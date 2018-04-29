@@ -1,0 +1,21 @@
+language: go
+
+# Use the latest version.
+go: 1.10.x
+
+# Skip the install step. Everything needed should be in the /vendor folder.
+install: true
+
+# Don't email the results of the test.
+notifications:
+  email: false
+
+# Commands to run before executing the "script" section.
+before_script:
+  - go get -u golang.org/x/lint/golint
+  - go get -u github.com/fzipp/gocyclo
+
+# CI Pipeline.
+script:
+  - make test
+  - make bench
