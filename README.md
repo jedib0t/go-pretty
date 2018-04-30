@@ -13,9 +13,9 @@ Pretty-print tables into ASCII/Unicode strings.
 
   - Supports Header and Footer
   - Supports Adding Rows one-by-one or as a group
-  - Auto (horizontal) Alignment (numeric columns are aligned Right)
-  - Custom (horizontal) Alignment per column
-  - Custom (vertical) VAlignment per column (and multi-line column support)
+  - Auto (horizontal) Align (numeric columns are aligned Right)
+  - Custom (horizontal) Align per column
+  - Custom (vertical) VAlign per column (and multi-line column support)
   - Completely customizable styles
     - Many ready-to-use styles: [table_style.go](table_style.go)
     - Colorize Headers/Body/Footers using [github.com/fatih/color][fatih.color]

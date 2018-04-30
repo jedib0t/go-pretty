@@ -8,30 +8,30 @@ import (
 	"github.com/fatih/color"
 )
 
-// Alignment denotes how text is to be aligned horizontally.
-type Alignment int
+// Align denotes how text is to be aligned horizontally.
+type Align int
 
-// Alignment enumerations
+// Align enumerations
 const (
-	AlignmentDefault Alignment = iota // same as AlignmentLeft
-	AlignmentLeft                     // "left        "
-	AlignmentCenter                   // "   center   "
-	AlignmentRight                    // "       right"
+	AlignDefault Align = iota // same as AlignLeft
+	AlignLeft                 // "left        "
+	AlignCenter               // "   center   "
+	AlignRight                // "       right"
 )
 
 // Apply aligns the text as directed. Examples:
-//  * AlignmentLeft.Apply("Ghost",   7) returns "Ghost  "
-//  * AlignmentCenter.Apply("Ghost", 7) returns " Ghost "
-//  * AlignmentRight.Apply("Ghost",  7) returns "  Ghost"
-func (a Alignment) Apply(text string, maxLength int) string {
+//  * AlignLeft.Apply("Ghost",   7) returns "Ghost  "
+//  * AlignCenter.Apply("Ghost", 7) returns " Ghost "
+//  * AlignRight.Apply("Ghost",  7) returns "  Ghost"
+func (a Align) Apply(text string, maxLength int) string {
 	textLength := utf8.RuneCountInString(text)
 
 	formatStr := "%"
-	if a == AlignmentCenter {
+	if a == AlignCenter {
 		if textLength < maxLength {
 			text += strings.Repeat(" ", int((maxLength-textLength)/2))
 		}
-	} else if a == AlignmentDefault || a == AlignmentLeft {
+	} else if a == AlignDefault || a == AlignLeft {
 		formatStr += "-"
 	}
 	formatStr += fmt.Sprint(maxLength)
@@ -40,14 +40,14 @@ func (a Alignment) Apply(text string, maxLength int) string {
 	return fmt.Sprintf(formatStr, text)
 }
 
-// HTMLProperty returns the equivalent HTML horizontal-alignment tag property.
-func (a Alignment) HTMLProperty() string {
+// HTMLProperty returns the equivalent HTML horizontal-align tag property.
+func (a Align) HTMLProperty() string {
 	switch a {
-	case AlignmentLeft:
+	case AlignLeft:
 		return "align=\"left\""
-	case AlignmentCenter:
+	case AlignCenter:
 		return "align=\"center\""
-	case AlignmentRight:
+	case AlignRight:
 		return "align=\"right\""
 	default:
 		return ""
@@ -111,33 +111,33 @@ func (tc TextColor) Sprintf(format string, a ...interface{}) string {
 	return fmt.Sprintf(format, a...)
 }
 
-// VAlignment denotes how text is to be aligned vertically.
-type VAlignment int
+// VAlign denotes how text is to be aligned vertically.
+type VAlign int
 
-// VAlignment enumerations
+// VAlign enumerations
 const (
-	VAlignmentDefault VAlignment = iota // same as VAlignmentTop
-	VAlignmentTop                       // "left"
-	VAlignmentMiddle                    // "\nmiddle\n"
-	VAlignmentBottom                    // "\n\nright"
+	VAlignDefault VAlign = iota // same as VAlignTop
+	VAlignTop                   // "top\n\n"
+	VAlignMiddle                // "\nmiddle\n"
+	VAlignBottom                // "\n\nbottom"
 )
 
 // Apply aligns the lines vertically. Examples:
-//  * VAlignmentTop.Apply({"Game", "Of", "Thrones"},    5)
+//  * VAlignTop.Apply({"Game", "Of", "Thrones"},    5)
 // 	    returns {"Game", "Of", "Thrones", "", ""}
-//  * VAlignmentMiddle.Apply({"Game", "Of", "Thrones"}, 5)
+//  * VAlignMiddle.Apply({"Game", "Of", "Thrones"}, 5)
 // 	    returns {"", "Game", "Of", "Thrones", ""}
-//  * VAlignmentBottom.Apply({"Game", "Of", "Thrones"}, 5)
+//  * VAlignBottom.Apply({"Game", "Of", "Thrones"}, 5)
 // 	    returns {"", "", "Game", "Of", "Thrones"}
-func (va VAlignment) Apply(lines []string, maxLines int) []string {
+func (va VAlign) Apply(lines []string, maxLines int) []string {
 	if len(lines) == maxLines {
 		return lines
 	}
 
 	insertIdx := 0
-	if va == VAlignmentMiddle {
+	if va == VAlignMiddle {
 		insertIdx = int(maxLines-len(lines)) / 2
-	} else if va == VAlignmentBottom {
+	} else if va == VAlignBottom {
 		insertIdx = maxLines - len(lines)
 	}
 
@@ -149,24 +149,24 @@ func (va VAlignment) Apply(lines []string, maxLines int) []string {
 }
 
 // ApplyStr aligns the string (of 1 or more lines) vertically. Examples:
-//  * VAlignmentTop.ApplyStr("Game\nOf\nThrones",    5)
+//  * VAlignTop.ApplyStr("Game\nOf\nThrones",    5)
 // 	    returns {"Game", "Of", "Thrones", "", ""}
-//  * VAlignmentMiddle.ApplyStr("Game\nOf\nThrones", 5)
+//  * VAlignMiddle.ApplyStr("Game\nOf\nThrones", 5)
 // 	    returns {"", "Game", "Of", "Thrones", ""}
-//  * VAlignmentBottom.ApplyStr("Game\nOf\nThrones", 5)
+//  * VAlignBottom.ApplyStr("Game\nOf\nThrones", 5)
 // 	    returns {"", "", "Game", "Of", "Thrones"}
-func (va VAlignment) ApplyStr(text string, maxLines int) []string {
+func (va VAlign) ApplyStr(text string, maxLines int) []string {
 	return va.Apply(strings.Split(text, "\n"), maxLines)
 }
 
-// HTMLProperty returns the equivalent HTML vertical-alignment tag property.
-func (va VAlignment) HTMLProperty() string {
+// HTMLProperty returns the equivalent HTML vertical-align tag property.
+func (va VAlign) HTMLProperty() string {
 	switch va {
-	case VAlignmentTop:
+	case VAlignTop:
 		return "valign=\"top\""
-	case VAlignmentMiddle:
+	case VAlignMiddle:
 		return "valign=\"middle\""
-	case VAlignmentBottom:
+	case VAlignBottom:
 		return "valign=\"bottom\""
 	default:
 		return ""

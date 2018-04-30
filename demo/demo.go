@@ -57,11 +57,11 @@ func demoTable() string {
 	}
 	row3 := gopretty.TableRow{300, "Tyrion", "Lannister", 5000}
 	footer := gopretty.TableRow{"", "", "Total", 10000}
-	alignment := []gopretty.Alignment{
-		gopretty.AlignmentDefault,
-		gopretty.AlignmentLeft,
-		gopretty.AlignmentLeft,
-		gopretty.AlignmentRight,
+	align := []gopretty.Align{
+		gopretty.AlignDefault,
+		gopretty.AlignLeft,
+		gopretty.AlignLeft,
+		gopretty.AlignRight,
 	}
 
 	var content []gopretty.TableRow
@@ -71,7 +71,7 @@ func demoTable() string {
 		table.AppendRows(rows1And2)
 		table.AppendRow(row3)
 		table.AppendFooter(footer)
-		table.SetAlignment(alignment)
+		table.SetAlign(align)
 		table.SetStyle(style)
 
 		if len(content) == 0 {
@@ -83,9 +83,9 @@ func demoTable() string {
 	tw := gopretty.NewTableWriter()
 	tw.AppendRows(content)
 	tw.EnableSeparators()
-	tw.SetAlignment([]gopretty.Alignment{gopretty.AlignmentRight, gopretty.AlignmentLeft})
+	tw.SetAlign([]gopretty.Align{gopretty.AlignRight, gopretty.AlignLeft})
 	tw.SetStyle(gopretty.TableStyleLight)
-	tw.SetVAlignment([]gopretty.VAlignment{gopretty.VAlignmentMiddle, gopretty.VAlignmentDefault})
+	tw.SetVAlign([]gopretty.VAlign{gopretty.VAlignMiddle, gopretty.VAlignDefault})
 	return tw.Render()
 }
 
@@ -94,10 +94,10 @@ func main() {
 	demo.AppendHeader([]interface{}{"#", "Feature", "Samples"})
 	demo.AppendRow(gopretty.TableRow{"1", "List", demoList()})
 	demo.AppendRow(gopretty.TableRow{"2", "Table", demoTable()})
-	demo.SetAlignment([]gopretty.Alignment{
-		gopretty.AlignmentDefault,
-		gopretty.AlignmentLeft,
-		gopretty.AlignmentCenter,
+	demo.SetAlign([]gopretty.Align{
+		gopretty.AlignDefault,
+		gopretty.AlignLeft,
+		gopretty.AlignCenter,
 	})
 	demo.SetCaption("Generated with go-pretty; MIT License; Copyright (c) 2018 jedib0t.")
 	demo.SetStyle(gopretty.TableStyleDouble)
