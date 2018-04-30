@@ -141,14 +141,14 @@ func (mr *MockTableWriterMockRecorder) RenderHTML() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RenderHTML", reflect.TypeOf((*MockTableWriter)(nil).RenderHTML))
 }
 
-// SetAlignment mocks base method
-func (m *MockTableWriter) SetAlignment(alignment []go_pretty.Alignment) {
-	m.ctrl.Call(m, "SetAlignment", alignment)
+// SetAlign mocks base method
+func (m *MockTableWriter) SetAlign(align []go_pretty.Align) {
+	m.ctrl.Call(m, "SetAlign", align)
 }
 
-// SetAlignment indicates an expected call of SetAlignment
-func (mr *MockTableWriterMockRecorder) SetAlignment(alignment interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAlignment", reflect.TypeOf((*MockTableWriter)(nil).SetAlignment), alignment)
+// SetAlign indicates an expected call of SetAlign
+func (mr *MockTableWriterMockRecorder) SetAlign(align interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAlign", reflect.TypeOf((*MockTableWriter)(nil).SetAlign), align)
 }
 
 // SetCaption mocks base method
@@ -211,14 +211,14 @@ func (mr *MockTableWriterMockRecorder) SetStyle(style interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStyle", reflect.TypeOf((*MockTableWriter)(nil).SetStyle), style)
 }
 
-// SetVAlignment mocks base method
-func (m *MockTableWriter) SetVAlignment(vAlignment []go_pretty.VAlignment) {
-	m.ctrl.Call(m, "SetVAlignment", vAlignment)
+// SetVAlign mocks base method
+func (m *MockTableWriter) SetVAlign(vAlign []go_pretty.VAlign) {
+	m.ctrl.Call(m, "SetVAlign", vAlign)
 }
 
-// SetVAlignment indicates an expected call of SetVAlignment
-func (mr *MockTableWriterMockRecorder) SetVAlignment(vAlignment interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetVAlignment", reflect.TypeOf((*MockTableWriter)(nil).SetVAlignment), vAlignment)
+// SetVAlign indicates an expected call of SetVAlign
+func (mr *MockTableWriterMockRecorder) SetVAlign(vAlign interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetVAlign", reflect.TypeOf((*MockTableWriter)(nil).SetVAlign), vAlign)
 }
 
 // Style mocks base method

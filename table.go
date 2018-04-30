@@ -21,8 +21,8 @@ type TableRow []interface{}
 
 // Table helps print a 2-dimensional array in a human readable pretty-table.
 type Table struct {
-	// alignment describes the horizontal-alignment for each column
-	alignment []Alignment
+	// align describes the horizontal-align for each column
+	align []Align
 	// caption stores the text to be rendered just below the table; and doesn't
 	// get used when rendered as a CSV
 	caption string
@@ -57,8 +57,8 @@ type Table struct {
 	rowSeparator TableRow
 	// style contains all the strings used to draw the table, and more
 	style *TableStyle
-	// vAlignment describes the vertical-alignment for each column
-	vAlignment []VAlignment
+	// vAlign describes the vertical-align for each column
+	vAlign []VAlign
 }
 
 // TableWriter declares the interfaces implemented by Table.
@@ -73,14 +73,14 @@ type TableWriter interface {
 	Render() string
 	RenderCSV() string
 	RenderHTML() string
-	SetAlignment(alignment []Alignment)
+	SetAlign(align []Align)
 	SetCaption(caption string)
 	SetColors(colors []TextColor)
 	SetColorsFooter(colors []TextColor)
 	SetColorsHeader(colors []TextColor)
 	SetHTMLCSSClass(cssClass string)
 	SetStyle(style TableStyle)
-	SetVAlignment(vAlignment []VAlignment)
+	SetVAlign(vAlign []VAlign)
 	Style() *TableStyle
 }
 
@@ -255,9 +255,9 @@ func (t *Table) RenderHTML() string {
 	return out.String()
 }
 
-// SetAlignment sets the horizontal-alignment for each column in all the rows.
-func (t *Table) SetAlignment(alignment []Alignment) {
-	t.alignment = alignment
+// SetAlign sets the horizontal-align for each column in all the rows.
+func (t *Table) SetAlign(align []Align) {
+	t.align = align
 }
 
 // SetCaption sets the text to be rendered just below the table. This will not
@@ -301,9 +301,9 @@ func (t *Table) SetStyle(style TableStyle) {
 	t.style = &style
 }
 
-// SetVAlignment sets the vertical-alignment for each column in all the rows.
-func (t *Table) SetVAlignment(vAlignment []VAlignment) {
-	t.vAlignment = vAlignment
+// SetVAlign sets the vertical-align for each column in all the rows.
+func (t *Table) SetVAlign(vAlign []VAlign) {
+	t.vAlign = vAlign
 }
 
 // Style returns the current style.
@@ -361,22 +361,22 @@ func (t *Table) csvFixDoubleQuotes(str string) string {
 	return strings.Replace(str, "\"", "\\\"", -1)
 }
 
-func (t *Table) getAlignment(colIdx int) Alignment {
-	alignment := AlignmentDefault
-	if colIdx < len(t.alignment) {
-		alignment = t.alignment[colIdx]
+func (t *Table) getAlign(colIdx int) Align {
+	align := AlignDefault
+	if colIdx < len(t.align) {
+		align = t.align[colIdx]
 	}
-	if alignment == AlignmentDefault && t.columnIsNumeric[colIdx] {
-		return AlignmentRight
+	if align == AlignDefault && t.columnIsNumeric[colIdx] {
+		return AlignRight
 	}
-	return alignment
+	return align
 }
 
-func (t *Table) getVAlignment(colIdx int) VAlignment {
-	if colIdx < len(t.vAlignment) {
-		return t.vAlignment[colIdx]
+func (t *Table) getVAlign(colIdx int) VAlign {
+	if colIdx < len(t.vAlign) {
+		return t.vAlign[colIdx]
 	}
-	return VAlignmentDefault
+	return VAlignDefault
 }
 
 func (t *Table) init() {
@@ -422,8 +422,7 @@ func (t *Table) renderColumn(out *strings.Builder, row TableRow, colIdx int, max
 		out.WriteString(t.style.CharPaddingLeft)
 	}
 
-	// determine the horizontal-alignment, color.Color and text to use
-	alignment := t.getAlignment(colIdx)
+	// determine the color.Color and text to use
 	var colorizer *color.Color
 	if colIdx < len(colors) {
 		colorizer = colors[colIdx]
@@ -434,7 +433,7 @@ func (t *Table) renderColumn(out *strings.Builder, row TableRow, colIdx int, max
 	}
 
 	// convert-case and then align horizontally
-	colStr = alignment.Apply(textCase.Convert(colStr), maxColumnLength)
+	colStr = t.getAlign(colIdx).Apply(textCase.Convert(colStr), maxColumnLength)
 	// colorize and then render the column content
 	if colorizer != nil {
 		out.WriteString(colorizer.Sprint(colStr))
@@ -525,7 +524,7 @@ func (t *Table) renderRow(out *strings.Builder, row TableRow, colors []*color.Co
 		// convert one row into N # of rows based on maxColLines
 		rowLines := make([][]string, len(row))
 		for colIdx, col := range row {
-			rowLines[colIdx] = t.getVAlignment(colIdx).ApplyStr(col.(string), maxColLines)
+			rowLines[colIdx] = t.getVAlign(colIdx).ApplyStr(col.(string), maxColLines)
 		}
 		for colLineIdx := 0; colLineIdx < maxColLines; colLineIdx++ {
 			rowLine := make(TableRow, len(rowLines))
@@ -613,19 +612,19 @@ func (t *Table) renderRowHTML(out *strings.Builder, row TableRow, isHeader bool,
 		}
 
 		// determine the HTML "align"/"valign" property values
-		alignment := t.getAlignment(idx).HTMLProperty()
-		vAlignment := t.getVAlignment(idx).HTMLProperty()
+		align := t.getAlign(idx).HTMLProperty()
+		vAlign := t.getVAlign(idx).HTMLProperty()
 
 		// write the row
 		out.WriteString("    <")
 		out.WriteString(colTagName)
-		if alignment != "" {
+		if align != "" {
 			out.WriteRune(' ')
-			out.WriteString(alignment)
+			out.WriteString(align)
 		}
-		if vAlignment != "" {
+		if vAlign != "" {
 			out.WriteRune(' ')
-			out.WriteString(vAlignment)
+			out.WriteString(vAlign)
 		}
 		out.WriteString(">")
 		if len(colStr) > 0 {

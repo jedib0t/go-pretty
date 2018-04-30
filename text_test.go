@@ -7,22 +7,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAlignment_Apply(t *testing.T) {
-	assert.Equal(t, "Ghost  ", AlignmentDefault.Apply("Ghost", 7))
-	assert.Equal(t, "Ghost  ", AlignmentLeft.Apply("Ghost", 7))
-	assert.Equal(t, " Ghost ", AlignmentCenter.Apply("Ghost", 7))
-	assert.Equal(t, "  Ghost", AlignmentRight.Apply("Ghost", 7))
+func TestAlign_Apply(t *testing.T) {
+	assert.Equal(t, "Ghost  ", AlignDefault.Apply("Ghost", 7))
+	assert.Equal(t, "Ghost  ", AlignLeft.Apply("Ghost", 7))
+	assert.Equal(t, " Ghost ", AlignCenter.Apply("Ghost", 7))
+	assert.Equal(t, "  Ghost", AlignRight.Apply("Ghost", 7))
 }
 
-func TestAlignment_HTMLProperty(t *testing.T) {
-	alignments := map[Alignment]string{
-		AlignmentDefault: "",
-		AlignmentLeft:    "left",
-		AlignmentCenter:  "center",
-		AlignmentRight:   "right",
+func TestAlign_HTMLProperty(t *testing.T) {
+	aligns := map[Align]string{
+		AlignDefault: "",
+		AlignLeft:    "left",
+		AlignCenter:  "center",
+		AlignRight:   "right",
 	}
-	for alignment, htmlStyle := range alignments {
-		assert.Contains(t, alignment.HTMLProperty(), htmlStyle)
+	for align, htmlStyle := range aligns {
+		assert.Contains(t, align.HTMLProperty(), htmlStyle)
 	}
 }
 
@@ -48,36 +48,36 @@ func TestTextColor_Sprintf(t *testing.T) {
 	assert.Equal(t, "\x1b[31mtest true\x1b[0m", TextColor{color.FgRed}.Sprintf("test %s", "true"))
 }
 
-func TestVAlignment_Apply(t *testing.T) {
+func TestVAlign_Apply(t *testing.T) {
 	assert.Equal(t, []string{"Game", "Of", "Thrones", "", ""},
-		VAlignmentDefault.Apply([]string{"Game", "Of", "Thrones"}, 5))
+		VAlignDefault.Apply([]string{"Game", "Of", "Thrones"}, 5))
 	assert.Equal(t, []string{"Game", "Of", "Thrones", "", ""},
-		VAlignmentTop.Apply([]string{"Game", "Of", "Thrones"}, 5))
+		VAlignTop.Apply([]string{"Game", "Of", "Thrones"}, 5))
 	assert.Equal(t, []string{"", "Game", "Of", "Thrones", ""},
-		VAlignmentMiddle.Apply([]string{"Game", "Of", "Thrones"}, 5))
+		VAlignMiddle.Apply([]string{"Game", "Of", "Thrones"}, 5))
 	assert.Equal(t, []string{"", "", "Game", "Of", "Thrones"},
-		VAlignmentBottom.Apply([]string{"Game", "Of", "Thrones"}, 5))
+		VAlignBottom.Apply([]string{"Game", "Of", "Thrones"}, 5))
 }
 
-func TestVAlignment_ApplyStr(t *testing.T) {
+func TestVAlign_ApplyStr(t *testing.T) {
 	assert.Equal(t, []string{"Game", "Of", "Thrones", "", ""},
-		VAlignmentDefault.ApplyStr("Game\nOf\nThrones", 5))
+		VAlignDefault.ApplyStr("Game\nOf\nThrones", 5))
 	assert.Equal(t, []string{"Game", "Of", "Thrones", "", ""},
-		VAlignmentTop.ApplyStr("Game\nOf\nThrones", 5))
+		VAlignTop.ApplyStr("Game\nOf\nThrones", 5))
 	assert.Equal(t, []string{"", "Game", "Of", "Thrones", ""},
-		VAlignmentMiddle.ApplyStr("Game\nOf\nThrones", 5))
+		VAlignMiddle.ApplyStr("Game\nOf\nThrones", 5))
 	assert.Equal(t, []string{"", "", "Game", "Of", "Thrones"},
-		VAlignmentBottom.ApplyStr("Game\nOf\nThrones", 5))
+		VAlignBottom.ApplyStr("Game\nOf\nThrones", 5))
 }
 
-func TestVAlignment_HTMLProperty(t *testing.T) {
-	vAlignments := map[VAlignment]string{
-		VAlignmentDefault: "",
-		VAlignmentTop:     "top",
-		VAlignmentMiddle:  "middle",
-		VAlignmentBottom:  "bottom",
+func TestVAlign_HTMLProperty(t *testing.T) {
+	vAligns := map[VAlign]string{
+		VAlignDefault: "",
+		VAlignTop:     "top",
+		VAlignMiddle:  "middle",
+		VAlignBottom:  "bottom",
 	}
-	for vAlignment, htmlStyle := range vAlignments {
-		assert.Contains(t, vAlignment.HTMLProperty(), htmlStyle)
+	for vAlign, htmlStyle := range vAligns {
+		assert.Contains(t, vAlign.HTMLProperty(), htmlStyle)
 	}
 }

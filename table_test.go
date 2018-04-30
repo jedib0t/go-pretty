@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	testAlignment    = []Alignment{AlignmentDefault, AlignmentLeft, AlignmentLeft, AlignmentRight}
+	testAlign        = []Align{AlignDefault, AlignLeft, AlignLeft, AlignRight}
 	testCaption      = "test-caption"
 	testCSSClass     = "test-css-class"
 	testColor        = TextColor{color.FgGreen}
@@ -36,7 +36,7 @@ func BenchmarkTable_Render(b *testing.B) {
 		tw.AppendHeader(testHeader)
 		tw.AppendRows(testRows)
 		tw.AppendFooter(testFooter)
-		tw.SetAlignment(testAlignment)
+		tw.SetAlign(testAlign)
 		tw.SetCaption(testCaption)
 		tw.Render()
 	}
@@ -48,7 +48,7 @@ func BenchmarkTable_RenderCSV(b *testing.B) {
 		tw.AppendHeader(testHeader)
 		tw.AppendRows(testRows)
 		tw.AppendFooter(testFooter)
-		tw.SetAlignment(testAlignment)
+		tw.SetAlign(testAlign)
 		tw.SetCaption(testCaption)
 		tw.RenderCSV()
 	}
@@ -60,7 +60,7 @@ func BenchmarkTable_RenderHTML(b *testing.B) {
 		tw.AppendHeader(testHeader)
 		tw.AppendRows(testRows)
 		tw.AppendFooter(testFooter)
-		tw.SetAlignment(testAlignment)
+		tw.SetAlign(testAlign)
 		tw.SetCaption(testCaption)
 		tw.RenderHTML()
 	}
@@ -176,7 +176,7 @@ func TestTable_Render(t *testing.T) {
 	tw.AppendRows(testRows)
 	tw.AppendRow(testRowMultiLine)
 	tw.AppendFooter(testFooter)
-	tw.SetAlignment(testAlignment)
+	tw.SetAlign(testAlign)
 	tw.SetCaption(testCaption)
 	tw.SetStyle(tableStyleTest)
 
@@ -202,7 +202,7 @@ func TestTable_RenderColored(t *testing.T) {
 	tw.AppendRows(testRows)
 	tw.AppendRow(testRowMultiLine)
 	tw.AppendFooter(testFooter)
-	tw.SetAlignment(testAlignment)
+	tw.SetAlign(testAlign)
 	tw.SetCaption(testCaption)
 	tw.SetColors(testColors)
 	tw.SetColorsFooter(testColorsFooter)
@@ -252,7 +252,7 @@ func TestTable_RenderHTML(t *testing.T) {
 	tw.AppendRow(testRowMultiLine)
 	tw.AppendFooter(testFooter)
 	tw.SetHTMLCSSClass(testCSSClass)
-	tw.SetVAlignment([]VAlignment{VAlignmentDefault, VAlignmentDefault, VAlignmentDefault, VAlignmentBottom, VAlignmentBottom})
+	tw.SetVAlign([]VAlign{VAlignDefault, VAlignDefault, VAlignDefault, VAlignBottom, VAlignBottom})
 
 	expectedOut := `<table class="test-css-class">
   <thead>
@@ -308,16 +308,16 @@ func TestTable_RenderHTML(t *testing.T) {
 	assert.Equal(t, expectedOut, tw.RenderHTML())
 }
 
-func TestTable_SetAlignment(t *testing.T) {
+func TestTable_SetAlign(t *testing.T) {
 	table := Table{}
-	assert.Nil(t, table.alignment)
+	assert.Nil(t, table.align)
 
-	table.SetAlignment([]Alignment{})
-	assert.NotNil(t, table.alignment)
+	table.SetAlign([]Align{})
+	assert.NotNil(t, table.align)
 
 	table.AppendRows(testRows)
 	table.AppendRow(testRowMultiLine)
-	table.SetAlignment([]Alignment{AlignmentDefault, AlignmentLeft, AlignmentLeft, AlignmentRight, AlignmentRight})
+	table.SetAlign([]Align{AlignDefault, AlignLeft, AlignLeft, AlignRight, AlignRight})
 
 	expectedOut := `+-----+--------+-----------+------+-----------------------------+
 |   1 | Arya   | Stark     | 3000 |                             |
@@ -378,15 +378,15 @@ func TestTable_SetColorsHeader(t *testing.T) {
 	assert.Equal(t, 2, len(table.colorsHeader))
 }
 
-func TestTable_SetVAlignment(t *testing.T) {
+func TestTable_SetVAlign(t *testing.T) {
 	table := Table{}
-	assert.Nil(t, table.vAlignment)
+	assert.Nil(t, table.vAlign)
 
-	table.SetVAlignment([]VAlignment{})
-	assert.NotNil(t, table.vAlignment)
+	table.SetVAlign([]VAlign{})
+	assert.NotNil(t, table.vAlign)
 
 	table.AppendRow(testRowMultiLine)
-	table.SetVAlignment([]VAlignment{VAlignmentTop, VAlignmentMiddle, VAlignmentBottom, VAlignmentDefault})
+	table.SetVAlign([]VAlign{VAlignTop, VAlignMiddle, VAlignBottom, VAlignDefault})
 
 	expectedOut := `+---+--------+----+---+----------------------+
 | 0 | Winter |    | 0 | Coming.              |
