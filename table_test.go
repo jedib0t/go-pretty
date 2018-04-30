@@ -141,6 +141,13 @@ func TestTable_DisableBorder(t *testing.T) {
 
 	table.DisableBorder()
 	assert.True(t, table.disableBorder)
+
+	table.AppendRow(testRows[0])
+	out := table.Render()
+
+	assert.NotEmpty(t, out)
+	assert.Equal(t, 0, strings.Count(out, "\n"))
+	assert.Equal(t, " 1 | Arya | Stark | 3000 ", out)
 }
 
 func TestTable_EnableSeparators(t *testing.T) {
@@ -149,6 +156,18 @@ func TestTable_EnableSeparators(t *testing.T) {
 
 	table.EnableSeparators()
 	assert.True(t, table.enableSeparators)
+
+	table.AppendRows(testRows)
+
+	expectedOut := `+-----+--------+-----------+------+-----------------------------+
+|   1 | Arya   | Stark     | 3000 |                             |
++-----+--------+-----------+------+-----------------------------+
+|  20 | Jon    | Snow      | 2000 | You know nothing, Jon Snow! |
++-----+--------+-----------+------+-----------------------------+
+| 300 | Tyrion | Lannister | 5000 |                             |
++-----+--------+-----------+------+-----------------------------+`
+
+	assert.Equal(t, expectedOut, table.Render())
 }
 
 func TestTable_Render(t *testing.T) {
@@ -233,6 +252,7 @@ func TestTable_RenderHTML(t *testing.T) {
 	tw.AppendRow(testRowMultiLine)
 	tw.AppendFooter(testFooter)
 	tw.SetHTMLCSSClass(testCSSClass)
+	tw.SetVAlignment([]VAlignment{VAlignmentDefault, VAlignmentDefault, VAlignmentDefault, VAlignmentBottom, VAlignmentBottom})
 
 	expectedOut := `<table class="test-css-class">
   <thead>
@@ -240,8 +260,8 @@ func TestTable_RenderHTML(t *testing.T) {
     <th align="right">#</th>
     <th>First Name</th>
     <th>Last Name</th>
-    <th align="right">Salary</th>
-    <th>&nbsp;</th>
+    <th align="right" valign="bottom">Salary</th>
+    <th valign="bottom">&nbsp;</th>
   </tr>
   </thead>
   <tbody>
@@ -249,29 +269,29 @@ func TestTable_RenderHTML(t *testing.T) {
     <td align="right">1</td>
     <td>Arya</td>
     <td>Stark</td>
-    <td align="right">3000</td>
-    <td>&nbsp;</td>
+    <td align="right" valign="bottom">3000</td>
+    <td valign="bottom">&nbsp;</td>
   </tr>
   <tr>
     <td align="right">20</td>
     <td>Jon</td>
     <td>Snow</td>
-    <td align="right">2000</td>
-    <td>You know nothing, Jon Snow!</td>
+    <td align="right" valign="bottom">2000</td>
+    <td valign="bottom">You know nothing, Jon Snow!</td>
   </tr>
   <tr>
     <td align="right">300</td>
     <td>Tyrion</td>
     <td>Lannister</td>
-    <td align="right">5000</td>
-    <td>&nbsp;</td>
+    <td align="right" valign="bottom">5000</td>
+    <td valign="bottom">&nbsp;</td>
   </tr>
   <tr>
     <td align="right">0</td>
     <td>Winter</td>
     <td>Is</td>
-    <td align="right">0</td>
-    <td>Coming.<br/>The North Remembers!</td>
+    <td align="right" valign="bottom">0</td>
+    <td valign="bottom">Coming.<br/>The North Remembers!</td>
   </tr>
   </tbody>
   <tfoot>
@@ -279,8 +299,8 @@ func TestTable_RenderHTML(t *testing.T) {
     <td align="right">&nbsp;</td>
     <td>&nbsp;</td>
     <td>Total</td>
-    <td align="right">10000</td>
-    <td>&nbsp;</td>
+    <td align="right" valign="bottom">10000</td>
+    <td valign="bottom">&nbsp;</td>
   </tr>
   </tfoot>
 </table>`
@@ -294,6 +314,20 @@ func TestTable_SetAlignment(t *testing.T) {
 
 	table.SetAlignment([]Alignment{})
 	assert.NotNil(t, table.alignment)
+
+	table.AppendRows(testRows)
+	table.AppendRow(testRowMultiLine)
+	table.SetAlignment([]Alignment{AlignmentDefault, AlignmentLeft, AlignmentLeft, AlignmentRight, AlignmentRight})
+
+	expectedOut := `+-----+--------+-----------+------+-----------------------------+
+|   1 | Arya   | Stark     | 3000 |                             |
+|  20 | Jon    | Snow      | 2000 | You know nothing, Jon Snow! |
+| 300 | Tyrion | Lannister | 5000 |                             |
+|   0 | Winter | Is        |    0 |                     Coming. |
+|     |        |           |      |        The North Remembers! |
++-----+--------+-----------+------+-----------------------------+`
+
+	assert.Equal(t, expectedOut, table.Render())
 }
 
 func TestTable_SetCaption(t *testing.T) {
@@ -350,6 +384,16 @@ func TestTable_SetVAlignment(t *testing.T) {
 
 	table.SetVAlignment([]VAlignment{})
 	assert.NotNil(t, table.vAlignment)
+
+	table.AppendRow(testRowMultiLine)
+	table.SetVAlignment([]VAlignment{VAlignmentTop, VAlignmentMiddle, VAlignmentBottom, VAlignmentDefault})
+
+	expectedOut := `+---+--------+----+---+----------------------+
+| 0 | Winter |    | 0 | Coming.              |
+|   |        | Is |   | The North Remembers! |
++---+--------+----+---+----------------------+`
+
+	assert.Equal(t, expectedOut, table.Render())
 }
 
 func TestTable_SetStyle(t *testing.T) {

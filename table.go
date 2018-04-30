@@ -190,14 +190,9 @@ func (t *Table) RenderCSV() string {
 	t.init()
 
 	var out strings.Builder
-	var appendRows = func(out *strings.Builder, rows []TableRow) {
-		for _, row := range rows {
-			t.renderRowCSV(out, row)
-		}
-	}
-	appendRows(&out, t.rowsHeader)
-	appendRows(&out, t.rows)
-	appendRows(&out, t.rowsFooter)
+	t.renderRowsCSV(&out, t.rowsHeader)
+	t.renderRowsCSV(&out, t.rows)
+	t.renderRowsCSV(&out, t.rowsFooter)
 	return out.String()
 }
 
@@ -535,11 +530,7 @@ func (t *Table) renderRow(out *strings.Builder, row TableRow, colors []*color.Co
 		for colLineIdx := 0; colLineIdx < maxColLines; colLineIdx++ {
 			rowLine := make(TableRow, len(rowLines))
 			for colIdx, colLines := range rowLines {
-				if colLineIdx < len(colLines) {
-					rowLine[colIdx] = colLines[colLineIdx]
-				} else {
-					rowLine[colIdx] = ""
-				}
+				rowLine[colIdx] = colLines[colLineIdx]
 			}
 			t.renderLine(out, rowLine, colors, isFirstRow, isLastRow, isSeparatorRow, textCase)
 		}

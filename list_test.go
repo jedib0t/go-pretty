@@ -81,6 +81,25 @@ c<f> Winter
 	assert.Equal(t, expectedOut, lw.Render())
 }
 
+func TestList_RenderWithoutStyle(t *testing.T) {
+	lw := NewListWriter()
+	lw.AppendItem(listItem1)
+	lw.Indent()
+	lw.AppendItems(listItems2)
+	lw.Indent()
+	lw.AppendItems(listItems3)
+
+	expectedOut := `- Game Of Thrones
+--- Winter
+  - Is
+  - Coming
+  --- This
+    - Is
+    - Known`
+
+	assert.Equal(t, expectedOut, lw.Render())
+}
+
 func TestList_SetStyle(t *testing.T) {
 	list := List{}
 	assert.Nil(t, list.Style())
