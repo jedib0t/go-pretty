@@ -50,15 +50,15 @@ Run the [sample code](demo/list/list.go) using `go run demo/list/list.go` to get
 
 ```
 $ go test -bench . -benchmem
-goos: linux                                                                                                           
-goarch: amd64                                                                                                         
-pkg: github.com/jedib0t/go-pretty                                                                                     
-BenchmarkList_Render-8           1000000              1659 ns/op             608 B/op         24 allocs/op            
-BenchmarkTable_Render-8           100000             23502 ns/op            6434 B/op        384 allocs/op            
-BenchmarkTable_RenderCSV-8        300000              5402 ns/op            2641 B/op         89 allocs/op            
-BenchmarkTable_RenderHTML-8       200000              7027 ns/op            4113 B/op         88 allocs/op            
-PASS                                                                                                                  
-ok      github.com/jedib0t/go-pretty    7.458s                                                                        
+goos: linux
+goarch: amd64
+pkg: github.com/jedib0t/go-pretty
+BenchmarkList_Render-8           1000000              1645 ns/op             608 B/op         24 allocs/op
+BenchmarkTable_Render-8           100000             23545 ns/op            6562 B/op        384 allocs/op
+BenchmarkTable_RenderCSV-8        300000              5221 ns/op            2641 B/op         89 allocs/op
+BenchmarkTable_RenderHTML-8       200000              7024 ns/op            4113 B/op         88 allocs/op
+PASS
+ok      github.com/jedib0t/go-pretty    7.414s
 ```
 
 
