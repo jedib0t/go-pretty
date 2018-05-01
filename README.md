@@ -40,7 +40,7 @@ Pretty-print tables into ASCII/Unicode strings.
 +-----+------------+-----------+--------+-----------------------------+
 ```
 
-A demonstration of all the capabilities can be found here: [demo/table/demo.go](demo/table/demo.go)
+A demonstration of all the capabilities can be found here: [table/demo/demo.go](table/demo/demo.go)
 
 ## List
 
@@ -59,7 +59,7 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
     - Known
 ```
 
-A demonstration of all the capabilities can be found here: [demo/list/demo.go](demo/list/demo.go)
+A demonstration of all the capabilities can be found here: [list/demo/demo.go](list/demo/demo.go)
 
 ## Benchmarks
 

@@ -13,7 +13,7 @@ type Writer interface {
 	RenderCSV() string
 	RenderHTML() string
 	SetAlign(align []text.Align)
-	SetCaption(format string, a... interface{})
+	SetCaption(format string, a ...interface{})
 	SetColors(colors []text.Colors)
 	SetColorsFooter(colors []text.Colors)
 	SetColorsHeader(colors []text.Colors)

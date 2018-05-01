@@ -1,4 +1,4 @@
-Output of `go run demo/table/demo.go`:
+Output of `go run table/demo/demo.go`:
 
 ```
 +-----+--------+-----------+------+-----------------------------+
@@ -116,13 +116,13 @@ Table using the style 'StyleDouble'.
 Table using the style 'funkyStyle'.
 
 ┏━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃[47;30m   # [0m┃[47;30m FIRST NAME [0m┃[47;30m LAST NAME [0m┃[47;30m SALARY [0m┃[47;30m                             [0m┃
+┃   # ┃ FIRST NAME ┃ LAST NAME ┃ SALARY ┃                             ┃
 ┣━━━━━╋━━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
-┃[33m   1 [0m┃[91m Arya       [0m┃[91m Stark     [0m┃[32m   3000 [0m┃[36m                             [0m┃
-┃[33m  20 [0m┃[91m Jon        [0m┃[91m Snow      [0m┃[32m   2000 [0m┃[36m You know nothing, Jon Snow! [0m┃
-┃[33m 300 [0m┃[91m Tyrion     [0m┃[91m Lannister [0m┃[32m   5000 [0m┃[36m                             [0m┃
+┃   1 ┃ Arya       ┃ Stark     ┃   3000 ┃                             ┃
+┃  20 ┃ Jon        ┃ Snow      ┃   2000 ┃ You know nothing, Jon Snow! ┃
+┃ 300 ┃ Tyrion     ┃ Lannister ┃   5000 ┃                             ┃
 ┣━━━━━╋━━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
-┃     ┃            ┃[47;30m TOTAL     [0m┃[47;30m  10000 [0m┃                             ┃
+┃     ┃            ┃ TOTAL     ┃  10000 ┃                             ┃
 ┗━━━━━┻━━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Table with Colors.
 

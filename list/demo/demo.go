@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/jedib0t/go-pretty/list"
 	"fmt"
+
+	"github.com/jedib0t/go-pretty/list"
 	"github.com/jedib0t/go-pretty/text"
 )
 
