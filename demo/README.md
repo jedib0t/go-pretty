@@ -1,4 +1,4 @@
-Run the demo using `make` or `go run demo/demo.go` to get the following output:
+Output of `go run demo/demo.go`:
 
 ```
 ╔═══╦═════════╦════════════════════════════════════════════════════════════════════════════════════════════╗
