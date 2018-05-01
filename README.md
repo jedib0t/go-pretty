@@ -5,7 +5,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/jedib0t/go-pretty)](https://goreportcard.com/report/github.com/jedib0t/go-pretty)
 [![GoDoc](https://godoc.org/github.com/jedib0t/go-pretty?status.svg)](https://godoc.org/github.com/jedib0t/go-pretty)
 
-Utilities to prettify console output of tables, lists, etc.
+Utilities to prettify console output of tables, lists, text, etc.
 
 ## Table
 
@@ -17,8 +17,8 @@ Pretty-print tables into ASCII/Unicode strings.
   - Custom (horizontal) Align per column
   - Custom (vertical) VAlign per column (and multi-line column support)
   - Completely customizable styles
-    - Many ready-to-use styles: [table_style.go](table_style.go)
-    - Colorize Headers/Body/Footers using [github.com/fatih/color][fatih.color]
+    - Many ready-to-use styles: [table/style.go](table/style.go)
+    - Colorize Headers/Body/Footers using [github.com/fatih/color](https://github.com/fatih/color)
     - Custom text-case for Headers/Body/Footers
     - Enable separators between each row
     - Render table without a Border
@@ -27,39 +27,46 @@ Pretty-print tables into ASCII/Unicode strings.
     - CSV
     - HTML Table (with custom CSS Style)
 
-### Example
 
-Run the [sample code](demo/table/table.go) using `go run demo/table/table.go` to get:
+```
++-----+------------+-----------+--------+-----------------------------+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++-----+------------+-----------+--------+-----------------------------+
+|   1 | Arya       | Stark     |   3000 |                             |
+|  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
+| 300 | Tyrion     | Lannister |   5000 |                             |
++-----+------------+-----------+--------+-----------------------------+
+|     |            | TOTAL     |  10000 |                             |
++-----+------------+-----------+--------+-----------------------------+
+```
 
-<img src="demo/table/table.png" width="600px"/>
+A demonstration of all the capabilities can be found here: [demo/table/demo.go](demo/table/demo.go)
 
 ## List
 
 Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
 
   - Completely customizable styles
-    - Many ready-to-use styles: [list_style.go](list_style.go)
+    - Many ready-to-use styles: [list/style.go](list/style.go)
 
-### Example
+```
+- Game Of Thrones
+--- Winter
+  - Is
+  - Coming
+  --- This
+    - Is
+    - Known
+```
 
-Run the [sample code](demo/list/list.go) using `go run demo/list/list.go` to get:
-
-<img src="demo/list/list.png" width="600px"/>
+A demonstration of all the capabilities can be found here: [demo/list/demo.go](demo/list/demo.go)
 
 ## Benchmarks
 
+Partial output of `make bench`:
 ```
-$ go test -bench . -benchmem
-goos: linux
-goarch: amd64
-pkg: github.com/jedib0t/go-pretty
 BenchmarkList_Render-8           1000000              1645 ns/op             608 B/op         24 allocs/op
-BenchmarkTable_Render-8           100000             23545 ns/op            6562 B/op        384 allocs/op
-BenchmarkTable_RenderCSV-8        300000              5221 ns/op            2641 B/op         89 allocs/op
-BenchmarkTable_RenderHTML-8       200000              7024 ns/op            4113 B/op         88 allocs/op
-PASS
-ok      github.com/jedib0t/go-pretty    7.414s
+BenchmarkTable_Render-8            50000             24826 ns/op            6995 B/op        410 allocs/op
+BenchmarkTable_RenderCSV-8        300000              5425 ns/op            2657 B/op         90 allocs/op
+BenchmarkTable_RenderHTML-8       200000              7080 ns/op            4129 B/op         89 allocs/op
 ```
-
-
-[fatih.color]: https://github.com/fatih/color

@@ -1,36 +1,34 @@
-.PHONY: all dep gen test
+.PHONY: all dep test
 
 default: build
 
 all: dep test bench
 
 tools:
-	go get -u golang.org/x/lint/golint
-	go get -u github.com/fzipp/gocyclo
-	go get -u github.com/golang/dep/cmd/dep
-	go get -u github.com/golang/mock/gomock
+	go get golang.org/x/lint/golint
+	go get github.com/fzipp/gocyclo
+	go get github.com/golang/dep/cmd/dep
+	go get github.com/golang/mock/gomock
 	go install github.com/golang/mock/mockgen
 
 bench:
-	go test -bench . -benchmem
+	go test github.com/jedib0t/go-pretty/list -bench=. -benchmem
+	go test github.com/jedib0t/go-pretty/table -bench=. -benchmem
 
-build: gen
+build:
 	go run demo/demo.go
 
 cyclo:
-	gocyclo -over 10 ./*.go
+	gocyclo -over 10 ./*/*.go
 
 dep:
 	dep ensure
 
-gen:
-	go generate $(shell go list .)
-
 lint:
-	golint $(shell go list .)
+	golint $(shell go list ./...)
 
 test: lint vet cyclo
-	go test -cover $(shell go list .)
+	go test -cover $(shell go list ./...)
 
 vet:
-	go vet $(shell go list .)
+	go vet $(shell go list ./...)

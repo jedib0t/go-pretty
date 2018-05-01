@@ -3,16 +3,18 @@ package main
 import (
 	"fmt"
 
-	"github.com/jedib0t/go-pretty"
+	"github.com/jedib0t/go-pretty/list"
+	"github.com/jedib0t/go-pretty/table"
+	"github.com/jedib0t/go-pretty/text"
 )
 
-// demoList demonstrates the capabilities of ListWriter with some of the
+// demoList demonstrates the capabilities of Writer with some of the
 // available ready-to-use styles.
 func demoList() string {
-	styles := []gopretty.ListStyle{
-		gopretty.ListStyleDefault,
-		gopretty.ListStyleBulletCircle,
-		gopretty.ListStyleConnectedLight,
+	styles := []list.Style{
+		list.StyleDefault,
+		list.StyleBulletCircle,
+		list.StyleConnectedLight,
 	}
 	itemLevel1 := "Game Of Thrones"
 	itemsLevel2 := []interface{}{"Winter", "Is", "Coming"}
@@ -20,7 +22,7 @@ func demoList() string {
 
 	var header, content []interface{}
 	for _, style := range styles {
-		lw := gopretty.NewListWriter()
+		lw := list.NewWriter()
 		lw.AppendItem(itemLevel1)
 		lw.Indent()
 		lw.AppendItems(itemsLevel2)
@@ -32,74 +34,74 @@ func demoList() string {
 		content = append(content, lw.Render())
 	}
 
-	tw := gopretty.NewTableWriter()
+	tw := table.NewWriter()
 	tw.AppendHeader(header)
 	tw.AppendRow(content)
-	tw.SetStyle(gopretty.TableStyleLight)
-	tw.Style().CaseHeader = gopretty.TextCaseDefault
+	tw.SetStyle(table.StyleLight)
+	tw.Style().FormatHeader = text.FormatDefault
 	return tw.Render()
 }
 
-// demoTable demonstrates the capabilities of TableWriter with some of the
+// demoTable demonstrates the capabilities of Writer with some of the
 // available ready-to-use styles.
 func demoTable() string {
-	styles := []gopretty.TableStyle{
-		gopretty.TableStyleDefault,
-		gopretty.TableStyleLight,
-		gopretty.TableStyleBold,
-		gopretty.TableStyleDouble,
-		gopretty.TableStyleRounded,
+	styles := []table.Style{
+		table.StyleDefault,
+		table.StyleLight,
+		table.StyleBold,
+		table.StyleDouble,
+		table.StyleRounded,
 	}
-	header := gopretty.TableRow{"#", "First Name", "Last Name", "Salary"}
-	rows1And2 := []gopretty.TableRow{
+	header := table.Row{"#", "First Name", "Last Name", "Salary"}
+	rows1And2 := []table.Row{
 		{1, "Arya", "Stark", 3000},
 		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
 	}
-	row3 := gopretty.TableRow{300, "Tyrion", "Lannister", 5000}
-	footer := gopretty.TableRow{"", "", "Total", 10000}
-	align := []gopretty.Align{
-		gopretty.AlignDefault,
-		gopretty.AlignLeft,
-		gopretty.AlignLeft,
-		gopretty.AlignRight,
+	row3 := table.Row{300, "Tyrion", "Lannister", 5000}
+	footer := table.Row{"", "", "Total", 10000}
+	align := []text.Align{
+		text.AlignDefault,
+		text.AlignLeft,
+		text.AlignLeft,
+		text.AlignRight,
 	}
 
-	var content []gopretty.TableRow
+	var content []table.Row
 	for _, style := range styles {
-		table := gopretty.NewTableWriter()
-		table.AppendHeader(header)
-		table.AppendRows(rows1And2)
-		table.AppendRow(row3)
-		table.AppendFooter(footer)
-		table.SetAlign(align)
-		table.SetStyle(style)
+		tw := table.NewWriter()
+		tw.AppendHeader(header)
+		tw.AppendRows(rows1And2)
+		tw.AppendRow(row3)
+		tw.AppendFooter(footer)
+		tw.SetAlign(align)
+		tw.SetStyle(style)
 
 		if len(content) == 0 {
-			content = append(content, gopretty.TableRow{"As CSV", table.RenderCSV()})
+			content = append(content, table.Row{"As CSV", tw.RenderCSV()})
 		}
-		content = append(content, gopretty.TableRow{style.Name, table.Render()})
+		content = append(content, table.Row{style.Name, tw.Render()})
 	}
 
-	tw := gopretty.NewTableWriter()
+	tw := table.NewWriter()
 	tw.AppendRows(content)
-	tw.EnableSeparators()
-	tw.SetAlign([]gopretty.Align{gopretty.AlignRight, gopretty.AlignLeft})
-	tw.SetStyle(gopretty.TableStyleLight)
-	tw.SetVAlign([]gopretty.VAlign{gopretty.VAlignMiddle, gopretty.VAlignDefault})
+	tw.ShowSeparators(true)
+	tw.SetAlign([]text.Align{text.AlignRight, text.AlignLeft})
+	tw.SetStyle(table.StyleLight)
+	tw.SetVAlign([]text.VAlign{text.VAlignMiddle, text.VAlignDefault})
 	return tw.Render()
 }
 
 func main() {
-	demo := gopretty.NewTableWriter()
+	demo := table.NewWriter()
 	demo.AppendHeader([]interface{}{"#", "Feature", "Samples"})
-	demo.AppendRow(gopretty.TableRow{"1", "List", demoList()})
-	demo.AppendRow(gopretty.TableRow{"2", "Table", demoTable()})
-	demo.SetAlign([]gopretty.Align{
-		gopretty.AlignDefault,
-		gopretty.AlignLeft,
-		gopretty.AlignCenter,
+	demo.AppendRow(table.Row{"1", "List", demoList()})
+	demo.AppendRow(table.Row{"2", "Table", demoTable()})
+	demo.SetAlign([]text.Align{
+		text.AlignDefault,
+		text.AlignLeft,
+		text.AlignCenter,
 	})
 	demo.SetCaption("Generated with go-pretty; MIT License; Copyright (c) 2018 jedib0t.")
-	demo.SetStyle(gopretty.TableStyleDouble)
+	demo.SetStyle(table.StyleDouble)
 	fmt.Println(demo.Render())
 }
