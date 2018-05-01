@@ -1,4 +1,4 @@
-Output of `go run demo/list/demo.go`:
+Output of `go run list/demo/demo.go`:
 
 ```
 A Simple List:

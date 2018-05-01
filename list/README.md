@@ -1,10 +1,20 @@
-# ListWriter
+## List
 
-You want to draw lists on the console? You are at the right place. Take a look
-at [../demo/list/demo.go](../demo/list/demo.go) to find out all the ways you
-can use ListWriter. It uses all available features step by step, and should
-be a good place to start.
+Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
 
-Run it using: `go run demo/list/demo.go`
+  - Completely customizable styles
+    - Many ready-to-use styles: [style.go](style.go)
+
+```
+- Game Of Thrones
+--- Winter
+  - Is
+  - Coming
+  --- This
+    - Is
+    - Known
+```
+
+A demonstration of all the capabilities can be found here: [demo/demo.go](demo/demo.go)
 
 Find documentation here: [GoDoc](https://godoc.org/github.com/jedib0t/go-pretty/list)

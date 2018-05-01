@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/jedib0t/go-pretty/table"
 	"fmt"
-	"github.com/jedib0t/go-pretty/text"
-	"github.com/fatih/color"
 	"strings"
+
+	"github.com/fatih/color"
+	"github.com/jedib0t/go-pretty/table"
+	"github.com/jedib0t/go-pretty/text"
 )
 
 func main() {
@@ -284,7 +285,7 @@ func main() {
 	//==========================================================================
 
 	//==========================================================================
-	// I don't like walls or borders!
+	// I don't like borders!
 	//==========================================================================
 	t.ShowBorder(false)
 	t.SetCaption("Table without Borders.\n")

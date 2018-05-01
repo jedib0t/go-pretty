@@ -8,8 +8,8 @@ tools:
 	go get golang.org/x/lint/golint
 	go get github.com/fzipp/gocyclo
 	go get github.com/golang/dep/cmd/dep
-	go get github.com/golang/mock/gomock
-	go install github.com/golang/mock/mockgen
+#	go get github.com/golang/mock/gomock
+#	go install github.com/golang/mock/mockgen
 
 bench:
 	go test github.com/jedib0t/go-pretty/list -bench=. -benchmem
