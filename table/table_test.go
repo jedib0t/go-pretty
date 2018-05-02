@@ -27,54 +27,20 @@ var (
 		{300, "Tyrion", "Lannister", 5000},
 	}
 	testRowMultiLine = Row{0, "Winter", "Is", 0, "Coming.\nThe North Remembers!"}
-	testRowTabs      = Row{0, "Valar", "Morghulis", 0, "\t"}
+	testRowNewLines  = Row{0, "Valar", "Morghulis", 0, "Faceless\nMen"}
+	testRowPipes     = Row{0, "Valar", "Morghulis", 0, "Faceless|Men"}
+	testRowTabs      = Row{0, "Valar", "Morghulis", 0, "Faceless\tMen"}
 	testColors1      = text.Colors{color.FgWhite, color.BgBlack}
 	testColors2      = text.Colors{color.FgBlack, color.BgWhite}
 )
 
-type myMockOutputMirror struct{
+type myMockOutputMirror struct {
 	mirroredOutput string
 }
 
 func (t *myMockOutputMirror) Write(p []byte) (n int, err error) {
 	t.mirroredOutput = string(p)
 	return len(p), nil
-}
-
-func BenchmarkTable_Render(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		tw := NewWriter()
-		tw.AppendHeader(testHeader)
-		tw.AppendRows(testRows)
-		tw.AppendFooter(testFooter)
-		tw.SetAlign(testAlign)
-		tw.SetCaption(testCaption)
-		tw.Render()
-	}
-}
-
-func BenchmarkTable_RenderCSV(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		tw := NewWriter()
-		tw.AppendHeader(testHeader)
-		tw.AppendRows(testRows)
-		tw.AppendFooter(testFooter)
-		tw.SetAlign(testAlign)
-		tw.SetCaption(testCaption)
-		tw.RenderCSV()
-	}
-}
-
-func BenchmarkTable_RenderHTML(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		tw := NewWriter()
-		tw.AppendHeader(testHeader)
-		tw.AppendRows(testRows)
-		tw.AppendFooter(testFooter)
-		tw.SetAlign(testAlign)
-		tw.SetCaption(testCaption)
-		tw.RenderHTML()
-	}
 }
 
 func TestNewWriter(t *testing.T) {
@@ -217,7 +183,7 @@ func TestTable_RenderCSV(t *testing.T) {
 300,Tyrion,Lannister,5000,
 0,Winter,Is,0,"Coming.
 The North Remembers!"
-0,Valar,Morghulis,0,    
+0,Valar,Morghulis,0,Faceless    Men
 ,,Total,10000,`
 
 	assert.Equal(t, expectedOut, tw.RenderCSV())
@@ -284,6 +250,28 @@ func TestTable_RenderHTML(t *testing.T) {
 </table>`
 
 	assert.Equal(t, expectedOut, tw.RenderHTML())
+}
+
+func TestTable_RenderMarkdown(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendRow(testRowNewLines)
+	tw.AppendRow(testRowPipes)
+	tw.AppendFooter(testFooter)
+	tw.SetCaption(testCaption)
+
+	expectedOut := `| # | First Name | Last Name | Salary |  |
+| ---:| --- | --- | ---:| --- |
+| 1 | Arya | Stark | 3000 |  |
+| 20 | Jon | Snow | 2000 | You know nothing, Jon Snow! |
+| 300 | Tyrion | Lannister | 5000 |  |
+| 0 | Valar | Morghulis | 0 | Faceless<br>Men |
+| 0 | Valar | Morghulis | 0 | Faceless\|Men |
+|  |  | Total | 10000 |  |
+_test-caption_`
+
+	assert.Equal(t, expectedOut, tw.RenderMarkdown())
 }
 
 func TestTable_SetAlign(t *testing.T) {

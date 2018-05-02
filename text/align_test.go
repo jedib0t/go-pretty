@@ -35,3 +35,16 @@ func TestAlign_HTMLProperty(t *testing.T) {
 		assert.Contains(t, align.HTMLProperty(), htmlStyle)
 	}
 }
+
+func TestAlign_MarkdownProperty(t *testing.T) {
+	aligns := map[Align]string{
+		AlignDefault: " --- ",
+		AlignLeft:    ":--- ",
+		AlignCenter:  ":---:",
+		AlignJustify: " --- ",
+		AlignRight:   " ---:",
+	}
+	for align, markdownSeparator := range aligns {
+		assert.Contains(t, align.MarkdownProperty(), markdownSeparator)
+	}
+}

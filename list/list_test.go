@@ -7,22 +7,10 @@ import (
 )
 
 var (
-	listItem1  = "Game Of Thrones"
-	listItems2 = []interface{}{"Winter", "Is", "Coming"}
-	listItems3 = []interface{}{"This", "Is", "Known"}
+	testItem1  = "Game Of Thrones"
+	testItems2 = []interface{}{"Winter", "Is", "Coming"}
+	testItems3 = []interface{}{"This", "Is", "Known"}
 )
-
-func BenchmarkList_Render(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		lw := NewWriter()
-		lw.AppendItem(listItem1)
-		lw.Indent()
-		lw.AppendItems(listItems2)
-		lw.Indent()
-		lw.AppendItems(listItems3)
-		lw.Render()
-	}
-}
 
 func TestNewWriter(t *testing.T) {
 	lw := NewWriter()
@@ -37,8 +25,8 @@ func TestList_AppendItem(t *testing.T) {
 	list := List{}
 	assert.Equal(t, 0, list.Length())
 
-	list.AppendItem(listItem1)
-	list.AppendItem(listItem1)
+	list.AppendItem(testItem1)
+	list.AppendItem(testItem1)
 	assert.Equal(t, 2, list.Length())
 }
 
@@ -46,8 +34,8 @@ func TestList_AppendItems(t *testing.T) {
 	list := List{}
 	assert.Equal(t, 0, list.Length())
 
-	list.AppendItems(listItems2)
-	assert.Equal(t, len(listItems2), list.Length())
+	list.AppendItems(testItems2)
+	assert.Equal(t, len(testItems2), list.Length())
 }
 
 func TestList_Indent(t *testing.T) {
@@ -63,11 +51,11 @@ func TestList_Indent(t *testing.T) {
 
 func TestList_Render(t *testing.T) {
 	lw := NewWriter()
-	lw.AppendItem(listItem1)
+	lw.AppendItem(testItem1)
 	lw.Indent()
-	lw.AppendItems(listItems2)
+	lw.AppendItems(testItems2)
 	lw.Indent()
-	lw.AppendItems(listItems3)
+	lw.AppendItems(testItems3)
 	lw.SetStyle(styleTest)
 
 	expectedOut := `^> Game Of Thrones
@@ -83,11 +71,11 @@ c<f> Winter
 
 func TestList_RenderWithoutStyle(t *testing.T) {
 	lw := NewWriter()
-	lw.AppendItem(listItem1)
+	lw.AppendItem(testItem1)
 	lw.Indent()
-	lw.AppendItems(listItems2)
+	lw.AppendItems(testItems2)
 	lw.Indent()
-	lw.AppendItems(listItems3)
+	lw.AppendItems(testItems3)
 
 	expectedOut := `- Game Of Thrones
 --- Winter

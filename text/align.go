@@ -69,6 +69,20 @@ func (a Align) HTMLProperty() string {
 	}
 }
 
+// MarkdownProperty returns the equivalent Markdown horizontal-align separator.
+func (a Align) MarkdownProperty() string {
+	switch a {
+	case AlignLeft:
+		return ":--- "
+	case AlignCenter:
+		return ":---:"
+	case AlignRight:
+		return " ---:"
+	default:
+		return " --- "
+	}
+}
+
 func (a Align) justifyText(text string, textLength int, maxLength int) string {
 	// split the text into individual words
 	wordsUnfiltered := strings.Split(text, " ")

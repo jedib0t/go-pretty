@@ -127,7 +127,7 @@ func (t *Table) Render() string {
 	return t.render(&out)
 }
 
-// RenderCSV renders the Table in a CSV format. Example:
+// RenderCSV renders the Table in CSV format. Example:
 //  #,First Name,Last Name,Salary,
 //  1,Arya,Stark,3000,
 //  20,Jon,Snow,2000,"You know nothing\, Jon Snow!"
@@ -143,7 +143,7 @@ func (t *Table) RenderCSV() string {
 	return t.render(&out)
 }
 
-// RenderHTML renders the Table in a HTML format. Example:
+// RenderHTML renders the Table in HTML format. Example:
 //  <table class="go-pretty-table">
 //    <thead>
 //    <tr>
@@ -198,6 +198,23 @@ func (t *Table) RenderHTML() string {
 	t.renderRowsHTML(&out, t.rows, false, false)
 	t.renderRowsHTML(&out, t.rowsFooter, false, true)
 	out.WriteString("</table>")
+	return t.render(&out)
+}
+
+// RenderMarkdown renders the Table in Markdown format. Example:
+//
+func (t *Table) RenderMarkdown() string {
+	t.init()
+
+	var out strings.Builder
+	t.renderRowsMarkdown(&out, t.rowsHeader, true, false)
+	t.renderRowsMarkdown(&out, t.rows, false, false)
+	t.renderRowsMarkdown(&out, t.rowsFooter, false, true)
+	if t.caption != "" {
+		out.WriteRune('_')
+		out.WriteString(t.caption)
+		out.WriteRune('_')
+	}
 	return t.render(&out)
 }
 
@@ -522,6 +539,44 @@ func (t *Table) renderRowsHTML(out *strings.Builder, rows []Row, isHeader bool, 
 		out.WriteString("  </")
 		out.WriteString(rowsTag)
 		out.WriteString(">\n")
+	}
+}
+
+func (t *Table) renderRowsMarkdown(out *strings.Builder, rows []Row, isHeader bool, isFooter bool) {
+	if len(rows) > 0 {
+		for idx, row := range rows {
+			t.renderRowMarkdown(out, row, false)
+			if idx == len(rows)-1 && isHeader {
+				t.renderRowMarkdown(out, t.rowSeparator, true)
+			}
+		}
+	}
+}
+
+func (t *Table) renderRowMarkdown(out *strings.Builder, row Row, isSeparator bool) {
+	if len(row) > 0 {
+		out.WriteRune('|')
+		for colIdx := range t.maxColumnLengths {
+			if !isSeparator {
+				var colStr string
+				if colIdx < len(row) {
+					colStr = row[colIdx].(string)
+				}
+				out.WriteRune(' ')
+				if strings.Contains(colStr, "|") {
+					colStr = strings.Replace(colStr, "|", "\\|", -1)
+				}
+				if strings.Contains(colStr, "\n") {
+					colStr = strings.Replace(colStr, "\n", "<br>", -1)
+				}
+				out.WriteString(colStr)
+				out.WriteRune(' ')
+			} else {
+				out.WriteString(t.getAlign(colIdx).MarkdownProperty())
+			}
+			out.WriteRune('|')
+		}
+		out.WriteRune('\n')
 	}
 }
 

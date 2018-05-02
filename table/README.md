@@ -2,8 +2,9 @@
 
 Pretty-print tables into ASCII/Unicode strings.
 
-  - Supports Header and Footer
-  - Supports Adding Rows one-by-one or as a group
+  - Add Rows one-by-one or as a group
+  - Add Header(s) and Footer(s)
+  - Set output to be mirrored to an io.Writer object like os.StdOut
   - Auto (horizontal) Align (numeric columns are aligned Right)
   - Custom (horizontal) Align per column
   - Custom (vertical) VAlign per column (and multi-line column support)
@@ -17,6 +18,7 @@ Pretty-print tables into ASCII/Unicode strings.
     - (ASCII/Unicode) Table
     - CSV
     - HTML Table (with custom CSS Style)
+    - Markdown Table
 
 
 ```
@@ -38,8 +40,6 @@ Documentation: [GoDoc](https://godoc.org/github.com/jedib0t/go-pretty/table)
 ### TODO
 
   - Performance Optimizations (Memory Usage)
-  - Render to io.Writer (and not return a string)
-  - Render as Markdown
   - Spreadsheet Format (Row Headers like [A, B, C, ...] and Column Indices)
   - Row and Cell Width Restrictions
   - Generic Cell Content Transformers (with some ready-made ones)

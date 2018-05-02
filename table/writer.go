@@ -16,6 +16,7 @@ type Writer interface {
 	Render() string
 	RenderCSV() string
 	RenderHTML() string
+	RenderMarkdown() string
 	SetAlign(align []text.Align)
 	SetCaption(format string, a ...interface{})
 	SetColors(colors []text.Colors)
