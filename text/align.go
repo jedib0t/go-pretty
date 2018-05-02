@@ -53,6 +53,22 @@ func (a Align) Apply(text string, maxLength int) string {
 	return fmt.Sprintf(formatStr, text)
 }
 
+// HTMLProperty returns the equivalent HTML horizontal-align tag property.
+func (a Align) HTMLProperty() string {
+	switch a {
+	case AlignLeft:
+		return "align=\"left\""
+	case AlignCenter:
+		return "align=\"center\""
+	case AlignJustify:
+		return "align=\"justify\""
+	case AlignRight:
+		return "align=\"right\""
+	default:
+		return ""
+	}
+}
+
 func (a Align) justifyText(text string, textLength int, maxLength int) string {
 	// split the text into individual words
 	wordsUnfiltered := strings.Split(text, " ")
@@ -92,20 +108,4 @@ func (a Align) justifyText(text string, textLength int, maxLength int) string {
 		}
 	}
 	return outText.String()
-}
-
-// HTMLProperty returns the equivalent HTML horizontal-align tag property.
-func (a Align) HTMLProperty() string {
-	switch a {
-	case AlignLeft:
-		return "align=\"left\""
-	case AlignCenter:
-		return "align=\"center\""
-	case AlignJustify:
-		return "align=\"justify\""
-	case AlignRight:
-		return "align=\"right\""
-	default:
-		return ""
-	}
 }

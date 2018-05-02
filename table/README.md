@@ -34,3 +34,16 @@ Pretty-print tables into ASCII/Unicode strings.
 A demonstration of all the capabilities can be found here: [demo/demo.go](demo/demo.go)
 
 Documentation: [GoDoc](https://godoc.org/github.com/jedib0t/go-pretty/table)
+
+### TODO
+
+  - Performance Optimizations (Memory Usage)
+  - Render to io.Writer (and not return a string)
+  - Render as Markdown
+  - Spreadsheet Format (Row Headers like [A, B, C, ...] and Column Indices)
+  - Row and Cell Width Restrictions
+  - Generic Cell Content Transformers (with some ready-made ones)
+    - Base64 Decoder
+    - Currency Formatter
+    - UnixTime to Date & Time
+    - Status Formatter (color "FAILED" in RED, etc.)
