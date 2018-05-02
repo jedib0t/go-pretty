@@ -67,8 +67,9 @@ A demonstration of all the capabilities can be found here: [list/demo/demo.go](l
 
 Partial output of `make bench`:
 ```
-BenchmarkList_Render-8           1000000              1645 ns/op             608 B/op         24 allocs/op
-BenchmarkTable_Render-8            50000             24826 ns/op            6995 B/op        410 allocs/op
-BenchmarkTable_RenderCSV-8        300000              5425 ns/op            2657 B/op         90 allocs/op
-BenchmarkTable_RenderHTML-8       200000              7080 ns/op            4129 B/op         89 allocs/op
+BenchmarkList_Render-8                   1000000              1651 ns/op             608 B/op         24 allocs/op
+BenchmarkTable_Render-8                    50000             26410 ns/op            7138 B/op        416 allocs/op
+BenchmarkTable_RenderCSV-8                300000              5827 ns/op            2656 B/op         90 allocs/op
+BenchmarkTable_RenderHTML-8               200000              7435 ns/op            4129 B/op         89 allocs/op
+BenchmarkTable_RenderMarkdown-8           200000              7493 ns/op            4129 B/op         89 allocs/op
 ```

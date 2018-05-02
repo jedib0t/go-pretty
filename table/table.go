@@ -2,6 +2,7 @@ package table
 
 import (
 	"fmt"
+	"io"
 	"strings"
 	"unicode/utf8"
 
@@ -46,6 +47,8 @@ type Table struct {
 	maxRowLength int
 	// numColumns stores the (max.) number of columns seen
 	numColumns int
+	// outputMirror stores an io.Writer where the "Render" functions would write
+	outputMirror io.Writer
 	// rows stores the rows that make up the body
 	rows []Row
 	// rowsFooter stores the rows that make up the footer
@@ -121,10 +124,10 @@ func (t *Table) Render() string {
 		out.WriteRune('\n')
 		out.WriteString(t.caption)
 	}
-	return out.String()
+	return t.render(&out)
 }
 
-// RenderCSV renders the Table in a CSV format. Example:
+// RenderCSV renders the Table in CSV format. Example:
 //  #,First Name,Last Name,Salary,
 //  1,Arya,Stark,3000,
 //  20,Jon,Snow,2000,"You know nothing\, Jon Snow!"
@@ -137,10 +140,10 @@ func (t *Table) RenderCSV() string {
 	t.renderRowsCSV(&out, t.rowsHeader)
 	t.renderRowsCSV(&out, t.rows)
 	t.renderRowsCSV(&out, t.rowsFooter)
-	return out.String()
+	return t.render(&out)
 }
 
-// RenderHTML renders the Table in a HTML format. Example:
+// RenderHTML renders the Table in HTML format. Example:
 //  <table class="go-pretty-table">
 //    <thead>
 //    <tr>
@@ -195,7 +198,24 @@ func (t *Table) RenderHTML() string {
 	t.renderRowsHTML(&out, t.rows, false, false)
 	t.renderRowsHTML(&out, t.rowsFooter, false, true)
 	out.WriteString("</table>")
-	return out.String()
+	return t.render(&out)
+}
+
+// RenderMarkdown renders the Table in Markdown format. Example:
+//
+func (t *Table) RenderMarkdown() string {
+	t.init()
+
+	var out strings.Builder
+	t.renderRowsMarkdown(&out, t.rowsHeader, true, false)
+	t.renderRowsMarkdown(&out, t.rows, false, false)
+	t.renderRowsMarkdown(&out, t.rowsFooter, false, true)
+	if t.caption != "" {
+		out.WriteRune('_')
+		out.WriteString(t.caption)
+		out.WriteRune('_')
+	}
+	return t.render(&out)
 }
 
 // SetAlign sets the horizontal-align for each column in all the rows.
@@ -237,6 +257,12 @@ func (t *Table) SetColorsHeader(textColors []text.Colors) {
 // when rendering the Table in HTML format.
 func (t *Table) SetHTMLCSSClass(cssClass string) {
 	t.htmlCSSClass = cssClass
+}
+
+// SetOutputMirror sets an io.Writer for all the Render functions to "Write" to
+// in addition to returning a string.
+func (t *Table) SetOutputMirror(mirror io.Writer) {
+	t.outputMirror = mirror
 }
 
 // SetStyle overrides the DefaultStyle with the provided one.
@@ -352,6 +378,14 @@ func (t *Table) init() {
 		t.maxRowLength += utf8.RuneCountInString(horizontalSeparatorCol)
 		t.rowSeparator[colIdx] = horizontalSeparatorCol
 	}
+}
+
+func (t *Table) render(out *strings.Builder) string {
+	outStr := out.String()
+	if t.outputMirror != nil {
+		t.outputMirror.Write([]byte(outStr))
+	}
+	return outStr
 }
 
 func (t *Table) renderColumn(out *strings.Builder, row Row, colIdx int, maxColumnLength int, colors []*color.Color, isFirstRow bool, isLastRow bool, isSeparatorRow bool, format text.Format) {
@@ -486,24 +520,64 @@ func (t *Table) renderRowsCSV(out *strings.Builder, rows []Row) {
 }
 
 func (t *Table) renderRowsHTML(out *strings.Builder, rows []Row, isHeader bool, isFooter bool) {
-	// determine that tag to use based on the type of the row
-	rowsTag := "tbody"
-	if isHeader {
-		rowsTag = "thead"
-	} else if isFooter {
-		rowsTag = "tfoot"
-	}
+	if len(rows) > 0 {
+		// determine that tag to use based on the type of the row
+		rowsTag := "tbody"
+		if isHeader {
+			rowsTag = "thead"
+		} else if isFooter {
+			rowsTag = "tfoot"
+		}
 
-	// render all the rows enclosed by the "rowsTag"
-	out.WriteString("  <")
-	out.WriteString(rowsTag)
-	out.WriteString(">\n")
-	for _, row := range rows {
-		t.renderRowHTML(out, row, isHeader, isFooter)
+		// render all the rows enclosed by the "rowsTag"
+		out.WriteString("  <")
+		out.WriteString(rowsTag)
+		out.WriteString(">\n")
+		for _, row := range rows {
+			t.renderRowHTML(out, row, isHeader, isFooter)
+		}
+		out.WriteString("  </")
+		out.WriteString(rowsTag)
+		out.WriteString(">\n")
 	}
-	out.WriteString("  </")
-	out.WriteString(rowsTag)
-	out.WriteString(">\n")
+}
+
+func (t *Table) renderRowsMarkdown(out *strings.Builder, rows []Row, isHeader bool, isFooter bool) {
+	if len(rows) > 0 {
+		for idx, row := range rows {
+			t.renderRowMarkdown(out, row, false)
+			if idx == len(rows)-1 && isHeader {
+				t.renderRowMarkdown(out, t.rowSeparator, true)
+			}
+		}
+	}
+}
+
+func (t *Table) renderRowMarkdown(out *strings.Builder, row Row, isSeparator bool) {
+	if len(row) > 0 {
+		out.WriteRune('|')
+		for colIdx := range t.maxColumnLengths {
+			if !isSeparator {
+				var colStr string
+				if colIdx < len(row) {
+					colStr = row[colIdx].(string)
+				}
+				out.WriteRune(' ')
+				if strings.Contains(colStr, "|") {
+					colStr = strings.Replace(colStr, "|", "\\|", -1)
+				}
+				if strings.Contains(colStr, "\n") {
+					colStr = strings.Replace(colStr, "\n", "<br>", -1)
+				}
+				out.WriteString(colStr)
+				out.WriteRune(' ')
+			} else {
+				out.WriteString(t.getAlign(colIdx).MarkdownProperty())
+			}
+			out.WriteRune('|')
+		}
+		out.WriteRune('\n')
+	}
 }
 
 func (t *Table) renderRowCSV(out *strings.Builder, row Row) {

@@ -12,8 +12,7 @@ tools:
 #	go install github.com/golang/mock/mockgen
 
 bench:
-	go test github.com/jedib0t/go-pretty/list -bench=. -benchmem
-	go test github.com/jedib0t/go-pretty/table -bench=. -benchmem
+	go test -bench=. -benchmem
 
 build:
 	go run demo/demo.go

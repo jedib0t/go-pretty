@@ -27,45 +27,20 @@ var (
 		{300, "Tyrion", "Lannister", 5000},
 	}
 	testRowMultiLine = Row{0, "Winter", "Is", 0, "Coming.\nThe North Remembers!"}
-	testRowTabs      = Row{0, "Valar", "Morghulis", 0, "\t"}
+	testRowNewLines  = Row{0, "Valar", "Morghulis", 0, "Faceless\nMen"}
+	testRowPipes     = Row{0, "Valar", "Morghulis", 0, "Faceless|Men"}
+	testRowTabs      = Row{0, "Valar", "Morghulis", 0, "Faceless\tMen"}
 	testColors1      = text.Colors{color.FgWhite, color.BgBlack}
 	testColors2      = text.Colors{color.FgBlack, color.BgWhite}
 )
 
-func BenchmarkTable_Render(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		tw := NewWriter()
-		tw.AppendHeader(testHeader)
-		tw.AppendRows(testRows)
-		tw.AppendFooter(testFooter)
-		tw.SetAlign(testAlign)
-		tw.SetCaption(testCaption)
-		tw.Render()
-	}
+type myMockOutputMirror struct {
+	mirroredOutput string
 }
 
-func BenchmarkTable_RenderCSV(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		tw := NewWriter()
-		tw.AppendHeader(testHeader)
-		tw.AppendRows(testRows)
-		tw.AppendFooter(testFooter)
-		tw.SetAlign(testAlign)
-		tw.SetCaption(testCaption)
-		tw.RenderCSV()
-	}
-}
-
-func BenchmarkTable_RenderHTML(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		tw := NewWriter()
-		tw.AppendHeader(testHeader)
-		tw.AppendRows(testRows)
-		tw.AppendFooter(testFooter)
-		tw.SetAlign(testAlign)
-		tw.SetCaption(testCaption)
-		tw.RenderHTML()
-	}
+func (t *myMockOutputMirror) Write(p []byte) (n int, err error) {
+	t.mirroredOutput = string(p)
+	return len(p), nil
 }
 
 func TestNewWriter(t *testing.T) {
@@ -208,7 +183,7 @@ func TestTable_RenderCSV(t *testing.T) {
 300,Tyrion,Lannister,5000,
 0,Winter,Is,0,"Coming.
 The North Remembers!"
-0,Valar,Morghulis,0,    
+0,Valar,Morghulis,0,Faceless    Men
 ,,Total,10000,`
 
 	assert.Equal(t, expectedOut, tw.RenderCSV())
@@ -220,11 +195,10 @@ func TestTable_RenderHTML(t *testing.T) {
 	tw.AppendRows(testRows)
 	tw.AppendRow(testRowMultiLine)
 	tw.AppendFooter(testFooter)
-	tw.SetHTMLCSSClass(testCSSClass)
 	tw.SetVAlign([]text.VAlign{
 		text.VAlignDefault, text.VAlignDefault, text.VAlignDefault, text.VAlignBottom, text.VAlignBottom})
 
-	expectedOut := `<table class="test-css-class">
+	expectedOut := `<table class="go-pretty-table">
   <thead>
   <tr>
     <th align="right">#</th>
@@ -276,6 +250,28 @@ func TestTable_RenderHTML(t *testing.T) {
 </table>`
 
 	assert.Equal(t, expectedOut, tw.RenderHTML())
+}
+
+func TestTable_RenderMarkdown(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendRow(testRowNewLines)
+	tw.AppendRow(testRowPipes)
+	tw.AppendFooter(testFooter)
+	tw.SetCaption(testCaption)
+
+	expectedOut := `| # | First Name | Last Name | Salary |  |
+| ---:| --- | --- | ---:| --- |
+| 1 | Arya | Stark | 3000 |  |
+| 20 | Jon | Snow | 2000 | You know nothing, Jon Snow! |
+| 300 | Tyrion | Lannister | 5000 |  |
+| 0 | Valar | Morghulis | 0 | Faceless<br>Men |
+| 0 | Valar | Morghulis | 0 | Faceless\|Men |
+|  |  | Total | 10000 |  |
+_test-caption_`
+
+	assert.Equal(t, expectedOut, tw.RenderMarkdown())
 }
 
 func TestTable_SetAlign(t *testing.T) {
@@ -346,6 +342,43 @@ func TestTable_SetColorsHeader(t *testing.T) {
 	assert.Empty(t, table.colorsFooter)
 	assert.NotEmpty(t, table.colorsHeader)
 	assert.Equal(t, 2, len(table.colorsHeader))
+}
+
+func TestTable_SetHTMLCSSClass(t *testing.T) {
+	table := Table{}
+	table.AppendRow(testRows[0])
+	expectedHTML := `<table class="` + DefaultHTMLCSSClass + `">
+  <tbody>
+  <tr>
+    <td align="right">1</td>
+    <td>Arya</td>
+    <td>Stark</td>
+    <td align="right">3000</td>
+  </tr>
+  </tbody>
+</table>`
+	assert.Equal(t, "", table.htmlCSSClass)
+	assert.Equal(t, expectedHTML, table.RenderHTML())
+
+	table.SetHTMLCSSClass(testCSSClass)
+	assert.Equal(t, testCSSClass, table.htmlCSSClass)
+	assert.Equal(t, strings.Replace(expectedHTML, DefaultHTMLCSSClass, testCSSClass, -1), table.RenderHTML())
+}
+
+func TestTable_SetOutputMirror(t *testing.T) {
+	table := Table{}
+	table.AppendRow(testRows[0])
+	expectedOut := `+---+------+-------+------+
+| 1 | Arya | Stark | 3000 |
++---+------+-------+------+`
+	assert.Equal(t, nil, table.outputMirror)
+	assert.Equal(t, expectedOut, table.Render())
+
+	mockOutputMirror := &myMockOutputMirror{}
+	table.SetOutputMirror(mockOutputMirror)
+	assert.Equal(t, mockOutputMirror, table.outputMirror)
+	assert.Equal(t, expectedOut, table.Render())
+	assert.Equal(t, expectedOut, mockOutputMirror.mirroredOutput)
 }
 
 func TestTable_SetVAlign(t *testing.T) {
