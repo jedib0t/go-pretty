@@ -32,6 +32,15 @@ var (
 	testColors2      = text.Colors{color.FgBlack, color.BgWhite}
 )
 
+type myMockOutputMirror struct{
+	mirroredOutput string
+}
+
+func (t *myMockOutputMirror) Write(p []byte) (n int, err error) {
+	t.mirroredOutput = string(p)
+	return len(p), nil
+}
+
 func BenchmarkTable_Render(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		tw := NewWriter()
@@ -220,11 +229,10 @@ func TestTable_RenderHTML(t *testing.T) {
 	tw.AppendRows(testRows)
 	tw.AppendRow(testRowMultiLine)
 	tw.AppendFooter(testFooter)
-	tw.SetHTMLCSSClass(testCSSClass)
 	tw.SetVAlign([]text.VAlign{
 		text.VAlignDefault, text.VAlignDefault, text.VAlignDefault, text.VAlignBottom, text.VAlignBottom})
 
-	expectedOut := `<table class="test-css-class">
+	expectedOut := `<table class="go-pretty-table">
   <thead>
   <tr>
     <th align="right">#</th>
@@ -346,6 +354,43 @@ func TestTable_SetColorsHeader(t *testing.T) {
 	assert.Empty(t, table.colorsFooter)
 	assert.NotEmpty(t, table.colorsHeader)
 	assert.Equal(t, 2, len(table.colorsHeader))
+}
+
+func TestTable_SetHTMLCSSClass(t *testing.T) {
+	table := Table{}
+	table.AppendRow(testRows[0])
+	expectedHTML := `<table class="` + DefaultHTMLCSSClass + `">
+  <tbody>
+  <tr>
+    <td align="right">1</td>
+    <td>Arya</td>
+    <td>Stark</td>
+    <td align="right">3000</td>
+  </tr>
+  </tbody>
+</table>`
+	assert.Equal(t, "", table.htmlCSSClass)
+	assert.Equal(t, expectedHTML, table.RenderHTML())
+
+	table.SetHTMLCSSClass(testCSSClass)
+	assert.Equal(t, testCSSClass, table.htmlCSSClass)
+	assert.Equal(t, strings.Replace(expectedHTML, DefaultHTMLCSSClass, testCSSClass, -1), table.RenderHTML())
+}
+
+func TestTable_SetOutputMirror(t *testing.T) {
+	table := Table{}
+	table.AppendRow(testRows[0])
+	expectedOut := `+---+------+-------+------+
+| 1 | Arya | Stark | 3000 |
++---+------+-------+------+`
+	assert.Equal(t, nil, table.outputMirror)
+	assert.Equal(t, expectedOut, table.Render())
+
+	mockOutputMirror := &myMockOutputMirror{}
+	table.SetOutputMirror(mockOutputMirror)
+	assert.Equal(t, mockOutputMirror, table.outputMirror)
+	assert.Equal(t, expectedOut, table.Render())
+	assert.Equal(t, expectedOut, mockOutputMirror.mirroredOutput)
 }
 
 func TestTable_SetVAlign(t *testing.T) {

@@ -1,6 +1,10 @@
 package table
 
-import "github.com/jedib0t/go-pretty/text"
+import (
+	"io"
+
+	"github.com/jedib0t/go-pretty/text"
+)
 
 // Writer declares the interfaces implemented by Table.
 type Writer interface {
@@ -18,6 +22,7 @@ type Writer interface {
 	SetColorsFooter(colors []text.Colors)
 	SetColorsHeader(colors []text.Colors)
 	SetHTMLCSSClass(cssClass string)
+	SetOutputMirror(mirror io.Writer)
 	SetStyle(style Style)
 	SetVAlign(vAlign []text.VAlign)
 	ShowBorder(show bool)
