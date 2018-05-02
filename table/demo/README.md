@@ -228,4 +228,12 @@ HTML |     <td>&nbsp;</td>
 HTML |   </tr>
 HTML |   </tfoot>
 HTML | </table>
+
+MD| | # | First Name | Last Name | Salary |  |
+MD| | ---:| --- | --- | ---:| --- |
+MD| | 1 | Arya | Stark | 3000 |  |
+MD| | 20 | Jon | Snow | 2000 | You know nothing, Jon Snow! |
+MD| | 300 | Tyrion | Lannister | 5000 |  |
+MD| |  |  | Total | 10000 |  |
+MD| 
 ```
