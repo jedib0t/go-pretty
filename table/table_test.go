@@ -27,6 +27,7 @@ var (
 		{300, "Tyrion", "Lannister", 5000},
 	}
 	testRowMultiLine = Row{0, "Winter", "Is", 0, "Coming.\nThe North Remembers!"}
+	testRowTabs      = Row{0, "Valar", "Morghulis", 0, "\t"}
 	testColors1      = text.Colors{color.FgWhite, color.BgBlack}
 	testColors2      = text.Colors{color.FgBlack, color.BgWhite}
 )
@@ -198,6 +199,7 @@ func TestTable_RenderCSV(t *testing.T) {
 	tw.AppendHeader(testHeader)
 	tw.AppendRows(testRows)
 	tw.AppendRow(testRowMultiLine)
+	tw.AppendRow(testRowTabs)
 	tw.AppendFooter(testFooter)
 
 	expectedOut := `#,First Name,Last Name,Salary,
@@ -206,6 +208,7 @@ func TestTable_RenderCSV(t *testing.T) {
 300,Tyrion,Lannister,5000,
 0,Winter,Is,0,"Coming.
 The North Remembers!"
+0,Valar,Morghulis,0,    
 ,,Total,10000,`
 
 	assert.Equal(t, expectedOut, tw.RenderCSV())
