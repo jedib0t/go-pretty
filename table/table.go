@@ -63,17 +63,17 @@ type Table struct {
 
 // AppendFooter appends the row to the List of footers to render.
 func (t *Table) AppendFooter(row Row) {
-	t.rowsFooter = append(t.rowsFooter, t.analyzeRowAndStringify(row, false, true))
+	t.rowsFooter = append(t.rowsFooter, t.analyzeAndStringify(row, false, true))
 }
 
 // AppendHeader appends the row to the List of headers to render.
 func (t *Table) AppendHeader(row Row) {
-	t.rowsHeader = append(t.rowsHeader, t.analyzeRowAndStringify(row, true, false))
+	t.rowsHeader = append(t.rowsHeader, t.analyzeAndStringify(row, true, false))
 }
 
 // AppendRow appends the row to the List of rows to render.
 func (t *Table) AppendRow(row Row) {
-	t.rows = append(t.rows, t.analyzeRowAndStringify(row, false, false))
+	t.rows = append(t.rows, t.analyzeAndStringify(row, false, false))
 }
 
 // AppendRows appends the rows to the List of rows to render.
@@ -284,7 +284,7 @@ func (t *Table) Style() *Style {
 	return t.style
 }
 
-func (t *Table) analyzeRowAndStringify(row []interface{}, isHeader bool, isFooter bool) []interface{} {
+func (t *Table) analyzeAndStringify(row Row, isHeader bool, isFooter bool) Row {
 	// update t.numColumns if this row is the longest seen till now
 	if len(row) > t.numColumns {
 		// pad t.columnIsNumeric with extra "true" values
@@ -302,32 +302,7 @@ func (t *Table) analyzeRowAndStringify(row []interface{}, isHeader bool, isFoote
 		t.numColumns = len(row)
 	}
 
-	// convert each column to string and figure out the longest column in all
-	// available rows
-	rowOut := make([]interface{}, len(row))
-	for colIdx, col := range row {
-		// if the column is a string, mark as so; else, convert to a string
-		var colStr string
-		if util.IsString(col) {
-			colStr = col.(string)
-			if !isHeader && !isFooter {
-				t.columnIsNumeric[colIdx] = false
-			}
-		} else {
-			colStr = fmt.Sprint(col)
-		}
-		rowOut[colIdx] = colStr
-
-		// split the string into multiple string based on newlines, and find
-		// the longest "line" in it
-		for _, colLine := range strings.Split(colStr, "\n") {
-			colLineLength := utf8.RuneCountInString(colLine)
-			if colLineLength > t.maxColumnLengths[colIdx] {
-				t.maxColumnLengths[colIdx] = colLineLength
-			}
-		}
-	}
-	return rowOut
+	return t.stringify(row, isHeader, isFooter)
 }
 
 func (t *Table) csvFixCommas(str string) string {
@@ -600,4 +575,37 @@ func (t *Table) renderRowHTML(out *strings.Builder, row Row, isHeader bool, isFo
 
 func (t *Table) renderRowSeparator(out *strings.Builder, isFirstRow bool, isLastRow bool) {
 	t.renderLine(out, t.rowSeparator, nil, isFirstRow, isLastRow, true, text.FormatDefault)
+}
+
+func (t *Table) stringify(row Row, isHeader bool, isFooter bool) Row {
+	// convert each column to string and figure out the longest column in all
+	// available rows
+	rowOut := make(Row, len(row))
+	for colIdx, col := range row {
+		// if the column is not a number, keep track of it
+		if !isHeader && !isFooter && t.columnIsNumeric[colIdx] && !util.IsNumber(col) {
+			t.columnIsNumeric[colIdx] = false
+		}
+
+		var colStr string
+		if util.IsString(col) {
+			colStr = col.(string)
+		} else {
+			colStr = fmt.Sprint(col)
+		}
+		if strings.Contains(colStr, "\t") {
+			colStr = strings.Replace(colStr, "\t", "    ", -1)
+		}
+		rowOut[colIdx] = colStr
+
+		// split the string into multiple string based on newlines, and find
+		// the longest "line" in it
+		for _, colLine := range strings.Split(colStr, "\n") {
+			colLineLength := utf8.RuneCountInString(colLine)
+			if colLineLength > t.maxColumnLengths[colIdx] {
+				t.maxColumnLengths[colIdx] = colLineLength
+			}
+		}
+	}
+	return rowOut
 }

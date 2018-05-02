@@ -78,21 +78,23 @@ func main() {
 	//==========================================================================
 	// did you notice that the numeric columns were auto-aligned? when you don't
 	// specify alignment, all the columns default to text.AlignDefault - numbers
-	// go right and everything else left. but what if you want the first name
-	// and the last name to be groovy?
-	t.SetAlign([]text.Align{text.AlignDefault, text.AlignRight, text.AlignCenter})
-	// notice that we set alignment for just 3 columns? the 4th and 5th column
-	// will continue using text.AlignDefault. time to take a peek:
+	// go right and everything else left. but what if you want the first name to
+	// go right too? and the last column to be "justified"?
+	t.SetAlign([]text.Align{text.AlignDefault, text.AlignRight, text.AlignDefault, text.AlignDefault, text.AlignJustify})
+	// to show AlignJustify in action, lets add one more row
+	t.AppendRow(table.Row{4, "Faceless", "Man", 0, "Needs a\tname."})
+	// time to take a peek:
 	t.SetCaption("Table with Custom Alignment for 2 columns.\n")
 	fmt.Println(t.Render())
 	//+-----+------------+-----------+--------+-----------------------------+
 	//|   # | FIRST NAME | LAST NAME | SALARY |                             |
 	//+-----+------------+-----------+--------+-----------------------------+
-	//|   1 |       Arya |   Stark   |   3000 |                             |
-	//|  20 |        Jon |    Snow   |   2000 | You know nothing, Jon Snow! |
+	//|   1 |       Arya | Stark     |   3000 |                             |
+	//|  20 |        Jon | Snow      |   2000 | You know nothing, Jon Snow! |
 	//| 300 |     Tyrion | Lannister |   5000 |                             |
+	//|   4 |   Faceless | Man       |      0 | Needs        a        name. |
 	//+-----+------------+-----------+--------+-----------------------------+
-	//|     |            |   TOTAL   |  10000 |                             |
+	//|     |            | TOTAL     |  10000 |                             |
 	//+-----+------------+-----------+--------+-----------------------------+
 	//Table with Custom Alignment for 2 columns.
 	//==========================================================================
@@ -109,38 +111,61 @@ func main() {
 	//+-----+------------+-----------+--------+-----------------------------+
 	//|   # | FIRST NAME | LAST NAME | SALARY |                             |
 	//+-----+------------+-----------+--------+-----------------------------+
-	//|   1 |       Arya |   Stark   |   3000 |                             |
-	//|  20 |        Jon |    Snow   |   2000 | You know nothing, Jon Snow! |
+	//|   1 |       Arya | Stark     |   3000 |                             |
+	//|  20 |        Jon | Snow      |   2000 | You know nothing, Jon Snow! |
 	//| 300 |     Tyrion | Lannister |   5000 |                             |
-	//|  13 |     Winter |   Valar   |      0 | You                         |
-	//|     |         Is | Morghulis |        |  know                       |
-	//|     |     Coming |           |        |   nothing,                  |
-	//|     |            |           |        |    Jon                      |
-	//|     |            |           |        |     Snow!                   |
+	//|   4 |   Faceless | Man       |      0 | Needs        a        name. |
+	//|  13 |     Winter | Valar     |      0 | You                         |
+	//|     |         Is | Morghulis |        | know                        |
+	//|     |     Coming |           |        | nothing,                    |
+	//|     |            |           |        | Jon                         |
+	//|     |            |           |        | Snow!                       |
 	//+-----+------------+-----------+--------+-----------------------------+
-	//|     |            |   TOTAL   |  10000 |                             |
+	//|     |            | TOTAL     |  10000 |                             |
 	//+-----+------------+-----------+--------+-----------------------------+
 	//Table with a Multi-line Row.
 	//
-	// time to VAlign the columns... and ignore 2 columns in the process
+	// time to VAlign the columns... and ignore the last column in the process
 	t.SetVAlign([]text.VAlign{text.VAlignDefault, text.VAlignMiddle, text.VAlignBottom, text.VAlignMiddle})
 	t.SetCaption("Table with a Multi-line Row with VAlign.\n")
 	fmt.Println(t.Render())
 	//+-----+------------+-----------+--------+-----------------------------+
 	//|   # | FIRST NAME | LAST NAME | SALARY |                             |
 	//+-----+------------+-----------+--------+-----------------------------+
-	//|   1 |       Arya |   Stark   |   3000 |                             |
-	//|  20 |        Jon |    Snow   |   2000 | You know nothing, Jon Snow! |
+	//|   1 |       Arya | Stark     |   3000 |                             |
+	//|  20 |        Jon | Snow      |   2000 | You know nothing, Jon Snow! |
 	//| 300 |     Tyrion | Lannister |   5000 |                             |
+	//|   4 |   Faceless | Man       |      0 | Needs        a        name. |
 	//|  13 |            |           |        | You                         |
-	//|     |     Winter |           |        |  know                       |
-	//|     |         Is |           |      0 |   nothing,                  |
-	//|     |     Coming |   Valar   |        |    Jon                      |
-	//|     |            | Morghulis |        |     Snow!                   |
+	//|     |     Winter |           |        | know                        |
+	//|     |         Is |           |      0 | nothing,                    |
+	//|     |     Coming | Valar     |        | Jon                         |
+	//|     |            | Morghulis |        | Snow!                       |
 	//+-----+------------+-----------+--------+-----------------------------+
-	//|     |            |   TOTAL   |  10000 |                             |
+	//|     |            | TOTAL     |  10000 |                             |
 	//+-----+------------+-----------+--------+-----------------------------+
 	//Table with a Multi-line Row with VAlign.
+	//
+	// changed your mind about AlignJustify?
+	t.SetAlign([]text.Align{text.AlignDefault, text.AlignRight, text.AlignDefault, text.AlignDefault, text.AlignCenter})
+	t.SetCaption("Table with a Multi-line Row with VAlign and changed Align.\n")
+	fmt.Println(t.Render())
+	//+-----+------------+-----------+--------+-----------------------------+
+	//|   # | FIRST NAME | LAST NAME | SALARY |                             |
+	//+-----+------------+-----------+--------+-----------------------------+
+	//|   1 |       Arya | Stark     |   3000 |                             |
+	//|  20 |        Jon | Snow      |   2000 | You know nothing, Jon Snow! |
+	//| 300 |     Tyrion | Lannister |   5000 |                             |
+	//|   4 |   Faceless | Man       |      0 |       Needs a    name.      |
+	//|  13 |            |           |        |             You             |
+	//|     |     Winter |           |        |             know            |
+	//|     |         Is |           |      0 |           nothing,          |
+	//|     |     Coming | Valar     |        |             Jon             |
+	//|     |            | Morghulis |        |            Snow!            |
+	//+-----+------------+-----------+--------+-----------------------------+
+	//|     |            | TOTAL     |  10000 |                             |
+	//+-----+------------+-----------+--------+-----------------------------+
+	//Table with a Multi-line Row with VAlign and changed Align.
 	//==========================================================================
 
 	//==========================================================================

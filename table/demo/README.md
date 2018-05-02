@@ -31,45 +31,65 @@ Table with 3 Rows, a Header & a Footer.
 +-----+------------+-----------+--------+-----------------------------+
 |   # | FIRST NAME | LAST NAME | SALARY |                             |
 +-----+------------+-----------+--------+-----------------------------+
-|   1 |       Arya |   Stark   |   3000 |                             |
-|  20 |        Jon |    Snow   |   2000 | You know nothing, Jon Snow! |
+|   1 |       Arya | Stark     |   3000 |                             |
+|  20 |        Jon | Snow      |   2000 | You know nothing, Jon Snow! |
 | 300 |     Tyrion | Lannister |   5000 |                             |
+|   4 |   Faceless | Man       |      0 | Needs        a        name. |
 +-----+------------+-----------+--------+-----------------------------+
-|     |            |   TOTAL   |  10000 |                             |
+|     |            | TOTAL     |  10000 |                             |
 +-----+------------+-----------+--------+-----------------------------+
 Table with Custom Alignment for 2 columns.
 
 +-----+------------+-----------+--------+-----------------------------+
 |   # | FIRST NAME | LAST NAME | SALARY |                             |
 +-----+------------+-----------+--------+-----------------------------+
-|   1 |       Arya |   Stark   |   3000 |                             |
-|  20 |        Jon |    Snow   |   2000 | You know nothing, Jon Snow! |
+|   1 |       Arya | Stark     |   3000 |                             |
+|  20 |        Jon | Snow      |   2000 | You know nothing, Jon Snow! |
 | 300 |     Tyrion | Lannister |   5000 |                             |
-|  13 |     Winter |   Valar   |      0 | You                         |
-|     |         Is | Morghulis |        |  know                       |
-|     |     Coming |           |        |   nothing,                  |
-|     |            |           |        |    Jon                      |
-|     |            |           |        |     Snow!                   |
+|   4 |   Faceless | Man       |      0 | Needs        a        name. |
+|  13 |     Winter | Valar     |      0 | You                         |
+|     |         Is | Morghulis |        | know                        |
+|     |     Coming |           |        | nothing,                    |
+|     |            |           |        | Jon                         |
+|     |            |           |        | Snow!                       |
 +-----+------------+-----------+--------+-----------------------------+
-|     |            |   TOTAL   |  10000 |                             |
+|     |            | TOTAL     |  10000 |                             |
 +-----+------------+-----------+--------+-----------------------------+
 Table with a Multi-line Row.
 
 +-----+------------+-----------+--------+-----------------------------+
 |   # | FIRST NAME | LAST NAME | SALARY |                             |
 +-----+------------+-----------+--------+-----------------------------+
-|   1 |       Arya |   Stark   |   3000 |                             |
-|  20 |        Jon |    Snow   |   2000 | You know nothing, Jon Snow! |
+|   1 |       Arya | Stark     |   3000 |                             |
+|  20 |        Jon | Snow      |   2000 | You know nothing, Jon Snow! |
 | 300 |     Tyrion | Lannister |   5000 |                             |
+|   4 |   Faceless | Man       |      0 | Needs        a        name. |
 |  13 |            |           |        | You                         |
-|     |     Winter |           |        |  know                       |
-|     |         Is |           |      0 |   nothing,                  |
-|     |     Coming |   Valar   |        |    Jon                      |
-|     |            | Morghulis |        |     Snow!                   |
+|     |     Winter |           |        | know                        |
+|     |         Is |           |      0 | nothing,                    |
+|     |     Coming | Valar     |        | Jon                         |
+|     |            | Morghulis |        | Snow!                       |
 +-----+------------+-----------+--------+-----------------------------+
-|     |            |   TOTAL   |  10000 |                             |
+|     |            | TOTAL     |  10000 |                             |
 +-----+------------+-----------+--------+-----------------------------+
 Table with a Multi-line Row with VAlign.
+
++-----+------------+-----------+--------+-----------------------------+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++-----+------------+-----------+--------+-----------------------------+
+|   1 |       Arya | Stark     |   3000 |                             |
+|  20 |        Jon | Snow      |   2000 | You know nothing, Jon Snow! |
+| 300 |     Tyrion | Lannister |   5000 |                             |
+|   4 |   Faceless | Man       |      0 |       Needs a    name.      |
+|  13 |            |           |        |             You             |
+|     |     Winter |           |        |             know            |
+|     |         Is |           |      0 |           nothing,          |
+|     |     Coming | Valar     |        |             Jon             |
+|     |            | Morghulis |        |            Snow!            |
++-----+------------+-----------+--------+-----------------------------+
+|     |            | TOTAL     |  10000 |                             |
++-----+------------+-----------+--------+-----------------------------+
+Table with a Multi-line Row with VAlign and changed Align.
 
 +-----+------------+-----------+--------+-----------------------------+
 |   # | FIRST NAME | LAST NAME | SALARY |                             |
