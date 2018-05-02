@@ -13,13 +13,14 @@ _Note_: Coveralls Integration is [broken](https://github.com/mattn/goveralls/iss
 
 Pretty-print tables into ASCII/Unicode strings.
 
-  - Supports Header and Footer
-  - Supports Adding Rows one-by-one or as a group
+  - Add Rows one-by-one or as a group
+  - Add Header(s) and Footer(s)
+  - Set output to be mirrored to an io.Writer object like os.StdOut
   - Auto (horizontal) Align (numeric columns are aligned Right)
   - Custom (horizontal) Align per column
   - Custom (vertical) VAlign per column (and multi-line column support)
   - Completely customizable styles
-    - Many ready-to-use styles: [table/style.go](table/style.go)
+    - Many ready-to-use styles: [style.go](style.go)
     - Colorize Headers/Body/Footers using [github.com/fatih/color](https://github.com/fatih/color)
     - Custom text-case for Headers/Body/Footers
     - Enable separators between each row
@@ -28,7 +29,7 @@ Pretty-print tables into ASCII/Unicode strings.
     - (ASCII/Unicode) Table
     - CSV
     - HTML Table (with custom CSS Style)
-
+    - Markdown Table 
 
 ```
 +-----+------------+-----------+--------+-----------------------------+
