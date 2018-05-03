@@ -1,12 +1,12 @@
 package table
 
 import (
+	"fmt"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/text"
-	"fmt"
-	"unicode/utf8"
 )
 
 // Render renders the Table in a human-readable "pretty" format. Example:
@@ -31,7 +31,7 @@ func (t *Table) Render() string {
 			if len(t.rowsHeader) > 0 {
 				t.renderRows(&out, t.rowsHeader, t.colorsHeader, t.style.FormatHeader)
 			} else {
-				t.renderRow(&out, 0, t.getAutoIndexColumnIDRow(), t.colorsHeader,false, false, false, text.FormatUpper)
+				t.renderRow(&out, 0, t.getAutoIndexColumnIDRow(), t.colorsHeader, false, false, false, text.FormatUpper)
 			}
 			t.renderRowSeparator(&out, false, false)
 		}

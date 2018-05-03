@@ -1,12 +1,12 @@
 package table
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"fmt"
 	"github.com/jedib0t/go-pretty/util"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTable_Render(t *testing.T) {
