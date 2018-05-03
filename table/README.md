@@ -4,10 +4,12 @@ Pretty-print tables into ASCII/Unicode strings.
 
   - Add Rows one-by-one or as a group
   - Add Header(s) and Footer(s)
+  - Auto Index Rows (1, 2, 3 ...) and Columns (A, B, C, ...)
   - Set output to be mirrored to an io.Writer object like os.StdOut
-  - Auto (horizontal) Align (numeric columns are aligned Right)
-  - Custom (horizontal) Align per column
-  - Custom (vertical) VAlign per column (and multi-line column support)
+  - Alignment/ - Horizontal & Vertical
+    - Auto (horizontal) Align (numeric columns are aligned Right)
+    - Custom (horizontal) Align per column
+    - Custom (vertical) VAlign per column (and multi-line column support)
   - Completely customizable styles
     - Many ready-to-use styles: [style.go](style.go)
     - Colorize Headers/Body/Footers using [github.com/fatih/color](https://github.com/fatih/color)
@@ -40,7 +42,6 @@ Documentation: [GoDoc](https://godoc.org/github.com/jedib0t/go-pretty/table)
 ### TODO
 
   - Performance Optimizations (Memory Usage)
-  - Spreadsheet Format (Row Headers like [A, B, C, ...] and Column Indices)
   - Row and Cell Width Restrictions
   - Generic Cell Content Transformers (with some ready-made ones)
     - Base64 Decoder

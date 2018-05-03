@@ -12,12 +12,14 @@ import (
 //  300,Tyrion,Lannister,5000,
 //  ,,Total,10000,
 func (t *Table) RenderCSV() string {
-	t.init()
+	t.initForRender()
 
 	var out strings.Builder
-	t.csvRenderRows(&out, t.rowsHeader)
-	t.csvRenderRows(&out, t.rows)
-	t.csvRenderRows(&out, t.rowsFooter)
+	if t.numColumns > 0 {
+		t.csvRenderRows(&out, t.rowsHeader)
+		t.csvRenderRows(&out, t.rows)
+		t.csvRenderRows(&out, t.rowsFooter)
+	}
 	return t.render(&out)
 }
 

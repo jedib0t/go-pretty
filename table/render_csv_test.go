@@ -25,3 +25,8 @@ The North Remembers!"
 
 	assert.Equal(t, expectedOut, tw.RenderCSV())
 }
+
+func TestTable_RenderCSV_Empty(t *testing.T) {
+	tw := NewWriter()
+	assert.Empty(t, tw.RenderCSV())
+}

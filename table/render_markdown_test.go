@@ -27,3 +27,8 @@ _test-caption_`
 
 	assert.Equal(t, expectedOut, tw.RenderMarkdown())
 }
+
+func TestTable_RenderMarkdown_Empty(t *testing.T) {
+	tw := NewWriter()
+	assert.Empty(t, tw.RenderMarkdown())
+}

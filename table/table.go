@@ -24,6 +24,10 @@ type Row []interface{}
 type Table struct {
 	// align describes the horizontal-align for each column
 	align []text.Align
+	// enable automatic indexing of the rows and columns like a spreadsheet?
+	autoIndex bool
+	// autoIndexVIndexMaxLength denotes the length in chars for the last rownum
+	autoIndexVIndexMaxLength int
 	// caption stores the text to be rendered just below the table; and doesn't
 	// get used when rendered as a CSV
 	caption string
@@ -94,6 +98,14 @@ func (t *Table) Length() int {
 // SetAlign sets the horizontal-align for each column in all the rows.
 func (t *Table) SetAlign(align []text.Align) {
 	t.align = align
+}
+
+// SetAutoIndex adds a generated header with columns such as "A", "B", "C", etc.
+// and a leading column with the row number similar to what you'd see on any
+// spreadsheet application. NOTE: Appending a Header will void this
+// functionality.
+func (t *Table) SetAutoIndex(autoIndex bool) {
+	t.autoIndex = true
 }
 
 // SetCaption sets the text to be rendered just below the table. This will not
@@ -215,6 +227,14 @@ func (t *Table) getAlign(colIdx int) text.Align {
 	return align
 }
 
+func (t *Table) getAutoIndexColumnIDRow() Row {
+	row := make(Row, t.numColumns)
+	for idx, maxColumnLength := range t.maxColumnLengths {
+		row[idx] = text.AlignCenter.Apply(util.AutoIndexColumnID(idx), maxColumnLength)
+	}
+	return row
+}
+
 func (t *Table) getVAlign(colIdx int) text.VAlign {
 	vAlign := text.VAlignDefault
 	if colIdx < len(t.vAlign) {
@@ -223,11 +243,17 @@ func (t *Table) getVAlign(colIdx int) text.VAlign {
 	return vAlign
 }
 
-func (t *Table) init() {
+func (t *Table) initForRender() {
 	// pick the default style
 	if t.style == nil {
 		t.style = &StyleDefault
 	}
+
+	// turn off auto-index if a header is found
+	if t.autoIndex && len(t.rowsHeader) > 0 {
+		t.autoIndex = false
+	}
+	t.autoIndexVIndexMaxLength = len(fmt.Sprint(len(t.rows)))
 
 	// default to a HTML CSS Class if none-defined
 	if t.htmlCSSClass == "" {
@@ -238,8 +264,10 @@ func (t *Table) init() {
 	t.maxRowLength = (utf8.RuneCountInString(t.style.CharMiddleSeparator) * t.numColumns) + 1
 	t.rowSeparator = make([]interface{}, t.numColumns)
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
-		horizontalSeparatorCol := strings.Repeat(t.style.CharMiddleHorizontal,
-			len(t.style.CharPaddingLeft)+maxColumnLength+len(t.style.CharPaddingRight))
+		maxColumnLength += utf8.RuneCountInString(t.style.CharPaddingLeft)
+		maxColumnLength += utf8.RuneCountInString(t.style.CharPaddingRight)
+		horizontalSeparatorCol := strings.Repeat(t.style.CharMiddleHorizontal, maxColumnLength)
+		// TODO: handle case where CharMiddleHorizontal is longer than 1 rune
 		t.maxRowLength += utf8.RuneCountInString(horizontalSeparatorCol)
 		t.rowSeparator[colIdx] = horizontalSeparatorCol
 	}

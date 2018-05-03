@@ -112,6 +112,19 @@ func TestTable_AppendRows(t *testing.T) {
 	assert.Equal(t, 0, len(table.rowsHeader))
 }
 
+func TestTable_Length(t *testing.T) {
+	table := Table{}
+	assert.Zero(t, table.Length())
+
+	table.AppendRow(testRows[0])
+	assert.Equal(t, 1, table.Length())
+	table.AppendRow(testRows[1])
+	assert.Equal(t, 2, table.Length())
+
+	table.AppendHeader(testHeader)
+	assert.Equal(t, 2, table.Length())
+}
+
 func TestTable_SetAlign(t *testing.T) {
 	table := Table{}
 	assert.Nil(t, table.align)
@@ -131,6 +144,42 @@ func TestTable_SetAlign(t *testing.T) {
 |     |        |           |      |        The North Remembers! |
 +-----+--------+-----------+------+-----------------------------+`
 
+	assert.Equal(t, expectedOut, table.Render())
+}
+
+func TestTable_SetAutoIndex(t *testing.T) {
+	table := Table{}
+	table.AppendRows(testRows)
+	table.SetStyle(styleTest)
+
+	expectedOut := `(-----^--------^-----------^------^-----------------------------)
+[<  1>|<Arya  >|<Stark    >|<3000>|<                           >]
+[< 20>|<Jon   >|<Snow     >|<2000>|<You know nothing, Jon Snow!>]
+[<300>|<Tyrion>|<Lannister>|<5000>|<                           >]
+\-----v--------v-----------v------v-----------------------------/`
+	assert.False(t, table.autoIndex)
+	assert.Equal(t, expectedOut, table.Render())
+
+	table.SetAutoIndex(true)
+	expectedOut = `(---^-----^--------^-----------^------^-----------------------------)
+[< >|< A >|<   B  >|<    C    >|<  D >|<             E             >]
+{---+-----+--------+-----------+------+-----------------------------}
+[<1>|<  1>|<Arya  >|<Stark    >|<3000>|<                           >]
+[<2>|< 20>|<Jon   >|<Snow     >|<2000>|<You know nothing, Jon Snow!>]
+[<3>|<300>|<Tyrion>|<Lannister>|<5000>|<                           >]
+\---v-----v--------v-----------v------v-----------------------------/`
+	assert.True(t, table.autoIndex)
+	assert.Equal(t, expectedOut, table.Render())
+
+	table.AppendHeader(testHeader)
+	expectedOut = `(-----^------------^-----------^--------^-----------------------------)
+[<  #>|<FIRST NAME>|<LAST NAME>|<SALARY>|<                           >]
+{-----+------------+-----------+--------+-----------------------------}
+[<  1>|<Arya      >|<Stark    >|<  3000>|<                           >]
+[< 20>|<Jon       >|<Snow     >|<  2000>|<You know nothing, Jon Snow!>]
+[<300>|<Tyrion    >|<Lannister>|<  5000>|<                           >]
+\-----v------------v-----------v--------v-----------------------------/`
+	assert.True(t, table.autoIndex)
 	assert.Equal(t, expectedOut, table.Render())
 }
 
