@@ -15,9 +15,11 @@ func (t *Table) RenderCSV() string {
 	t.init()
 
 	var out strings.Builder
-	t.csvRenderRows(&out, t.rowsHeader)
-	t.csvRenderRows(&out, t.rows)
-	t.csvRenderRows(&out, t.rowsFooter)
+	if t.numColumns > 0 {
+		t.csvRenderRows(&out, t.rowsHeader)
+		t.csvRenderRows(&out, t.rows)
+		t.csvRenderRows(&out, t.rowsFooter)
+	}
 	return t.render(&out)
 }
 

@@ -50,13 +50,15 @@ func (t *Table) RenderHTML() string {
 	t.init()
 
 	var out strings.Builder
-	out.WriteString("<table class=\"")
-	out.WriteString(t.htmlCSSClass)
-	out.WriteString("\">\n")
-	t.htmlRenderRows(&out, t.rowsHeader, true, false)
-	t.htmlRenderRows(&out, t.rows, false, false)
-	t.htmlRenderRows(&out, t.rowsFooter, false, true)
-	out.WriteString("</table>")
+	if t.numColumns > 0 {
+		out.WriteString("<table class=\"")
+		out.WriteString(t.htmlCSSClass)
+		out.WriteString("\">\n")
+		t.htmlRenderRows(&out, t.rowsHeader, true, false)
+		t.htmlRenderRows(&out, t.rows, false, false)
+		t.htmlRenderRows(&out, t.rowsFooter, false, true)
+		out.WriteString("</table>")
+	}
 	return t.render(&out)
 }
 
@@ -112,15 +114,23 @@ func (t *Table) htmlRenderRows(out *strings.Builder, rows []Row, isHeader bool, 
 			rowsTag = "tfoot"
 		}
 
-		// render all the rows enclosed by the "rowsTag"
-		out.WriteString("  <")
-		out.WriteString(rowsTag)
-		out.WriteString(">\n")
+		var renderedTagOpen, shouldRenderTagClose bool
 		for _, row := range rows {
-			t.htmlRenderRow(out, row, isHeader, isFooter)
+			if len(row) > 0 {
+				if !renderedTagOpen {
+					out.WriteString("  <")
+					out.WriteString(rowsTag)
+					out.WriteString(">\n")
+					renderedTagOpen = true
+				}
+				t.htmlRenderRow(out, row, isHeader, isFooter)
+				shouldRenderTagClose = true
+			}
 		}
-		out.WriteString("  </")
-		out.WriteString(rowsTag)
-		out.WriteString(">\n")
+		if shouldRenderTagClose {
+			out.WriteString("  </")
+			out.WriteString(rowsTag)
+			out.WriteString(">\n")
+		}
 	}
 }

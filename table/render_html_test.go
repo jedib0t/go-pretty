@@ -70,3 +70,8 @@ func TestTable_RenderHTML(t *testing.T) {
 
 	assert.Equal(t, expectedOut, tw.RenderHTML())
 }
+
+func TestTable_RenderHTML_Empty(t *testing.T) {
+	tw := NewWriter()
+	assert.Empty(t, tw.RenderHTML())
+}

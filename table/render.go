@@ -21,24 +21,26 @@ func (t *Table) Render() string {
 	t.init()
 
 	var out strings.Builder
-	if !t.disableBorder {
-		t.renderRowSeparator(&out, true, false)
-	}
-	if len(t.rowsHeader) > 0 {
-		t.renderRows(&out, t.rowsHeader, t.colorsHeader, t.style.FormatHeader)
-		t.renderRowSeparator(&out, false, false)
-	}
-	t.renderRows(&out, t.rows, t.colors, t.style.FormatRows)
-	if len(t.rowsFooter) > 0 {
-		t.renderRowSeparator(&out, false, false)
-		t.renderRows(&out, t.rowsFooter, t.colorsFooter, t.style.FormatFooter)
-	}
-	if !t.disableBorder {
-		t.renderRowSeparator(&out, false, true)
-	}
-	if t.caption != "" {
-		out.WriteRune('\n')
-		out.WriteString(t.caption)
+	if t.numColumns > 0 {
+		if !t.disableBorder {
+			t.renderRowSeparator(&out, true, false)
+		}
+		if len(t.rowsHeader) > 0 {
+			t.renderRows(&out, t.rowsHeader, t.colorsHeader, t.style.FormatHeader)
+			t.renderRowSeparator(&out, false, false)
+		}
+		t.renderRows(&out, t.rows, t.colors, t.style.FormatRows)
+		if len(t.rowsFooter) > 0 {
+			t.renderRowSeparator(&out, false, false)
+			t.renderRows(&out, t.rowsFooter, t.colorsFooter, t.style.FormatFooter)
+		}
+		if !t.disableBorder {
+			t.renderRowSeparator(&out, false, true)
+		}
+		if t.caption != "" {
+			out.WriteRune('\n')
+			out.WriteString(t.caption)
+		}
 	}
 	return t.render(&out)
 }
@@ -81,24 +83,26 @@ func (t *Table) renderColumn(out *strings.Builder, row Row, colIdx int, maxColum
 }
 
 func (t *Table) renderLine(out *strings.Builder, row Row, colors []*color.Color, isFirstRow bool, isLastRow bool, isSeparatorRow bool, format text.Format) {
-	// grow the strings.Builder by using the horizontal-row-separator length
-	// and by the number of columns to account for the column-separator
-	out.Grow(t.maxRowLength + t.numColumns + 1)
+	if len(row) > 0 {
+		// grow the strings.Builder by using the horizontal-row-separator length
+		// and by the number of columns to account for the column-separator
+		out.Grow(t.maxRowLength + t.numColumns + 1)
 
-	// if the output has content, it means that this call is working on line
-	// number 2 or more; separate them with a newline
-	if out.Len() > 0 {
-		out.WriteRune('\n')
-	}
+		// if the output has content, it means that this call is working on line
+		// number 2 or more; separate them with a newline
+		if out.Len() > 0 {
+			out.WriteRune('\n')
+		}
 
-	if !t.disableBorder {
-		t.renderMarginLeft(out, isFirstRow, isLastRow, isSeparatorRow)
-	}
-	for colIdx, maxColumnLength := range t.maxColumnLengths {
-		t.renderColumn(out, row, colIdx, maxColumnLength, colors, isFirstRow, isLastRow, isSeparatorRow, format)
-	}
-	if !t.disableBorder {
-		t.renderMarginRight(out, isFirstRow, isLastRow, isSeparatorRow)
+		if !t.disableBorder {
+			t.renderMarginLeft(out, isFirstRow, isLastRow, isSeparatorRow)
+		}
+		for colIdx, maxColumnLength := range t.maxColumnLengths {
+			t.renderColumn(out, row, colIdx, maxColumnLength, colors, isFirstRow, isLastRow, isSeparatorRow, format)
+		}
+		if !t.disableBorder {
+			t.renderMarginRight(out, isFirstRow, isLastRow, isSeparatorRow)
+		}
 	}
 }
 

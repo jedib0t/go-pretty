@@ -13,13 +13,15 @@ func (t *Table) RenderMarkdown() string {
 	t.init()
 
 	var out strings.Builder
-	t.markdownRenderRows(&out, t.rowsHeader, true, false)
-	t.markdownRenderRows(&out, t.rows, false, false)
-	t.markdownRenderRows(&out, t.rowsFooter, false, true)
-	if t.caption != "" {
-		out.WriteString("\n_")
-		out.WriteString(t.caption)
-		out.WriteRune('_')
+	if t.numColumns > 0 {
+		t.markdownRenderRows(&out, t.rowsHeader, true, false)
+		t.markdownRenderRows(&out, t.rows, false, false)
+		t.markdownRenderRows(&out, t.rowsFooter, false, true)
+		if t.caption != "" {
+			out.WriteString("\n_")
+			out.WriteString(t.caption)
+			out.WriteRune('_')
+		}
 	}
 	return t.render(&out)
 }

@@ -33,7 +33,7 @@ test-caption`
 	assert.Equal(t, expectedOut, tw.Render())
 }
 
-func TestTable_RenderColored(t *testing.T) {
+func TestTable_Render_Colored(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(testHeader)
 	tw.AppendRows(testRows)
@@ -62,4 +62,9 @@ func TestTable_RenderColored(t *testing.T) {
 	}
 
 	assert.Equal(t, strings.Join(expectedOut, "\n"), tw.Render())
+}
+
+func TestTable_Render_Empty(t *testing.T) {
+	tw := NewWriter()
+	assert.Empty(t, tw.Render())
 }
