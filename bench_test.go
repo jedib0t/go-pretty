@@ -3,9 +3,9 @@ package gopretty
 import (
 	"testing"
 
+	"github.com/jedib0t/go-pretty/list"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/jedib0t/go-pretty/text"
-	"github.com/jedib0t/go-pretty/list"
 )
 
 var (

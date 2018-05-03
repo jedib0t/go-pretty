@@ -28,7 +28,14 @@ const (
 //  * AlignRight.Apply("Jon Snow",   12) returns "    Jon Snow"
 func (a Align) Apply(text string, maxLength int) string {
 	if strings.ContainsAny(text, " \t") {
-		text = strings.Trim(text, " \t")
+		switch a {
+		case AlignDefault, AlignLeft:
+			text = strings.TrimRight(text, " \t")
+		case AlignRight:
+			text = strings.TrimLeft(text, " \t")
+		default:
+			text = strings.Trim(text, " \t")
+		}
 	}
 	textLength := utf8.RuneCountInString(text)
 

@@ -7,13 +7,27 @@ import (
 )
 
 func TestAlign_Apply(t *testing.T) {
-	// AlignDefault, AlignLeft, AlignCenter, AlignRight are all simple
+	// AlignDefault & AlignLeft are the same
 	assert.Equal(t, "Jon Snow    ", AlignDefault.Apply("Jon Snow", 12))
+	assert.Equal(t, " Jon Snow   ", AlignDefault.Apply(" Jon Snow", 12))
+	assert.Equal(t, "            ", AlignDefault.Apply("", 12))
 	assert.Equal(t, "Jon Snow    ", AlignLeft.Apply("Jon Snow   ", 12))
-	assert.Equal(t, "  Jon Snow  ", AlignCenter.Apply("Jon Snow ", 12))
-	assert.Equal(t, "    Jon Snow", AlignRight.Apply("Jon Snow ", 12))
+	assert.Equal(t, " Jon Snow   ", AlignLeft.Apply(" Jon Snow  ", 12))
+	assert.Equal(t, "            ", AlignLeft.Apply("", 12))
 
-	// AlignJustify is special and needs testing a lot more edge cases
+	// AlignCenter
+	assert.Equal(t, "  Jon Snow  ", AlignCenter.Apply("Jon Snow ", 12))
+	assert.Equal(t, "  Jon Snow  ", AlignCenter.Apply(" Jon Snow", 12))
+	assert.Equal(t, "  Jon Snow  ", AlignCenter.Apply(" Jon Snow  ", 12))
+	assert.Equal(t, "            ", AlignCenter.Apply("", 12))
+
+	// Align Right
+	assert.Equal(t, "    Jon Snow", AlignRight.Apply("Jon Snow", 12))
+	assert.Equal(t, "   Jon Snow ", AlignRight.Apply("Jon Snow ", 12))
+	assert.Equal(t, "   Jon Snow ", AlignRight.Apply("  Jon Snow ", 12))
+	assert.Equal(t, "            ", AlignRight.Apply("", 12))
+
+	// AlignJustify
 	assert.Equal(t, "Jon     Snow", AlignJustify.Apply("Jon Snow", 12))
 	assert.Equal(t, "JS  vs.   DT", AlignJustify.Apply("JS vs. DT", 12))
 	assert.Equal(t, "JS   is   AT", AlignJustify.Apply("JS is AT", 12))

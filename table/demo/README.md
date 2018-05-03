@@ -229,11 +229,11 @@ HTML |   </tr>
 HTML |   </tfoot>
 HTML | </table>
 
-MD| | # | First Name | Last Name | Salary |  |
-MD| | ---:| --- | --- | ---:| --- |
-MD| | 1 | Arya | Stark | 3000 |  |
-MD| | 20 | Jon | Snow | 2000 | You know nothing, Jon Snow! |
-MD| | 300 | Tyrion | Lannister | 5000 |  |
-MD| |  |  | Total | 10000 |  |
-MD| 
+Markdown | | # | First Name | Last Name | Salary |  |
+Markdown | | ---:| --- | --- | ---:| --- |
+Markdown | | 1 | Arya | Stark | 3000 |  |
+Markdown | | 20 | Jon | Snow | 2000 | You know nothing, Jon Snow! |
+Markdown | | 300 | Tyrion | Lannister | 5000 |  |
+Markdown | |  |  | Total | 10000 |  |
+Markdown | 
 ```
