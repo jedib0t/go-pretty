@@ -20,7 +20,7 @@ Pretty-print tables into ASCII/Unicode strings.
   - Custom (horizontal) Align per column
   - Custom (vertical) VAlign per column (and multi-line column support)
   - Completely customizable styles
-    - Many ready-to-use styles: [style.go](style.go)
+    - Many ready-to-use styles: [table/style.go](table/style.go)
     - Colorize Headers/Body/Footers using [github.com/fatih/color](https://github.com/fatih/color)
     - Custom text-case for Headers/Body/Footers
     - Enable separators between each row
@@ -43,7 +43,7 @@ Pretty-print tables into ASCII/Unicode strings.
 +-----+------------+-----------+--------+-----------------------------+
 ```
 
-A demonstration of all the capabilities can be found here: [table/demo/demo.go](table/demo/demo.go)
+A demonstration of all the capabilities can be found here: [table/demo](table/demo)
 
 ## List
 
@@ -62,7 +62,7 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
     - Known
 ```
 
-A demonstration of all the capabilities can be found here: [list/demo/demo.go](list/demo/demo.go)
+A demonstration of all the capabilities can be found here: [list/demo](list/demo)
 
 ## Benchmarks
 

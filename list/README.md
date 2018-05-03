@@ -15,7 +15,7 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
     - Known
 ```
 
-A demonstration of all the capabilities can be found here: [demo/demo.go](demo/demo.go)
+A demonstration of all the capabilities can be found here: [demo](demo)
 
 Find documentation here: [GoDoc](https://godoc.org/github.com/jedib0t/go-pretty/list)
 

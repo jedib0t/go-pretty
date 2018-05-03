@@ -8,14 +8,30 @@ import (
 
 func TestVAlign_Apply(t *testing.T) {
 	assert.Equal(t, []string{"Game", "Of", "Thrones"},
+		VAlignDefault.Apply([]string{"Game", "Of", "Thrones"}, 1))
+	assert.Equal(t, []string{"Game", "Of", "Thrones"},
 		VAlignDefault.Apply([]string{"Game", "Of", "Thrones"}, 3))
-
 	assert.Equal(t, []string{"Game", "Of", "Thrones", "", ""},
 		VAlignDefault.Apply([]string{"Game", "Of", "Thrones"}, 5))
+
+	assert.Equal(t, []string{"Game", "Of", "Thrones"},
+		VAlignTop.Apply([]string{"Game", "Of", "Thrones"}, 1))
+	assert.Equal(t, []string{"Game", "Of", "Thrones"},
+		VAlignTop.Apply([]string{"Game", "Of", "Thrones"}, 3))
 	assert.Equal(t, []string{"Game", "Of", "Thrones", "", ""},
 		VAlignTop.Apply([]string{"Game", "Of", "Thrones"}, 5))
+
+	assert.Equal(t, []string{"Game", "Of", "Thrones"},
+		VAlignMiddle.Apply([]string{"Game", "Of", "Thrones"}, 1))
+	assert.Equal(t, []string{"Game", "Of", "Thrones"},
+		VAlignMiddle.Apply([]string{"Game", "Of", "Thrones"}, 3))
 	assert.Equal(t, []string{"", "Game", "Of", "Thrones", ""},
 		VAlignMiddle.Apply([]string{"Game", "Of", "Thrones"}, 5))
+
+	assert.Equal(t, []string{"Game", "Of", "Thrones"},
+		VAlignBottom.Apply([]string{"Game", "Of", "Thrones"}, 1))
+	assert.Equal(t, []string{"Game", "Of", "Thrones"},
+		VAlignBottom.Apply([]string{"Game", "Of", "Thrones"}, 3))
 	assert.Equal(t, []string{"", "", "Game", "Of", "Thrones"},
 		VAlignBottom.Apply([]string{"Game", "Of", "Thrones"}, 5))
 }

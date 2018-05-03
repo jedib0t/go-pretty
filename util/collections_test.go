@@ -1,9 +1,9 @@
 package util
 
 import (
-	"testing"
-	"strings"
 	"github.com/stretchr/testify/assert"
+	"strings"
+	"testing"
 )
 
 func TestFilterStrings(t *testing.T) {

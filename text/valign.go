@@ -23,6 +23,8 @@ const (
 func (va VAlign) Apply(lines []string, maxLines int) []string {
 	if len(lines) == maxLines {
 		return lines
+	} else if len(lines) > maxLines {
+		maxLines = len(lines)
 	}
 
 	insertIdx := 0
