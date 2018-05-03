@@ -65,6 +65,6 @@ func BenchmarkTable_RenderHTML(b *testing.B) {
 
 func BenchmarkTable_RenderMarkdown(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		generateBenchmarkTable().RenderHTML()
+		generateBenchmarkTable().RenderMarkdown()
 	}
 }

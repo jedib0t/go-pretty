@@ -10,7 +10,7 @@ import "strings"
 //  | 300 | Tyrion | Lannister | 5000 |  |
 //  |  |  | Total | 10000 |  |
 func (t *Table) RenderMarkdown() string {
-	t.init()
+	t.initForRender()
 
 	var out strings.Builder
 	if t.numColumns > 0 {

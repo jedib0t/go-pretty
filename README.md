@@ -15,10 +15,12 @@ Pretty-print tables into ASCII/Unicode strings.
 
   - Add Rows one-by-one or as a group
   - Add Header(s) and Footer(s)
+  - Auto Index Rows (1, 2, 3 ...) and Columns (A, B, C, ...)
   - Set output to be mirrored to an io.Writer object like os.StdOut
-  - Auto (horizontal) Align (numeric columns are aligned Right)
-  - Custom (horizontal) Align per column
-  - Custom (vertical) VAlign per column (and multi-line column support)
+  - Alignment/ - Horizontal & Vertical
+    - Auto (horizontal) Align (numeric columns are aligned Right)
+    - Custom (horizontal) Align per column
+    - Custom (vertical) VAlign per column (and multi-line column support)
   - Completely customizable styles
     - Many ready-to-use styles: [table/style.go](table/style.go)
     - Colorize Headers/Body/Footers using [github.com/fatih/color](https://github.com/fatih/color)
@@ -68,9 +70,9 @@ A demonstration of all the capabilities can be found here: [list/demo](list/demo
 
 Partial output of `make bench`:
 ```
-BenchmarkList_Render-8                   1000000              1651 ns/op             608 B/op         24 allocs/op
-BenchmarkTable_Render-8                    50000             26410 ns/op            7138 B/op        416 allocs/op
-BenchmarkTable_RenderCSV-8                300000              5827 ns/op            2656 B/op         90 allocs/op
-BenchmarkTable_RenderHTML-8               200000              7435 ns/op            4129 B/op         89 allocs/op
-BenchmarkTable_RenderMarkdown-8           200000              7493 ns/op            4129 B/op         89 allocs/op
+BenchmarkList_Render-8                   1000000              1638 ns/op             608 B/op         24 allocs/op
+BenchmarkTable_Render-8                    50000             26605 ns/op            6962 B/op        418 allocs/op
+BenchmarkTable_RenderCSV-8                300000              5979 ns/op            2704 B/op         92 allocs/op
+BenchmarkTable_RenderHTML-8               200000              7542 ns/op            4161 B/op         91 allocs/op
+BenchmarkTable_RenderMarkdown-8           200000              6181 ns/op            2640 B/op         90 allocs/op
 ```

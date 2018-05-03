@@ -47,7 +47,7 @@ import "strings"
 //    </tfoot>
 //  </table>
 func (t *Table) RenderHTML() string {
-	t.init()
+	t.initForRender()
 
 	var out strings.Builder
 	if t.numColumns > 0 {
