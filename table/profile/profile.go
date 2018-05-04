@@ -1,8 +1,8 @@
 package main
 
 import (
-	"os"
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/jedib0t/go-pretty/table"
@@ -11,12 +11,12 @@ import (
 )
 
 var (
-	profilers   = []func(*profile.Profile){
+	profilers = []func(*profile.Profile){
 		profile.CPUProfile,
-		profile.MemProfile,
+		profile.MemProfileRate(512),
 	}
-	tableRowAlign  = []text.Align{text.AlignDefault, text.AlignLeft, text.AlignLeft, text.AlignRight}
-	tableCaption   = "table-caption"
+	tableRowAlign  = []text.Align{text.AlignDefault, text.AlignLeft, text.AlignCenter, text.AlignRight}
+	tableCaption   = "Profiling a Simple Table."
 	tableRowFooter = table.Row{"", "", "Total", 10000}
 	tableRowHeader = table.Row{"#", "First Name", "Last Name", "Salary"}
 	tableRows      = []table.Row{
@@ -27,7 +27,7 @@ var (
 )
 
 func profileRender(profiler func(profile2 *profile.Profile), n int) {
-	defer profile.Start(profiler, profile.ProfilePath("./")).Stop()
+	defer profile.Start(profiler, profile.ProfilePath(".")).Stop()
 
 	for i := 0; i < n; i++ {
 		tw := table.NewWriter()
@@ -37,11 +37,14 @@ func profileRender(profiler func(profile2 *profile.Profile), n int) {
 		tw.SetAlign(tableRowAlign)
 		tw.SetCaption(tableCaption)
 		tw.Render()
+		tw.RenderCSV()
+		tw.RenderHTML()
+		tw.RenderMarkdown()
 	}
 }
 
 func main() {
-	numRenders := 10000
+	numRenders := 100000
 	if len(os.Args) > 1 {
 		var err error
 		numRenders, err = strconv.Atoi(os.Args[2])

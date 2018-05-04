@@ -1,8 +1,8 @@
 package main
 
 import (
-	"os"
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/jedib0t/go-pretty/list"
@@ -15,7 +15,7 @@ var (
 	listItems3 = []interface{}{"This", "Is", "Known"}
 	profilers  = []func(*profile.Profile){
 		profile.CPUProfile,
-		profile.MemProfile,
+		profile.MemProfileRate(512),
 	}
 )
 
@@ -34,7 +34,7 @@ func profileRender(profiler func(profile2 *profile.Profile), n int) {
 }
 
 func main() {
-	numRenders := 10000
+	numRenders := 100000
 	if len(os.Args) > 1 {
 		var err error
 		numRenders, err = strconv.Atoi(os.Args[2])

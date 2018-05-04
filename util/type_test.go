@@ -6,6 +6,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestAsString(t *testing.T) {
+	assert.Equal(t, "", AsString(""))
+	assert.Equal(t, "Arya", AsString("Arya"))
+	assert.Equal(t, "1", AsString(1))
+	assert.Equal(t, "1.01", AsString(1.01))
+}
+
 func TestIsNumber(t *testing.T) {
 	assert.True(t, IsNumber(int(1)))
 	assert.True(t, IsNumber(int8(1)))
