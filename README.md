@@ -70,9 +70,9 @@ A demonstration of all the capabilities can be found here: [list/demo](list/demo
 
 Partial output of `make bench`:
 ```
-BenchmarkList_Render-8                   1000000              1635 ns/op             608 B/op         24 allocs/op
-BenchmarkTable_Render-8                   100000             17246 ns/op            5505 B/op        192 allocs/op
-BenchmarkTable_RenderCSV-8                300000              4680 ns/op            2320 B/op         70 allocs/op
-BenchmarkTable_RenderHTML-8               200000              6255 ns/op            3793 B/op         69 allocs/op
-BenchmarkTable_RenderMarkdown-8           300000              4886 ns/op            2256 B/op         68 allocs/op
+BenchmarkList_Render-8                   1000000              1638 ns/op             608 B/op         24 allocs/op
+BenchmarkTable_Render-8                   100000             17557 ns/op            4913 B/op        192 allocs/op
+BenchmarkTable_RenderCSV-8                300000              4740 ns/op            2320 B/op         70 allocs/op
+BenchmarkTable_RenderHTML-8               200000              6287 ns/op            3793 B/op         69 allocs/op
+BenchmarkTable_RenderMarkdown-8           300000              4927 ns/op            2256 B/op         68 allocs/op
 ```

@@ -22,7 +22,7 @@ dep:
 	dep ensure
 
 lint:
-	golint $(shell go list ./...)
+	golint -set_exit_status $(shell go list ./...)
 
 profile:
 	./profile.sh

@@ -4,25 +4,26 @@ import "github.com/jedib0t/go-pretty/text"
 
 // Style declares how to render the Table.
 type Style struct {
-	CharBottomLeft       string
-	CharBottomRight      string
-	CharBottomSeparator  string
-	CharLeft             string
-	CharLeftSeparator    string
-	CharMiddleHorizontal string
-	CharMiddleSeparator  string
-	CharMiddleVertical   string
-	CharPaddingLeft      string
-	CharPaddingRight     string
-	CharRight            string
-	CharRightSeparator   string
-	CharTopLeft          string
-	CharTopRight         string
-	CharTopSeparator     string
-	FormatHeader         text.Format
-	FormatFooter         text.Format
-	FormatRows           text.Format
-	Name                 string
+	BoxBottomLeft       string
+	BoxBottomRight      string
+	BoxBottomSeparator  string
+	BoxLeft             string
+	BoxLeftSeparator    string
+	BoxMiddleHorizontal string
+	BoxMiddleSeparator  string
+	BoxMiddleVertical   string
+	BoxPaddingLeft      string
+	BoxPaddingRight     string
+	BoxRight            string
+	BoxRightSeparator   string
+	BoxTopLeft          string
+	BoxTopRight         string
+	BoxTopSeparator     string
+	BoxUnfinishedRow    string
+	FormatHeader        text.Format
+	FormatFooter        text.Format
+	FormatRows          text.Format
+	Name                string
 }
 
 var (
@@ -37,25 +38,26 @@ var (
 	//  |     |            | TOTAL     |  10000 |                             |
 	//  +-----+------------+-----------+--------+-----------------------------+
 	StyleDefault = Style{
-		CharBottomLeft:       "+",
-		CharBottomRight:      "+",
-		CharBottomSeparator:  "+",
-		CharLeft:             "|",
-		CharLeftSeparator:    "+",
-		CharMiddleHorizontal: "-",
-		CharMiddleSeparator:  "+",
-		CharMiddleVertical:   "|",
-		CharPaddingLeft:      " ",
-		CharPaddingRight:     " ",
-		CharRight:            "|",
-		CharRightSeparator:   "+",
-		CharTopLeft:          "+",
-		CharTopRight:         "+",
-		CharTopSeparator:     "+",
-		FormatFooter:         text.FormatUpper,
-		FormatHeader:         text.FormatUpper,
-		FormatRows:           text.FormatDefault,
-		Name:                 "StyleDefault",
+		BoxBottomLeft:       "+",
+		BoxBottomRight:      "+",
+		BoxBottomSeparator:  "+",
+		BoxLeft:             "|",
+		BoxLeftSeparator:    "+",
+		BoxMiddleHorizontal: "-",
+		BoxMiddleSeparator:  "+",
+		BoxMiddleVertical:   "|",
+		BoxPaddingLeft:      " ",
+		BoxPaddingRight:     " ",
+		BoxRight:            "|",
+		BoxRightSeparator:   "+",
+		BoxTopLeft:          "+",
+		BoxTopRight:         "+",
+		BoxTopSeparator:     "+",
+		BoxUnfinishedRow:    " ~",
+		FormatFooter:        text.FormatUpper,
+		FormatHeader:        text.FormatUpper,
+		FormatRows:          text.FormatDefault,
+		Name:                "StyleDefault",
 	}
 
 	// StyleBold renders a Table like below:
@@ -69,25 +71,26 @@ var (
 	//  ┃     ┃            ┃ TOTAL     ┃  10000 ┃                             ┃
 	//  ┗━━━━━┻━━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 	StyleBold = Style{
-		CharBottomLeft:       text.BoxBottomLeftBold,
-		CharBottomRight:      text.BoxBottomRightBold,
-		CharBottomSeparator:  text.BoxBottomSeparatorBold,
-		CharLeft:             text.BoxLeftBold,
-		CharLeftSeparator:    text.BoxLeftSeparatorBold,
-		CharMiddleHorizontal: text.BoxHorizontalBold,
-		CharMiddleSeparator:  text.BoxSeparatorBold,
-		CharMiddleVertical:   text.BoxVerticalBold,
-		CharPaddingLeft:      " ",
-		CharPaddingRight:     " ",
-		CharRight:            text.BoxRightBold,
-		CharRightSeparator:   text.BoxRightSeparatorBold,
-		CharTopLeft:          text.BoxTopLeftBold,
-		CharTopRight:         text.BoxTopRightBold,
-		CharTopSeparator:     text.BoxTopSeparatorBold,
-		FormatFooter:         text.FormatUpper,
-		FormatHeader:         text.FormatUpper,
-		FormatRows:           text.FormatDefault,
-		Name:                 "StyleBold",
+		BoxBottomLeft:       text.BoxBottomLeftBold,
+		BoxBottomRight:      text.BoxBottomRightBold,
+		BoxBottomSeparator:  text.BoxBottomSeparatorBold,
+		BoxLeft:             text.BoxLeftBold,
+		BoxLeftSeparator:    text.BoxLeftSeparatorBold,
+		BoxMiddleHorizontal: text.BoxHorizontalBold,
+		BoxMiddleSeparator:  text.BoxSeparatorBold,
+		BoxMiddleVertical:   text.BoxVerticalBold,
+		BoxPaddingLeft:      " ",
+		BoxPaddingRight:     " ",
+		BoxRight:            text.BoxRightBold,
+		BoxRightSeparator:   text.BoxRightSeparatorBold,
+		BoxTopLeft:          text.BoxTopLeftBold,
+		BoxTopRight:         text.BoxTopRightBold,
+		BoxTopSeparator:     text.BoxTopSeparatorBold,
+		BoxUnfinishedRow:    " " + text.BoxUnfinishedLine,
+		FormatFooter:        text.FormatUpper,
+		FormatHeader:        text.FormatUpper,
+		FormatRows:          text.FormatDefault,
+		Name:                "StyleBold",
 	}
 
 	// StyleDouble renders a Table like below:
@@ -101,25 +104,26 @@ var (
 	//  ║     ║            ║ TOTAL     ║  10000 ║                             ║
 	//  ╚═════╩════════════╩═══════════╩════════╩═════════════════════════════╝
 	StyleDouble = Style{
-		CharBottomLeft:       text.BoxBottomLeftDouble,
-		CharBottomRight:      text.BoxBottomRightDouble,
-		CharBottomSeparator:  text.BoxBottomSeparatorDouble,
-		CharLeft:             text.BoxLeftDouble,
-		CharLeftSeparator:    text.BoxLeftSeparatorDouble,
-		CharMiddleHorizontal: text.BoxHorizontalDouble,
-		CharMiddleSeparator:  text.BoxSeparatorDouble,
-		CharMiddleVertical:   text.BoxVerticalDouble,
-		CharPaddingLeft:      " ",
-		CharPaddingRight:     " ",
-		CharRight:            text.BoxRightDouble,
-		CharRightSeparator:   text.BoxRightSeparatorDouble,
-		CharTopLeft:          text.BoxTopLeftDouble,
-		CharTopRight:         text.BoxTopRightDouble,
-		CharTopSeparator:     text.BoxTopSeparatorDouble,
-		FormatFooter:         text.FormatUpper,
-		FormatHeader:         text.FormatUpper,
-		FormatRows:           text.FormatDefault,
-		Name:                 "StyleDouble",
+		BoxBottomLeft:       text.BoxBottomLeftDouble,
+		BoxBottomRight:      text.BoxBottomRightDouble,
+		BoxBottomSeparator:  text.BoxBottomSeparatorDouble,
+		BoxLeft:             text.BoxLeftDouble,
+		BoxLeftSeparator:    text.BoxLeftSeparatorDouble,
+		BoxMiddleHorizontal: text.BoxHorizontalDouble,
+		BoxMiddleSeparator:  text.BoxSeparatorDouble,
+		BoxMiddleVertical:   text.BoxVerticalDouble,
+		BoxPaddingLeft:      " ",
+		BoxPaddingRight:     " ",
+		BoxRight:            text.BoxRightDouble,
+		BoxRightSeparator:   text.BoxRightSeparatorDouble,
+		BoxTopLeft:          text.BoxTopLeftDouble,
+		BoxTopRight:         text.BoxTopRightDouble,
+		BoxTopSeparator:     text.BoxTopSeparatorDouble,
+		BoxUnfinishedRow:    " " + text.BoxUnfinishedLine,
+		FormatFooter:        text.FormatUpper,
+		FormatHeader:        text.FormatUpper,
+		FormatRows:          text.FormatDefault,
+		Name:                "StyleDouble",
 	}
 
 	// StyleLight renders a Table like below:
@@ -133,25 +137,26 @@ var (
 	//  │     │            │ TOTAL     │  10000 │                             │
 	//  └─────┴────────────┴───────────┴────────┴─────────────────────────────┘
 	StyleLight = Style{
-		CharBottomLeft:       text.BoxBottomLeft,
-		CharBottomRight:      text.BoxBottomRight,
-		CharBottomSeparator:  text.BoxBottomSeparator,
-		CharLeft:             text.BoxLeft,
-		CharLeftSeparator:    text.BoxLeftSeparator,
-		CharMiddleHorizontal: text.BoxHorizontal,
-		CharMiddleSeparator:  text.BoxSeparator,
-		CharMiddleVertical:   text.BoxVertical,
-		CharPaddingLeft:      " ",
-		CharPaddingRight:     " ",
-		CharRight:            text.BoxRight,
-		CharRightSeparator:   text.BoxRightSeparator,
-		CharTopLeft:          text.BoxTopLeft,
-		CharTopRight:         text.BoxTopRight,
-		CharTopSeparator:     text.BoxTopSeparator,
-		FormatFooter:         text.FormatUpper,
-		FormatHeader:         text.FormatUpper,
-		FormatRows:           text.FormatDefault,
-		Name:                 "StyleLight",
+		BoxBottomLeft:       text.BoxBottomLeft,
+		BoxBottomRight:      text.BoxBottomRight,
+		BoxBottomSeparator:  text.BoxBottomSeparator,
+		BoxLeft:             text.BoxLeft,
+		BoxLeftSeparator:    text.BoxLeftSeparator,
+		BoxMiddleHorizontal: text.BoxHorizontal,
+		BoxMiddleSeparator:  text.BoxSeparator,
+		BoxMiddleVertical:   text.BoxVertical,
+		BoxPaddingLeft:      " ",
+		BoxPaddingRight:     " ",
+		BoxRight:            text.BoxRight,
+		BoxRightSeparator:   text.BoxRightSeparator,
+		BoxTopLeft:          text.BoxTopLeft,
+		BoxTopRight:         text.BoxTopRight,
+		BoxTopSeparator:     text.BoxTopSeparator,
+		BoxUnfinishedRow:    " " + text.BoxUnfinishedLine,
+		FormatFooter:        text.FormatUpper,
+		FormatHeader:        text.FormatUpper,
+		FormatRows:          text.FormatDefault,
+		Name:                "StyleLight",
 	}
 
 	// StyleRounded renders a Table like below:
@@ -165,25 +170,26 @@ var (
 	//  │     │            │ TOTAL     │  10000 │                             │
 	//  ╰─────┴────────────┴───────────┴────────┴─────────────────────────────╯
 	StyleRounded = Style{
-		CharBottomLeft:       text.BoxBottomLeftRounded,
-		CharBottomRight:      text.BoxBottomRightRounded,
-		CharBottomSeparator:  text.BoxBottomSeparator,
-		CharLeft:             text.BoxLeft,
-		CharLeftSeparator:    text.BoxLeftSeparator,
-		CharMiddleHorizontal: text.BoxHorizontal,
-		CharMiddleSeparator:  text.BoxSeparator,
-		CharMiddleVertical:   text.BoxVertical,
-		CharPaddingLeft:      " ",
-		CharPaddingRight:     " ",
-		CharRight:            text.BoxRight,
-		CharRightSeparator:   text.BoxRightSeparator,
-		CharTopLeft:          text.BoxTopLeftRounded,
-		CharTopRight:         text.BoxTopRightRounded,
-		CharTopSeparator:     text.BoxTopSeparator,
-		FormatFooter:         text.FormatUpper,
-		FormatHeader:         text.FormatUpper,
-		FormatRows:           text.FormatDefault,
-		Name:                 "StyleRounded",
+		BoxBottomLeft:       text.BoxBottomLeftRounded,
+		BoxBottomRight:      text.BoxBottomRightRounded,
+		BoxBottomSeparator:  text.BoxBottomSeparator,
+		BoxLeft:             text.BoxLeft,
+		BoxLeftSeparator:    text.BoxLeftSeparator,
+		BoxMiddleHorizontal: text.BoxHorizontal,
+		BoxMiddleSeparator:  text.BoxSeparator,
+		BoxMiddleVertical:   text.BoxVertical,
+		BoxPaddingLeft:      " ",
+		BoxPaddingRight:     " ",
+		BoxRight:            text.BoxRight,
+		BoxRightSeparator:   text.BoxRightSeparator,
+		BoxTopLeft:          text.BoxTopLeftRounded,
+		BoxTopRight:         text.BoxTopRightRounded,
+		BoxTopSeparator:     text.BoxTopSeparator,
+		BoxUnfinishedRow:    " " + text.BoxUnfinishedLine,
+		FormatFooter:        text.FormatUpper,
+		FormatHeader:        text.FormatUpper,
+		FormatRows:          text.FormatDefault,
+		Name:                "StyleRounded",
 	}
 
 	// styleTest renders a Table like below:
@@ -197,24 +203,25 @@ var (
 	//  [<   >|<          >|<TOTAL    >|< 10000>|<                           >]
 	//  \-----v------------v-----------v--------v-----------------------------/
 	styleTest = Style{
-		CharBottomLeft:       "\\",
-		CharBottomRight:      "/",
-		CharBottomSeparator:  "v",
-		CharLeft:             "[",
-		CharLeftSeparator:    "{",
-		CharMiddleHorizontal: "-",
-		CharMiddleSeparator:  "+",
-		CharMiddleVertical:   "|",
-		CharPaddingLeft:      "<",
-		CharPaddingRight:     ">",
-		CharRight:            "]",
-		CharRightSeparator:   "}",
-		CharTopLeft:          "(",
-		CharTopRight:         ")",
-		CharTopSeparator:     "^",
-		FormatFooter:         text.FormatUpper,
-		FormatHeader:         text.FormatUpper,
-		FormatRows:           text.FormatDefault,
-		Name:                 "styleTest",
+		BoxBottomLeft:       "\\",
+		BoxBottomRight:      "/",
+		BoxBottomSeparator:  "v",
+		BoxLeft:             "[",
+		BoxLeftSeparator:    "{",
+		BoxMiddleHorizontal: "-",
+		BoxMiddleSeparator:  "+",
+		BoxMiddleVertical:   "|",
+		BoxPaddingLeft:      "<",
+		BoxPaddingRight:     ">",
+		BoxRight:            "]",
+		BoxRightSeparator:   "}",
+		BoxTopLeft:          "(",
+		BoxTopRight:         ")",
+		BoxTopSeparator:     "^",
+		BoxUnfinishedRow:    " ~~~",
+		FormatFooter:        text.FormatUpper,
+		FormatHeader:        text.FormatUpper,
+		FormatRows:          text.FormatDefault,
+		Name:                "styleTest",
 	}
 )

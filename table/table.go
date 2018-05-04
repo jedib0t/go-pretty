@@ -24,6 +24,8 @@ type Row []interface{}
 type Table struct {
 	// align describes the horizontal-align for each column
 	align []text.Align
+	// allowedRowLength is the max allowed length for a row (or line of output)
+	allowedRowLength int
 	// enable automatic indexing of the rows and columns like a spreadsheet?
 	autoIndex bool
 	// autoIndexVIndexMaxLength denotes the length in chars for the last rownum
@@ -98,6 +100,13 @@ func (t *Table) Length() int {
 // SetAlign sets the horizontal-align for each column in all the rows.
 func (t *Table) SetAlign(align []text.Align) {
 	t.align = align
+}
+
+// SetAllowedRowLength sets the maximum allowed length or a row (or line of
+// output) when rendered as a table. Rows that are longer than this limit will
+// be "snipped" to the length. Length has to be a positive value to take effect.
+func (t *Table) SetAllowedRowLength(length int) {
+	t.allowedRowLength = length
 }
 
 // SetAutoIndex adds a generated header with columns such as "A", "B", "C", etc.
@@ -259,13 +268,13 @@ func (t *Table) initForRender() {
 	}
 
 	// generate a separator row and calculate maximum row length
-	t.maxRowLength = (utf8.RuneCountInString(t.style.CharMiddleSeparator) * t.numColumns) + 1
+	t.maxRowLength = (utf8.RuneCountInString(t.style.BoxMiddleSeparator) * t.numColumns) + 1
 	t.rowSeparator = make([]interface{}, t.numColumns)
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
-		maxColumnLength += utf8.RuneCountInString(t.style.CharPaddingLeft)
-		maxColumnLength += utf8.RuneCountInString(t.style.CharPaddingRight)
-		// TODO: handle case where CharMiddleHorizontal is longer than 1 rune
-		horizontalSeparatorCol := strings.Repeat(t.style.CharMiddleHorizontal, maxColumnLength)
+		maxColumnLength += utf8.RuneCountInString(t.style.BoxPaddingLeft)
+		maxColumnLength += utf8.RuneCountInString(t.style.BoxPaddingRight)
+		// TODO: handle case where BoxMiddleHorizontal is longer than 1 rune
+		horizontalSeparatorCol := strings.Repeat(t.style.BoxMiddleHorizontal, maxColumnLength)
 		t.maxRowLength += maxColumnLength
 		t.rowSeparator[colIdx] = horizontalSeparatorCol
 	}
