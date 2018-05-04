@@ -1,6 +1,17 @@
 package util
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
+
+// AsString returns the argument in a 'string' form no matter what type it is.
+func AsString(x interface{}) string {
+	if reflect.TypeOf(x).Kind() == reflect.String {
+		return x.(string)
+	}
+	return fmt.Sprint(x)
+}
 
 // IsNumber returns true if the argument is a numeric type; false otherwise.
 func IsNumber(x interface{}) bool {

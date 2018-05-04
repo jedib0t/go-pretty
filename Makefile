@@ -8,8 +8,6 @@ tools:
 	go get golang.org/x/lint/golint
 	go get github.com/fzipp/gocyclo
 	go get github.com/golang/dep/cmd/dep
-#	go get github.com/golang/mock/gomock
-#	go install github.com/golang/mock/mockgen
 
 bench:
 	go test -bench=. -benchmem
@@ -25,6 +23,9 @@ dep:
 
 lint:
 	golint $(shell go list ./...)
+
+profile:
+	./profile.sh
 
 test: lint vet cyclo
 	go test -cover $(shell go list ./...)

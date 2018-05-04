@@ -37,8 +37,8 @@ type Table struct {
 	colorsFooter []*color.Color
 	// colorsHeader contains Colorization options for the header
 	colorsHeader []*color.Color
-	// columnIsNumeric stores if a column contains numbers in all rows or not
-	columnIsNumeric []bool
+	// columnIsNonNumeric stores if a column contains non-numbers in all rows
+	columnIsNonNumeric []bool
 	// disableBorder disables drawing the border around the table
 	disableBorder bool
 	// enableSeparators enables drawing separators between each row
@@ -198,16 +198,14 @@ func (t *Table) Style() *Style {
 func (t *Table) analyzeAndStringify(row Row, isHeader bool, isFooter bool) Row {
 	// update t.numColumns if this row is the longest seen till now
 	if len(row) > t.numColumns {
-		// pad t.columnIsNumeric with extra "true" values
-		columnIsNumeric := make([]bool, len(row)-t.numColumns)
-		for idx := range columnIsNumeric {
-			columnIsNumeric[idx] = true
+		// init the slices for the first time; and pad them the rest of the time
+		if t.numColumns == 0 {
+			t.columnIsNonNumeric = make([]bool, len(row))
+			t.maxColumnLengths = make([]int, len(row))
+		} else {
+			t.columnIsNonNumeric = append(t.columnIsNonNumeric, make([]bool, len(row)-t.numColumns)...)
+			t.maxColumnLengths = append(t.maxColumnLengths, make([]int, len(row)-t.numColumns)...)
 		}
-		t.columnIsNumeric = append(t.columnIsNumeric, columnIsNumeric...)
-
-		// pad t.maxColumnLengths with extra "0" values
-		maxColumnLengths := make([]int, len(row)-t.numColumns)
-		t.maxColumnLengths = append(t.maxColumnLengths, maxColumnLengths...)
 
 		// update t.numColumns
 		t.numColumns = len(row)
@@ -221,7 +219,7 @@ func (t *Table) getAlign(colIdx int) text.Align {
 	if colIdx < len(t.align) {
 		align = t.align[colIdx]
 	}
-	if align == text.AlignDefault && t.columnIsNumeric[colIdx] {
+	if align == text.AlignDefault && !t.columnIsNonNumeric[colIdx] {
 		align = text.AlignRight
 	}
 	return align
@@ -266,9 +264,9 @@ func (t *Table) initForRender() {
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
 		maxColumnLength += utf8.RuneCountInString(t.style.CharPaddingLeft)
 		maxColumnLength += utf8.RuneCountInString(t.style.CharPaddingRight)
-		horizontalSeparatorCol := strings.Repeat(t.style.CharMiddleHorizontal, maxColumnLength)
 		// TODO: handle case where CharMiddleHorizontal is longer than 1 rune
-		t.maxRowLength += utf8.RuneCountInString(horizontalSeparatorCol)
+		horizontalSeparatorCol := strings.Repeat(t.style.CharMiddleHorizontal, maxColumnLength)
+		t.maxRowLength += maxColumnLength
 		t.rowSeparator[colIdx] = horizontalSeparatorCol
 	}
 }
@@ -287,28 +285,21 @@ func (t *Table) stringify(row Row, isHeader bool, isFooter bool) Row {
 	rowOut := make(Row, len(row))
 	for colIdx, col := range row {
 		// if the column is not a number, keep track of it
-		if !isHeader && !isFooter && t.columnIsNumeric[colIdx] && !util.IsNumber(col) {
-			t.columnIsNumeric[colIdx] = false
+		if !isHeader && !isFooter && !t.columnIsNonNumeric[colIdx] && !util.IsNumber(col) {
+			t.columnIsNonNumeric[colIdx] = true
 		}
 
-		var colStr string
-		if util.IsString(col) {
-			colStr = col.(string)
-		} else {
-			colStr = fmt.Sprint(col)
-		}
+		// convert to a string and store it in the row
+		colStr := util.AsString(col)
 		if strings.Contains(colStr, "\t") {
 			colStr = strings.Replace(colStr, "\t", "    ", -1)
 		}
 		rowOut[colIdx] = colStr
 
-		// split the string into multiple string based on newlines, and find
-		// the longest "line" in it
-		for _, colLine := range strings.Split(colStr, "\n") {
-			colLineLength := utf8.RuneCountInString(colLine)
-			if colLineLength > t.maxColumnLengths[colIdx] {
-				t.maxColumnLengths[colIdx] = colLineLength
-			}
+		// find the longest continuous line in the column string
+		colLongestLineLength := util.GetLongestLineLength(colStr)
+		if colLongestLineLength > t.maxColumnLengths[colIdx] {
+			t.maxColumnLengths[colIdx] = colLongestLineLength
 		}
 	}
 	return rowOut

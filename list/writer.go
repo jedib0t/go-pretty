@@ -1,6 +1,6 @@
 package list
 
-// Writer declares the interfaces implemented by List.
+// Writer declares the interfaces that can be used to setup and render a list.
 type Writer interface {
 	AppendItem(item interface{})
 	AppendItems(items []interface{})

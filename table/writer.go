@@ -6,7 +6,7 @@ import (
 	"github.com/jedib0t/go-pretty/text"
 )
 
-// Writer declares the interfaces implemented by Table.
+// Writer declares the interfaces that can be used to setup and render a table.
 type Writer interface {
 	AppendFooter(row Row)
 	AppendHeader(row Row)

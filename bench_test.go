@@ -12,7 +12,7 @@ var (
 	listItem1      = "Game Of Thrones"
 	listItems2     = []interface{}{"Winter", "Is", "Coming"}
 	listItems3     = []interface{}{"This", "Is", "Known"}
-	tableRowAlign  = []text.Align{text.AlignDefault, text.AlignLeft, text.AlignLeft, text.AlignRight}
+	tableRowAlign  = []text.Align{text.AlignDefault, text.AlignLeft, text.AlignCenter, text.AlignRight}
 	tableCaption   = "table-caption"
 	tableRowFooter = table.Row{"", "", "Total", 10000}
 	tableRowHeader = table.Row{"#", "First Name", "Last Name", "Salary"}
