@@ -1,4 +1,4 @@
-Output of `go run table/demo/demo.go`:
+Output of `go run cmd/demo-table/demo.go`:
 
 ```
 +-----+--------+-----------+------+-----------------------------+

@@ -36,7 +36,7 @@ Pretty-print tables into ASCII/Unicode strings.
 +-----+------------+-----------+--------+-----------------------------+
 ```
 
-A demonstration of all the capabilities can be found here: [demo](demo)
+A demonstration of all the capabilities can be found here: [../cmd/demo-table](../cmd/demo-table)
 
 Documentation: [GoDoc](https://godoc.org/github.com/jedib0t/go-pretty/table)
 
