@@ -7,6 +7,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/text"
 	"github.com/stretchr/testify/assert"
+	"unicode/utf8"
 )
 
 var (
@@ -145,6 +146,46 @@ func TestTable_SetAlign(t *testing.T) {
 +-----+--------+-----------+------+-----------------------------+`
 
 	assert.Equal(t, expectedOut, table.Render())
+}
+
+func TestTable_SetAllowedRowLength(t *testing.T) {
+	table := Table{}
+	table.AppendRows(testRows)
+	table.SetStyle(styleTest)
+
+	expectedOutWithNoRowLimit := `(-----^--------^-----------^------^-----------------------------)
+[<  1>|<Arya  >|<Stark    >|<3000>|<                           >]
+[< 20>|<Jon   >|<Snow     >|<2000>|<You know nothing, Jon Snow!>]
+[<300>|<Tyrion>|<Lannister>|<5000>|<                           >]
+\-----v--------v-----------v------v-----------------------------/`
+	assert.Zero(t, table.allowedRowLength)
+	assert.Equal(t, expectedOutWithNoRowLimit, table.Render())
+
+	table.SetAllowedRowLength(utf8.RuneCountInString(table.style.BoxUnfinishedRow))
+	assert.Equal(t, utf8.RuneCountInString(table.style.BoxUnfinishedRow), table.allowedRowLength)
+	assert.Equal(t, "", table.Render())
+
+	table.SetAllowedRowLength(5)
+	expectedOutWithRowLimit := `( ~~~
+[ ~~~
+[ ~~~
+[ ~~~
+\ ~~~`
+	assert.Equal(t, 5, table.allowedRowLength)
+	assert.Equal(t, expectedOutWithRowLimit, table.Render())
+
+	table.SetAllowedRowLength(30)
+	expectedOutWithRowLimit = `(-----^--------^---------- ~~~
+[<  1>|<Arya  >|<Stark     ~~~
+[< 20>|<Jon   >|<Snow      ~~~
+[<300>|<Tyrion>|<Lannister ~~~
+\-----v--------v---------- ~~~`
+	assert.Equal(t, 30, table.allowedRowLength)
+	assert.Equal(t, expectedOutWithRowLimit, table.Render())
+
+	table.SetAllowedRowLength(300)
+	assert.Equal(t, 300, table.allowedRowLength)
+	assert.Equal(t, expectedOutWithNoRowLimit, table.Render())
 }
 
 func TestTable_SetAutoIndex(t *testing.T) {

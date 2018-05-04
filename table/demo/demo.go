@@ -209,6 +209,37 @@ func main() {
 	//==========================================================================
 
 	//==========================================================================
+	// How about limiting the length of every Row?
+	//==========================================================================
+	t.SetAllowedRowLength(50)
+	t.SetCaption("Table with an Allowed Row Length of 50.\n")
+	fmt.Println(t.Render())
+	//+-----+------------+-----------+--------+------- ~
+	//|   # | FIRST NAME | LAST NAME | SALARY |        ~
+	//+-----+------------+-----------+--------+------- ~
+	//|   1 | Arya       | Stark     |   3000 |        ~
+	//|  20 | Jon        | Snow      |   2000 | You kn ~
+	//| 300 | Tyrion     | Lannister |   5000 |        ~
+	//+-----+------------+-----------+--------+------- ~
+	//|     |            | TOTAL     |  10000 |        ~
+	//+-----+------------+-----------+--------+------- ~
+	t.SetStyle(table.StyleDouble)
+	t.SetCaption("Table with an Allowed Row Length of 50 in 'StyleDouble'.\n")
+	fmt.Println(t.Render())
+	//╔═════╦════════════╦═══════════╦════════╦═══════ ≈
+	//║   # ║ FIRST NAME ║ LAST NAME ║ SALARY ║        ≈
+	//╠═════╬════════════╬═══════════╬════════╬═══════ ≈
+	//║   1 ║ Arya       ║ Stark     ║   3000 ║        ≈
+	//║  20 ║ Jon        ║ Snow      ║   2000 ║ You kn ≈
+	//║ 300 ║ Tyrion     ║ Lannister ║   5000 ║        ≈
+	//╠═════╬════════════╬═══════════╬════════╬═══════ ≈
+	//║     ║            ║ TOTAL     ║  10000 ║        ≈
+	//╚═════╩════════════╩═══════════╩════════╩═══════ ≈
+	//Table with an Allowed Row Length of 50 in 'StyleDouble'.
+	t.SetAllowedRowLength(0)
+	//==========================================================================
+
+	//==========================================================================
 	// ASCII is too simple for me.
 	//==========================================================================
 	t.SetStyle(table.StyleLight)
@@ -243,25 +274,26 @@ func main() {
 	// I don't like any of the ready-made styles.
 	//==========================================================================
 	funkyStyle := table.Style{
-		CharBottomLeft:       "\\",
-		CharBottomRight:      "/",
-		CharBottomSeparator:  "v",
-		CharLeft:             "[",
-		CharLeftSeparator:    "{",
-		CharMiddleHorizontal: "-",
-		CharMiddleSeparator:  "+",
-		CharMiddleVertical:   "|",
-		CharPaddingLeft:      "<",
-		CharPaddingRight:     ">",
-		CharRight:            "]",
-		CharRightSeparator:   "}",
-		CharTopLeft:          "(",
-		CharTopRight:         ")",
-		CharTopSeparator:     "^",
-		FormatFooter:         text.FormatLower,
-		FormatHeader:         text.FormatLower,
-		FormatRows:           text.FormatUpper,
-		Name:                 "funkyStyle",
+		BoxBottomLeft:       "\\",
+		BoxBottomRight:      "/",
+		BoxBottomSeparator:  "v",
+		BoxLeft:             "[",
+		BoxLeftSeparator:    "{",
+		BoxMiddleHorizontal: "-",
+		BoxMiddleSeparator:  "+",
+		BoxMiddleVertical:   "|",
+		BoxPaddingLeft:      "<",
+		BoxPaddingRight:     ">",
+		BoxRight:            "]",
+		BoxRightSeparator:   "}",
+		BoxTopLeft:          "(",
+		BoxTopRight:         ")",
+		BoxTopSeparator:     "^",
+		BoxUnfinishedRow:    " ~~~",
+		FormatFooter:        text.FormatLower,
+		FormatHeader:        text.FormatLower,
+		FormatRows:          text.FormatUpper,
+		Name:                "funkyStyle",
 	}
 	t.SetStyle(funkyStyle)
 	t.SetCaption("Table using the style 'funkyStyle'.\n")

@@ -56,17 +56,17 @@ func (t *Table) renderColumn(out *strings.Builder, rowNum int, row Row, colIdx i
 	// column with the row number on it.
 	if colIdx == 0 && t.autoIndex {
 		if rowNum < 0 {
-			numChars := t.autoIndexVIndexMaxLength + utf8.RuneCountInString(t.style.CharPaddingLeft) +
-				utf8.RuneCountInString(t.style.CharPaddingRight)
-			out.WriteString(strings.Repeat(t.style.CharMiddleHorizontal, numChars))
+			numChars := t.autoIndexVIndexMaxLength + utf8.RuneCountInString(t.style.BoxPaddingLeft) +
+				utf8.RuneCountInString(t.style.BoxPaddingRight)
+			out.WriteString(strings.Repeat(t.style.BoxMiddleHorizontal, numChars))
 		} else {
-			out.WriteString(t.style.CharPaddingLeft)
+			out.WriteString(t.style.BoxPaddingLeft)
 			rowNumStr := fmt.Sprint(rowNum)
 			if rowNum == 0 {
 				rowNumStr = strings.Repeat(" ", t.autoIndexVIndexMaxLength)
 			}
 			out.WriteString(text.AlignRight.Apply(rowNumStr, t.autoIndexVIndexMaxLength))
-			out.WriteString(t.style.CharPaddingRight)
+			out.WriteString(t.style.BoxPaddingRight)
 		}
 		t.renderColumnSeparator(out, isFirstRow, isLastRow, rowNum < 0)
 	}
@@ -85,7 +85,7 @@ func (t *Table) renderColumn(out *strings.Builder, rowNum int, row Row, colIdx i
 
 	// pad both sides of the column (when not a separator row)
 	if !isSeparatorRow {
-		colStr = t.style.CharPaddingLeft + colStr + t.style.CharPaddingRight
+		colStr = t.style.BoxPaddingLeft + colStr + t.style.BoxPaddingRight
 	}
 
 	// colorize and then render the column content if a color has been set
@@ -100,37 +100,57 @@ func (t *Table) renderColumnSeparator(out *strings.Builder, isFirstRow bool, isL
 	// type of row determines the character used (top/bottom/separator)
 	if isSeparatorRow {
 		if isFirstRow {
-			out.WriteString(t.style.CharTopSeparator)
+			out.WriteString(t.style.BoxTopSeparator)
 		} else if isLastRow {
-			out.WriteString(t.style.CharBottomSeparator)
+			out.WriteString(t.style.BoxBottomSeparator)
 		} else {
-			out.WriteString(t.style.CharMiddleSeparator)
+			out.WriteString(t.style.BoxMiddleSeparator)
 		}
 	} else {
-		out.WriteString(t.style.CharMiddleVertical)
+		out.WriteString(t.style.BoxMiddleVertical)
 	}
 }
 
 func (t *Table) renderLine(out *strings.Builder, rowNum int, row Row, colors []*color.Color, isFirstRow bool, isLastRow bool, isSeparatorRow bool, format text.Format) {
 	if len(row) > 0 {
-		// grow the strings.Builder by using the horizontal-row-separator length
-		// and by the number of columns to account for the column-separator
-		out.Grow(t.maxRowLength)
-
 		// if the output has content, it means that this call is working on line
 		// number 2 or more; separate them with a newline
 		if out.Len() > 0 {
 			out.WriteRune('\n')
 		}
 
+		// use a brand new strings.Builder if a row length limit has been set
+		var outLine *strings.Builder
+		if t.allowedRowLength > 0 {
+			outLine = &strings.Builder{}
+		} else {
+			outLine = out
+		}
+		// grow the strings.Builder to the maximum possible row length
+		outLine.Grow(t.maxRowLength)
+
 		if !t.disableBorder {
-			t.renderMarginLeft(out, isFirstRow, isLastRow, isSeparatorRow)
+			t.renderMarginLeft(outLine, isFirstRow, isLastRow, isSeparatorRow)
 		}
 		for colIdx, maxColumnLength := range t.maxColumnLengths {
-			t.renderColumn(out, rowNum, row, colIdx, maxColumnLength, colors, isFirstRow, isLastRow, isSeparatorRow, format)
+			t.renderColumn(outLine, rowNum, row, colIdx, maxColumnLength, colors, isFirstRow, isLastRow, isSeparatorRow, format)
 		}
 		if !t.disableBorder {
-			t.renderMarginRight(out, isFirstRow, isLastRow, isSeparatorRow)
+			t.renderMarginRight(outLine, isFirstRow, isLastRow, isSeparatorRow)
+		}
+
+		if outLine != out {
+			outLineStr := outLine.String()
+			if utf8.RuneCountInString(outLineStr) >= t.allowedRowLength {
+				finalCharIdx := t.allowedRowLength - utf8.RuneCountInString(t.style.BoxUnfinishedRow)
+				if finalCharIdx > 0 {
+					outLineStr = string([]rune(outLineStr)[0:finalCharIdx])
+					out.WriteString(outLineStr)
+					out.WriteString(t.style.BoxUnfinishedRow)
+				}
+			} else {
+				out.WriteString(outLineStr)
+			}
 		}
 	}
 }
@@ -138,26 +158,26 @@ func (t *Table) renderLine(out *strings.Builder, rowNum int, row Row, colors []*
 func (t *Table) renderMarginLeft(out *strings.Builder, isFirstRow bool, isLastRow bool, isSeparatorRow bool) {
 	// type of row determines the character used (top/bottom/separator/etc.)
 	if isFirstRow {
-		out.WriteString(t.style.CharTopLeft)
+		out.WriteString(t.style.BoxTopLeft)
 	} else if isLastRow {
-		out.WriteString(t.style.CharBottomLeft)
+		out.WriteString(t.style.BoxBottomLeft)
 	} else if isSeparatorRow {
-		out.WriteString(t.style.CharLeftSeparator)
+		out.WriteString(t.style.BoxLeftSeparator)
 	} else {
-		out.WriteString(t.style.CharLeft)
+		out.WriteString(t.style.BoxLeft)
 	}
 }
 
 func (t *Table) renderMarginRight(out *strings.Builder, isFirstRow bool, isLastRow bool, isSeparatorRow bool) {
 	// type of row determines the character used (top/bottom/separator/etc.)
 	if isFirstRow {
-		out.WriteString(t.style.CharTopRight)
+		out.WriteString(t.style.BoxTopRight)
 	} else if isLastRow {
-		out.WriteString(t.style.CharBottomRight)
+		out.WriteString(t.style.BoxBottomRight)
 	} else if isSeparatorRow {
-		out.WriteString(t.style.CharRightSeparator)
+		out.WriteString(t.style.BoxRightSeparator)
 	} else {
-		out.WriteString(t.style.CharRight)
+		out.WriteString(t.style.BoxRight)
 	}
 }
 
