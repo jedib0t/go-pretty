@@ -66,6 +66,22 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
 
 A demonstration of all the capabilities can be found here: [cmd/demo-list](cmd/demo-list)
 
+## Text
+
+The following features are all used by the other packages in this project.
+Specifically, `table` and `list` use these extensively:
+
+   - Align text horizontally
+     - [text/align.go](text/align.go)
+   - Align text vertically
+     - [text/valign.go](text/valign.go)
+   - Colorize text using a simpler interface to the awesome package [github.com/fatih/color](github.com/fatih.color)
+     - [text/color.go](text/color.go)
+   - Format text (convert case for now)
+     - [text/format.go](text/format.go)
+
+The unit-tests for each of the above show how these are to be used.
+
 ## Benchmarks
 
 Partial output of `make bench`:
