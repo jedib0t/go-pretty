@@ -1,13 +1,11 @@
 # go-pretty
 
 [![Build Status](https://travis-ci.org/jedib0t/go-pretty.svg?branch=master)](https://travis-ci.org/jedib0t/go-pretty)
+<!-- [![Coverage Status](https://coveralls.io/repos/github/jedib0t/go-pretty/badge.svg?branch=master)](https://coveralls.io/github/jedib0t/go-pretty?branch=master) -->
 [![Go Report Card](https://goreportcard.com/badge/github.com/jedib0t/go-pretty)](https://goreportcard.com/report/github.com/jedib0t/go-pretty)
 [![GoDoc](https://godoc.org/github.com/jedib0t/go-pretty?status.svg)](https://godoc.org/github.com/jedib0t/go-pretty)
-<!-- [![Coverage Status](https://coveralls.io/repos/github/jedib0t/go-pretty/badge.svg?branch=master)](https://coveralls.io/github/jedib0t/go-pretty?branch=master) -->
 
 Utilities to prettify console output of tables, lists, text, etc.
-
-_Note_: Coveralls Integration is [broken](https://github.com/mattn/goveralls/issues/114) as of now.
 
 ## Table
 
@@ -16,7 +14,8 @@ Pretty-print tables into ASCII/Unicode strings.
   - Add Rows one-by-one or as a group
   - Add Header(s) and Footer(s)
   - Auto Index Rows (1, 2, 3 ...) and Columns (A, B, C, ...)
-  - Set output to be mirrored to an io.Writer object like os.StdOut
+  - Mirror output to an io.Writer object (like os.StdOut)
+  - Limit the length of the Rows
   - Alignment - Horizontal & Vertical
     - Auto (horizontal) Align (numeric columns are aligned Right)
     - Custom (horizontal) Align per column
@@ -45,7 +44,7 @@ Pretty-print tables into ASCII/Unicode strings.
 +-----+------------+-----------+--------+-----------------------------+
 ```
 
-A demonstration of all the capabilities can be found here: [table/demo](table/demo)
+A demonstration of all the capabilities can be found here: [cmd/demo-table](cmd/demo-table)
 
 ## List
 
@@ -64,7 +63,7 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
     - Known
 ```
 
-A demonstration of all the capabilities can be found here: [list/demo](list/demo)
+A demonstration of all the capabilities can be found here: [cmd/demo-list](cmd/demo-list)
 
 ## Benchmarks
 

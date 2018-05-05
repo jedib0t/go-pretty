@@ -8,7 +8,7 @@ for what in "list" "table"
 do
     echo "Profiling ${what} ..."
     mkdir -p profile/${what}
-    go build -o profile/${what}/${what} ${what}/profile/profile.go
+    go build -o profile/${what}/${what} cmd/profile-${what}/profile.go
     (cd profile/${what} && \
         ./${what} && \
         go tool pprof -pdf ${what} cpu.pprof > ../${what}.cpu.pdf && \

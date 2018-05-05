@@ -1,4 +1,4 @@
-.PHONY: all dep test
+.PHONY: all dep profile test
 
 default: build
 
@@ -13,7 +13,7 @@ bench:
 	go test -bench=. -benchmem
 
 build:
-	go run demo/demo.go
+	go run cmd/demo/demo.go
 
 cyclo:
 	gocyclo -over 10 ./*/*.go
@@ -25,7 +25,7 @@ lint:
 	golint -set_exit_status $(shell go list ./...)
 
 profile:
-	./profile.sh
+	sh profile.sh
 
 test: lint vet cyclo
 	go test -cover $(shell go list ./...)
