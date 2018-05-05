@@ -142,11 +142,10 @@ func (t *Table) renderLine(out *strings.Builder, rowNum int, row RowStr, colors 
 
 		if outLine != out {
 			outLineStr := outLine.String()
-			if utf8.RuneCountInString(outLineStr) >= t.allowedRowLength {
-				finalCharIdx := t.allowedRowLength - utf8.RuneCountInString(t.style.BoxUnfinishedRow)
-				if finalCharIdx > 0 {
-					outLineStr = string([]rune(outLineStr)[0:finalCharIdx])
-					out.WriteString(outLineStr)
+			if util.RuneCountWithoutEscapeSeq(outLineStr) > t.allowedRowLength {
+				trimLength := t.allowedRowLength - utf8.RuneCountInString(t.style.BoxUnfinishedRow)
+				if trimLength > 0 {
+					out.WriteString(util.TrimTextWithoutEscapeSeq(outLineStr, trimLength))
 					out.WriteString(t.style.BoxUnfinishedRow)
 				}
 			} else {

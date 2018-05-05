@@ -42,7 +42,6 @@ Documentation: [GoDoc](https://godoc.org/github.com/jedib0t/go-pretty/table)
 
 ### TODO
 
-  - Fix Width Restriction issues with Colored Tables (control characters)
   - Generic Cell Content Transformers (with some ready-made ones)
     - Base64 Decoder
     - Currency Formatter
