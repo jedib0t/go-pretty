@@ -62,12 +62,12 @@ func (t *Table) RenderHTML() string {
 	return t.render(&out)
 }
 
-func (t *Table) htmlRenderRow(out *strings.Builder, row Row, isHeader bool, isFooter bool) {
+func (t *Table) htmlRenderRow(out *strings.Builder, row RowStr, isHeader bool, isFooter bool) {
 	out.WriteString("  <tr>\n")
-	for idx := range t.maxColumnLengths {
-		colStr := ""
-		if idx < len(row) {
-			colStr = row[idx].(string)
+	for colIdx := 0; colIdx < t.numColumns; colIdx++ {
+		var colStr string
+		if colIdx < len(row) {
+			colStr = row[colIdx]
 		}
 
 		// header uses "th" instead of "td"
@@ -77,8 +77,8 @@ func (t *Table) htmlRenderRow(out *strings.Builder, row Row, isHeader bool, isFo
 		}
 
 		// determine the HTML "align"/"valign" property values
-		align := t.getAlign(idx).HTMLProperty()
-		vAlign := t.getVAlign(idx).HTMLProperty()
+		align := t.getAlign(colIdx).HTMLProperty()
+		vAlign := t.getVAlign(colIdx).HTMLProperty()
 
 		// write the row
 		out.WriteString("    <")
@@ -104,7 +104,7 @@ func (t *Table) htmlRenderRow(out *strings.Builder, row Row, isHeader bool, isFo
 	out.WriteString("  </tr>\n")
 }
 
-func (t *Table) htmlRenderRows(out *strings.Builder, rows []Row, isHeader bool, isFooter bool) {
+func (t *Table) htmlRenderRows(out *strings.Builder, rows []RowStr, isHeader bool, isFooter bool) {
 	if len(rows) > 0 {
 		// determine that tag to use based on the type of the row
 		rowsTag := "tbody"

@@ -51,7 +51,7 @@ func (t *Table) Render() string {
 	return t.render(&out)
 }
 
-func (t *Table) renderColumn(out *strings.Builder, rowNum int, row Row, colIdx int, maxColumnLength int, colors []*color.Color, isFirstRow bool, isLastRow bool, isSeparatorRow bool, format text.Format) {
+func (t *Table) renderColumn(out *strings.Builder, rowNum int, row RowStr, colIdx int, maxColumnLength int, colors []*color.Color, isFirstRow bool, isLastRow bool, isSeparatorRow bool, format text.Format) {
 	// when working on the first column, and autoIndex is true, insert a new
 	// column with the row number on it.
 	if colIdx == 0 && t.autoIndex {
@@ -79,7 +79,7 @@ func (t *Table) renderColumn(out *strings.Builder, rowNum int, row Row, colIdx i
 	// extract the text, convert-case if not-empty and align horizontally
 	var colStr string
 	if colIdx < len(row) {
-		colStr = format.Apply(row[colIdx].(string))
+		colStr = format.Apply(row[colIdx])
 	}
 	colStr = t.getAlign(colIdx).Apply(colStr, maxColumnLength)
 
@@ -111,7 +111,7 @@ func (t *Table) renderColumnSeparator(out *strings.Builder, isFirstRow bool, isL
 	}
 }
 
-func (t *Table) renderLine(out *strings.Builder, rowNum int, row Row, colors []*color.Color, isFirstRow bool, isLastRow bool, isSeparatorRow bool, format text.Format) {
+func (t *Table) renderLine(out *strings.Builder, rowNum int, row RowStr, colors []*color.Color, isFirstRow bool, isLastRow bool, isSeparatorRow bool, format text.Format) {
 	if len(row) > 0 {
 		// if the output has content, it means that this call is working on line
 		// number 2 or more; separate them with a newline
@@ -181,12 +181,12 @@ func (t *Table) renderMarginRight(out *strings.Builder, isFirstRow bool, isLastR
 	}
 }
 
-func (t *Table) renderRow(out *strings.Builder, rowNum int, row Row, colors []*color.Color, isFirstRow bool, isLastRow bool, isSeparatorRow bool, format text.Format) {
+func (t *Table) renderRow(out *strings.Builder, rowNum int, row RowStr, colors []*color.Color, isFirstRow bool, isLastRow bool, isSeparatorRow bool, format text.Format) {
 	// find the max. # of lines found in all the columns and split each column
 	// into a list of strings
 	maxColLines := 0
-	for _, col := range row {
-		numLines := strings.Count(col.(string), "\n") + 1
+	for _, colStr := range row {
+		numLines := strings.Count(colStr, "\n") + 1
 		if numLines > maxColLines {
 			maxColLines = numLines
 		}
@@ -198,12 +198,12 @@ func (t *Table) renderRow(out *strings.Builder, rowNum int, row Row, colors []*c
 		t.renderLine(out, rowNum, row, colors, isFirstRow, isLastRow, isSeparatorRow, format)
 	} else {
 		// convert one row into N # of rows based on maxColLines
-		rowLines := make([][]string, len(row))
-		for colIdx, col := range row {
-			rowLines[colIdx] = t.getVAlign(colIdx).ApplyStr(col.(string), maxColLines)
+		rowLines := make([]RowStr, len(row))
+		for colIdx, colStr := range row {
+			rowLines[colIdx] = t.getVAlign(colIdx).ApplyStr(colStr, maxColLines)
 		}
 		for colLineIdx := 0; colLineIdx < maxColLines; colLineIdx++ {
-			rowLine := make(Row, len(rowLines))
+			rowLine := make(RowStr, len(rowLines))
 			for colIdx, colLines := range rowLines {
 				rowLine[colIdx] = colLines[colLineIdx]
 			}
@@ -212,7 +212,7 @@ func (t *Table) renderRow(out *strings.Builder, rowNum int, row Row, colors []*c
 	}
 }
 
-func (t *Table) renderRows(out *strings.Builder, rows []Row, colors []*color.Color, format text.Format) {
+func (t *Table) renderRows(out *strings.Builder, rows []RowStr, colors []*color.Color, format text.Format) {
 	for idx, row := range rows {
 		t.renderRow(out, idx+1, row, colors, false, false, false, format)
 		if t.enableSeparators && idx < len(rows)-1 {
