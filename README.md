@@ -16,7 +16,7 @@ Pretty-print tables into ASCII/Unicode strings.
   - Add Header(s) and Footer(s)
   - Auto Index Rows (1, 2, 3 ...) and Columns (A, B, C, ...)
   - Mirror output to an io.Writer object (like os.StdOut)
-  - Limit the length of the Rows
+  - Limit the length of the Rows; limit the length of individual Columns
   - Alignment - Horizontal & Vertical
     - Auto (horizontal) Align (numeric columns are aligned Right)
     - Custom (horizontal) Align per column
@@ -70,9 +70,9 @@ A demonstration of all the capabilities can be found here: [cmd/demo-list](cmd/d
 
 Partial output of `make bench`:
 ```
-BenchmarkList_Render-8                   1000000              1638 ns/op             608 B/op         24 allocs/op
-BenchmarkTable_Render-8                   100000             17557 ns/op            4913 B/op        192 allocs/op
-BenchmarkTable_RenderCSV-8                300000              4740 ns/op            2320 B/op         70 allocs/op
-BenchmarkTable_RenderHTML-8               200000              6287 ns/op            3793 B/op         69 allocs/op
-BenchmarkTable_RenderMarkdown-8           300000              4927 ns/op            2256 B/op         68 allocs/op
+BenchmarkList_Render-8                   1000000              1644 ns/op             608 B/op         24 allocs/op
+BenchmarkTable_Render-8                   100000             18828 ns/op            5009 B/op        190 allocs/op
+BenchmarkTable_RenderCSV-8                300000              4066 ns/op            1920 B/op         44 allocs/op
+BenchmarkTable_RenderHTML-8               300000              5621 ns/op            3377 B/op         43 allocs/op
+BenchmarkTable_RenderMarkdown-8           300000              4221 ns/op            1856 B/op         42 allocs/op
 ```
