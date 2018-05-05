@@ -18,6 +18,7 @@ type Writer interface {
 	RenderHTML() string
 	RenderMarkdown() string
 	SetAlign(align []text.Align)
+	SetAllowedColumnLengths(lengths []int)
 	SetAllowedRowLength(length int)
 	SetAutoIndex(autoIndex bool)
 	SetCaption(format string, a ...interface{})

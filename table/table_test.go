@@ -144,7 +144,40 @@ func TestTable_SetAlign(t *testing.T) {
 |   0 | Winter | Is        |    0 |                     Coming. |
 |     |        |           |      |        The North Remembers! |
 +-----+--------+-----------+------+-----------------------------+`
+	assert.Equal(t, expectedOut, table.Render())
+}
 
+func TestTable_SetAllowedColumnLengths(t *testing.T) {
+	table := Table{}
+	table.AppendRows(testRows)
+	table.SetStyle(styleTest)
+
+	expectedOut := `(-----^--------^-----------^------^-----------------------------)
+[<  1>|<Arya  >|<Stark    >|<3000>|<                           >]
+[< 20>|<Jon   >|<Snow     >|<2000>|<You know nothing, Jon Snow!>]
+[<300>|<Tyrion>|<Lannister>|<5000>|<                           >]
+\-----v--------v-----------v------v-----------------------------/`
+	assert.Empty(t, table.allowedColumnLengths)
+	assert.Equal(t, expectedOut, table.Render())
+
+	table.SetAllowedColumnLengths([]int{0, 1, 2, 3, 7})
+	expectedOut = `(-----^---^----^-----^---------)
+[<  1>|<A>|<St>|<300>|<       >]
+[<   >|<r>|<ar>|<  0>|<       >]
+[<   >|<y>|<k >|<   >|<       >]
+[<   >|<a>|<  >|<   >|<       >]
+[< 20>|<J>|<Sn>|<200>|<You kno>]
+[<   >|<o>|<ow>|<  0>|<w nothi>]
+[<   >|<n>|<  >|<   >|<ng, Jon>]
+[<   >|< >|<  >|<   >|< Snow! >]
+[<300>|<T>|<La>|<500>|<       >]
+[<   >|<y>|<nn>|<  0>|<       >]
+[<   >|<r>|<is>|<   >|<       >]
+[<   >|<i>|<te>|<   >|<       >]
+[<   >|<o>|<r >|<   >|<       >]
+[<   >|<n>|<  >|<   >|<       >]
+\-----v---v----v-----v---------/`
+	assert.Equal(t, []int{0, 1, 2, 3, 7}, table.allowedColumnLengths)
 	assert.Equal(t, expectedOut, table.Render())
 }
 

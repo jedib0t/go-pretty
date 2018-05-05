@@ -26,7 +26,7 @@ func (t *Table) RenderMarkdown() string {
 	return t.render(&out)
 }
 
-func (t *Table) markdownRenderRow(out *strings.Builder, row Row, isSeparator bool) {
+func (t *Table) markdownRenderRow(out *strings.Builder, row RowStr, isSeparator bool) {
 	if len(row) > 0 {
 		// when working on line number 2 or more, insert a newline first
 		if out.Len() > 0 {
@@ -35,13 +35,13 @@ func (t *Table) markdownRenderRow(out *strings.Builder, row Row, isSeparator boo
 
 		// render each column up to the max. columns seen in all the rows
 		out.WriteRune('|')
-		for colIdx := range t.maxColumnLengths {
+		for colIdx := 0; colIdx < t.numColumns; colIdx++ {
 			if isSeparator {
 				out.WriteString(t.getAlign(colIdx).MarkdownProperty())
 			} else {
 				var colStr string
 				if colIdx < len(row) {
-					colStr = row[colIdx].(string)
+					colStr = row[colIdx]
 				}
 				out.WriteRune(' ')
 				if strings.Contains(colStr, "|") {
@@ -58,7 +58,7 @@ func (t *Table) markdownRenderRow(out *strings.Builder, row Row, isSeparator boo
 	}
 }
 
-func (t *Table) markdownRenderRows(out *strings.Builder, rows []Row, isHeader bool, isFooter bool) {
+func (t *Table) markdownRenderRows(out *strings.Builder, rows []RowStr, isHeader bool, isFooter bool) {
 	if len(rows) > 0 {
 		for idx, row := range rows {
 			t.markdownRenderRow(out, row, false)

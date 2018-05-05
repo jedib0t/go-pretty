@@ -31,18 +31,17 @@ func (t *Table) csvFixDoubleQuotes(str string) string {
 	return strings.Replace(str, "\"", "\\\"", -1)
 }
 
-func (t *Table) csvRenderRow(out *strings.Builder, row Row) {
+func (t *Table) csvRenderRow(out *strings.Builder, row RowStr) {
 	// when working on line number 2 or more, insert a newline first
 	if out.Len() > 0 {
 		out.WriteRune('\n')
 	}
 
 	// generate the columns to render in CSV format and append to "out"
-	for idx, col := range row {
-		if idx > 0 {
+	for colIdx, colStr := range row {
+		if colIdx > 0 {
 			out.WriteRune(',')
 		}
-		colStr := col.(string)
 		if strings.ContainsAny(colStr, "\",\n") {
 			out.WriteRune('"')
 			out.WriteString(t.csvFixCommas(t.csvFixDoubleQuotes(colStr)))
@@ -51,12 +50,12 @@ func (t *Table) csvRenderRow(out *strings.Builder, row Row) {
 			out.WriteString(colStr)
 		}
 	}
-	for idx := len(row); idx < t.numColumns; idx++ {
+	for colIdx := len(row); colIdx < t.numColumns; colIdx++ {
 		out.WriteRune(',')
 	}
 }
 
-func (t *Table) csvRenderRows(out *strings.Builder, rows []Row) {
+func (t *Table) csvRenderRows(out *strings.Builder, rows []RowStr) {
 	for _, row := range rows {
 		t.csvRenderRow(out, row)
 	}

@@ -20,10 +20,15 @@ const (
 // Row defines a single row in the Table.
 type Row []interface{}
 
+// RowStr defines a single row in the Table comprised of just string objects.
+type RowStr []string
+
 // Table helps print a 2-dimensional array in a human readable pretty-table.
 type Table struct {
 	// align describes the horizontal-align for each column
 	align []text.Align
+	// allowedColumnLengths contains the max allowed length for each column
+	allowedColumnLengths []int
 	// allowedRowLength is the max allowed length for a row (or line of output)
 	allowedRowLength int
 	// enable automatic indexing of the rows and columns like a spreadsheet?
@@ -56,14 +61,14 @@ type Table struct {
 	// outputMirror stores an io.Writer where the "Render" functions would write
 	outputMirror io.Writer
 	// rows stores the rows that make up the body
-	rows []Row
+	rows []RowStr
 	// rowsFooter stores the rows that make up the footer
-	rowsFooter []Row
+	rowsFooter []RowStr
 	// rowsHeader stores the rows that make up the header
-	rowsHeader []Row
+	rowsHeader []RowStr
 	// rowSeparator is a dummy row that contains the separator columns (dashes
 	// that make up the separator between header/body/footer
-	rowSeparator Row
+	rowSeparator RowStr
 	// style contains all the strings used to draw the table, and more
 	style *Style
 	// vAlign describes the vertical-align for each column
@@ -100,6 +105,13 @@ func (t *Table) Length() int {
 // SetAlign sets the horizontal-align for each column in all the rows.
 func (t *Table) SetAlign(align []text.Align) {
 	t.align = align
+}
+
+// SetAllowedColumnLengths sets the maximum allowed length for each column in
+// all the rows. Columns with content longer than the allowed limit will be
+// wrapped to fit the length. Length has to be a positive value to take effect.
+func (t *Table) SetAllowedColumnLengths(lengths []int) {
+	t.allowedColumnLengths = lengths
 }
 
 // SetAllowedRowLength sets the maximum allowed length or a row (or line of
@@ -204,23 +216,35 @@ func (t *Table) Style() *Style {
 	return t.style
 }
 
-func (t *Table) analyzeAndStringify(row Row, isHeader bool, isFooter bool) Row {
+func (t *Table) analyzeAndStringify(row Row, isHeader bool, isFooter bool) RowStr {
 	// update t.numColumns if this row is the longest seen till now
 	if len(row) > t.numColumns {
-		// init the slices for the first time; and pad them the rest of the time
+		// init the slice for the first time; and pad it the rest of the time
 		if t.numColumns == 0 {
 			t.columnIsNonNumeric = make([]bool, len(row))
-			t.maxColumnLengths = make([]int, len(row))
 		} else {
 			t.columnIsNonNumeric = append(t.columnIsNonNumeric, make([]bool, len(row)-t.numColumns)...)
-			t.maxColumnLengths = append(t.maxColumnLengths, make([]int, len(row)-t.numColumns)...)
 		}
-
 		// update t.numColumns
 		t.numColumns = len(row)
 	}
 
-	return t.stringify(row, isHeader, isFooter)
+	// convert each column to string and figure out if it has non-numeric data
+	rowOut := make(RowStr, len(row))
+	for colIdx, col := range row {
+		// if the column is not a number, keep track of it
+		if !isHeader && !isFooter && !t.columnIsNonNumeric[colIdx] && !util.IsNumber(col) {
+			t.columnIsNonNumeric[colIdx] = true
+		}
+
+		// convert to a string and store it in the row
+		colStr := util.AsString(col)
+		if strings.Contains(colStr, "\t") {
+			colStr = strings.Replace(colStr, "\t", "    ", -1)
+		}
+		rowOut[colIdx] = colStr
+	}
+	return rowOut
 }
 
 func (t *Table) getAlign(colIdx int) text.Align {
@@ -234,10 +258,17 @@ func (t *Table) getAlign(colIdx int) text.Align {
 	return align
 }
 
-func (t *Table) getAutoIndexColumnIDRow() Row {
-	row := make(Row, t.numColumns)
-	for idx, maxColumnLength := range t.maxColumnLengths {
-		row[idx] = text.AlignCenter.Apply(util.AutoIndexColumnID(idx), maxColumnLength)
+func (t *Table) getAllowedColumnLength(colIdx int) int {
+	if colIdx < len(t.allowedColumnLengths) {
+		return t.allowedColumnLengths[colIdx]
+	}
+	return 0
+}
+
+func (t *Table) getAutoIndexColumnIDRow() RowStr {
+	row := make(RowStr, t.numColumns)
+	for colIdx, maxColumnLength := range t.maxColumnLengths {
+		row[colIdx] = text.AlignCenter.Apply(util.AutoIndexColumnID(colIdx), maxColumnLength)
 	}
 	return row
 }
@@ -267,9 +298,39 @@ func (t *Table) initForRender() {
 		t.htmlCSSClass = DefaultHTMLCSSClass
 	}
 
+	// find the longest continuous line in the column string
+	t.initForRenderMaxColumnLength()
+
 	// generate a separator row and calculate maximum row length
+	t.initForRenderRowSeparator()
+}
+
+func (t *Table) initForRenderMaxColumnLength() {
+	var findMaxColumnLengths = func(rows []RowStr) {
+		for _, row := range rows {
+			for colIdx, colStr := range row {
+				allowedColumnLength := t.getAllowedColumnLength(colIdx)
+				if allowedColumnLength > 0 {
+					t.maxColumnLengths[colIdx] = allowedColumnLength
+				} else {
+					colLongestLineLength := util.GetLongestLineLength(colStr)
+					if colLongestLineLength > t.maxColumnLengths[colIdx] {
+						t.maxColumnLengths[colIdx] = colLongestLineLength
+					}
+				}
+			}
+		}
+	}
+
+	t.maxColumnLengths = make([]int, t.numColumns)
+	findMaxColumnLengths(t.rowsHeader)
+	findMaxColumnLengths(t.rows)
+	findMaxColumnLengths(t.rowsFooter)
+}
+
+func (t *Table) initForRenderRowSeparator() {
 	t.maxRowLength = (utf8.RuneCountInString(t.style.BoxMiddleSeparator) * t.numColumns) + 1
-	t.rowSeparator = make([]interface{}, t.numColumns)
+	t.rowSeparator = make(RowStr, t.numColumns)
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
 		maxColumnLength += utf8.RuneCountInString(t.style.BoxPaddingLeft)
 		maxColumnLength += utf8.RuneCountInString(t.style.BoxPaddingRight)
@@ -286,30 +347,4 @@ func (t *Table) render(out *strings.Builder) string {
 		t.outputMirror.Write([]byte(outStr))
 	}
 	return outStr
-}
-
-func (t *Table) stringify(row Row, isHeader bool, isFooter bool) Row {
-	// convert each column to string and figure out the longest column in all
-	// available rows
-	rowOut := make(Row, len(row))
-	for colIdx, col := range row {
-		// if the column is not a number, keep track of it
-		if !isHeader && !isFooter && !t.columnIsNonNumeric[colIdx] && !util.IsNumber(col) {
-			t.columnIsNonNumeric[colIdx] = true
-		}
-
-		// convert to a string and store it in the row
-		colStr := util.AsString(col)
-		if strings.Contains(colStr, "\t") {
-			colStr = strings.Replace(colStr, "\t", "    ", -1)
-		}
-		rowOut[colIdx] = colStr
-
-		// find the longest continuous line in the column string
-		colLongestLineLength := util.GetLongestLineLength(colStr)
-		if colLongestLineLength > t.maxColumnLengths[colIdx] {
-			t.maxColumnLengths[colIdx] = colLongestLineLength
-		}
-	}
-	return rowOut
 }
