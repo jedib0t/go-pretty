@@ -22,7 +22,23 @@ func TestInsertRuneEveryN(t *testing.T) {
 	assert.Equal(t, "Ghost", InsertRuneEveryN("Ghost", '-', 5))
 }
 
+func TestRuneCountWithoutEscapeSeq(t *testing.T) {
+	assert.Equal(t, 0, RuneCountWithoutEscapeSeq(""))
+	assert.Equal(t, 5, RuneCountWithoutEscapeSeq("Ghost"))
+	assert.Equal(t, 5, RuneCountWithoutEscapeSeq("\x1b[33mGhost\x1b[0m"))
+	assert.Equal(t, 5, RuneCountWithoutEscapeSeq("\x1b[33mGhost\x1b[0"))
+}
+
+func TestTrimTextWithoutEscapeSeq(t *testing.T) {
+	assert.Equal(t, "", TrimTextWithoutEscapeSeq("Ghost", 0))
+	assert.Equal(t, "Gho", TrimTextWithoutEscapeSeq("Ghost", 3))
+	assert.Equal(t, "Ghost", TrimTextWithoutEscapeSeq("Ghost", 6))
+	assert.Equal(t, "\x1b[33mGho\x1b[0m", TrimTextWithoutEscapeSeq("\x1b[33mGhost\x1b[0m", 3))
+	assert.Equal(t, "\x1b[33mGhost\x1b[0m", TrimTextWithoutEscapeSeq("\x1b[33mGhost\x1b[0m", 6))
+}
+
 func TestWrapText(t *testing.T) {
+	assert.Equal(t, "", WrapText("Ghost", 0))
 	assert.Equal(t, "G\nh\no\ns\nt", WrapText("Ghost", 1))
 	assert.Equal(t, "Gh\nos\nt", WrapText("Ghost", 2))
 	assert.Equal(t, "Gho\nst", WrapText("Ghost", 3))
