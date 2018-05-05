@@ -7,6 +7,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/text"
+	"github.com/jedib0t/go-pretty/util"
 )
 
 // Render renders the Table in a human-readable "pretty" format. Example:
@@ -182,27 +183,29 @@ func (t *Table) renderMarginRight(out *strings.Builder, isFirstRow bool, isLastR
 }
 
 func (t *Table) renderRow(out *strings.Builder, rowNum int, row RowStr, colors []*color.Color, isFirstRow bool, isLastRow bool, isSeparatorRow bool, format text.Format) {
-	// find the max. # of lines found in all the columns and split each column
-	// into a list of strings
-	maxColLines := 0
-	for _, colStr := range row {
-		numLines := strings.Count(colStr, "\n") + 1
-		if numLines > maxColLines {
-			maxColLines = numLines
+	// fit every column into the allowedColumnLength/maxColumnLength limit and
+	// in the process find the max. number of lines in any column in this row
+	colMaxLines := 0
+	rowWrapped := make(RowStr, len(row))
+	for colIdx, colStr := range row {
+		rowWrapped[colIdx] = util.WrapText(colStr, t.maxColumnLengths[colIdx])
+		colNumLines := strings.Count(rowWrapped[colIdx], "\n") + 1
+		if colNumLines > colMaxLines {
+			colMaxLines = colNumLines
 		}
 	}
 
 	// if there is just 1 line in all columns, add the row as such; else split
 	// each column into individual lines and render them one-by-one
-	if maxColLines == 1 {
+	if colMaxLines == 1 {
 		t.renderLine(out, rowNum, row, colors, isFirstRow, isLastRow, isSeparatorRow, format)
 	} else {
-		// convert one row into N # of rows based on maxColLines
+		// convert one row into N # of rows based on colMaxLines
 		rowLines := make([]RowStr, len(row))
-		for colIdx, colStr := range row {
-			rowLines[colIdx] = t.getVAlign(colIdx).ApplyStr(colStr, maxColLines)
+		for colIdx, colStr := range rowWrapped {
+			rowLines[colIdx] = t.getVAlign(colIdx).ApplyStr(colStr, colMaxLines)
 		}
-		for colLineIdx := 0; colLineIdx < maxColLines; colLineIdx++ {
+		for colLineIdx := 0; colLineIdx < colMaxLines; colLineIdx++ {
 			rowLine := make(RowStr, len(rowLines))
 			for colIdx, colLines := range rowLines {
 				rowLine[colIdx] = colLines[colLineIdx]

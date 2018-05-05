@@ -8,7 +8,6 @@ import (
 	"github.com/jedib0t/go-pretty/text"
 	"github.com/stretchr/testify/assert"
 	"unicode/utf8"
-	"fmt"
 )
 
 var (
@@ -164,11 +163,21 @@ func TestTable_SetAllowedColumnLengths(t *testing.T) {
 	table.SetAllowedColumnLengths([]int{0, 1, 2, 3, 7})
 	expectedOut = `(-----^---^----^-----^---------)
 [<  1>|<A>|<St>|<300>|<       >]
+[<   >|<r>|<ar>|<  0>|<       >]
+[<   >|<y>|<k >|<   >|<       >]
+[<   >|<a>|<  >|<   >|<       >]
 [< 20>|<J>|<Sn>|<200>|<You kno>]
+[<   >|<o>|<ow>|<  0>|<w nothi>]
+[<   >|<n>|<  >|<   >|<ng, Jon>]
+[<   >|< >|<  >|<   >|< Snow! >]
 [<300>|<T>|<La>|<500>|<       >]
+[<   >|<y>|<nn>|<  0>|<       >]
+[<   >|<r>|<is>|<   >|<       >]
+[<   >|<i>|<te>|<   >|<       >]
+[<   >|<o>|<r >|<   >|<       >]
+[<   >|<n>|<  >|<   >|<       >]
 \-----v---v----v-----v---------/`
 	assert.Equal(t, []int{0, 1, 2, 3, 7}, table.allowedColumnLengths)
-	fmt.Println(table.Render())
 	assert.Equal(t, expectedOut, table.Render())
 }
 

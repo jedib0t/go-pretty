@@ -19,6 +19,7 @@ const (
 
 // Row defines a single row in the Table.
 type Row []interface{}
+
 // RowStr defines a single row in the Table comprised of just string objects.
 type RowStr []string
 
@@ -305,17 +306,23 @@ func (t *Table) initForRender() {
 }
 
 func (t *Table) initForRenderMaxColumnLength() {
-	t.maxColumnLengths = make([]int, t.numColumns)
 	var findMaxColumnLengths = func(rows []RowStr) {
 		for _, row := range rows {
 			for colIdx, colStr := range row {
-				colLongestLineLength := util.GetLongestLineLength(colStr)
-				if colLongestLineLength > t.maxColumnLengths[colIdx] {
-					t.maxColumnLengths[colIdx] = colLongestLineLength
+				allowedColumnLength := t.getAllowedColumnLength(colIdx)
+				if allowedColumnLength > 0 {
+					t.maxColumnLengths[colIdx] = allowedColumnLength
+				} else {
+					colLongestLineLength := util.GetLongestLineLength(colStr)
+					if colLongestLineLength > t.maxColumnLengths[colIdx] {
+						t.maxColumnLengths[colIdx] = colLongestLineLength
+					}
 				}
 			}
 		}
 	}
+
+	t.maxColumnLengths = make([]int, t.numColumns)
 	findMaxColumnLengths(t.rowsHeader)
 	findMaxColumnLengths(t.rows)
 	findMaxColumnLengths(t.rowsFooter)
