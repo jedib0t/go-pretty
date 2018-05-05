@@ -28,7 +28,7 @@ profile:
 	sh profile.sh
 
 test: lint vet cyclo
-	go test -cover $(shell go list ./...)
+	go test -cover -coverprofile=.coverprofile $(shell go list ./...)
 
 vet:
 	go vet $(shell go list ./...)
