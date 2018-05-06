@@ -224,61 +224,61 @@ Table without Borders.
 ┗━━━━━┻━━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Table with Borders Everywhere!
 
-CSV | #,First Name,Last Name,Salary,
-CSV | 1,Arya,Stark,3000,
-CSV | 20,Jon,Snow,2000,"You know nothing\, Jon Snow!"
-CSV | 300,Tyrion,Lannister,5000,
-CSV | ,,Total,10000,
+[CSV] #,First Name,Last Name,Salary,
+[CSV] 1,Arya,Stark,3000,
+[CSV] 20,Jon,Snow,2000,"You know nothing\, Jon Snow!"
+[CSV] 300,Tyrion,Lannister,5000,
+[CSV] ,,Total,10000,
 
-HTML | <table class="go-pretty-table">
-HTML |   <thead>
-HTML |   <tr>
-HTML |     <th align="right">#</th>
-HTML |     <th>First Name</th>
-HTML |     <th>Last Name</th>
-HTML |     <th align="right">Salary</th>
-HTML |     <th>&nbsp;</th>
-HTML |   </tr>
-HTML |   </thead>
-HTML |   <tbody>
-HTML |   <tr>
-HTML |     <td align="right">1</td>
-HTML |     <td>Arya</td>
-HTML |     <td>Stark</td>
-HTML |     <td align="right">3000</td>
-HTML |     <td>&nbsp;</td>
-HTML |   </tr>
-HTML |   <tr>
-HTML |     <td align="right">20</td>
-HTML |     <td>Jon</td>
-HTML |     <td>Snow</td>
-HTML |     <td align="right">2000</td>
-HTML |     <td>You know nothing, Jon Snow!</td>
-HTML |   </tr>
-HTML |   <tr>
-HTML |     <td align="right">300</td>
-HTML |     <td>Tyrion</td>
-HTML |     <td>Lannister</td>
-HTML |     <td align="right">5000</td>
-HTML |     <td>&nbsp;</td>
-HTML |   </tr>
-HTML |   </tbody>
-HTML |   <tfoot>
-HTML |   <tr>
-HTML |     <td align="right">&nbsp;</td>
-HTML |     <td>&nbsp;</td>
-HTML |     <td>Total</td>
-HTML |     <td align="right">10000</td>
-HTML |     <td>&nbsp;</td>
-HTML |   </tr>
-HTML |   </tfoot>
-HTML | </table>
+[HTML] <table class="go-pretty-table">
+[HTML]   <thead>
+[HTML]   <tr>
+[HTML]     <th align="right">#</th>
+[HTML]     <th>First Name</th>
+[HTML]     <th>Last Name</th>
+[HTML]     <th align="right">Salary</th>
+[HTML]     <th>&nbsp;</th>
+[HTML]   </tr>
+[HTML]   </thead>
+[HTML]   <tbody>
+[HTML]   <tr>
+[HTML]     <td align="right">1</td>
+[HTML]     <td>Arya</td>
+[HTML]     <td>Stark</td>
+[HTML]     <td align="right">3000</td>
+[HTML]     <td>&nbsp;</td>
+[HTML]   </tr>
+[HTML]   <tr>
+[HTML]     <td align="right">20</td>
+[HTML]     <td>Jon</td>
+[HTML]     <td>Snow</td>
+[HTML]     <td align="right">2000</td>
+[HTML]     <td>You know nothing, Jon Snow!</td>
+[HTML]   </tr>
+[HTML]   <tr>
+[HTML]     <td align="right">300</td>
+[HTML]     <td>Tyrion</td>
+[HTML]     <td>Lannister</td>
+[HTML]     <td align="right">5000</td>
+[HTML]     <td>&nbsp;</td>
+[HTML]   </tr>
+[HTML]   </tbody>
+[HTML]   <tfoot>
+[HTML]   <tr>
+[HTML]     <td align="right">&nbsp;</td>
+[HTML]     <td>&nbsp;</td>
+[HTML]     <td>Total</td>
+[HTML]     <td align="right">10000</td>
+[HTML]     <td>&nbsp;</td>
+[HTML]   </tr>
+[HTML]   </tfoot>
+[HTML] </table>
 
-Markdown | | # | First Name | Last Name | Salary |  |
-Markdown | | ---:| --- | --- | ---:| --- |
-Markdown | | 1 | Arya | Stark | 3000 |  |
-Markdown | | 20 | Jon | Snow | 2000 | You know nothing, Jon Snow! |
-Markdown | | 300 | Tyrion | Lannister | 5000 |  |
-Markdown | |  |  | Total | 10000 |  |
+[Markdown] | # | First Name | Last Name | Salary |  |
+[Markdown] | ---:| --- | --- | ---:| --- |
+[Markdown] | 1 | Arya | Stark | 3000 |  |
+[Markdown] | 20 | Jon | Snow | 2000 | You know nothing, Jon Snow! |
+[Markdown] | 300 | Tyrion | Lannister | 5000 |  |
+[Markdown] |  |  | Total | 10000 |  |
 
 ```
