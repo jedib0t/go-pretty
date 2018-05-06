@@ -86,7 +86,7 @@ The unit-tests for each of the above show how these are to be used.
 
 Partial output of `make bench`:
 ```
-BenchmarkList_Render-8                   1000000              1644 ns/op             608 B/op         24 allocs/op
+BenchmarkList_Render-8                   1000000              1563 ns/op             568 B/op         21 allocs/op
 BenchmarkTable_Render-8                   100000             18828 ns/op            5009 B/op        190 allocs/op
 BenchmarkTable_RenderCSV-8                300000              4066 ns/op            1920 B/op         44 allocs/op
 BenchmarkTable_RenderHTML-8               300000              5621 ns/op            3377 B/op         43 allocs/op

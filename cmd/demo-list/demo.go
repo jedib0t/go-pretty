@@ -33,6 +33,8 @@ func main() {
 	l.AppendItems([]interface{}{"Winter", "Is", "Coming"})
 	l.Indent()
 	l.AppendItems([]interface{}{"This", "Is", "Known"})
+	l.Indent()
+	l.AppendItem("Dance Of Dragons")
 	fmt.Printf("A Multi-level List:\n%s\n\n", l.Render())
 	//A Multi-level List:
 	//- Game Of Thrones
@@ -74,15 +76,16 @@ func main() {
 	// I want my own Style!
 	//==========================================================================
 	funkyStyle := list.Style{
-		CharConnect:      "c",
-		CharItem:         "i",
-		CharItemBottom:   "v",
-		CharItemFirst:    "f",
-		CharItemTop:      "^",
-		CharPaddingLeft:  "<",
-		CharPaddingRight: ">",
-		Format:           text.FormatUpper,
-		Name:             "funkyStyle",
+		Name:              "funkyStyle",
+		CharConnectBottom: "c",
+		CharHorizontal:    "~",
+		CharItem:          "i",
+		CharItemBottom:    "v",
+		CharItemFirst:     "f",
+		CharItemTop:       "^",
+		CharPaddingLeft:   "<",
+		CharPaddingRight:  ">",
+		Format:            text.FormatUpper,
 	}
 	l.SetStyle(funkyStyle)
 	fmt.Printf("A List using the Style 'funkyStyle':\n%s\n\n", l.Render())

@@ -9,6 +9,7 @@ type Writer interface {
 	Render() string
 	SetStyle(style Style)
 	Style() *Style
+	UnIndent()
 }
 
 // NewWriter initializes and returns a Writer.

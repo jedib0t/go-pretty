@@ -3,8 +3,8 @@ package list
 import (
 	"fmt"
 	"io"
-	"unicode/utf8"
 	"strings"
+	"unicode/utf8"
 )
 
 // listItem represents one line in the List
@@ -41,7 +41,13 @@ func (l *List) AppendItems(items []interface{}) {
 
 // Indent indents the following items to appear right-shifted.
 func (l *List) Indent() {
-	l.level++
+	if len(l.items) == 0 {
+		// should not indent when there is no item in the current level
+	} else if l.level > l.items[len(l.items)-1].Level {
+		// already indented compared to previous item; do not indent more
+	} else {
+		l.level++
+	}
 }
 
 // Length returns the number of items to be rendered.
@@ -82,10 +88,28 @@ func (l *List) analyzeAndStringify(item interface{}) *listItem {
 	return listEntry
 }
 
+// UnIndent un-indents the following items to appear left-shifted.
+func (l *List) UnIndent() {
+	if l.level > 0 {
+		l.level--
+	}
+}
+
 func (l *List) initForRender() {
 	if l.style == nil {
 		l.style = &StyleDefault
 	}
+}
+
+func (l *List) hasMoreItemsInLevel(levelIdx int, fromItemIdx int) bool {
+	for idx := fromItemIdx + 1; idx >= 0 && idx < len(l.items); idx++ {
+		if l.items[idx].Level < levelIdx {
+			return false
+		} else if l.items[idx].Level == levelIdx {
+			return true
+		}
+	}
+	return false
 }
 
 func (l *List) render(out *strings.Builder) string {
