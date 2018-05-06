@@ -26,7 +26,7 @@ c<f> Winter
 	assert.Equal(t, expectedOut, lw.Render())
 }
 
-func TestList_RenderWithoutStyle(t *testing.T) {
+func TestList_Render_WithoutStyle(t *testing.T) {
 	lw := NewWriter()
 	lw.AppendItem(testItem1)
 	lw.Indent()
@@ -43,4 +43,14 @@ func TestList_RenderWithoutStyle(t *testing.T) {
     - Known`
 
 	assert.Equal(t, expectedOut, lw.Render())
+}
+
+func TestList_Render_Test(t *testing.T) {
+	lw := NewWriter()
+	lw.AppendItem("Game Of Thrones")
+	lw.Indent()
+	lw.AppendItem("A Song Of Ice And Fire")
+	lw.Indent()
+	lw.AppendItem("The Mother Of Dragons")
+	lw.Render()
 }

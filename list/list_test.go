@@ -12,6 +12,16 @@ var (
 	testItems3 = []interface{}{"This", "Is", "Known"}
 )
 
+type myMockOutputMirror struct {
+	mirroredOutput string
+}
+
+func (t *myMockOutputMirror) Write(p []byte) (n int, err error) {
+	t.mirroredOutput = string(p)
+	return len(p), nil
+}
+
+
 func TestNewWriter(t *testing.T) {
 	lw := NewWriter()
 	assert.Nil(t, lw.Style())
@@ -47,6 +57,20 @@ func TestList_Indent(t *testing.T) {
 
 	list.Indent()
 	assert.Equal(t, 2, list.level)
+}
+
+func TestTable_SetOutputMirror(t *testing.T) {
+	list := List{}
+	list.AppendItem(testItem1)
+	expectedOut := "- Game Of Thrones"
+	assert.Equal(t, nil, list.outputMirror)
+	assert.Equal(t, expectedOut, list.Render())
+
+	mockOutputMirror := &myMockOutputMirror{}
+	list.SetOutputMirror(mockOutputMirror)
+	assert.Equal(t, mockOutputMirror, list.outputMirror)
+	assert.Equal(t, expectedOut, list.Render())
+	assert.Equal(t, expectedOut, mockOutputMirror.mirroredOutput)
 }
 
 func TestList_SetStyle(t *testing.T) {

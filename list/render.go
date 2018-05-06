@@ -11,9 +11,9 @@ import "strings"
 //      ├─ Is
 //      └─ Known
 func (l *List) Render() string {
-	l.init()
+	l.initForRender()
 
-	// init a new strings.Builder to build the output efficiently and grow it by
+	// initForRender a new strings.Builder to build the output efficiently and grow it by
 	// the pre-calculated "approxSize"
 	var out strings.Builder
 	out.Grow(l.approxSize)
@@ -54,5 +54,5 @@ func (l *List) Render() string {
 		out.WriteString(l.style.Format.Apply(item.Text))
 	}
 
-	return out.String()
+	return l.render(&out)
 }

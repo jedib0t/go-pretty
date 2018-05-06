@@ -87,13 +87,17 @@ func main() {
 	l.SetStyle(funkyStyle)
 	fmt.Printf("A List using the Style 'funkyStyle':\n%s\n\n", l.Render())
 	//A List using the Style 'funkyStyle':
-	//^> 1
-	//i> TWO
-	//i> 3.14159265359
-	//c<f> GAME
-	//  i> OF
-	//  i> THRONES
-	//  c<f> SEASON
-	//    v> 7
+	//^> GAME OF THRONES
+	//c<f> WINTER
+	//  i> IS
+	//  i> COMING
+	//  c<f> THIS
+	//    i> IS
+	//    v> KNOWN
+	//==========================================================================
+
+	//==========================================================================
+	// Show me more!
+	//==========================================================================
 	//==========================================================================
 }
