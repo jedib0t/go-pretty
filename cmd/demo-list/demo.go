@@ -2,10 +2,20 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/jedib0t/go-pretty/list"
 	"github.com/jedib0t/go-pretty/text"
 )
+
+func demoPrint(title string, content string, prefix string) {
+	fmt.Printf("%s:\n", title)
+	fmt.Println(strings.Repeat("-", len(title)+1))
+	for _, line := range strings.Split(content, "\n") {
+		fmt.Printf("%s%s\n", prefix, line)
+	}
+	fmt.Println()
+}
 
 func main() {
 	//==========================================================================
@@ -21,35 +31,48 @@ func main() {
 	// A List needs Items.
 	//==========================================================================
 	l.AppendItem("Game Of Thrones")
-	fmt.Printf("A Simple List:\n%s\n\n", l.Render())
+	l.AppendItem("The Dark Tower")
+	demoPrint("A Simple List", l.Render(), "")
 	//A Simple List:
-	//- Game Of Thrones
+	//--------------
+	//* Game Of Thrones
+	//* The Dark Tower
+	l.Reset()
 	//==========================================================================
 
 	//==========================================================================
 	// I wanna Level Down!
 	//==========================================================================
+	l.AppendItem("Game Of Thrones")
 	l.Indent()
 	l.AppendItems([]interface{}{"Winter", "Is", "Coming"})
 	l.Indent()
 	l.AppendItems([]interface{}{"This", "Is", "Known"})
-	fmt.Printf("A Multi-level List:\n%s\n\n", l.Render())
+	l.UnIndent()
+	l.AppendItem("The Dark Tower")
+	l.Indent()
+	l.AppendItem("The Gunslinger")
+	demoPrint("A Multi-level List", l.Render(), "")
 	//A Multi-level List:
-	//- Game Of Thrones
-	//--- Winter
-	//  - Is
-	//  - Coming
-	//  --- This
-	//    - Is
-	//    - Known
+	//-------------------
+	//* Game Of Thrones
+	//  * Winter
+	//  * Is
+	//  * Coming
+	//    * This
+	//    * Is
+	//    * Known
+	//  * The Dark Tower
+	//    * The Gunslinger
 	//==========================================================================
 
 	//==========================================================================
 	// I am Fancy!
 	//==========================================================================
 	l.SetStyle(list.StyleBulletCircle)
-	fmt.Printf("A List using the Style 'StyleBulletCircle':\n%s\n\n", l.Render())
+	demoPrint("A List using the Style 'StyleBulletCircle'", l.Render(), "")
 	//A List using the Style 'StyleBulletCircle':
+	//-------------------------------------------
 	//● Game Of Thrones
 	//  ● Winter
 	//  ● Is
@@ -57,43 +80,67 @@ func main() {
 	//    ● This
 	//    ● Is
 	//    ● Known
-	//
+	//  ● The Dark Tower
+	//    ● The Gunslinger
 	l.SetStyle(list.StyleConnectedRounded)
-	fmt.Printf("A List using the Style 'StyleConnectedRounded':\n%s\n\n", l.Render())
+	demoPrint("A List using the Style 'StyleConnectedRounded'", l.Render(), "")
 	//A List using the Style 'StyleConnectedRounded':
+	//-----------------------------------------------
 	//╭─ Game Of Thrones
 	//╰─┬─ Winter
 	//  ├─ Is
 	//  ├─ Coming
-	//  ╰─┬─ This
-	//    ├─ Is
-	//    ╰─ Known
+	//  ├─┬─ This
+	//  │ ├─ Is
+	//  │ ╰─ Known
+	//  ├─ The Dark Tower
+	//  ╰─── The Gunslinger
 	//==========================================================================
 
 	//==========================================================================
 	// I want my own Style!
 	//==========================================================================
 	funkyStyle := list.Style{
-		CharConnect:      "c",
-		CharItem:         "i",
-		CharItemBottom:   "v",
-		CharItemFirst:    "f",
-		CharItemTop:      "^",
-		CharPaddingLeft:  "<",
-		CharPaddingRight: ">",
-		Format:           text.FormatUpper,
-		Name:             "funkyStyle",
+		Name:              "funkyStyle",
+		CharConnectBottom: "c",
+		CharHorizontal:    "~",
+		CharItem:          "i",
+		CharItemBottom:    "v",
+		CharItemFirst:     "f",
+		CharItemTop:       "^",
+		CharPaddingLeft:   "<",
+		CharPaddingRight:  ">",
+		Format:            text.FormatUpper,
 	}
 	l.SetStyle(funkyStyle)
-	fmt.Printf("A List using the Style 'funkyStyle':\n%s\n\n", l.Render())
+	demoPrint("A List using the Style 'funkyStyle'", l.Render(), "")
 	//A List using the Style 'funkyStyle':
-	//^> 1
-	//i> TWO
-	//i> 3.14159265359
-	//c<f> GAME
-	//  i> OF
-	//  i> THRONES
-	//  c<f> SEASON
-	//    v> 7
+	//------------------------------------
+	//^> GAME OF THRONES
+	//c~f> WINTER
+	//  i> IS
+	//  i> COMING
+	//  ~f> THIS
+	//   i> IS
+	//   v> KNOWN
+	//  i> THE DARK TOWER
+	//  c~> THE GUNSLINGER
+	//==========================================================================
+
+	//==========================================================================
+	// Can I get the list in Markdown format?
+	//==========================================================================
+	demoPrint("A List in Markdown format", l.RenderMarkdown(), "[Markdown] ")
+	//A List in Markdown format:
+	//--------------------------
+	//[Markdown]   * Game Of Thrones
+	//[Markdown]     * Winter
+	//[Markdown]     * Is
+	//[Markdown]     * Coming
+	//[Markdown]       * This
+	//[Markdown]       * Is
+	//[Markdown]       * Known
+	//[Markdown]     * The Dark Tower
+	//[Markdown]       * The Gunslinger
 	//==========================================================================
 }

@@ -1,5 +1,7 @@
 package list
 
+import "io"
+
 // Writer declares the interfaces that can be used to setup and render a list.
 type Writer interface {
 	AppendItem(item interface{})
@@ -7,8 +9,12 @@ type Writer interface {
 	Indent()
 	Length() int
 	Render() string
+	RenderMarkdown() string
+	Reset()
+	SetOutputMirror(mirror io.Writer)
 	SetStyle(style Style)
 	Style() *Style
+	UnIndent()
 }
 
 // NewWriter initializes and returns a Writer.
