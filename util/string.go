@@ -133,13 +133,9 @@ func WrapText(s string, n int) string {
 	out.Grow(sLen + (sLen / n))
 	sLineIdx := 0
 	for sIdx, sChr := range s {
-		if sLineIdx == n {
-			if sIdx == (sLen-1) && sChr == '\n' {
-				// last letter and it is a newline; don't add one more
-			} else {
-				out.WriteRune('\n')
-				sLineIdx = 0
-			}
+		if sLineIdx == n && sChr != '\n' {
+			out.WriteRune('\n')
+			sLineIdx = 0
 		}
 		out.WriteRune(sChr)
 		if sChr == '\n' {
