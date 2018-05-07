@@ -10,7 +10,8 @@ var (
 	testItem1  = "Game Of Thrones"
 	testItems2 = []interface{}{"Winter", "Is", "Coming"}
 	testItems3 = []interface{}{"This", "Is", "Known"}
-	testItem4  = "Dance Of Dragons"
+	testItem4  = "The Dark Tower"
+	testItem5  = "The Gunslinger"
 )
 
 type myMockOutputMirror struct {
@@ -66,10 +67,24 @@ func TestList_Indent(t *testing.T) {
 	assert.Equal(t, 1, list.level)
 }
 
-func TestTable_SetOutputMirror(t *testing.T) {
+func TestList_Reset(t *testing.T) {
+	list := List{}
+	list.SetStyle(StyleBulletCircle)
+	assert.NotNil(t, list.Style())
+	assert.Equal(t, "", list.Render())
+
+	list.AppendItem(testItem1)
+	assert.Equal(t, "● Game Of Thrones", list.Render())
+
+	list.Reset()
+	assert.Nil(t, list.Style())
+	assert.Equal(t, "", list.Render())
+}
+
+func TestList_SetOutputMirror(t *testing.T) {
 	list := List{}
 	list.AppendItem(testItem1)
-	expectedOut := "- Game Of Thrones"
+	expectedOut := "* Game Of Thrones"
 	assert.Equal(t, nil, list.outputMirror)
 	assert.Equal(t, expectedOut, list.Render())
 
@@ -86,10 +101,10 @@ func TestList_SetStyle(t *testing.T) {
 	list.AppendItem(testItem1)
 	list.Indent()
 	list.AppendItems(testItems2)
-	expectedOut := `- Game Of Thrones
---- Winter
-  - Is
-  - Coming`
+	expectedOut := `* Game Of Thrones
+  * Winter
+  * Is
+  * Coming`
 	assert.Equal(t, expectedOut, list.Render())
 
 	list.SetStyle(StyleConnectedLight)

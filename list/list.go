@@ -55,6 +55,14 @@ func (l *List) Length() int {
 	return len(l.items)
 }
 
+// Reset sets the List to its initial state.
+func (l *List) Reset() {
+	l.approxSize = 0
+	l.items = make([]*listItem, 0)
+	l.level = 0
+	l.style = nil
+}
+
 // SetOutputMirror sets an io.Writer for all the Render functions to "Write" to
 // in addition to returning a string.
 func (l *List) SetOutputMirror(mirror io.Writer) {

@@ -16,18 +16,21 @@ func TestList_Render(t *testing.T) {
 	lw.AppendItems(testItems2)
 	lw.Indent()
 	lw.AppendItems(testItems3)
-	lw.Indent()
+	lw.UnIndent()
 	lw.AppendItem(testItem4)
+	lw.Indent()
+	lw.AppendItem(testItem5)
 	lw.SetStyle(styleTest)
 
 	expectedOut := `^> Game Of Thrones
 c~f> Winter
   i> Is
   i> Coming
-  c~f> This
-    i> Is
-    i> Known
-    c~I> Dance Of Dragons`
+  T~f> This
+  | i> Is
+  | v> Known
+  i> The Dark Tower
+  c~I> The Gunslinger`
 
 	assert.Equal(t, expectedOut, lw.Render())
 }
@@ -67,7 +70,7 @@ func TestList_Render_Complex(t *testing.T) {
 		StyleConnectedDouble:  "╔═ The Houses of Westeros\n╚═╦═ The Starks of Winterfell\n  ╠═╦═ Eddard Stark\n  ║ ╠═╦═ Robb Stark\n  ║ ║ ╠═ Sansa Stark\n  ║ ║ ╠═ Arya Stark\n  ║ ║ ╠═ Bran Stark\n  ║ ║ ╚═ Rickon Stark\n  ║ ╠═ Lyanna Stark\n  ║ ╚═ Benjen Stark\n  ╠═ The Targaryens of Dragonstone\n  ╠═╦═ Aerys Targaryen\n  ║ ╚═╦═ Rhaegar Targaryen\n  ║   ╠═ Viserys Targaryen\n  ║   ╚═ Daenerys Targaryen\n  ╠═ The Lannisters of Lannisport\n  ╚═╦═ Tywin Lannister\n    ╚═╦═ Cersei Lannister\n      ╠═ Jaime Lannister\n      ╚═ Tyrion Lannister",
 		StyleConnectedLight:   "┌─ The Houses of Westeros\n└─┬─ The Starks of Winterfell\n  ├─┬─ Eddard Stark\n  │ ├─┬─ Robb Stark\n  │ │ ├─ Sansa Stark\n  │ │ ├─ Arya Stark\n  │ │ ├─ Bran Stark\n  │ │ └─ Rickon Stark\n  │ ├─ Lyanna Stark\n  │ └─ Benjen Stark\n  ├─ The Targaryens of Dragonstone\n  ├─┬─ Aerys Targaryen\n  │ └─┬─ Rhaegar Targaryen\n  │   ├─ Viserys Targaryen\n  │   └─ Daenerys Targaryen\n  ├─ The Lannisters of Lannisport\n  └─┬─ Tywin Lannister\n    └─┬─ Cersei Lannister\n      ├─ Jaime Lannister\n      └─ Tyrion Lannister",
 		StyleConnectedRounded: "╭─ The Houses of Westeros\n╰─┬─ The Starks of Winterfell\n  ├─┬─ Eddard Stark\n  │ ├─┬─ Robb Stark\n  │ │ ├─ Sansa Stark\n  │ │ ├─ Arya Stark\n  │ │ ├─ Bran Stark\n  │ │ ╰─ Rickon Stark\n  │ ├─ Lyanna Stark\n  │ ╰─ Benjen Stark\n  ├─ The Targaryens of Dragonstone\n  ├─┬─ Aerys Targaryen\n  │ ╰─┬─ Rhaegar Targaryen\n  │   ├─ Viserys Targaryen\n  │   ╰─ Daenerys Targaryen\n  ├─ The Lannisters of Lannisport\n  ╰─┬─ Tywin Lannister\n    ╰─┬─ Cersei Lannister\n      ├─ Jaime Lannister\n      ╰─ Tyrion Lannister",
-		StyleDefault:          "- The Houses of Westeros\n--- The Starks of Winterfell\n  --- Eddard Stark\n    --- Robb Stark\n      - Sansa Stark\n      - Arya Stark\n      - Bran Stark\n      - Rickon Stark\n    - Lyanna Stark\n    - Benjen Stark\n  - The Targaryens of Dragonstone\n  --- Aerys Targaryen\n    --- Rhaegar Targaryen\n      - Viserys Targaryen\n      - Daenerys Targaryen\n  - The Lannisters of Lannisport\n  --- Tywin Lannister\n    --- Cersei Lannister\n      - Jaime Lannister\n      - Tyrion Lannister",
+		StyleDefault:          "* The Houses of Westeros\n  * The Starks of Winterfell\n    * Eddard Stark\n      * Robb Stark\n      * Sansa Stark\n      * Arya Stark\n      * Bran Stark\n      * Rickon Stark\n    * Lyanna Stark\n    * Benjen Stark\n  * The Targaryens of Dragonstone\n    * Aerys Targaryen\n      * Rhaegar Targaryen\n      * Viserys Targaryen\n      * Daenerys Targaryen\n  * The Lannisters of Lannisport\n    * Tywin Lannister\n      * Cersei Lannister\n      * Jaime Lannister\n      * Tyrion Lannister",
 		styleTest:             "^> The Houses of Westeros\nc~f> The Starks of Winterfell\n  T~f> Eddard Stark\n  | T~f> Robb Stark\n  | | i> Sansa Stark\n  | | i> Arya Stark\n  | | i> Bran Stark\n  | | v> Rickon Stark\n  | i> Lyanna Stark\n  | v> Benjen Stark\n  i> The Targaryens of Dragonstone\n  T~f> Aerys Targaryen\n  | c~f> Rhaegar Targaryen\n  |   i> Viserys Targaryen\n  |   v> Daenerys Targaryen\n  i> The Lannisters of Lannisport\n  c~f> Tywin Lannister\n    c~f> Cersei Lannister\n      i> Jaime Lannister\n      v> Tyrion Lannister",
 	}
 	var mismatches []string

@@ -66,6 +66,10 @@ func (l *List) renderItem(out *strings.Builder, idx int, item *listItem) {
 }
 
 func (l *List) renderItemPrefix(out *strings.Builder, idx int, item *listItem) {
+	if l.style.LinePrefix != "" {
+		out.WriteString(l.style.LinePrefix)
+	}
+
 	// render spaces and connectors until the item's position
 	for levelIdx := 0; levelIdx < item.Level; levelIdx++ {
 		if l.hasMoreItemsInLevel(levelIdx, idx) {

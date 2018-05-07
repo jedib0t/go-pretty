@@ -16,32 +16,35 @@ type Style struct {
 	CharPaddingRight    string
 	CharVertical        string
 	CharVerticalConnect string
+	LinePrefix          string
 	Name                string
 }
 
 var (
 	// StyleDefault renders a List like below:
-	//  - Game Of Thrones
-	//  --- Winter
-	//    - Is
-	//    - Coming
-	//    --- This
-	//      - Is
-	//      - Known
-	//      --- Dance Of Dragons
+	//  * Game Of Thrones
+	//    * Winter
+	//    * Is
+	//    * Coming
+	//      * This
+	//      * Is
+	//      * Known
+	//    * The Dark Tower
+	//      * The Gunslinger
 	StyleDefault = Style{
 		Format:              text.FormatDefault,
-		CharConnectBottom:   "-",
-		CharHorizontal:      "-",
-		CharItem:            "-",
-		CharItemBottom:      "-",
-		CharItemFirst:       "-",
-		CharItemSingle:      "-",
-		CharItemTop:         "-",
-		CharPaddingLeft:     "-",
+		CharConnectBottom:   " ",
+		CharHorizontal:      " ",
+		CharItem:            "*",
+		CharItemBottom:      "*",
+		CharItemFirst:       "*",
+		CharItemSingle:      "*",
+		CharItemTop:         "*",
+		CharPaddingLeft:     " ",
 		CharPaddingRight:    "",
 		CharVertical:        " ",
-		CharVerticalConnect: "-",
+		CharVerticalConnect: " ",
+		LinePrefix:          "",
 		Name:                "StyleDefault",
 	}
 
@@ -53,7 +56,8 @@ var (
 	//      ● This
 	//      ● Is
 	//      ● Known
-	//        ● Dance Of Dragons
+	//    ● The Dark Tower
+	//      ● The Gunslinger
 	StyleBulletCircle = Style{
 		Format:              text.FormatDefault,
 		CharConnectBottom:   " ",
@@ -67,6 +71,7 @@ var (
 		CharPaddingRight:    "",
 		CharVertical:        " ",
 		CharVerticalConnect: " ",
+		LinePrefix:          "",
 		Name:                "StyleBulletCircle",
 	}
 
@@ -78,7 +83,8 @@ var (
 	//      ✽ This
 	//      ✽ Is
 	//      ✽ Known
-	//        ✽ Dance Of Dragons
+	//    ✽ The Dark Tower
+	//      ✽ The Gunslinger
 	StyleBulletFlower = Style{
 		Format:              text.FormatDefault,
 		CharConnectBottom:   " ",
@@ -92,6 +98,7 @@ var (
 		CharPaddingRight:    "",
 		CharVertical:        " ",
 		CharVerticalConnect: " ",
+		LinePrefix:          "",
 		Name:                "StyleBulletFlower",
 	}
 
@@ -103,7 +110,8 @@ var (
 	//      ■ This
 	//      ■ Is
 	//      ■ Known
-	//        ■ Dance Of Dragons
+	//    ■ The Dark Tower
+	//      ■ The Gunslinger
 	StyleBulletSquare = Style{
 		Format:              text.FormatDefault,
 		CharConnectBottom:   " ",
@@ -117,18 +125,20 @@ var (
 		CharPaddingRight:    "",
 		CharVertical:        " ",
 		CharVerticalConnect: " ",
+		LinePrefix:          "",
 		Name:                "StyleBulletSquare",
 	}
 
 	// StyleBulletStar renders a List like below:
-	//  ✭ Game Of Thrones
-	//    ✭ Winter
-	//    ✭ Is
-	//    ✭ Coming
-	//      ✭ This
-	//      ✭ Is
-	//      ✭ Known
-	//        ★ Dance Of Dragons
+	//  ★ Game Of Thrones
+	//    ★ Winter
+	//    ★ Is
+	//    ★ Coming
+	//      ★ This
+	//      ★ Is
+	//      ★ Known
+	//    ★ The Dark Tower
+	//      ★ The Gunslinger
 	StyleBulletStar = Style{
 		Format:              text.FormatDefault,
 		CharConnectBottom:   " ",
@@ -142,6 +152,7 @@ var (
 		CharPaddingRight:    "",
 		CharVertical:        " ",
 		CharVerticalConnect: " ",
+		LinePrefix:          "",
 		Name:                "StyleBulletStar",
 	}
 
@@ -153,7 +164,8 @@ var (
 	//      ▶ This
 	//      ▶ Is
 	//      ▶ Known
-	//        ▶ Dance Of Dragons
+	//    ▶ The Dark Tower
+	//      ▶ The Gunslinger
 	StyleBulletTriangle = Style{
 		Format:              text.FormatDefault,
 		CharConnectBottom:   " ",
@@ -167,6 +179,7 @@ var (
 		CharPaddingRight:    "",
 		CharVertical:        " ",
 		CharVerticalConnect: " ",
+		LinePrefix:          "",
 		Name:                "StyleBulletTriangle",
 	}
 
@@ -175,10 +188,11 @@ var (
 	//  ┗━┳━ Winter
 	//    ┣━ Is
 	//    ┣━ Coming
-	//    ┗━┳━ This
-	//      ┣━ Is
-	//      ┣━ Known
-	//      ┗━━━ Dance Of Dragons
+	//    ┣━┳━ This
+	//    ┃ ┣━ Is
+	//    ┃ ┗━ Known
+	//    ┣━ The Dark Tower
+	//    ┗━━━ The Gunslinger
 	StyleConnectedBold = Style{
 		Format:              text.FormatDefault,
 		CharConnectBottom:   text.BoxBottomLeftBold,
@@ -192,6 +206,7 @@ var (
 		CharPaddingRight:    text.BoxHorizontalBold,
 		CharVertical:        text.BoxVerticalBold,
 		CharVerticalConnect: text.BoxLeftSeparatorBold,
+		LinePrefix:          "",
 		Name:                "StyleConnectedBold",
 	}
 
@@ -200,10 +215,11 @@ var (
 	//  ╚═╦═ Winter
 	//    ╠═ Is
 	//    ╠═ Coming
-	//    ╚═╦═ This
-	//      ╠═ Is
-	//      ╠═ Known
-	//      ╚═══ Dance Of Dragons
+	//    ╠═╦═ This
+	//    ║ ╠═ Is
+	//    ║ ╚═ Known
+	//    ╠═ The Dark Tower
+	//    ╚═══ The Gunslinger
 	StyleConnectedDouble = Style{
 		Format:              text.FormatDefault,
 		CharConnectBottom:   text.BoxBottomLeftDouble,
@@ -217,6 +233,7 @@ var (
 		CharPaddingRight:    text.BoxHorizontalDouble,
 		CharVertical:        text.BoxVerticalDouble,
 		CharVerticalConnect: text.BoxLeftSeparatorDouble,
+		LinePrefix:          "",
 		Name:                "StyleConnectedDouble",
 	}
 
@@ -225,10 +242,11 @@ var (
 	//  └─┬─ Winter
 	//    ├─ Is
 	//    ├─ Coming
-	//    └─┬─ This
-	//      ├─ Is
-	//      ├─ Known
-	//      └─── Dance Of Dragons
+	//    ├─┬─ This
+	//    │ ├─ Is
+	//    │ └─ Known
+	//    ├─ The Dark Tower
+	//    └─── The Gunslinger
 	StyleConnectedLight = Style{
 		Format:              text.FormatDefault,
 		CharConnectBottom:   text.BoxBottomLeft,
@@ -242,6 +260,7 @@ var (
 		CharPaddingRight:    text.BoxHorizontal,
 		CharVertical:        text.BoxVertical,
 		CharVerticalConnect: text.BoxLeftSeparator,
+		LinePrefix:          "",
 		Name:                "StyleConnectedLight",
 	}
 
@@ -250,10 +269,11 @@ var (
 	//  ╰─┬─ Winter
 	//    ├─ Is
 	//    ├─ Coming
-	//    ╰─┬─ This
-	//      ├─ Is
-	//      ├─ Known
-	//      ╰─── Dance Of Dragons
+	//    ├─┬─ This
+	//    │ ├─ Is
+	//    │ ╰─ Known
+	//    ├─ The Dark Tower
+	//    ╰─── The Gunslinger
 	StyleConnectedRounded = Style{
 		Format:              text.FormatDefault,
 		CharConnectBottom:   text.BoxBottomLeftRounded,
@@ -267,18 +287,47 @@ var (
 		CharPaddingRight:    text.BoxHorizontal,
 		CharVertical:        text.BoxVertical,
 		CharVerticalConnect: text.BoxLeftSeparator,
+		LinePrefix:          "",
 		Name:                "StyleConnectedRounded",
+	}
+
+	// StyleMarkdown renders a List like below:
+	//    * Game Of Thrones
+	//      * Winter
+	//      * Is
+	//      * Coming
+	//        * This
+	//        * Is
+	//        * Known
+	//      * The Dark Tower
+	//        * The Gunslinger
+	StyleMarkdown = Style{
+		Format:              text.FormatDefault,
+		CharConnectBottom:   " ",
+		CharHorizontal:      " ",
+		CharItem:            "*",
+		CharItemBottom:      "*",
+		CharItemFirst:       "*",
+		CharItemSingle:      "*",
+		CharItemTop:         "*",
+		CharPaddingLeft:     " ",
+		CharPaddingRight:    "",
+		CharVertical:        " ",
+		CharVerticalConnect: " ",
+		LinePrefix:          "  ",
+		Name:                "StyleMarkdown",
 	}
 
 	// styleTest renders a List like below:
 	//  ^> Game Of Thrones
-	//  c<f> Winter
+	//  c~f> Winter
 	//    i> Is
 	//    i> Coming
-	//    c<f> This
-	//      i> Is
-	//      v> Known
-	//      c<~> Dance Of Dragons
+	//    T~f> This
+	//    | i> Is
+	//    | v> Known
+	//    i> The Dark Tower
+	//    c~I> The Gunslinger
 	styleTest = Style{
 		Format:              text.FormatDefault,
 		CharConnectBottom:   "c",
@@ -292,6 +341,7 @@ var (
 		CharPaddingRight:    ">",
 		CharVertical:        "|",
 		CharVerticalConnect: "T",
+		LinePrefix:          "",
 		Name:                "styleTest",
 	}
 )
