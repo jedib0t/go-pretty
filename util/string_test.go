@@ -47,4 +47,8 @@ func TestWrapText(t *testing.T) {
 	assert.Equal(t, "Ghost", WrapText("Ghost", 6))
 	assert.Equal(t, "Jo\nn\nSn\now", WrapText("Jon\nSnow", 2))
 	assert.Equal(t, "Jo\nn\nSn\now\n", WrapText("Jon\nSnow\n", 2))
+	assert.Equal(t, "Jon\nSno\nw\n", WrapText("Jon\nSnow\n", 3))
+
+	complexIn := "+---+------+-------+------+\n| 1 | Arya | Stark | 3000 |\n+---+------+-------+------+"
+	assert.Equal(t, complexIn, WrapText(complexIn, 27))
 }

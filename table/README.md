@@ -1,4 +1,5 @@
 ## Table
+[![GoDoc](https://godoc.org/github.com/jedib0t/go-pretty/table?status.svg)](https://godoc.org/github.com/jedib0t/go-pretty/table)
 
 Pretty-print tables into ASCII/Unicode strings.
 
@@ -37,8 +38,6 @@ Pretty-print tables into ASCII/Unicode strings.
 ```
 
 A demonstration of all the capabilities can be found here: [../cmd/demo-table](../cmd/demo-table)
-
-Documentation: [GoDoc](https://godoc.org/github.com/jedib0t/go-pretty/table)
 
 ### TODO
 

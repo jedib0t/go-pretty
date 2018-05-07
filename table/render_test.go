@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jedib0t/go-pretty/text"
 	"github.com/jedib0t/go-pretty/util"
 	"github.com/stretchr/testify/assert"
 )
@@ -99,4 +100,34 @@ func TestTable_Render_Colored(t *testing.T) {
 func TestTable_Render_Empty(t *testing.T) {
 	tw := NewWriter()
 	assert.Empty(t, tw.Render())
+}
+
+func TestTable_Render_TableWithinTable(t *testing.T) {
+	twInner := NewWriter()
+	twInner.AppendHeader(testHeader)
+	twInner.AppendRows(testRows)
+	twInner.AppendFooter(testFooter)
+	twInner.SetStyle(StyleLight)
+
+	twOuter := NewWriter()
+	twOuter.AppendHeader(Row{"Table within a Table"})
+	twOuter.AppendRow(Row{twInner.Render()})
+	twOuter.SetAlign([]text.Align{text.AlignCenter})
+	twOuter.SetStyle(StyleDouble)
+
+	expectedOut := `╔═════════════════════════════════════════════════════════════════════════╗
+║                           TABLE WITHIN A TABLE                          ║
+╠═════════════════════════════════════════════════════════════════════════╣
+║ ┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐ ║
+║ │   # │ FIRST NAME │ LAST NAME │ SALARY │                             │ ║
+║ ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤ ║
+║ │   1 │ Arya       │ Stark     │   3000 │                             │ ║
+║ │  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │ ║
+║ │ 300 │ Tyrion     │ Lannister │   5000 │                             │ ║
+║ ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤ ║
+║ │     │            │ TOTAL     │  10000 │                             │ ║
+║ └─────┴────────────┴───────────┴────────┴─────────────────────────────┘ ║
+╚═════════════════════════════════════════════════════════════════════════╝`
+
+	assert.Equal(t, expectedOut, twOuter.Render())
 }

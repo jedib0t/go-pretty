@@ -1,4 +1,5 @@
 ## List
+[![GoDoc](https://godoc.org/github.com/jedib0t/go-pretty/list?status.svg)](https://godoc.org/github.com/jedib0t/go-pretty/list)
 
 Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
 
@@ -24,8 +25,6 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
 ```
 
 A demonstration of all the capabilities can be found here: [../cmd/demo-list](../cmd/demo-list)
-
-Find documentation here: [GoDoc](https://godoc.org/github.com/jedib0t/go-pretty/list)
 
 ### TODO
 
