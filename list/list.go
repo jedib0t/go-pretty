@@ -124,6 +124,7 @@ func (l *List) render(out *strings.Builder) string {
 	outStr := out.String()
 	if l.outputMirror != nil {
 		l.outputMirror.Write([]byte(outStr))
+		l.outputMirror.Write([]byte("\n"))
 	}
 	return outStr
 }
