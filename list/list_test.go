@@ -19,7 +19,7 @@ type myMockOutputMirror struct {
 }
 
 func (t *myMockOutputMirror) Write(p []byte) (n int, err error) {
-	t.mirroredOutput = string(p)
+	t.mirroredOutput += string(p)
 	return len(p), nil
 }
 
@@ -92,7 +92,7 @@ func TestList_SetOutputMirror(t *testing.T) {
 	list.SetOutputMirror(mockOutputMirror)
 	assert.Equal(t, mockOutputMirror, list.outputMirror)
 	assert.Equal(t, expectedOut, list.Render())
-	assert.Equal(t, expectedOut, mockOutputMirror.mirroredOutput)
+	assert.Equal(t, expectedOut + "\n", mockOutputMirror.mirroredOutput)
 }
 
 func TestList_SetStyle(t *testing.T) {

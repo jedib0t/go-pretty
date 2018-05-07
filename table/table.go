@@ -345,6 +345,7 @@ func (t *Table) render(out *strings.Builder) string {
 	outStr := out.String()
 	if t.outputMirror != nil {
 		t.outputMirror.Write([]byte(outStr))
+		t.outputMirror.Write([]byte("\n"))
 	}
 	return outStr
 }
