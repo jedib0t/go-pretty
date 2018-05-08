@@ -19,4 +19,4 @@ before_script:
 # CI Pipeline.
 script:
   - make test bench
-  - $GOPATH/bin/goveralls -service=travis-ci -coverprofile=.coverprofile
+  - $GOPATH/bin/goveralls -service=travis-ci -coverprofile=.coverprofile -repotoken=$TOKEN_COVERALLS
