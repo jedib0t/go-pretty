@@ -20,7 +20,7 @@ func TestTable_RenderMarkdown(t *testing.T) {
 | 1 | Arya | Stark | 3000 |  |
 | 20 | Jon | Snow | 2000 | You know nothing, Jon Snow! |
 | 300 | Tyrion | Lannister | 5000 |  |
-| 0 | Valar | Morghulis | 0 | Faceless<br>Men |
+| 0 | Valar | Morghulis | 0 | Faceless<br/>Men |
 | 0 | Valar | Morghulis | 0 | Faceless\|Men |
 |  |  | Total | 10000 |  |
 _test-caption_`

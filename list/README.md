@@ -5,6 +5,7 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
 
   - Append Items one-by-one or as a group
   - Indent/UnIndent as you like
+  - Support Items with Multiple-lines
   - Mirror output to an io.Writer object (like os.StdOut)
   - Completely customizable styles
     - Many ready-to-use styles: [style.go](style.go)
@@ -21,13 +22,8 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
      ■ This
      ■ Is
      ■ Known
-   ■ The Dark Tower
-     ■ The Gunslinger
+ ■ The Dark Tower
+   ■ The Gunslinger
 ```
 
 A demonstration of all the capabilities can be found here: [../cmd/demo-list](../cmd/demo-list)
-
-### TODO
-
-  - Multi-line items
-  - Line-width restrictions

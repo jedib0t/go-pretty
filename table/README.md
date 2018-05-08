@@ -6,12 +6,12 @@ Pretty-print tables into ASCII/Unicode strings.
   - Add Rows one-by-one or as a group
   - Add Header(s) and Footer(s)
   - Auto Index Rows (1, 2, 3 ...) and Columns (A, B, C, ...)
-  - Mirror output to an io.Writer object (like os.StdOut)
   - Limit the length of the Rows; limit the length of individual Columns
   - Alignment - Horizontal & Vertical
     - Auto (horizontal) Align (numeric columns are aligned Right)
     - Custom (horizontal) Align per column
     - Custom (vertical) VAlign per column (and multi-line column support)
+  - Mirror output to an io.Writer object (like os.StdOut)
   - Completely customizable styles
     - Many ready-to-use styles: [style.go](style.go)
     - Colorize Headers/Body/Footers using [github.com/fatih/color](https://github.com/fatih/color)

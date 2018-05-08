@@ -48,7 +48,7 @@ func (t *Table) markdownRenderRow(out *strings.Builder, row RowStr, isSeparator 
 					colStr = strings.Replace(colStr, "|", "\\|", -1)
 				}
 				if strings.Contains(colStr, "\n") {
-					colStr = strings.Replace(colStr, "\n", "<br>", -1)
+					colStr = strings.Replace(colStr, "\n", "<br/>", -1)
 				}
 				out.WriteString(colStr)
 				out.WriteRune(' ')

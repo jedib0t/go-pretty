@@ -12,15 +12,15 @@ Utilities to prettify console output of tables, lists, text, etc.
 
 Pretty-print tables into ASCII/Unicode strings.
 
-  - Append Rows one-by-one or as a group
-  - Append Header(s) and Footer(s)
+  - Add Rows one-by-one or as a group
+  - Add Header(s) and Footer(s)
   - Auto Index Rows (1, 2, 3 ...) and Columns (A, B, C, ...)
-  - Mirror output to an io.Writer object (like os.StdOut)
   - Limit the length of the Rows; limit the length of individual Columns
   - Alignment - Horizontal & Vertical
     - Auto (horizontal) Align (numeric columns are aligned Right)
     - Custom (horizontal) Align per column
     - Custom (vertical) VAlign per column (and multi-line column support)
+  - Mirror output to an io.Writer object (like os.StdOut)
   - Completely customizable styles
     - Many ready-to-use styles: [table/style.go](table/style.go)
     - Colorize Headers/Body/Footers using [github.com/fatih/color](https://github.com/fatih/color)
@@ -53,6 +53,8 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
 
   - Append Items one-by-one or as a group
   - Indent/UnIndent as you like
+  - Limit the length of the Lines/Items
+  - Support Items with Multiple-lines
   - Mirror output to an io.Writer object (like os.StdOut)
   - Completely customizable styles
     - Many ready-to-use styles: [list/style.go](list/style.go)
@@ -69,8 +71,8 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
      ■ This
      ■ Is
      ■ Known
-   ■ The Dark Tower
-     ■ The Gunslinger
+ ■ The Dark Tower
+   ■ The Gunslinger
 ```
 
 A demonstration of all the capabilities can be found here: [cmd/demo-list](cmd/demo-list)
