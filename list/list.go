@@ -7,6 +7,12 @@ import (
 	"unicode/utf8"
 )
 
+const (
+	// DefaultHTMLCSSClass stores the css-class to use when none-provided via
+	// SetHTMLCSSClass(cssClass string).
+	DefaultHTMLCSSClass = "go-pretty-table"
+)
+
 // listItem represents one line in the List
 type listItem struct {
 	Level int
@@ -17,10 +23,12 @@ type listItem struct {
 type List struct {
 	// approxSize stores the approximate output length/size
 	approxSize int
-	// level stores the current indentation level
-	level int
+	// htmlCSSClass stores the HTML CSS Class to use on the <ul> node
+	htmlCSSClass string
 	// items contains the list of items to render
 	items []*listItem
+	// level stores the current indentation level
+	level int
 	// outputMirror stores an io.Writer where the "Render" functions would write
 	outputMirror io.Writer
 	// style contains all the strings used to draw the List, and more
@@ -61,6 +69,14 @@ func (l *List) Reset() {
 	l.items = make([]*listItem, 0)
 	l.level = 0
 	l.style = nil
+}
+
+// SetHTMLCSSClass sets the the HTML CSS Class to use on the <ul> node
+// when rendering the List in HTML format. Recursive lists would use a numbered
+// index suffix. For ex., if the cssClass is set as "foo"; the <ul> for level 0
+// would have the class set as "foo"; the <ul> for level 1 would have "foo-1".
+func (l *List) SetHTMLCSSClass(cssClass string) {
+	l.htmlCSSClass = cssClass
 }
 
 // SetOutputMirror sets an io.Writer for all the Render functions to "Write" to
@@ -104,8 +120,14 @@ func (l *List) UnIndent() {
 }
 
 func (l *List) initForRender() {
+	// pick a default style
 	if l.style == nil {
 		l.style = &StyleDefault
+	}
+
+	// default to a HTML CSS Class if none-defined
+	if l.htmlCSSClass == "" {
+		l.htmlCSSClass = DefaultHTMLCSSClass
 	}
 }
 
@@ -122,7 +144,7 @@ func (l *List) hasMoreItemsInLevel(levelIdx int, fromItemIdx int) bool {
 
 func (l *List) render(out *strings.Builder) string {
 	outStr := out.String()
-	if l.outputMirror != nil {
+	if l.outputMirror != nil && len(outStr) > 0 {
 		l.outputMirror.Write([]byte(outStr))
 		l.outputMirror.Write([]byte("\n"))
 	}

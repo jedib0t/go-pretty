@@ -7,11 +7,12 @@ import (
 )
 
 var (
-	testItem1  = "Game Of Thrones"
-	testItems2 = []interface{}{"Winter", "Is", "Coming"}
-	testItems3 = []interface{}{"This", "Is", "Known"}
-	testItem4  = "The Dark Tower"
-	testItem5  = "The Gunslinger"
+	testCSSClass = "test-css-class"
+	testItem1    = "Game Of Thrones"
+	testItems2   = []interface{}{"Winter", "Is", "Coming"}
+	testItems3   = []interface{}{"This", "Is", "Known"}
+	testItem4    = "The Dark Tower"
+	testItem5    = "The Gunslinger"
 )
 
 type myMockOutputMirror struct {
@@ -67,6 +68,14 @@ func TestList_Indent(t *testing.T) {
 	assert.Equal(t, 1, list.level)
 }
 
+func TestList_Length(t *testing.T) {
+	list := List{}
+	assert.Equal(t, 0, list.Length())
+
+	list.AppendItem(testItem1)
+	assert.Equal(t, 1, list.Length())
+}
+
 func TestList_Reset(t *testing.T) {
 	list := List{}
 	list.SetStyle(StyleBulletCircle)
@@ -81,6 +90,14 @@ func TestList_Reset(t *testing.T) {
 	assert.Equal(t, "", list.Render())
 }
 
+func TestList_SetHTMLCSSClass(t *testing.T) {
+	list := List{}
+	assert.Empty(t, list.htmlCSSClass)
+
+	list.SetHTMLCSSClass(testCSSClass)
+	assert.Equal(t, testCSSClass, list.htmlCSSClass)
+}
+
 func TestList_SetOutputMirror(t *testing.T) {
 	list := List{}
 	list.AppendItem(testItem1)
@@ -92,7 +109,7 @@ func TestList_SetOutputMirror(t *testing.T) {
 	list.SetOutputMirror(mockOutputMirror)
 	assert.Equal(t, mockOutputMirror, list.outputMirror)
 	assert.Equal(t, expectedOut, list.Render())
-	assert.Equal(t, expectedOut + "\n", mockOutputMirror.mirroredOutput)
+	assert.Equal(t, expectedOut+"\n", mockOutputMirror.mirroredOutput)
 }
 
 func TestList_SetStyle(t *testing.T) {

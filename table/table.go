@@ -282,7 +282,7 @@ func (t *Table) getVAlign(colIdx int) text.VAlign {
 }
 
 func (t *Table) initForRender() {
-	// pick the default style
+	// pick a default style
 	if t.style == nil {
 		t.style = &StyleDefault
 	}
@@ -343,7 +343,7 @@ func (t *Table) initForRenderRowSeparator() {
 
 func (t *Table) render(out *strings.Builder) string {
 	outStr := out.String()
-	if t.outputMirror != nil {
+	if t.outputMirror != nil && len(outStr) > 0 {
 		t.outputMirror.Write([]byte(outStr))
 		t.outputMirror.Write([]byte("\n"))
 	}

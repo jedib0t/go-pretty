@@ -58,6 +58,7 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
     - Many ready-to-use styles: [list/style.go](list/style.go)
   - Render as:
     - (ASCII/Unicode) List
+    - HTML List (with custom CSS Class)
     - Markdown List
 
 ```
@@ -94,7 +95,7 @@ The unit-tests for each of the above show how these are to be used.
 
 Partial output of `make bench`:
 ```
-BenchmarkList_Render-8                   1000000              1563 ns/op             568 B/op         21 allocs/op
+BenchmarkList_Render-8                   1000000              1607 ns/op             584 B/op         21 allocs/op
 BenchmarkTable_Render-8                   100000             18828 ns/op            5009 B/op        190 allocs/op
 BenchmarkTable_RenderCSV-8                300000              4066 ns/op            1920 B/op         44 allocs/op
 BenchmarkTable_RenderHTML-8               300000              5621 ns/op            3377 B/op         43 allocs/op

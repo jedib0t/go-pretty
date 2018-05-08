@@ -17,20 +17,21 @@ func TestList_Render(t *testing.T) {
 	lw.Indent()
 	lw.AppendItems(testItems3)
 	lw.UnIndent()
+	lw.UnIndent()
 	lw.AppendItem(testItem4)
 	lw.Indent()
 	lw.AppendItem(testItem5)
 	lw.SetStyle(styleTest)
 
 	expectedOut := `^> Game Of Thrones
-c~f> Winter
-  i> Is
-  i> Coming
-  T~f> This
-  | i> Is
-  | v> Known
-  i> The Dark Tower
-  c~I> The Gunslinger`
+T~f> Winter
+| i> Is
+| i> Coming
+| c~f> This
+|   i> Is
+|   v> Known
+i> The Dark Tower
+c~I> The Gunslinger`
 
 	assert.Equal(t, expectedOut, lw.Render())
 }

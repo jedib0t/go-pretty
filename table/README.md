@@ -21,7 +21,7 @@ Pretty-print tables into ASCII/Unicode strings.
   - Render as:
     - (ASCII/Unicode) Table
     - CSV
-    - HTML Table (with custom CSS Style)
+    - HTML Table (with custom CSS Class)
     - Markdown Table
 
 

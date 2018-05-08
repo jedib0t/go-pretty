@@ -10,6 +10,7 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
     - Many ready-to-use styles: [style.go](style.go)
   - Render as:
     - (ASCII/Unicode) List
+    - HTML List (with custom CSS Class)
     - Markdown List
 
 ```
@@ -30,4 +31,3 @@ A demonstration of all the capabilities can be found here: [../cmd/demo-list](..
 
   - Multi-line items
   - Line-width restrictions
-  - Render as HTML
