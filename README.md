@@ -86,7 +86,7 @@ Specifically, `table` and `list` use these extensively:
      - [text/align.go](text/align.go)
    - Align text vertically
      - [text/valign.go](text/valign.go)
-   - Colorize text using a simpler interface to the awesome package [github.com/fatih/color](https://github.com/fatih.color)
+   - Colorize text using a simpler interface to [github.com/fatih/color](https://github.com/fatih/color)
      - [text/color.go](text/color.go)
    - Format text (convert case for now)
      - [text/format.go](text/format.go)
