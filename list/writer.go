@@ -9,8 +9,10 @@ type Writer interface {
 	Indent()
 	Length() int
 	Render() string
+	RenderHTML() string
 	RenderMarkdown() string
 	Reset()
+	SetHTMLCSSClass(cssClass string)
 	SetOutputMirror(mirror io.Writer)
 	SetStyle(style Style)
 	Style() *Style

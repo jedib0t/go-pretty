@@ -49,6 +49,7 @@ func main() {
 	l.Indent()
 	l.AppendItems([]interface{}{"This", "Is", "Known"})
 	l.UnIndent()
+	l.UnIndent()
 	l.AppendItem("The Dark Tower")
 	l.Indent()
 	l.AppendItem("The Gunslinger")
@@ -62,8 +63,8 @@ func main() {
 	//    * This
 	//    * Is
 	//    * Known
-	//  * The Dark Tower
-	//    * The Gunslinger
+	//* The Dark Tower
+	//  * The Gunslinger
 	//==========================================================================
 
 	//==========================================================================
@@ -80,21 +81,21 @@ func main() {
 	//    ● This
 	//    ● Is
 	//    ● Known
-	//  ● The Dark Tower
-	//    ● The Gunslinger
+	//● The Dark Tower
+	//  ● The Gunslinger
 	l.SetStyle(list.StyleConnectedRounded)
 	demoPrint("A List using the Style 'StyleConnectedRounded'", l.Render(), "")
 	//A List using the Style 'StyleConnectedRounded':
 	//-----------------------------------------------
 	//╭─ Game Of Thrones
-	//╰─┬─ Winter
-	//  ├─ Is
-	//  ├─ Coming
-	//  ├─┬─ This
-	//  │ ├─ Is
-	//  │ ╰─ Known
-	//  ├─ The Dark Tower
-	//  ╰─── The Gunslinger
+	//├─┬─ Winter
+	//│ ├─ Is
+	//│ ├─ Coming
+	//│ ╰─┬─ This
+	//│   ├─ Is
+	//│   ╰─ Known
+	//├─ The Dark Tower
+	//╰─── The Gunslinger
 	//==========================================================================
 
 	//==========================================================================
@@ -117,20 +118,46 @@ func main() {
 	//A List using the Style 'funkyStyle':
 	//------------------------------------
 	//^> GAME OF THRONES
-	//c~f> WINTER
-	//  i> IS
-	//  i> COMING
-	//  ~f> THIS
+	//~f> WINTER
+	// i> IS
+	// i> COMING
+	// c~f> THIS
 	//   i> IS
 	//   v> KNOWN
-	//  i> THE DARK TOWER
-	//  c~> THE GUNSLINGER
+	//i> THE DARK TOWER
+	//c~> THE GUNSLINGER
+	//==========================================================================
+
+	//==========================================================================
+	// I want to use it in a HTML file!
+	//==========================================================================
+	demoPrint("A List in HTML format", l.RenderHTML(), "[HTML] ")
+	//A List in HTML format:
+	//----------------------
+	//[HTML] <ul class="go-pretty-table">
+	//[HTML]   <li>Game Of Thrones</li>
+	//[HTML]   <ul class="go-pretty-table-1">
+	//[HTML]     <li>Winter</li>
+	//[HTML]     <li>Is</li>
+	//[HTML]     <li>Coming</li>
+	//[HTML]     <ul class="go-pretty-table-2">
+	//[HTML]       <li>This</li>
+	//[HTML]       <li>Is</li>
+	//[HTML]       <li>Known</li>
+	//[HTML]     </ul>
+	//[HTML]   </ul>
+	//[HTML]   <li>The Dark Tower</li>
+	//[HTML]   <ul class="go-pretty-table-1">
+	//[HTML]     <li>The Gunslinger</li>
+	//[HTML]   </ul>
+	//[HTML] </ul>
 	//==========================================================================
 
 	//==========================================================================
 	// Can I get the list in Markdown format?
 	//==========================================================================
 	demoPrint("A List in Markdown format", l.RenderMarkdown(), "[Markdown] ")
+	fmt.Println()
 	//A List in Markdown format:
 	//--------------------------
 	//[Markdown]   * Game Of Thrones
@@ -140,7 +167,7 @@ func main() {
 	//[Markdown]       * This
 	//[Markdown]       * Is
 	//[Markdown]       * Known
-	//[Markdown]     * The Dark Tower
-	//[Markdown]       * The Gunslinger
+	//[Markdown]   * The Dark Tower
+	//[Markdown]     * The Gunslinger
 	//==========================================================================
 }

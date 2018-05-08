@@ -1,6 +1,9 @@
 package table
 
-import "strings"
+import (
+	"html"
+	"strings"
+)
 
 // RenderHTML renders the Table in HTML format. Example:
 //  <table class="go-pretty-table">
@@ -93,7 +96,7 @@ func (t *Table) htmlRenderRow(out *strings.Builder, row RowStr, isHeader bool, i
 		}
 		out.WriteString(">")
 		if len(colStr) > 0 {
-			out.WriteString(strings.Replace(colStr, "\n", "<br/>", -1))
+			out.WriteString(strings.Replace(html.EscapeString(colStr), "\n", "<br/>", -1))
 		} else {
 			out.WriteString("&nbsp;")
 		}
