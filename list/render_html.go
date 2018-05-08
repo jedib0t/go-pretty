@@ -50,7 +50,7 @@ func (l *List) htmlRenderRecursively(out *strings.Builder, idx int, item *listIt
 		if l.items[itemIdx].Level == item.Level {
 			out.WriteString(linePrefix)
 			out.WriteString("  <li>")
-			out.WriteString(html.EscapeString(l.items[itemIdx].Text))
+			out.WriteString(strings.Replace(html.EscapeString(l.items[itemIdx].Text), "\n", "<br/>", -1))
 			out.WriteString("</li>\n")
 			numItemsRendered++
 		} else if l.items[itemIdx].Level > item.Level { // indent

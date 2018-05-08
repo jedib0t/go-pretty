@@ -93,3 +93,89 @@ func TestList_Render_Complex(t *testing.T) {
 		fmt.Println(mismatch)
 	}
 }
+
+func TestList_Render_MultiLine(t *testing.T) {
+	lw := NewWriter()
+	lw.AppendItem(testItem1ML)
+	lw.Indent()
+	lw.AppendItems(testItems2ML)
+	lw.Indent()
+	lw.AppendItems(testItems3ML)
+	lw.UnIndent()
+	lw.UnIndent()
+	lw.AppendItem(testItem4ML)
+	lw.Indent()
+	lw.AppendItem(testItem5)
+
+	expectedOut := `* Game Of Thrones
+   // George. R. R. Martin
+  * Winter
+     Is
+     Coming
+  * Is
+  * Coming
+    * This
+       Is
+       Known
+    * Is
+    * Known
+* The Dark Tower
+   // Stephen King
+  * The Gunslinger`
+	assert.Equal(t, expectedOut, lw.Render())
+
+	expectedOutRounded := `╭─ Game Of Thrones
+│  // George. R. R. Martin
+├─┬─ Winter
+│ │  Is
+│ │  Coming
+│ ├─ Is
+│ ├─ Coming
+│ ╰─┬─ This
+│   │  Is
+│   │  Known
+│   ├─ Is
+│   ╰─ Known
+├─ The Dark Tower
+│  // Stephen King
+╰─── The Gunslinger`
+	lw.SetStyle(StyleConnectedRounded)
+	assert.Equal(t, expectedOutRounded, lw.Render())
+
+	expectedOutHTML := `<ul class="go-pretty-table">
+  <li>Game Of Thrones<br/>// George. R. R. Martin</li>
+  <ul class="go-pretty-table-1">
+    <li>Winter<br/>Is<br/>Coming</li>
+    <li>Is</li>
+    <li>Coming</li>
+    <ul class="go-pretty-table-2">
+      <li>This<br/>Is<br/>Known</li>
+      <li>Is</li>
+      <li>Known</li>
+    </ul>
+  </ul>
+  <li>The Dark Tower<br/>// Stephen King</li>
+  <ul class="go-pretty-table-1">
+    <li>The Gunslinger</li>
+  </ul>
+</ul>`
+	assert.Equal(t, expectedOutHTML, lw.RenderHTML())
+
+	expectedOutMarkdown := `  * Game Of Thrones
+     // George. R. R. Martin
+    * Winter
+       Is
+       Coming
+    * Is
+    * Coming
+      * This
+         Is
+         Known
+      * Is
+      * Known
+  * The Dark Tower
+     // Stephen King
+    * The Gunslinger`
+	assert.Equal(t, expectedOutMarkdown, lw.RenderMarkdown())
+	lw.SetStyle(StyleConnectedRounded)
+}

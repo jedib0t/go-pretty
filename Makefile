@@ -16,7 +16,7 @@ build:
 	go run cmd/demo/demo.go
 
 cyclo:
-	gocyclo -over 10 ./*/*.go
+	gocyclo -over 13 ./*/*.go
 
 dep:
 	dep ensure

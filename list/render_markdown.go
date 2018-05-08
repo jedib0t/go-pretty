@@ -11,9 +11,8 @@ package list
 //      * The Dark Tower
 //        * The Gunslinger
 func (l *List) RenderMarkdown() string {
-	// make a copy of the original style
+	// make a copy of the original style and ensure it is restored on exit
 	originalStyle := l.style
-	// ensure it gets restored on function exit
 	defer func() {
 		if originalStyle == nil {
 			l.style = nil
