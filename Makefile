@@ -5,9 +5,9 @@ default: build
 all: dep test bench
 
 tools:
-	go get golang.org/x/lint/golint
 	go get github.com/fzipp/gocyclo
 	go get github.com/golang/dep/cmd/dep
+	go get golang.org/x/lint/golint
 
 bench:
 	go test -bench=. -benchmem
