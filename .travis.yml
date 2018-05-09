@@ -12,11 +12,11 @@ notifications:
 
 # Commands to run before executing the "script" section.
 before_script:
-  - go get github.com/fzipp/gocyclo
-  - go get github.com/mattn/goveralls
-  - go get golang.org/x/lint/golint
+  - go get -u github.com/fzipp/gocyclo
+  - go get -u github.com/mattn/goveralls
+  - go get -u golang.org/x/lint/golint
 
 # CI Pipeline.
 script:
   - make test bench
-  - $GOPATH/bin/goveralls -service=travis-ci -coverprofile=.coverprofile -repotoken=$TOKEN_COVERALLS
+  - $GOPATH/bin/goveralls -service=travis-pro -coverprofile=.coverprofile
