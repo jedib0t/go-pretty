@@ -333,6 +333,7 @@ type StyleColor struct {
 }
 
 var (
+	// StyleColorDefault defines sensible ANSI color options - basically NONE.
 	StyleColorDefault = StyleColor{
 		AutoIndexColumn: nil,
 		FirstColumn:     nil,
@@ -342,6 +343,8 @@ var (
 		RowAlternate:    nil,
 	}
 
+	// StyleColorBright defines ANSI color options to render dark text on bright
+	// background.
 	StyleColorBright = StyleColor{
 		AutoIndexColumn: text.Colors{color.BgHiCyan, color.FgBlack},
 		FirstColumn:     nil,
@@ -351,6 +354,8 @@ var (
 		RowAlternate:    text.Colors{color.BgHiWhite, color.FgBlack},
 	}
 
+	// StyleColorDark defines ANSI color options to render bright text on dark
+	// background.
 	StyleColorDark = StyleColor{
 		AutoIndexColumn: text.Colors{color.FgHiCyan, color.BgBlack},
 		FirstColumn:     nil,
@@ -370,6 +375,7 @@ type StyleFormat struct {
 }
 
 var (
+	// StyleFormatDefault defines sensible formatting options.
 	StyleFormatDefault = StyleFormat{
 		FirstColumn: text.FormatDefault,
 		Footer:      text.FormatUpper,
@@ -387,6 +393,7 @@ type StyleOptions struct {
 }
 
 var (
+	// StyleOptionsDefault defines sensible global options.
 	StyleOptionsDefault = StyleOptions{
 		DrawBorder:      true,
 		SeparateColumns: true,
