@@ -92,6 +92,10 @@ func (l *List) SetStyle(style Style) {
 
 // Style returns the current style.
 func (l *List) Style() *Style {
+	if l.style == nil {
+		tempStyle := StyleDefault
+		l.style = &tempStyle
+	}
 	return l.style
 }
 
@@ -121,9 +125,7 @@ func (l *List) UnIndent() {
 
 func (l *List) initForRender() {
 	// pick a default style
-	if l.style == nil {
-		l.style = &StyleDefault
-	}
+	l.Style()
 
 	// default to a HTML CSS Class if none-defined
 	if l.htmlCSSClass == "" {

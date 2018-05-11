@@ -1,29 +1,18 @@
 package table
 
-import "github.com/jedib0t/go-pretty/text"
+import (
+	"github.com/fatih/color"
+	"github.com/jedib0t/go-pretty/text"
+)
 
-// Style declares how to render the Table.
+// Style declares how to render the Table and provides very fine-grained control
+// on how the Table gets rendered on the Console.
 type Style struct {
-	BoxBottomLeft       string
-	BoxBottomRight      string
-	BoxBottomSeparator  string
-	BoxLeft             string
-	BoxLeftSeparator    string
-	BoxMiddleHorizontal string
-	BoxMiddleSeparator  string
-	BoxMiddleVertical   string
-	BoxPaddingLeft      string
-	BoxPaddingRight     string
-	BoxRight            string
-	BoxRightSeparator   string
-	BoxTopLeft          string
-	BoxTopRight         string
-	BoxTopSeparator     string
-	BoxUnfinishedRow    string
-	FormatHeader        text.Format
-	FormatFooter        text.Format
-	FormatRows          text.Format
-	Name                string
+	Name    string
+	Box     StyleBox
+	Color   StyleColor
+	Format  StyleFormat
+	Options StyleOptions
 }
 
 var (
@@ -38,26 +27,11 @@ var (
 	//  |     |            | TOTAL     |  10000 |                             |
 	//  +-----+------------+-----------+--------+-----------------------------+
 	StyleDefault = Style{
-		BoxBottomLeft:       "+",
-		BoxBottomRight:      "+",
-		BoxBottomSeparator:  "+",
-		BoxLeft:             "|",
-		BoxLeftSeparator:    "+",
-		BoxMiddleHorizontal: "-",
-		BoxMiddleSeparator:  "+",
-		BoxMiddleVertical:   "|",
-		BoxPaddingLeft:      " ",
-		BoxPaddingRight:     " ",
-		BoxRight:            "|",
-		BoxRightSeparator:   "+",
-		BoxTopLeft:          "+",
-		BoxTopRight:         "+",
-		BoxTopSeparator:     "+",
-		BoxUnfinishedRow:    " ~",
-		FormatFooter:        text.FormatUpper,
-		FormatHeader:        text.FormatUpper,
-		FormatRows:          text.FormatDefault,
-		Name:                "StyleDefault",
+		Name:    "StyleDefault",
+		Box:     StyleBoxDefault,
+		Color:   StyleColorDefault,
+		Format:  StyleFormatDefault,
+		Options: StyleOptionsDefault,
 	}
 
 	// StyleBold renders a Table like below:
@@ -71,26 +45,11 @@ var (
 	//  ┃     ┃            ┃ TOTAL     ┃  10000 ┃                             ┃
 	//  ┗━━━━━┻━━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 	StyleBold = Style{
-		BoxBottomLeft:       text.BoxBottomLeftBold,
-		BoxBottomRight:      text.BoxBottomRightBold,
-		BoxBottomSeparator:  text.BoxBottomSeparatorBold,
-		BoxLeft:             text.BoxLeftBold,
-		BoxLeftSeparator:    text.BoxLeftSeparatorBold,
-		BoxMiddleHorizontal: text.BoxHorizontalBold,
-		BoxMiddleSeparator:  text.BoxSeparatorBold,
-		BoxMiddleVertical:   text.BoxVerticalBold,
-		BoxPaddingLeft:      " ",
-		BoxPaddingRight:     " ",
-		BoxRight:            text.BoxRightBold,
-		BoxRightSeparator:   text.BoxRightSeparatorBold,
-		BoxTopLeft:          text.BoxTopLeftBold,
-		BoxTopRight:         text.BoxTopRightBold,
-		BoxTopSeparator:     text.BoxTopSeparatorBold,
-		BoxUnfinishedRow:    " " + text.BoxUnfinishedLine,
-		FormatFooter:        text.FormatUpper,
-		FormatHeader:        text.FormatUpper,
-		FormatRows:          text.FormatDefault,
-		Name:                "StyleBold",
+		Name:    "StyleBold",
+		Box:     StyleBoxBold,
+		Color:   StyleColorDefault,
+		Format:  StyleFormatDefault,
+		Options: StyleOptionsDefault,
 	}
 
 	// StyleDouble renders a Table like below:
@@ -104,26 +63,11 @@ var (
 	//  ║     ║            ║ TOTAL     ║  10000 ║                             ║
 	//  ╚═════╩════════════╩═══════════╩════════╩═════════════════════════════╝
 	StyleDouble = Style{
-		BoxBottomLeft:       text.BoxBottomLeftDouble,
-		BoxBottomRight:      text.BoxBottomRightDouble,
-		BoxBottomSeparator:  text.BoxBottomSeparatorDouble,
-		BoxLeft:             text.BoxLeftDouble,
-		BoxLeftSeparator:    text.BoxLeftSeparatorDouble,
-		BoxMiddleHorizontal: text.BoxHorizontalDouble,
-		BoxMiddleSeparator:  text.BoxSeparatorDouble,
-		BoxMiddleVertical:   text.BoxVerticalDouble,
-		BoxPaddingLeft:      " ",
-		BoxPaddingRight:     " ",
-		BoxRight:            text.BoxRightDouble,
-		BoxRightSeparator:   text.BoxRightSeparatorDouble,
-		BoxTopLeft:          text.BoxTopLeftDouble,
-		BoxTopRight:         text.BoxTopRightDouble,
-		BoxTopSeparator:     text.BoxTopSeparatorDouble,
-		BoxUnfinishedRow:    " " + text.BoxUnfinishedLine,
-		FormatFooter:        text.FormatUpper,
-		FormatHeader:        text.FormatUpper,
-		FormatRows:          text.FormatDefault,
-		Name:                "StyleDouble",
+		Name:    "StyleDouble",
+		Box:     StyleBoxDouble,
+		Color:   StyleColorDefault,
+		Format:  StyleFormatDefault,
+		Options: StyleOptionsDefault,
 	}
 
 	// StyleLight renders a Table like below:
@@ -137,26 +81,11 @@ var (
 	//  │     │            │ TOTAL     │  10000 │                             │
 	//  └─────┴────────────┴───────────┴────────┴─────────────────────────────┘
 	StyleLight = Style{
-		BoxBottomLeft:       text.BoxBottomLeft,
-		BoxBottomRight:      text.BoxBottomRight,
-		BoxBottomSeparator:  text.BoxBottomSeparator,
-		BoxLeft:             text.BoxLeft,
-		BoxLeftSeparator:    text.BoxLeftSeparator,
-		BoxMiddleHorizontal: text.BoxHorizontal,
-		BoxMiddleSeparator:  text.BoxSeparator,
-		BoxMiddleVertical:   text.BoxVertical,
-		BoxPaddingLeft:      " ",
-		BoxPaddingRight:     " ",
-		BoxRight:            text.BoxRight,
-		BoxRightSeparator:   text.BoxRightSeparator,
-		BoxTopLeft:          text.BoxTopLeft,
-		BoxTopRight:         text.BoxTopRight,
-		BoxTopSeparator:     text.BoxTopSeparator,
-		BoxUnfinishedRow:    " " + text.BoxUnfinishedLine,
-		FormatFooter:        text.FormatUpper,
-		FormatHeader:        text.FormatUpper,
-		FormatRows:          text.FormatDefault,
-		Name:                "StyleLight",
+		Name:    "StyleLight",
+		Box:     StyleBoxLight,
+		Color:   StyleColorDefault,
+		Format:  StyleFormatDefault,
+		Options: StyleOptionsDefault,
 	}
 
 	// StyleRounded renders a Table like below:
@@ -170,26 +99,11 @@ var (
 	//  │     │            │ TOTAL     │  10000 │                             │
 	//  ╰─────┴────────────┴───────────┴────────┴─────────────────────────────╯
 	StyleRounded = Style{
-		BoxBottomLeft:       text.BoxBottomLeftRounded,
-		BoxBottomRight:      text.BoxBottomRightRounded,
-		BoxBottomSeparator:  text.BoxBottomSeparator,
-		BoxLeft:             text.BoxLeft,
-		BoxLeftSeparator:    text.BoxLeftSeparator,
-		BoxMiddleHorizontal: text.BoxHorizontal,
-		BoxMiddleSeparator:  text.BoxSeparator,
-		BoxMiddleVertical:   text.BoxVertical,
-		BoxPaddingLeft:      " ",
-		BoxPaddingRight:     " ",
-		BoxRight:            text.BoxRight,
-		BoxRightSeparator:   text.BoxRightSeparator,
-		BoxTopLeft:          text.BoxTopLeftRounded,
-		BoxTopRight:         text.BoxTopRightRounded,
-		BoxTopSeparator:     text.BoxTopSeparator,
-		BoxUnfinishedRow:    " " + text.BoxUnfinishedLine,
-		FormatFooter:        text.FormatUpper,
-		FormatHeader:        text.FormatUpper,
-		FormatRows:          text.FormatDefault,
-		Name:                "StyleRounded",
+		Name:    "StyleRounded",
+		Box:     StyleBoxRounded,
+		Color:   StyleColorDefault,
+		Format:  StyleFormatDefault,
+		Options: StyleOptionsDefault,
 	}
 
 	// styleTest renders a Table like below:
@@ -203,25 +117,279 @@ var (
 	//  [<   >|<          >|<TOTAL    >|< 10000>|<                           >]
 	//  \-----v------------v-----------v--------v-----------------------------/
 	styleTest = Style{
-		BoxBottomLeft:       "\\",
-		BoxBottomRight:      "/",
-		BoxBottomSeparator:  "v",
-		BoxLeft:             "[",
-		BoxLeftSeparator:    "{",
-		BoxMiddleHorizontal: "-",
-		BoxMiddleSeparator:  "+",
-		BoxMiddleVertical:   "|",
-		BoxPaddingLeft:      "<",
-		BoxPaddingRight:     ">",
-		BoxRight:            "]",
-		BoxRightSeparator:   "}",
-		BoxTopLeft:          "(",
-		BoxTopRight:         ")",
-		BoxTopSeparator:     "^",
-		BoxUnfinishedRow:    " ~~~",
-		FormatFooter:        text.FormatUpper,
-		FormatHeader:        text.FormatUpper,
-		FormatRows:          text.FormatDefault,
-		Name:                "styleTest",
+		Name:    "styleTest",
+		Box:     styleBoxTest,
+		Color:   StyleColorDefault,
+		Format:  StyleFormatDefault,
+		Options: StyleOptionsDefault,
+	}
+)
+
+// StyleBox defines the characters/strings to use to render the borders and
+// separators for the Table.
+type StyleBox struct {
+	BottomLeft       string
+	BottomRight      string
+	BottomSeparator  string
+	Left             string
+	LeftSeparator    string
+	MiddleHorizontal string
+	MiddleSeparator  string
+	MiddleVertical   string
+	PaddingLeft      string
+	PaddingRight     string
+	Right            string
+	RightSeparator   string
+	TopLeft          string
+	TopRight         string
+	TopSeparator     string
+	UnfinishedRow    string
+}
+
+var (
+	// StyleBoxDefault defines a Boxed-Table like below:
+	//  +-----+------------+-----------+--------+-----------------------------+
+	//  |   # | FIRST NAME | LAST NAME | SALARY |                             |
+	//  +-----+------------+-----------+--------+-----------------------------+
+	//  |   1 | Arya       | Stark     |   3000 |                             |
+	//  |  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
+	//  | 300 | Tyrion     | Lannister |   5000 |                             |
+	//  +-----+------------+-----------+--------+-----------------------------+
+	//  |     |            | TOTAL     |  10000 |                             |
+	//  +-----+------------+-----------+--------+-----------------------------+
+	StyleBoxDefault = StyleBox{
+		BottomLeft:       "+",
+		BottomRight:      "+",
+		BottomSeparator:  "+",
+		Left:             "|",
+		LeftSeparator:    "+",
+		MiddleHorizontal: "-",
+		MiddleSeparator:  "+",
+		MiddleVertical:   "|",
+		PaddingLeft:      " ",
+		PaddingRight:     " ",
+		Right:            "|",
+		RightSeparator:   "+",
+		TopLeft:          "+",
+		TopRight:         "+",
+		TopSeparator:     "+",
+		UnfinishedRow:    " ~",
+	}
+
+	// StyleBoxBold defines a Boxed-Table like below:
+	//  ┏━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+	//  ┃   # ┃ FIRST NAME ┃ LAST NAME ┃ SALARY ┃                             ┃
+	//  ┣━━━━━╋━━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+	//  ┃   1 ┃ Arya       ┃ Stark     ┃   3000 ┃                             ┃
+	//  ┃  20 ┃ Jon        ┃ Snow      ┃   2000 ┃ You know nothing, Jon Snow! ┃
+	//  ┃ 300 ┃ Tyrion     ┃ Lannister ┃   5000 ┃                             ┃
+	//  ┣━━━━━╋━━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+	//  ┃     ┃            ┃ TOTAL     ┃  10000 ┃                             ┃
+	//  ┗━━━━━┻━━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+	StyleBoxBold = StyleBox{
+		BottomLeft:       text.BoxBottomLeftBold,
+		BottomRight:      text.BoxBottomRightBold,
+		BottomSeparator:  text.BoxBottomSeparatorBold,
+		Left:             text.BoxLeftBold,
+		LeftSeparator:    text.BoxLeftSeparatorBold,
+		MiddleHorizontal: text.BoxHorizontalBold,
+		MiddleSeparator:  text.BoxSeparatorBold,
+		MiddleVertical:   text.BoxVerticalBold,
+		PaddingLeft:      " ",
+		PaddingRight:     " ",
+		Right:            text.BoxRightBold,
+		RightSeparator:   text.BoxRightSeparatorBold,
+		TopLeft:          text.BoxTopLeftBold,
+		TopRight:         text.BoxTopRightBold,
+		TopSeparator:     text.BoxTopSeparatorBold,
+		UnfinishedRow:    " " + text.BoxUnfinishedLine,
+	}
+
+	// StyleBoxDouble defines a Boxed-Table like below:
+	//  ╔═════╦════════════╦═══════════╦════════╦═════════════════════════════╗
+	//  ║   # ║ FIRST NAME ║ LAST NAME ║ SALARY ║                             ║
+	//  ╠═════╬════════════╬═══════════╬════════╬═════════════════════════════╣
+	//  ║   1 ║ Arya       ║ Stark     ║   3000 ║                             ║
+	//  ║  20 ║ Jon        ║ Snow      ║   2000 ║ You know nothing, Jon Snow! ║
+	//  ║ 300 ║ Tyrion     ║ Lannister ║   5000 ║                             ║
+	//  ╠═════╬════════════╬═══════════╬════════╬═════════════════════════════╣
+	//  ║     ║            ║ TOTAL     ║  10000 ║                             ║
+	//  ╚═════╩════════════╩═══════════╩════════╩═════════════════════════════╝
+	StyleBoxDouble = StyleBox{
+		BottomLeft:       text.BoxBottomLeftDouble,
+		BottomRight:      text.BoxBottomRightDouble,
+		BottomSeparator:  text.BoxBottomSeparatorDouble,
+		Left:             text.BoxLeftDouble,
+		LeftSeparator:    text.BoxLeftSeparatorDouble,
+		MiddleHorizontal: text.BoxHorizontalDouble,
+		MiddleSeparator:  text.BoxSeparatorDouble,
+		MiddleVertical:   text.BoxVerticalDouble,
+		PaddingLeft:      " ",
+		PaddingRight:     " ",
+		Right:            text.BoxRightDouble,
+		RightSeparator:   text.BoxRightSeparatorDouble,
+		TopLeft:          text.BoxTopLeftDouble,
+		TopRight:         text.BoxTopRightDouble,
+		TopSeparator:     text.BoxTopSeparatorDouble,
+		UnfinishedRow:    " " + text.BoxUnfinishedLine,
+	}
+
+	// StyleBoxLight defines a Boxed-Table like below:
+	//  ┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
+	//  │   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
+	//  ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+	//  │   1 │ Arya       │ Stark     │   3000 │                             │
+	//  │  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │
+	//  │ 300 │ Tyrion     │ Lannister │   5000 │                             │
+	//  ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+	//  │     │            │ TOTAL     │  10000 │                             │
+	//  └─────┴────────────┴───────────┴────────┴─────────────────────────────┘
+	StyleBoxLight = StyleBox{
+		BottomLeft:       text.BoxBottomLeft,
+		BottomRight:      text.BoxBottomRight,
+		BottomSeparator:  text.BoxBottomSeparator,
+		Left:             text.BoxLeft,
+		LeftSeparator:    text.BoxLeftSeparator,
+		MiddleHorizontal: text.BoxHorizontal,
+		MiddleSeparator:  text.BoxSeparator,
+		MiddleVertical:   text.BoxVertical,
+		PaddingLeft:      " ",
+		PaddingRight:     " ",
+		Right:            text.BoxRight,
+		RightSeparator:   text.BoxRightSeparator,
+		TopLeft:          text.BoxTopLeft,
+		TopRight:         text.BoxTopRight,
+		TopSeparator:     text.BoxTopSeparator,
+		UnfinishedRow:    " " + text.BoxUnfinishedLine,
+	}
+
+	// StyleBoxRounded defines a Boxed-Table like below:
+	//  ╭─────┬────────────┬───────────┬────────┬─────────────────────────────╮
+	//  │   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
+	//  ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+	//  │   1 │ Arya       │ Stark     │   3000 │                             │
+	//  │  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │
+	//  │ 300 │ Tyrion     │ Lannister │   5000 │                             │
+	//  ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+	//  │     │            │ TOTAL     │  10000 │                             │
+	//  ╰─────┴────────────┴───────────┴────────┴─────────────────────────────╯
+	StyleBoxRounded = StyleBox{
+		BottomLeft:       text.BoxBottomLeftRounded,
+		BottomRight:      text.BoxBottomRightRounded,
+		BottomSeparator:  text.BoxBottomSeparator,
+		Left:             text.BoxLeft,
+		LeftSeparator:    text.BoxLeftSeparator,
+		MiddleHorizontal: text.BoxHorizontal,
+		MiddleSeparator:  text.BoxSeparator,
+		MiddleVertical:   text.BoxVertical,
+		PaddingLeft:      " ",
+		PaddingRight:     " ",
+		Right:            text.BoxRight,
+		RightSeparator:   text.BoxRightSeparator,
+		TopLeft:          text.BoxTopLeftRounded,
+		TopRight:         text.BoxTopRightRounded,
+		TopSeparator:     text.BoxTopSeparator,
+		UnfinishedRow:    " " + text.BoxUnfinishedLine,
+	}
+
+	// styleBoxTest defines a Boxed-Table like below:
+	//  (-----^------------^-----------^--------^-----------------------------)
+	//  [<  #>|<FIRST NAME>|<LAST NAME>|<SALARY>|<                           >]
+	//  {-----+------------+-----------+--------+-----------------------------}
+	//  [<  1>|<Arya      >|<Stark    >|<  3000>|<                           >]
+	//  [< 20>|<Jon       >|<Snow     >|<  2000>|<You know nothing, Jon Snow!>]
+	//  [<300>|<Tyrion    >|<Lannister>|<  5000>|<                           >]
+	//  {-----+------------+-----------+--------+-----------------------------}
+	//  [<   >|<          >|<TOTAL    >|< 10000>|<                           >]
+	//  \-----v------------v-----------v--------v-----------------------------/
+	styleBoxTest = StyleBox{
+		BottomLeft:       "\\",
+		BottomRight:      "/",
+		BottomSeparator:  "v",
+		Left:             "[",
+		LeftSeparator:    "{",
+		MiddleHorizontal: "-",
+		MiddleSeparator:  "+",
+		MiddleVertical:   "|",
+		PaddingLeft:      "<",
+		PaddingRight:     ">",
+		Right:            "]",
+		RightSeparator:   "}",
+		TopLeft:          "(",
+		TopRight:         ")",
+		TopSeparator:     "^",
+		UnfinishedRow:    " ~~~",
+	}
+)
+
+// StyleColor defines the ANSI colors to use for parts of the Table.
+type StyleColor struct {
+	AutoIndexColumn text.Colors
+	FirstColumn     text.Colors
+	Footer          text.Colors
+	Header          text.Colors
+	Row             text.Colors
+	RowAlternate    text.Colors
+}
+
+var (
+	StyleColorDefault = StyleColor{
+		AutoIndexColumn: nil,
+		FirstColumn:     nil,
+		Footer:          nil,
+		Header:          nil,
+		Row:             nil,
+		RowAlternate:    nil,
+	}
+
+	StyleColorBright = StyleColor{
+		AutoIndexColumn: text.Colors{color.BgHiCyan, color.FgBlack},
+		FirstColumn:     nil,
+		Footer:          text.Colors{color.BgCyan, color.FgBlack},
+		Header:          text.Colors{color.BgHiCyan, color.FgBlack},
+		Row:             text.Colors{color.BgWhite, color.FgBlack},
+		RowAlternate:    text.Colors{color.BgHiWhite, color.FgBlack},
+	}
+
+	StyleColorDark = StyleColor{
+		AutoIndexColumn: text.Colors{color.FgHiCyan, color.BgBlack},
+		FirstColumn:     nil,
+		Footer:          text.Colors{color.FgCyan, color.BgBlack},
+		Header:          text.Colors{color.FgHiCyan, color.BgBlack},
+		Row:             text.Colors{color.FgWhite, color.BgBlack},
+		RowAlternate:    text.Colors{color.FgHiWhite, color.BgBlack},
+	}
+)
+
+// StyleFormat defines the text-formatting to perform on parts of the Table.
+type StyleFormat struct {
+	FirstColumn text.Format
+	Footer      text.Format
+	Header      text.Format
+	Row         text.Format
+}
+
+var (
+	StyleFormatDefault = StyleFormat{
+		FirstColumn: text.FormatDefault,
+		Footer:      text.FormatUpper,
+		Header:      text.FormatUpper,
+		Row:         text.FormatDefault,
+	}
+)
+
+// StyleOptions defines the global options that determine how the Table is
+// rendered.
+type StyleOptions struct {
+	DrawBorder      bool
+	SeparateColumns bool
+	SeparateRows    bool
+}
+
+var (
+	StyleOptionsDefault = StyleOptions{
+		DrawBorder:      true,
+		SeparateColumns: true,
+		SeparateRows:    false,
 	}
 )

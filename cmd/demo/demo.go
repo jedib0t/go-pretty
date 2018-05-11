@@ -38,7 +38,7 @@ func demoList() string {
 	tw.AppendHeader(header)
 	tw.AppendRow(content)
 	tw.SetStyle(table.StyleLight)
-	tw.Style().FormatHeader = text.FormatDefault
+	tw.Style().Format.Header = text.FormatDefault
 	return tw.Render()
 }
 

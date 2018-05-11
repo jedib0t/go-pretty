@@ -297,28 +297,33 @@ func main() {
 	// I don't like any of the ready-made styles.
 	//==========================================================================
 	funkyStyle := table.Style{
-		BoxBottomLeft:       "\\",
-		BoxBottomRight:      "/",
-		BoxBottomSeparator:  "v",
-		BoxLeft:             "[",
-		BoxLeftSeparator:    "{",
-		BoxMiddleHorizontal: "-",
-		BoxMiddleSeparator:  "+",
-		BoxMiddleVertical:   "|",
-		BoxPaddingLeft:      "<",
-		BoxPaddingRight:     ">",
-		BoxRight:            "]",
-		BoxRightSeparator:   "}",
-		BoxTopLeft:          "(",
-		BoxTopRight:         ")",
-		BoxTopSeparator:     "^",
-		BoxUnfinishedRow:    " ~~~",
-		FormatFooter:        text.FormatLower,
-		FormatHeader:        text.FormatLower,
-		FormatRows:          text.FormatUpper,
-		Name:                "funkyStyle",
+		Name: "funkyStyle",
+		Box: table.StyleBox{
+			BottomLeft:       "\\",
+			BottomRight:      "/",
+			BottomSeparator:  "v",
+			Left:             "[",
+			LeftSeparator:    "{",
+			MiddleHorizontal: "-",
+			MiddleSeparator:  "+",
+			MiddleVertical:   "|",
+			PaddingLeft:      "<",
+			PaddingRight:     ">",
+			Right:            "]",
+			RightSeparator:   "}",
+			TopLeft:          "(",
+			TopRight:         ")",
+			TopSeparator:     "^",
+			UnfinishedRow:    " ~~~",
+		},
 	}
 	t.SetStyle(funkyStyle)
+	t.Style().Format = table.StyleFormat{
+		Footer: text.FormatLower,
+		Header: text.FormatLower,
+		Row:    text.FormatUpper,
+	}
+	t.Style().Options.DrawBorder = true
 	t.SetCaption("Table using the style 'funkyStyle'.\n")
 	fmt.Println(t.Render())
 	//(-----^------------^-----------^--------^-----------------------------)

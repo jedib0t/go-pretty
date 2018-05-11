@@ -27,9 +27,11 @@ func TestList_RenderMarkdown(t *testing.T) {
       * Known
     * The Dark Tower
       * The Gunslinger`
-	assert.Nil(t, lw.Style())
+	assert.NotNil(t, lw.Style())
+	assert.Equal(t, StyleDefault, *lw.Style())
 	assert.Equal(t, expectedOutMarkdown, lw.RenderMarkdown())
-	assert.Nil(t, lw.Style())
+	assert.NotNil(t, lw.Style())
+	assert.Equal(t, StyleDefault, *lw.Style())
 
 	lw.SetStyle(styleTest)
 	assert.NotNil(t, lw.Style())

@@ -213,6 +213,10 @@ func (t *Table) ShowSeparators(show bool) {
 
 // Style returns the current style.
 func (t *Table) Style() *Style {
+	if t.style == nil {
+		tempStyle := StyleDefault
+		t.style = &tempStyle
+	}
 	return t.style
 }
 
@@ -265,7 +269,7 @@ func (t *Table) getAllowedColumnLength(colIdx int) int {
 	return 0
 }
 
-func (t *Table) getAutoIndexColumnIDRow() RowStr {
+func (t *Table) getAutoIndexColumnIDs() RowStr {
 	row := make(RowStr, t.numColumns)
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
 		row[colIdx] = text.AlignCenter.Apply(util.AutoIndexColumnID(colIdx), maxColumnLength)
@@ -283,9 +287,7 @@ func (t *Table) getVAlign(colIdx int) text.VAlign {
 
 func (t *Table) initForRender() {
 	// pick a default style
-	if t.style == nil {
-		t.style = &StyleDefault
-	}
+	t.Style()
 
 	// turn off auto-index if a header is found
 	if t.autoIndex && len(t.rowsHeader) > 0 {
@@ -329,13 +331,13 @@ func (t *Table) initForRenderMaxColumnLength() {
 }
 
 func (t *Table) initForRenderRowSeparator() {
-	t.maxRowLength = (utf8.RuneCountInString(t.style.BoxMiddleSeparator) * t.numColumns) + 1
+	t.maxRowLength = (utf8.RuneCountInString(t.style.Box.MiddleSeparator) * t.numColumns) + 1
 	t.rowSeparator = make(RowStr, t.numColumns)
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
-		maxColumnLength += utf8.RuneCountInString(t.style.BoxPaddingLeft)
-		maxColumnLength += utf8.RuneCountInString(t.style.BoxPaddingRight)
+		maxColumnLength += utf8.RuneCountInString(t.style.Box.PaddingLeft)
+		maxColumnLength += utf8.RuneCountInString(t.style.Box.PaddingRight)
 		// TODO: handle case where BoxMiddleHorizontal is longer than 1 rune
-		horizontalSeparatorCol := strings.Repeat(t.style.BoxMiddleHorizontal, maxColumnLength)
+		horizontalSeparatorCol := strings.Repeat(t.style.Box.MiddleHorizontal, maxColumnLength)
 		t.maxRowLength += maxColumnLength
 		t.rowSeparator[colIdx] = horizontalSeparatorCol
 	}

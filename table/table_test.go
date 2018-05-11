@@ -46,7 +46,8 @@ func (t *myMockOutputMirror) Write(p []byte) (n int, err error) {
 
 func TestNewWriter(t *testing.T) {
 	tw := NewWriter()
-	assert.Nil(t, tw.Style())
+	assert.NotNil(t, tw.Style())
+	assert.Equal(t, StyleDefault, *tw.Style())
 
 	tw.SetStyle(StyleBold)
 	assert.NotNil(t, tw.Style())
@@ -194,8 +195,8 @@ func TestTable_SetAllowedRowLength(t *testing.T) {
 	assert.Zero(t, table.allowedRowLength)
 	assert.Equal(t, expectedOutWithNoRowLimit, table.Render())
 
-	table.SetAllowedRowLength(utf8.RuneCountInString(table.style.BoxUnfinishedRow))
-	assert.Equal(t, utf8.RuneCountInString(table.style.BoxUnfinishedRow), table.allowedRowLength)
+	table.SetAllowedRowLength(utf8.RuneCountInString(table.style.Box.UnfinishedRow))
+	assert.Equal(t, utf8.RuneCountInString(table.style.Box.UnfinishedRow), table.allowedRowLength)
 	assert.Equal(t, "", table.Render())
 
 	table.SetAllowedRowLength(5)
@@ -362,11 +363,12 @@ func TestTable_SetVAlign(t *testing.T) {
 
 func TestTable_SetStyle(t *testing.T) {
 	table := Table{}
-	assert.Nil(t, table.Style())
+	assert.NotNil(t, table.Style())
+	assert.Equal(t, StyleDefault, *table.Style())
 
 	table.SetStyle(StyleDefault)
 	assert.NotNil(t, table.Style())
-	assert.Equal(t, &StyleDefault, table.Style())
+	assert.Equal(t, StyleDefault, *table.Style())
 }
 
 func TestTable_ShowBorder(t *testing.T) {

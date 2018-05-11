@@ -30,7 +30,8 @@ func (t *myMockOutputMirror) Write(p []byte) (n int, err error) {
 
 func TestNewWriter(t *testing.T) {
 	lw := NewWriter()
-	assert.Nil(t, lw.Style())
+	assert.NotNil(t, lw.Style())
+	assert.Equal(t, StyleDefault, *lw.Style())
 
 	lw.SetStyle(StyleConnectedBold)
 	assert.NotNil(t, lw.Style())
@@ -83,14 +84,12 @@ func TestList_Length(t *testing.T) {
 func TestList_Reset(t *testing.T) {
 	list := List{}
 	list.SetStyle(StyleBulletCircle)
-	assert.NotNil(t, list.Style())
 	assert.Equal(t, "", list.Render())
 
 	list.AppendItem(testItem1)
 	assert.Equal(t, "● Game Of Thrones", list.Render())
 
 	list.Reset()
-	assert.Nil(t, list.Style())
 	assert.Equal(t, "", list.Render())
 }
 
@@ -118,7 +117,7 @@ func TestList_SetOutputMirror(t *testing.T) {
 
 func TestList_SetStyle(t *testing.T) {
 	list := List{}
-	assert.Nil(t, list.Style())
+	assert.NotNil(t, list.Style())
 	list.AppendItem(testItem1)
 	list.Indent()
 	list.AppendItems(testItems2)
