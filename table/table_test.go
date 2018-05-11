@@ -370,38 +370,3 @@ func TestTable_SetStyle(t *testing.T) {
 	assert.NotNil(t, table.Style())
 	assert.Equal(t, StyleDefault, *table.Style())
 }
-
-func TestTable_ShowBorder(t *testing.T) {
-	table := Table{}
-	assert.False(t, table.disableBorder)
-
-	table.ShowBorder(false)
-	assert.True(t, table.disableBorder)
-
-	table.AppendRow(testRows[0])
-	out := table.Render()
-
-	assert.NotEmpty(t, out)
-	assert.Equal(t, 0, strings.Count(out, "\n"))
-	assert.Equal(t, " 1 | Arya | Stark | 3000 ", out)
-}
-
-func TestTable_ShowSeparators(t *testing.T) {
-	table := Table{}
-	assert.False(t, table.enableSeparators)
-
-	table.ShowSeparators(true)
-	assert.True(t, table.enableSeparators)
-
-	table.AppendRows(testRows)
-
-	expectedOut := `+-----+--------+-----------+------+-----------------------------+
-|   1 | Arya   | Stark     | 3000 |                             |
-+-----+--------+-----------+------+-----------------------------+
-|  20 | Jon    | Snow      | 2000 | You know nothing, Jon Snow! |
-+-----+--------+-----------+------+-----------------------------+
-| 300 | Tyrion | Lannister | 5000 |                             |
-+-----+--------+-----------+------+-----------------------------+`
-
-	assert.Equal(t, expectedOut, table.Render())
-}

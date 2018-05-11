@@ -25,7 +25,7 @@ func (t *Table) Render() string {
 
 	var out strings.Builder
 	if t.numColumns > 0 {
-		if !t.disableBorder {
+		if t.style.Options.DrawBorder {
 			t.renderRowSeparator(&out, true, false)
 		}
 		if len(t.rowsHeader) > 0 || t.autoIndex {
@@ -41,7 +41,7 @@ func (t *Table) Render() string {
 			t.renderRowSeparator(&out, false, false)
 			t.renderRows(&out, t.rowsFooter, t.colorsFooter, t.style.Format.Footer)
 		}
-		if !t.disableBorder {
+		if t.style.Options.DrawBorder {
 			t.renderRowSeparator(&out, false, true)
 		}
 		if t.caption != "" {
@@ -130,13 +130,13 @@ func (t *Table) renderLine(out *strings.Builder, rowNum int, row RowStr, colors 
 		// grow the strings.Builder to the maximum possible row length
 		outLine.Grow(t.maxRowLength)
 
-		if !t.disableBorder {
+		if t.style.Options.DrawBorder {
 			t.renderMarginLeft(outLine, isFirstRow, isLastRow, isSeparatorRow)
 		}
 		for colIdx, maxColumnLength := range t.maxColumnLengths {
 			t.renderColumn(outLine, rowNum, row, colIdx, maxColumnLength, colors, isFirstRow, isLastRow, isSeparatorRow, format)
 		}
-		if !t.disableBorder {
+		if t.style.Options.DrawBorder {
 			t.renderMarginRight(outLine, isFirstRow, isLastRow, isSeparatorRow)
 		}
 
@@ -217,7 +217,7 @@ func (t *Table) renderRow(out *strings.Builder, rowNum int, row RowStr, colors [
 func (t *Table) renderRows(out *strings.Builder, rows []RowStr, colors []*color.Color, format text.Format) {
 	for idx, row := range rows {
 		t.renderRow(out, idx+1, row, colors, false, false, false, format)
-		if t.enableSeparators && idx < len(rows)-1 {
+		if t.style.Options.SeparateRows && idx < len(rows)-1 {
 			t.renderRowSeparator(out, false, false)
 		}
 	}

@@ -29,8 +29,6 @@ type Writer interface {
 	SetOutputMirror(mirror io.Writer)
 	SetStyle(style Style)
 	SetVAlign(vAlign []text.VAlign)
-	ShowBorder(show bool)
-	ShowSeparators(show bool)
 	Style() *Style
 }
 

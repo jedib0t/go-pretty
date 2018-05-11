@@ -46,10 +46,6 @@ type Table struct {
 	colorsHeader []*color.Color
 	// columnIsNonNumeric stores if a column contains non-numbers in all rows
 	columnIsNonNumeric []bool
-	// disableBorder disables drawing the border around the table
-	disableBorder bool
-	// enableSeparators enables drawing separators between each row
-	enableSeparators bool
 	// htmlCSSClass stores the HTML CSS Class to use on the <table> node
 	htmlCSSClass string
 	// maxColumnLengths stores the length of the longest line in each column
@@ -179,36 +175,6 @@ func (t *Table) SetStyle(style Style) {
 // SetVAlign sets the vertical-align for each column in all the rows.
 func (t *Table) SetVAlign(vAlign []text.VAlign) {
 	t.vAlign = vAlign
-}
-
-// ShowBorder enables or disables drawing the border around the Table. Example
-// of a table where it is disabled (enabled by default):
-//     # │ FIRST NAME │ LAST NAME │ SALARY │
-//  ─────┼────────────┼───────────┼────────┼─────────────────────────────
-//     1 │ Arya       │ Stark     │   3000 │
-//    20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow!
-//   300 │ Tyrion     │ Lannister │   5000 │
-//  ─────┼────────────┼───────────┼────────┼─────────────────────────────
-//       │            │ TOTAL     │  10000 │
-func (t *Table) ShowBorder(show bool) {
-	t.disableBorder = !show
-}
-
-// ShowSeparators enables or disable drawing separators between each row.
-// Example of a table where it is enabled (disabled by default):
-//  ┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
-//  │   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
-//  ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
-//  │   1 │ Arya       │ Stark     │   3000 │                             │
-//  ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
-//  │  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │
-//  ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
-//  │ 300 │ Tyrion     │ Lannister │   5000 │                             │
-//  ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
-//  │     │            │ TOTAL     │  10000 │                             │
-//  └─────┴────────────┴───────────┴────────┴─────────────────────────────┘
-func (t *Table) ShowSeparators(show bool) {
-	t.enableSeparators = show
 }
 
 // Style returns the current style.

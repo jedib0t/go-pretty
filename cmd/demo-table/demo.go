@@ -389,7 +389,7 @@ func main() {
 	//==========================================================================
 	// I don't like borders!
 	//==========================================================================
-	t.ShowBorder(false)
+	t.Style().Options.DrawBorder = false
 	t.SetCaption("Table without Borders.\n")
 	fmt.Println(t.Render())
 	//   # ┃ FIRST NAME ┃ LAST NAME ┃ SALARY ┃
@@ -405,8 +405,8 @@ func main() {
 	//==========================================================================
 	// I like walls and borders everywhere!
 	//==========================================================================
-	t.ShowBorder(true)
-	t.ShowSeparators(true)
+	t.Style().Options.DrawBorder = true
+	t.Style().Options.SeparateRows = true
 	t.SetCaption("Table with Borders Everywhere!\n")
 	fmt.Println(t.Render())
 	//┏━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
