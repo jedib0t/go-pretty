@@ -424,6 +424,24 @@ func main() {
 	//==========================================================================
 
 	//==========================================================================
+	// There is strength in Unity.
+	//==========================================================================
+	t.Style().Options.DrawBorder = false
+	t.Style().Options.SeparateColumns = false
+	t.Style().Options.SeparateFooter = false
+	t.Style().Options.SeparateHeader = false
+	t.Style().Options.SeparateRows = false
+	t.SetCaption("Table without Any Borders or Separators!\n")
+	fmt.Println(t.Render())
+	//   #  FIRST NAME  LAST NAME  SALARY
+	//   1  Arya        Stark        3000
+	//  20  Jon         Snow         2000  You know nothing, Jon Snow!
+	// 300  Tyrion      Lannister    5000
+	//                  TOTAL       10000
+	//Table without Any Borders or Separators!
+	//==========================================================================
+
+	//==========================================================================
 	// I want CSV.
 	//==========================================================================
 	t.SetCaption("")

@@ -402,6 +402,14 @@ type StyleOptions struct {
 	// Example of a table where it is disabled:
 	SeparateColumns bool
 
+	// SeparateFooter enables or disable drawing border between the footer and
+	// the rows. Example of a table where it is disabled:
+	SeparateFooter bool
+
+	// SeparateHeader enables or disable drawing border between the header and
+	// the rows. Example of a table where it is disabled:
+	SeparateHeader bool
+
 	// SeparateRows enables or disables drawing separators between each row.
 	// Example of a table where it is enabled:
 	//  ┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
@@ -423,6 +431,8 @@ var (
 	StyleOptionsDefault = StyleOptions{
 		DrawBorder:      true,
 		SeparateColumns: true,
+		SeparateFooter:  true,
+		SeparateHeader:  true,
 		SeparateRows:    false,
 	}
 )

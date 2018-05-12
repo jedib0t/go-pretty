@@ -135,25 +135,84 @@ func TestTable_Render_TableWithinTable(t *testing.T) {
 func TestTable_Render_WithoutBorder(t *testing.T) {
 	table := Table{}
 	table.Style().Options.DrawBorder = false
+	table.AppendHeader(testHeader)
 	table.AppendRows(testRows)
 
-	expectedOut := `   1 | Arya   | Stark     | 3000 |                             
-  20 | Jon    | Snow      | 2000 | You know nothing, Jon Snow! 
- 300 | Tyrion | Lannister | 5000 |                             `
+	expectedOut := `   # | FIRST NAME | LAST NAME | SALARY |                             
+-----+------------+-----------+--------+-----------------------------
+   1 | Arya       | Stark     |   3000 |                             
+  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! 
+ 300 | Tyrion     | Lannister |   5000 |                             `
+	assert.Equal(t, expectedOut, table.Render())
+}
+
+func TestTable_Render_WithoutBorderAndSeparator(t *testing.T) {
+	table := Table{}
+	table.Style().Options.DrawBorder = false
+	table.Style().Options.SeparateColumns = false
+	table.Style().Options.SeparateRows = false
+	table.AppendHeader(testHeader)
+	table.AppendRows(testRows)
+	table.AppendFooter(testFooter)
+
+	expectedOut := `   #  FIRST NAME  LAST NAME  SALARY                              
+-----------------------------------------------------------------
+   1  Arya        Stark        3000                              
+  20  Jon         Snow         2000  You know nothing, Jon Snow! 
+ 300  Tyrion      Lannister    5000                              
+-----------------------------------------------------------------
+                  TOTAL       10000                              `
+	assert.Equal(t, expectedOut, table.Render())
+
+	table.Style().Options.SeparateFooter = false
+	expectedOut = `   #  FIRST NAME  LAST NAME  SALARY                              
+-----------------------------------------------------------------
+   1  Arya        Stark        3000                              
+  20  Jon         Snow         2000  You know nothing, Jon Snow! 
+ 300  Tyrion      Lannister    5000                              
+                  TOTAL       10000                              `
+	assert.Equal(t, expectedOut, table.Render())
+
+	table.Style().Options.SeparateHeader = false
+	expectedOut = `   #  FIRST NAME  LAST NAME  SALARY                              
+   1  Arya        Stark        3000                              
+  20  Jon         Snow         2000  You know nothing, Jon Snow! 
+ 300  Tyrion      Lannister    5000                              
+                  TOTAL       10000                              `
+	assert.Equal(t, expectedOut, table.Render())
+}
+
+func TestTable_Render_WithoutSeparators(t *testing.T) {
+	table := Table{}
+	table.Style().Options.SeparateColumns = false
+	table.Style().Options.SeparateRows = false
+	table.AppendHeader(testHeader)
+	table.AppendRows(testRows)
+
+	expectedOut := `+-----------------------------------------------------------------+
+|   #  FIRST NAME  LAST NAME  SALARY                              |
++-----------------------------------------------------------------+
+|   1  Arya        Stark        3000                              |
+|  20  Jon         Snow         2000  You know nothing, Jon Snow! |
+| 300  Tyrion      Lannister    5000                              |
++-----------------------------------------------------------------+`
 	assert.Equal(t, expectedOut, table.Render())
 }
 
 func TestTable_Render_WithSeparators(t *testing.T) {
 	table := Table{}
 	table.Style().Options.SeparateRows = true
+	table.AppendHeader(testHeader)
 	table.AppendRows(testRows)
 
-	expectedOut := `+-----+--------+-----------+------+-----------------------------+
-|   1 | Arya   | Stark     | 3000 |                             |
-+-----+--------+-----------+------+-----------------------------+
-|  20 | Jon    | Snow      | 2000 | You know nothing, Jon Snow! |
-+-----+--------+-----------+------+-----------------------------+
-| 300 | Tyrion | Lannister | 5000 |                             |
-+-----+--------+-----------+------+-----------------------------+`
+	expectedOut := `+-----+------------+-----------+--------+-----------------------------+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++-----+------------+-----------+--------+-----------------------------+
+|   1 | Arya       | Stark     |   3000 |                             |
++-----+------------+-----------+--------+-----------------------------+
+|  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
++-----+------------+-----------+--------+-----------------------------+
+| 300 | Tyrion     | Lannister |   5000 |                             |
++-----+------------+-----------+--------+-----------------------------+`
 	assert.Equal(t, expectedOut, table.Render())
 }

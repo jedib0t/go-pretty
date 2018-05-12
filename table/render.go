@@ -25,25 +25,21 @@ func (t *Table) Render() string {
 
 	var out strings.Builder
 	if t.numColumns > 0 {
-		if t.style.Options.DrawBorder {
-			t.renderRowSeparator(&out, true, false)
-		}
+		t.renderRowSeparator(&out, true, false, false, false)
 		if len(t.rowsHeader) > 0 || t.autoIndex {
 			if len(t.rowsHeader) > 0 {
 				t.renderRows(&out, t.rowsHeader, t.colorsHeader, t.style.Format.Header)
 			} else {
 				t.renderRow(&out, 0, t.getAutoIndexColumnIDs(), t.colorsHeader, false, false, false, text.FormatUpper)
 			}
-			t.renderRowSeparator(&out, false, false)
+			t.renderRowSeparator(&out, false, true, false, false)
 		}
 		t.renderRows(&out, t.rows, t.colors, t.style.Format.Row)
 		if len(t.rowsFooter) > 0 {
-			t.renderRowSeparator(&out, false, false)
+			t.renderRowSeparator(&out, false, false, true, false)
 			t.renderRows(&out, t.rowsFooter, t.colorsFooter, t.style.Format.Footer)
 		}
-		if t.style.Options.DrawBorder {
-			t.renderRowSeparator(&out, false, true)
-		}
+		t.renderRowSeparator(&out, false, false, false, true)
 		if t.caption != "" {
 			out.WriteRune('\n')
 			out.WriteString(t.caption)
@@ -56,20 +52,7 @@ func (t *Table) renderColumn(out *strings.Builder, rowNum int, row RowStr, colId
 	// when working on the first column, and autoIndex is true, insert a new
 	// column with the row number on it.
 	if colIdx == 0 && t.autoIndex {
-		if rowNum < 0 {
-			numChars := t.autoIndexVIndexMaxLength + utf8.RuneCountInString(t.style.Box.PaddingLeft) +
-				utf8.RuneCountInString(t.style.Box.PaddingRight)
-			out.WriteString(strings.Repeat(t.style.Box.MiddleHorizontal, numChars))
-		} else {
-			out.WriteString(t.style.Box.PaddingLeft)
-			rowNumStr := fmt.Sprint(rowNum)
-			if rowNum == 0 {
-				rowNumStr = strings.Repeat(" ", t.autoIndexVIndexMaxLength)
-			}
-			out.WriteString(text.AlignRight.Apply(rowNumStr, t.autoIndexVIndexMaxLength))
-			out.WriteString(t.style.Box.PaddingRight)
-		}
-		t.renderColumnSeparator(out, isFirstRow, isLastRow, rowNum < 0)
+		t.renderColumnAutoIndex(out, rowNum, isFirstRow, isLastRow)
 	}
 
 	// when working on column number 2 or more, render the column separator
@@ -97,18 +80,38 @@ func (t *Table) renderColumn(out *strings.Builder, rowNum int, row RowStr, colId
 	}
 }
 
-func (t *Table) renderColumnSeparator(out *strings.Builder, isFirstRow bool, isLastRow bool, isSeparatorRow bool) {
-	// type of row determines the character used (top/bottom/separator)
-	if isSeparatorRow {
-		if isFirstRow {
-			out.WriteString(t.style.Box.TopSeparator)
-		} else if isLastRow {
-			out.WriteString(t.style.Box.BottomSeparator)
-		} else {
-			out.WriteString(t.style.Box.MiddleSeparator)
-		}
+func (t *Table) renderColumnAutoIndex(out *strings.Builder, rowNum int, isFirstRow bool, isLastRow bool) {
+	if rowNum < 0 {
+		numChars := t.autoIndexVIndexMaxLength + utf8.RuneCountInString(t.style.Box.PaddingLeft) +
+			utf8.RuneCountInString(t.style.Box.PaddingRight)
+		out.WriteString(strings.Repeat(t.style.Box.MiddleHorizontal, numChars))
 	} else {
-		out.WriteString(t.style.Box.MiddleVertical)
+		out.WriteString(t.style.Box.PaddingLeft)
+		rowNumStr := fmt.Sprint(rowNum)
+		if rowNum == 0 {
+			rowNumStr = strings.Repeat(" ", t.autoIndexVIndexMaxLength)
+		}
+		out.WriteString(text.AlignRight.Apply(rowNumStr, t.autoIndexVIndexMaxLength))
+		out.WriteString(t.style.Box.PaddingRight)
+	}
+
+	t.renderColumnSeparator(out, isFirstRow, isLastRow, rowNum < 0)
+}
+
+func (t *Table) renderColumnSeparator(out *strings.Builder, isFirstRow bool, isLastRow bool, isSeparatorRow bool) {
+	if t.style.Options.SeparateColumns {
+		// type of row determines the character used (top/bottom/separator)
+		if isSeparatorRow {
+			if isFirstRow {
+				out.WriteString(t.style.Box.TopSeparator)
+			} else if isLastRow {
+				out.WriteString(t.style.Box.BottomSeparator)
+			} else {
+				out.WriteString(t.style.Box.MiddleSeparator)
+			}
+		} else {
+			out.WriteString(t.style.Box.MiddleVertical)
+		}
 	}
 }
 
@@ -218,11 +221,18 @@ func (t *Table) renderRows(out *strings.Builder, rows []RowStr, colors []*color.
 	for idx, row := range rows {
 		t.renderRow(out, idx+1, row, colors, false, false, false, format)
 		if t.style.Options.SeparateRows && idx < len(rows)-1 {
-			t.renderRowSeparator(out, false, false)
+			t.renderRowSeparator(out, false, false, false, false)
 		}
 	}
 }
 
-func (t *Table) renderRowSeparator(out *strings.Builder, isFirstRow bool, isLastRow bool) {
+func (t *Table) renderRowSeparator(out *strings.Builder, isFirstRow bool, isHeader bool, isFooter bool, isLastRow bool) {
+	if (isFirstRow || isLastRow) && !t.style.Options.DrawBorder {
+		return
+	} else if isHeader && !t.style.Options.SeparateHeader {
+		return
+	} else if isFooter && !t.style.Options.SeparateFooter {
+		return
+	}
 	t.renderLine(out, -1, t.rowSeparator, nil, isFirstRow, isLastRow, true, text.FormatDefault)
 }
