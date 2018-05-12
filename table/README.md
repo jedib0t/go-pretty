@@ -1,4 +1,4 @@
-## Table
+# Table
 [![GoDoc](https://godoc.org/github.com/jedib0t/go-pretty/table?status.svg)](https://godoc.org/github.com/jedib0t/go-pretty/table)
 
 Pretty-print tables into ASCII/Unicode strings.
@@ -42,7 +42,7 @@ A demonstration of all the capabilities can be found here:
 
 If you want very specific examples, read ahead.
 
-## Examples
+# Examples
 
 All the examples below are going to start with the following block, although
 nothing except a single Row is mandatory for the `Render()` function to render
@@ -82,13 +82,13 @@ Running the above will result in:
 +-----+------------+-----------+--------+-----------------------------
 ```
 
-### Styles
+## Styles
 
 You can customize almost every single thing about the table above. The previous
 example just defaulted to `StyleDefault` during `Render()`. You can use a
 ready-to-use style (as in [style.go](style.go)) or customize it as you want.
 
-#### Ready-to-use Styles
+### Ready-to-use Styles
 
 Table comes with a bunch of ready-to-use Styles that make the table look really
 good. Set or Change the style using:
@@ -116,7 +116,7 @@ Or if you want to use a full-color mode, and don't care for boxes, use:
 ```
 to get:<br/><img src="images/table-StyleColoredBright.png" width="480px"/>
 
-#### Roll your own Style
+### Roll your own Style
 
 You can also roll your own style:
 ```go
@@ -171,7 +171,7 @@ Or you can use one of the ready-to-use Styles, and just make a few tweaks:
     t.Style().Options.DrawBorder = false
 ```
 
-### Wrapping (or) Row/Column Width restrictions
+## Wrapping (or) Row/Column Width restrictions
 
 You can restrict the maximum (text) width for a Row:
 ```go
@@ -213,7 +213,7 @@ to get:
 ╰─────┴────────┴───────────┴────────┴────────────╯
 ```
 
-### Column Control - Alignment & Colors
+## Column Control - Alignment & Colors
 
 You can align text in columns horizontally and/or vertically. You can set up
 per-column color styles that will override the directives from the global Style
@@ -227,25 +227,25 @@ set through `SetStyle()`.
     t.SetColorsHeader([]text.Colors{{color.FgCyan}, {color.FgMagenta}, {color.FgYellow}, {color.FgBlack, color.BgWhite}})
 ```
 
-### Render As ...
+## Render As ...
 
 Tables can be rendered in other common formats such as:
 
-#### ... CSV
+### ... CSV
 
 ```go
     t.RenderCSV()
 ```
 to get:
 ```
-#,First Name,Last Name,Salary,
+,First Name,Last Name,Salary,
 1,Arya,Stark,3000,
 20,Jon,Snow,2000,"You know nothing\, Jon Snow!"
 300,Tyrion,Lannister,5000,
 ,,Total,10000,
 ```
 
-#### ... HTML Table
+### ... HTML Table
 
 ```go
     t.RenderHTML()
@@ -297,7 +297,7 @@ to get:
 </table>
 ```
 
-#### ... Markdown Table
+### ... Markdown Table
 
 ```go
     t.RenderMarkdown()
@@ -312,7 +312,7 @@ to get:
 |  |  | Total | 10000 |  |
 ```
 
-## TODO
+# TODO
 
   - Generic Cell Content Transformers (with some ready-made ones)
     - Base64 Decoder
