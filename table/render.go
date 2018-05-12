@@ -121,7 +121,7 @@ func (t *Table) renderColumnAutoIndex(out *strings.Builder, rowNum int, hint ren
 }
 
 func (t *Table) renderColumnColorized(out *strings.Builder, rowNum int, colIdx int, colStr string, colors []*color.Color, hint renderHint) {
-	// colorize and then render the column content if a color has been set
+	// colorize and then render the column content
 	if colIdx < len(colors) && colors[colIdx] != nil {
 		out.WriteString(colors[colIdx].Sprint(colStr))
 	} else if hint.isHeaderRow && t.style.Color.Header != nil {

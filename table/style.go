@@ -52,6 +52,8 @@ var (
 		Options: OptionsDefault,
 	}
 
+	// StyleColoredBright renders a Table without any borders or separators, and
+	// with every row colored with a Bright background.
 	StyleColoredBright = Style{
 		Name:    "StyleColoredBright",
 		Box:     StyleBoxDefault,
@@ -60,6 +62,8 @@ var (
 		Options: OptionsNoBordersAndSeparators,
 	}
 
+	// StyleColoredDark renders a Table without any borders or separators, and
+	// with every row colored with a Dark background.
 	StyleColoredDark = Style{
 		Name:    "StyleColoredDark",
 		Box:     StyleBoxDefault,

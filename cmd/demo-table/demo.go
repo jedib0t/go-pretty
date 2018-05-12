@@ -53,15 +53,23 @@ func main() {
 	//| 3 | 300 | Tyrion | Lannister | 5000 |                             |
 	//+---+-----+--------+-----------+------+-----------------------------+
 	//Table with Auto-Indexing.
-	t.SetAutoIndex(false)
+	//
+	t.AppendHeader(table.Row{"#", "First Name", "Last Name", "Salary"})
+	t.SetCaption("Table with Auto-Indexing Columns.\n")
+	fmt.Println(t.Render())
+	//+---+-----+------------+-----------+--------+-----------------------------+
+	//|   |   # | FIRST NAME | LAST NAME | SALARY |                             |
+	//+---+-----+------------+-----------+--------+-----------------------------+
+	//| 1 |   1 | Arya       | Stark     |   3000 |                             |
+	//| 2 |  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
+	//| 3 | 300 | Tyrion     | Lannister |   5000 |                             |
+	//+---+-----+------------+-----------+--------+-----------------------------+
 	//==========================================================================
 
 	//==========================================================================
 	// A table needs to have a Header & Footer (for this demo at least!)
 	//==========================================================================
-	// start with a header
-	t.AppendHeader(table.Row{"#", "First Name", "Last Name", "Salary"})
-	// time to take a peek
+	t.SetAutoIndex(false)
 	t.SetCaption("Table with 3 Rows & and a Header.\n")
 	fmt.Println(t.Render())
 	//+-----+------------+-----------+--------+-----------------------------+
@@ -296,7 +304,7 @@ func main() {
 	//==========================================================================
 	// I don't like any of the ready-made styles.
 	//==========================================================================
-	funkyStyle := table.Style{
+	t.SetStyle(table.Style{
 		Name: "funkyStyle",
 		Box: table.BoxStyle{
 			BottomLeft:       "\\",
@@ -316,14 +324,16 @@ func main() {
 			TopSeparator:     "^",
 			UnfinishedRow:    " ~~~",
 		},
-	}
-	t.SetStyle(funkyStyle)
+	})
 	t.Style().Format = table.FormatOptions{
 		Footer: text.FormatLower,
 		Header: text.FormatLower,
 		Row:    text.FormatUpper,
 	}
 	t.Style().Options.DrawBorder = true
+	t.Style().Options.SeparateColumns = true
+	t.Style().Options.SeparateFooter = true
+	t.Style().Options.SeparateHeader = true
 	t.SetCaption("Table using the style 'funkyStyle'.\n")
 	fmt.Println(t.Render())
 	//(-----^------------^-----------^--------^-----------------------------)
@@ -361,7 +371,7 @@ func main() {
 	//
 	// "Table with Colors"??? where? i don't see any! well, you have to trust me
 	// on this... the colors show on a terminal that supports it. to prove it,
-	// lets print the same table line-by-line using "%#v" to see the escape
+	// lets print the same table line-by-line using "%#v" to see the control
 	// sequences ...
 	t.SetCaption("Table with Colors in Raw Mode.\n")
 	for _, line := range strings.Split(t.Render(), "\n") {
@@ -384,6 +394,22 @@ func main() {
 	t.SetColorsHeader([]text.Colors{}) // disable colors on the header
 	t.SetColors([]text.Colors{})       // disable colors on the body
 	t.SetColorsFooter([]text.Colors{}) // disable colors on the footer
+	//==========================================================================
+
+	//==========================================================================
+	// How about not asking me to set colors in such a verbose way? And I don't
+	// like wasting my terminal space with borders and separators.
+	//==========================================================================
+	t.SetStyle(table.StyleColoredBright)
+	t.SetCaption("Table with style 'StyleColoredBright'.\n")
+	fmt.Println(t.Render())
+	//   #  FIRST NAME  LAST NAME  SALARY
+	//   1  Arya        Stark        3000
+	//  20  Jon         Snow         2000  You know nothing, Jon Snow!
+	// 300  Tyrion      Lannister    5000
+	//                  TOTAL       10000
+	//Table with style 'StyleColoredBright'.
+	t.SetStyle(table.StyleBold)
 	//==========================================================================
 
 	//==========================================================================

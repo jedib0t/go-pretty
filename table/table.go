@@ -122,7 +122,7 @@ func (t *Table) SetAllowedRowLength(length int) {
 // spreadsheet application. NOTE: Appending a Header will void this
 // functionality.
 func (t *Table) SetAutoIndex(autoIndex bool) {
-	t.autoIndex = true
+	t.autoIndex = autoIndex
 }
 
 // SetCaption sets the text to be rendered just below the table. This will not

@@ -60,13 +60,13 @@ func InsertRuneEveryN(s string, c rune, n int) string {
 //  RuneCountWithoutEscapeSeq("\x1b[33mGhost\x1b[0m") == 5
 //  RuneCountWithoutEscapeSeq("\x1b[33mGhost\x1b[0") == 5
 func RuneCountWithoutEscapeSeq(s string) int {
-	out, isCtrlSeq := 0, false
+	out, isEscSeq := 0, false
 	for _, sChr := range s {
 		if sChr == escapeStart {
-			isCtrlSeq = true
-		} else if isCtrlSeq {
+			isEscSeq = true
+		} else if isEscSeq {
 			if sChr == escapeStop {
-				isCtrlSeq = false
+				isEscSeq = false
 			}
 		} else {
 			out++
@@ -89,17 +89,17 @@ func TrimTextWithoutEscapeSeq(s string, n int) string {
 	var out strings.Builder
 	out.Grow(n)
 
-	outLen, isCtrlSeq, lastCtrlSeq := 0, false, strings.Builder{}
+	outLen, isEscSeq, lastEscSeq := 0, false, strings.Builder{}
 	for _, sChr := range s {
 		out.WriteRune(sChr)
 		if sChr == escapeStart {
-			isCtrlSeq = true
-			lastCtrlSeq.Reset()
-			lastCtrlSeq.WriteRune(sChr)
-		} else if isCtrlSeq {
-			lastCtrlSeq.WriteRune(sChr)
+			isEscSeq = true
+			lastEscSeq.Reset()
+			lastEscSeq.WriteRune(sChr)
+		} else if isEscSeq {
+			lastEscSeq.WriteRune(sChr)
 			if sChr == escapeStop {
-				isCtrlSeq = false
+				isEscSeq = false
 			}
 		} else {
 			outLen++
@@ -108,7 +108,7 @@ func TrimTextWithoutEscapeSeq(s string, n int) string {
 			}
 		}
 	}
-	if lastCtrlSeq.Len() > 0 && lastCtrlSeq.String() != colorReset {
+	if lastEscSeq.Len() > 0 && lastEscSeq.String() != colorReset {
 		out.WriteString(colorReset)
 	}
 	return out.String()
