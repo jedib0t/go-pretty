@@ -17,6 +17,15 @@ Simple Table with 3 Rows.
 +---+-----+--------+-----------+------+-----------------------------+
 Table with Auto-Indexing.
 
++---+-----+------------+-----------+--------+-----------------------------+
+|   |   # | FIRST NAME | LAST NAME | SALARY |                             |
++---+-----+------------+-----------+--------+-----------------------------+
+| 1 |   1 | Arya       | Stark     |   3000 |                             |
+| 2 |  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
+| 3 | 300 | Tyrion     | Lannister |   5000 |                             |
++---+-----+------------+-----------+--------+-----------------------------+
+Table with Auto-Indexing Columns.
+
 +-----+------------+-----------+--------+-----------------------------+
 |   # | FIRST NAME | LAST NAME | SALARY |                             |
 +-----+------------+-----------+--------+-----------------------------+
@@ -202,6 +211,13 @@ Table with Colors.
 "┗━━━━━┻━━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 "Table with Colors in Raw Mode."
 
+   #  FIRST NAME  LAST NAME  SALARY                              
+   1  Arya        Stark        3000                              
+  20  Jon         Snow         2000  You know nothing, Jon Snow! 
+ 300  Tyrion      Lannister    5000                              
+                  TOTAL       10000                              
+Table with style 'StyleColoredBright'.
+
    # ┃ FIRST NAME ┃ LAST NAME ┃ SALARY ┃                             
 ━━━━━╋━━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    1 ┃ Arya       ┃ Stark     ┃   3000 ┃                             
@@ -223,6 +239,13 @@ Table without Borders.
 ┃     ┃            ┃ TOTAL     ┃  10000 ┃                             ┃
 ┗━━━━━┻━━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Table with Borders Everywhere!
+
+   #  FIRST NAME  LAST NAME  SALARY                              
+   1  Arya        Stark        3000                              
+  20  Jon         Snow         2000  You know nothing, Jon Snow! 
+ 300  Tyrion      Lannister    5000                              
+                  TOTAL       10000                              
+Table without Any Borders or Separators!
 
 [CSV] #,First Name,Last Name,Salary,
 [CSV] 1,Arya,Stark,3000,

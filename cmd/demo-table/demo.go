@@ -53,15 +53,23 @@ func main() {
 	//| 3 | 300 | Tyrion | Lannister | 5000 |                             |
 	//+---+-----+--------+-----------+------+-----------------------------+
 	//Table with Auto-Indexing.
-	t.SetAutoIndex(false)
+	//
+	t.AppendHeader(table.Row{"#", "First Name", "Last Name", "Salary"})
+	t.SetCaption("Table with Auto-Indexing Columns.\n")
+	fmt.Println(t.Render())
+	//+---+-----+------------+-----------+--------+-----------------------------+
+	//|   |   # | FIRST NAME | LAST NAME | SALARY |                             |
+	//+---+-----+------------+-----------+--------+-----------------------------+
+	//| 1 |   1 | Arya       | Stark     |   3000 |                             |
+	//| 2 |  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
+	//| 3 | 300 | Tyrion     | Lannister |   5000 |                             |
+	//+---+-----+------------+-----------+--------+-----------------------------+
 	//==========================================================================
 
 	//==========================================================================
 	// A table needs to have a Header & Footer (for this demo at least!)
 	//==========================================================================
-	// start with a header
-	t.AppendHeader(table.Row{"#", "First Name", "Last Name", "Salary"})
-	// time to take a peek
+	t.SetAutoIndex(false)
 	t.SetCaption("Table with 3 Rows & and a Header.\n")
 	fmt.Println(t.Render())
 	//+-----+------------+-----------+--------+-----------------------------+
@@ -296,29 +304,36 @@ func main() {
 	//==========================================================================
 	// I don't like any of the ready-made styles.
 	//==========================================================================
-	funkyStyle := table.Style{
-		BoxBottomLeft:       "\\",
-		BoxBottomRight:      "/",
-		BoxBottomSeparator:  "v",
-		BoxLeft:             "[",
-		BoxLeftSeparator:    "{",
-		BoxMiddleHorizontal: "-",
-		BoxMiddleSeparator:  "+",
-		BoxMiddleVertical:   "|",
-		BoxPaddingLeft:      "<",
-		BoxPaddingRight:     ">",
-		BoxRight:            "]",
-		BoxRightSeparator:   "}",
-		BoxTopLeft:          "(",
-		BoxTopRight:         ")",
-		BoxTopSeparator:     "^",
-		BoxUnfinishedRow:    " ~~~",
-		FormatFooter:        text.FormatLower,
-		FormatHeader:        text.FormatLower,
-		FormatRows:          text.FormatUpper,
-		Name:                "funkyStyle",
+	t.SetStyle(table.Style{
+		Name: "funkyStyle",
+		Box: table.BoxStyle{
+			BottomLeft:       "\\",
+			BottomRight:      "/",
+			BottomSeparator:  "v",
+			Left:             "[",
+			LeftSeparator:    "{",
+			MiddleHorizontal: "-",
+			MiddleSeparator:  "+",
+			MiddleVertical:   "|",
+			PaddingLeft:      "<",
+			PaddingRight:     ">",
+			Right:            "]",
+			RightSeparator:   "}",
+			TopLeft:          "(",
+			TopRight:         ")",
+			TopSeparator:     "^",
+			UnfinishedRow:    " ~~~",
+		},
+	})
+	t.Style().Format = table.FormatOptions{
+		Footer: text.FormatLower,
+		Header: text.FormatLower,
+		Row:    text.FormatUpper,
 	}
-	t.SetStyle(funkyStyle)
+	t.Style().Options.DrawBorder = true
+	t.Style().Options.SeparateColumns = true
+	t.Style().Options.SeparateFooter = true
+	t.Style().Options.SeparateHeader = true
 	t.SetCaption("Table using the style 'funkyStyle'.\n")
 	fmt.Println(t.Render())
 	//(-----^------------^-----------^--------^-----------------------------)
@@ -356,7 +371,7 @@ func main() {
 	//
 	// "Table with Colors"??? where? i don't see any! well, you have to trust me
 	// on this... the colors show on a terminal that supports it. to prove it,
-	// lets print the same table line-by-line using "%#v" to see the escape
+	// lets print the same table line-by-line using "%#v" to see the control
 	// sequences ...
 	t.SetCaption("Table with Colors in Raw Mode.\n")
 	for _, line := range strings.Split(t.Render(), "\n") {
@@ -382,10 +397,26 @@ func main() {
 	//==========================================================================
 
 	//==========================================================================
+	// How about not asking me to set colors in such a verbose way? And I don't
+	// like wasting my terminal space with borders and separators.
+	//==========================================================================
+	t.SetStyle(table.StyleColoredBright)
+	t.SetCaption("Table with style 'StyleColoredBright'.\n")
+	fmt.Println(t.Render())
+	//   #  FIRST NAME  LAST NAME  SALARY
+	//   1  Arya        Stark        3000
+	//  20  Jon         Snow         2000  You know nothing, Jon Snow!
+	// 300  Tyrion      Lannister    5000
+	//                  TOTAL       10000
+	//Table with style 'StyleColoredBright'.
+	t.SetStyle(table.StyleBold)
+	//==========================================================================
+
+	//==========================================================================
 	// I don't like borders!
 	//==========================================================================
-	t.ShowBorder(false)
-	t.SetCaption("Table without Borders.\n")
+	t.Style().Options.DrawBorder = false
+	t.SetCaption("Table without Options.\n")
 	fmt.Println(t.Render())
 	//   # ┃ FIRST NAME ┃ LAST NAME ┃ SALARY ┃
 	//━━━━━╋━━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -394,15 +425,15 @@ func main() {
 	// 300 ┃ Tyrion     ┃ Lannister ┃   5000 ┃
 	//━━━━━╋━━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 	//     ┃            ┃ TOTAL     ┃  10000 ┃
-	//Table without Borders.
+	//Table without Options.
 	//==========================================================================
 
 	//==========================================================================
 	// I like walls and borders everywhere!
 	//==========================================================================
-	t.ShowBorder(true)
-	t.ShowSeparators(true)
-	t.SetCaption("Table with Borders Everywhere!\n")
+	t.Style().Options.DrawBorder = true
+	t.Style().Options.SeparateRows = true
+	t.SetCaption("Table with Options Everywhere!\n")
 	fmt.Println(t.Render())
 	//┏━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 	//┃   # ┃ FIRST NAME ┃ LAST NAME ┃ SALARY ┃                             ┃
@@ -415,7 +446,25 @@ func main() {
 	//┣━━━━━╋━━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
 	//┃     ┃            ┃ TOTAL     ┃  10000 ┃                             ┃
 	//┗━━━━━┻━━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-	//Table with Borders Everywhere!
+	//Table with Options Everywhere!
+	//==========================================================================
+
+	//==========================================================================
+	// There is strength in Unity.
+	//==========================================================================
+	t.Style().Options.DrawBorder = false
+	t.Style().Options.SeparateColumns = false
+	t.Style().Options.SeparateFooter = false
+	t.Style().Options.SeparateHeader = false
+	t.Style().Options.SeparateRows = false
+	t.SetCaption("Table without Any Options or Separators!\n")
+	fmt.Println(t.Render())
+	//   #  FIRST NAME  LAST NAME  SALARY
+	//   1  Arya        Stark        3000
+	//  20  Jon         Snow         2000  You know nothing, Jon Snow!
+	// 300  Tyrion      Lannister    5000
+	//                  TOTAL       10000
+	//Table without Any Options or Separators!
 	//==========================================================================
 
 	//==========================================================================

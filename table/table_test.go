@@ -46,7 +46,8 @@ func (t *myMockOutputMirror) Write(p []byte) (n int, err error) {
 
 func TestNewWriter(t *testing.T) {
 	tw := NewWriter()
-	assert.Nil(t, tw.Style())
+	assert.NotNil(t, tw.Style())
+	assert.Equal(t, StyleDefault, *tw.Style())
 
 	tw.SetStyle(StyleBold)
 	assert.NotNil(t, tw.Style())
@@ -194,8 +195,8 @@ func TestTable_SetAllowedRowLength(t *testing.T) {
 	assert.Zero(t, table.allowedRowLength)
 	assert.Equal(t, expectedOutWithNoRowLimit, table.Render())
 
-	table.SetAllowedRowLength(utf8.RuneCountInString(table.style.BoxUnfinishedRow))
-	assert.Equal(t, utf8.RuneCountInString(table.style.BoxUnfinishedRow), table.allowedRowLength)
+	table.SetAllowedRowLength(utf8.RuneCountInString(table.style.Box.UnfinishedRow))
+	assert.Equal(t, utf8.RuneCountInString(table.style.Box.UnfinishedRow), table.allowedRowLength)
 	assert.Equal(t, "", table.Render())
 
 	table.SetAllowedRowLength(5)
@@ -246,13 +247,13 @@ func TestTable_SetAutoIndex(t *testing.T) {
 	assert.Equal(t, expectedOut, table.Render())
 
 	table.AppendHeader(testHeader)
-	expectedOut = `(-----^------------^-----------^--------^-----------------------------)
-[<  #>|<FIRST NAME>|<LAST NAME>|<SALARY>|<                           >]
-{-----+------------+-----------+--------+-----------------------------}
-[<  1>|<Arya      >|<Stark    >|<  3000>|<                           >]
-[< 20>|<Jon       >|<Snow     >|<  2000>|<You know nothing, Jon Snow!>]
-[<300>|<Tyrion    >|<Lannister>|<  5000>|<                           >]
-\-----v------------v-----------v--------v-----------------------------/`
+	expectedOut = `(---^-----^------------^-----------^--------^-----------------------------)
+[< >|<  #>|<FIRST NAME>|<LAST NAME>|<SALARY>|<                           >]
+{---+-----+------------+-----------+--------+-----------------------------}
+[<1>|<  1>|<Arya      >|<Stark    >|<  3000>|<                           >]
+[<2>|< 20>|<Jon       >|<Snow     >|<  2000>|<You know nothing, Jon Snow!>]
+[<3>|<300>|<Tyrion    >|<Lannister>|<  5000>|<                           >]
+\---v-----v------------v-----------v--------v-----------------------------/`
 	assert.True(t, table.autoIndex)
 	assert.Equal(t, expectedOut, table.Render())
 }
@@ -362,44 +363,10 @@ func TestTable_SetVAlign(t *testing.T) {
 
 func TestTable_SetStyle(t *testing.T) {
 	table := Table{}
-	assert.Nil(t, table.Style())
+	assert.NotNil(t, table.Style())
+	assert.Equal(t, StyleDefault, *table.Style())
 
 	table.SetStyle(StyleDefault)
 	assert.NotNil(t, table.Style())
-	assert.Equal(t, &StyleDefault, table.Style())
-}
-
-func TestTable_ShowBorder(t *testing.T) {
-	table := Table{}
-	assert.False(t, table.disableBorder)
-
-	table.ShowBorder(false)
-	assert.True(t, table.disableBorder)
-
-	table.AppendRow(testRows[0])
-	out := table.Render()
-
-	assert.NotEmpty(t, out)
-	assert.Equal(t, 0, strings.Count(out, "\n"))
-	assert.Equal(t, " 1 | Arya | Stark | 3000 ", out)
-}
-
-func TestTable_ShowSeparators(t *testing.T) {
-	table := Table{}
-	assert.False(t, table.enableSeparators)
-
-	table.ShowSeparators(true)
-	assert.True(t, table.enableSeparators)
-
-	table.AppendRows(testRows)
-
-	expectedOut := `+-----+--------+-----------+------+-----------------------------+
-|   1 | Arya   | Stark     | 3000 |                             |
-+-----+--------+-----------+------+-----------------------------+
-|  20 | Jon    | Snow      | 2000 | You know nothing, Jon Snow! |
-+-----+--------+-----------+------+-----------------------------+
-| 300 | Tyrion | Lannister | 5000 |                             |
-+-----+--------+-----------+------+-----------------------------+`
-
-	assert.Equal(t, expectedOut, table.Render())
+	assert.Equal(t, StyleDefault, *table.Style())
 }

@@ -38,7 +38,7 @@ func demoList() string {
 	tw.AppendHeader(header)
 	tw.AppendRow(content)
 	tw.SetStyle(table.StyleLight)
-	tw.Style().FormatHeader = text.FormatDefault
+	tw.Style().Format.Header = text.FormatDefault
 	return tw.Render()
 }
 
@@ -84,9 +84,9 @@ func demoTable() string {
 
 	tw := table.NewWriter()
 	tw.AppendRows(content)
-	tw.ShowSeparators(true)
 	tw.SetAlign([]text.Align{text.AlignRight, text.AlignLeft})
 	tw.SetStyle(table.StyleLight)
+	tw.Style().Options.SeparateRows = true
 	tw.SetVAlign([]text.VAlign{text.VAlignMiddle, text.VAlignDefault})
 	return tw.Render()
 }

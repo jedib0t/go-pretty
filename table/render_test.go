@@ -66,7 +66,122 @@ func TestTable_Render_AutoIndex(t *testing.T) {
 	assert.Equal(t, expectedOut, tw.Render())
 }
 
-func TestTable_Render_Colored(t *testing.T) {
+func TestTable_Render_BorderAndSeparators(t *testing.T) {
+	table := Table{}
+	table.AppendHeader(testHeader)
+	table.AppendRows(testRows)
+	table.AppendFooter(testFooter)
+	expectedOut := `+-----+------------+-----------+--------+-----------------------------+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++-----+------------+-----------+--------+-----------------------------+
+|   1 | Arya       | Stark     |   3000 |                             |
+|  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
+| 300 | Tyrion     | Lannister |   5000 |                             |
++-----+------------+-----------+--------+-----------------------------+
+|     |            | TOTAL     |  10000 |                             |
++-----+------------+-----------+--------+-----------------------------+`
+	assert.Equal(t, expectedOut, table.Render())
+
+	table.Style().Options = OptionsNoBorders
+	expectedOut = `   # | FIRST NAME | LAST NAME | SALARY |                             
+-----+------------+-----------+--------+-----------------------------
+   1 | Arya       | Stark     |   3000 |                             
+  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! 
+ 300 | Tyrion     | Lannister |   5000 |                             
+-----+------------+-----------+--------+-----------------------------
+     |            | TOTAL     |  10000 |                             `
+	assert.Equal(t, expectedOut, table.Render())
+
+	table.Style().Options.SeparateColumns = false
+	expectedOut = `   #  FIRST NAME  LAST NAME  SALARY                              
+-----------------------------------------------------------------
+   1  Arya        Stark        3000                              
+  20  Jon         Snow         2000  You know nothing, Jon Snow! 
+ 300  Tyrion      Lannister    5000                              
+-----------------------------------------------------------------
+                  TOTAL       10000                              `
+	assert.Equal(t, expectedOut, table.Render())
+
+	table.Style().Options.SeparateFooter = false
+	expectedOut = `   #  FIRST NAME  LAST NAME  SALARY                              
+-----------------------------------------------------------------
+   1  Arya        Stark        3000                              
+  20  Jon         Snow         2000  You know nothing, Jon Snow! 
+ 300  Tyrion      Lannister    5000                              
+                  TOTAL       10000                              `
+	assert.Equal(t, expectedOut, table.Render())
+
+	table.Style().Options = OptionsNoBordersAndSeparators
+	expectedOut = `   #  FIRST NAME  LAST NAME  SALARY                              
+   1  Arya        Stark        3000                              
+  20  Jon         Snow         2000  You know nothing, Jon Snow! 
+ 300  Tyrion      Lannister    5000                              
+                  TOTAL       10000                              `
+	assert.Equal(t, expectedOut, table.Render())
+
+	table.Style().Options.DrawBorder = true
+	expectedOut = `+-----------------------------------------------------------------+
+|   #  FIRST NAME  LAST NAME  SALARY                              |
+|   1  Arya        Stark        3000                              |
+|  20  Jon         Snow         2000  You know nothing, Jon Snow! |
+| 300  Tyrion      Lannister    5000                              |
+|                  TOTAL       10000                              |
++-----------------------------------------------------------------+`
+	assert.Equal(t, expectedOut, table.Render())
+
+	table.Style().Options.SeparateFooter = true
+	expectedOut = `+-----------------------------------------------------------------+
+|   #  FIRST NAME  LAST NAME  SALARY                              |
+|   1  Arya        Stark        3000                              |
+|  20  Jon         Snow         2000  You know nothing, Jon Snow! |
+| 300  Tyrion      Lannister    5000                              |
++-----------------------------------------------------------------+
+|                  TOTAL       10000                              |
++-----------------------------------------------------------------+`
+	assert.Equal(t, expectedOut, table.Render())
+
+	table.Style().Options.SeparateHeader = true
+	expectedOut = `+-----------------------------------------------------------------+
+|   #  FIRST NAME  LAST NAME  SALARY                              |
++-----------------------------------------------------------------+
+|   1  Arya        Stark        3000                              |
+|  20  Jon         Snow         2000  You know nothing, Jon Snow! |
+| 300  Tyrion      Lannister    5000                              |
++-----------------------------------------------------------------+
+|                  TOTAL       10000                              |
++-----------------------------------------------------------------+`
+	assert.Equal(t, expectedOut, table.Render())
+
+	table.Style().Options.SeparateRows = true
+	expectedOut = `+-----------------------------------------------------------------+
+|   #  FIRST NAME  LAST NAME  SALARY                              |
++-----------------------------------------------------------------+
+|   1  Arya        Stark        3000                              |
++-----------------------------------------------------------------+
+|  20  Jon         Snow         2000  You know nothing, Jon Snow! |
++-----------------------------------------------------------------+
+| 300  Tyrion      Lannister    5000                              |
++-----------------------------------------------------------------+
+|                  TOTAL       10000                              |
++-----------------------------------------------------------------+`
+	assert.Equal(t, expectedOut, table.Render())
+
+	table.Style().Options.SeparateColumns = true
+	expectedOut = `+-----+------------+-----------+--------+-----------------------------+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++-----+------------+-----------+--------+-----------------------------+
+|   1 | Arya       | Stark     |   3000 |                             |
++-----+------------+-----------+--------+-----------------------------+
+|  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
++-----+------------+-----------+--------+-----------------------------+
+| 300 | Tyrion     | Lannister |   5000 |                             |
++-----+------------+-----------+--------+-----------------------------+
+|     |            | TOTAL     |  10000 |                             |
++-----+------------+-----------+--------+-----------------------------+`
+	assert.Equal(t, expectedOut, table.Render())
+}
+
+func TestTable_Render_ColoredCustom(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(testHeader)
 	tw.AppendRows(testRows)
@@ -95,6 +210,85 @@ func TestTable_Render_Colored(t *testing.T) {
 	}
 
 	assert.Equal(t, strings.Join(expectedOut, "\n"), tw.Render())
+}
+
+func TestTable_Render_ColoredStyle(t *testing.T) {
+	table := Table{}
+	table.AppendHeader(testHeader)
+	table.AppendRows(testRows)
+	table.AppendFooter(testFooter)
+
+	styleToExpectedOutMap := map[Style]string{
+		StyleColoredBright: strings.Join([]string{
+			"\x1b[106;30m   # \x1b[0m\x1b[106;30m FIRST NAME \x1b[0m\x1b[106;30m LAST NAME \x1b[0m\x1b[106;30m SALARY \x1b[0m\x1b[106;30m                             \x1b[0m",
+			"\x1b[47;30m   1 \x1b[0m\x1b[47;30m Arya       \x1b[0m\x1b[47;30m Stark     \x1b[0m\x1b[47;30m   3000 \x1b[0m\x1b[47;30m                             \x1b[0m",
+			"\x1b[107;30m  20 \x1b[0m\x1b[107;30m Jon        \x1b[0m\x1b[107;30m Snow      \x1b[0m\x1b[107;30m   2000 \x1b[0m\x1b[107;30m You know nothing, Jon Snow! \x1b[0m",
+			"\x1b[47;30m 300 \x1b[0m\x1b[47;30m Tyrion     \x1b[0m\x1b[47;30m Lannister \x1b[0m\x1b[47;30m   5000 \x1b[0m\x1b[47;30m                             \x1b[0m",
+			"\x1b[46;30m     \x1b[0m\x1b[46;30m            \x1b[0m\x1b[46;30m TOTAL     \x1b[0m\x1b[46;30m  10000 \x1b[0m\x1b[46;30m                             \x1b[0m",
+		}, "\n"),
+		StyleColoredDark: strings.Join([]string{
+			"\x1b[96;40m   # \x1b[0m\x1b[96;40m FIRST NAME \x1b[0m\x1b[96;40m LAST NAME \x1b[0m\x1b[96;40m SALARY \x1b[0m\x1b[96;40m                             \x1b[0m",
+			"\x1b[37;40m   1 \x1b[0m\x1b[37;40m Arya       \x1b[0m\x1b[37;40m Stark     \x1b[0m\x1b[37;40m   3000 \x1b[0m\x1b[37;40m                             \x1b[0m",
+			"\x1b[97;40m  20 \x1b[0m\x1b[97;40m Jon        \x1b[0m\x1b[97;40m Snow      \x1b[0m\x1b[97;40m   2000 \x1b[0m\x1b[97;40m You know nothing, Jon Snow! \x1b[0m",
+			"\x1b[37;40m 300 \x1b[0m\x1b[37;40m Tyrion     \x1b[0m\x1b[37;40m Lannister \x1b[0m\x1b[37;40m   5000 \x1b[0m\x1b[37;40m                             \x1b[0m",
+			"\x1b[36;40m     \x1b[0m\x1b[36;40m            \x1b[0m\x1b[36;40m TOTAL     \x1b[0m\x1b[36;40m  10000 \x1b[0m\x1b[36;40m                             \x1b[0m",
+		}, "\n"),
+	}
+	for style, expectedOut := range styleToExpectedOutMap {
+		table.SetStyle(style)
+
+		out := table.Render()
+		assert.Equal(t, expectedOut, out, "Style: %s", style.Name)
+
+		// dump it out in a easy way to update the test if things are meant to
+		// change due to some other feature
+		if expectedOut != out {
+			for _, line := range strings.Split(out, "\n") {
+				fmt.Printf("%#v,\n", line)
+			}
+			fmt.Println()
+		}
+	}
+}
+
+func TestTable_Render_ColoredStyleAutoIndex(t *testing.T) {
+	table := Table{}
+	table.AppendHeader(testHeader)
+	table.AppendRows(testRows)
+	table.AppendFooter(testFooter)
+	table.SetAutoIndex(true)
+
+	styleToExpectedOutMap := map[Style]string{
+		StyleColoredBright: strings.Join([]string{
+			"\x1b[106;30m   \x1b[0m\x1b[106;30m   # \x1b[0m\x1b[106;30m FIRST NAME \x1b[0m\x1b[106;30m LAST NAME \x1b[0m\x1b[106;30m SALARY \x1b[0m\x1b[106;30m                             \x1b[0m",
+			"\x1b[106;30m 1 \x1b[0m\x1b[47;30m   1 \x1b[0m\x1b[47;30m Arya       \x1b[0m\x1b[47;30m Stark     \x1b[0m\x1b[47;30m   3000 \x1b[0m\x1b[47;30m                             \x1b[0m",
+			"\x1b[106;30m 2 \x1b[0m\x1b[107;30m  20 \x1b[0m\x1b[107;30m Jon        \x1b[0m\x1b[107;30m Snow      \x1b[0m\x1b[107;30m   2000 \x1b[0m\x1b[107;30m You know nothing, Jon Snow! \x1b[0m",
+			"\x1b[106;30m 3 \x1b[0m\x1b[47;30m 300 \x1b[0m\x1b[47;30m Tyrion     \x1b[0m\x1b[47;30m Lannister \x1b[0m\x1b[47;30m   5000 \x1b[0m\x1b[47;30m                             \x1b[0m",
+			"\x1b[106;30m   \x1b[0m\x1b[46;30m     \x1b[0m\x1b[46;30m            \x1b[0m\x1b[46;30m TOTAL     \x1b[0m\x1b[46;30m  10000 \x1b[0m\x1b[46;30m                             \x1b[0m",
+		}, "\n"),
+		StyleColoredDark: strings.Join([]string{
+			"\x1b[96;40m   \x1b[0m\x1b[96;40m   # \x1b[0m\x1b[96;40m FIRST NAME \x1b[0m\x1b[96;40m LAST NAME \x1b[0m\x1b[96;40m SALARY \x1b[0m\x1b[96;40m                             \x1b[0m",
+			"\x1b[96;40m 1 \x1b[0m\x1b[37;40m   1 \x1b[0m\x1b[37;40m Arya       \x1b[0m\x1b[37;40m Stark     \x1b[0m\x1b[37;40m   3000 \x1b[0m\x1b[37;40m                             \x1b[0m",
+			"\x1b[96;40m 2 \x1b[0m\x1b[97;40m  20 \x1b[0m\x1b[97;40m Jon        \x1b[0m\x1b[97;40m Snow      \x1b[0m\x1b[97;40m   2000 \x1b[0m\x1b[97;40m You know nothing, Jon Snow! \x1b[0m",
+			"\x1b[96;40m 3 \x1b[0m\x1b[37;40m 300 \x1b[0m\x1b[37;40m Tyrion     \x1b[0m\x1b[37;40m Lannister \x1b[0m\x1b[37;40m   5000 \x1b[0m\x1b[37;40m                             \x1b[0m",
+			"\x1b[96;40m   \x1b[0m\x1b[36;40m     \x1b[0m\x1b[36;40m            \x1b[0m\x1b[36;40m TOTAL     \x1b[0m\x1b[36;40m  10000 \x1b[0m\x1b[36;40m                             \x1b[0m",
+		}, "\n"),
+	}
+	for style, expectedOut := range styleToExpectedOutMap {
+		table.SetStyle(style)
+
+		out := table.Render()
+		assert.Equal(t, expectedOut, out, "Style: %s", style.Name)
+
+		// dump it out in a easy way to update the test if things are meant to
+		// change due to some other feature
+		if expectedOut != out {
+			for _, line := range strings.Split(out, "\n") {
+				fmt.Printf("%#v,\n", line)
+			}
+			fmt.Println()
+		}
+	}
 }
 
 func TestTable_Render_Empty(t *testing.T) {

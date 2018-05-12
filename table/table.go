@@ -46,10 +46,6 @@ type Table struct {
 	colorsHeader []*color.Color
 	// columnIsNonNumeric stores if a column contains non-numbers in all rows
 	columnIsNonNumeric []bool
-	// disableBorder disables drawing the border around the table
-	disableBorder bool
-	// enableSeparators enables drawing separators between each row
-	enableSeparators bool
 	// htmlCSSClass stores the HTML CSS Class to use on the <table> node
 	htmlCSSClass string
 	// maxColumnLengths stores the length of the longest line in each column
@@ -126,7 +122,7 @@ func (t *Table) SetAllowedRowLength(length int) {
 // spreadsheet application. NOTE: Appending a Header will void this
 // functionality.
 func (t *Table) SetAutoIndex(autoIndex bool) {
-	t.autoIndex = true
+	t.autoIndex = autoIndex
 }
 
 // SetCaption sets the text to be rendered just below the table. This will not
@@ -181,38 +177,12 @@ func (t *Table) SetVAlign(vAlign []text.VAlign) {
 	t.vAlign = vAlign
 }
 
-// ShowBorder enables or disables drawing the border around the Table. Example
-// of a table where it is disabled (enabled by default):
-//     # │ FIRST NAME │ LAST NAME │ SALARY │
-//  ─────┼────────────┼───────────┼────────┼─────────────────────────────
-//     1 │ Arya       │ Stark     │   3000 │
-//    20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow!
-//   300 │ Tyrion     │ Lannister │   5000 │
-//  ─────┼────────────┼───────────┼────────┼─────────────────────────────
-//       │            │ TOTAL     │  10000 │
-func (t *Table) ShowBorder(show bool) {
-	t.disableBorder = !show
-}
-
-// ShowSeparators enables or disable drawing separators between each row.
-// Example of a table where it is enabled (disabled by default):
-//  ┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
-//  │   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
-//  ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
-//  │   1 │ Arya       │ Stark     │   3000 │                             │
-//  ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
-//  │  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │
-//  ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
-//  │ 300 │ Tyrion     │ Lannister │   5000 │                             │
-//  ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
-//  │     │            │ TOTAL     │  10000 │                             │
-//  └─────┴────────────┴───────────┴────────┴─────────────────────────────┘
-func (t *Table) ShowSeparators(show bool) {
-	t.enableSeparators = show
-}
-
 // Style returns the current style.
 func (t *Table) Style() *Style {
+	if t.style == nil {
+		tempStyle := StyleDefault
+		t.style = &tempStyle
+	}
 	return t.style
 }
 
@@ -265,7 +235,7 @@ func (t *Table) getAllowedColumnLength(colIdx int) int {
 	return 0
 }
 
-func (t *Table) getAutoIndexColumnIDRow() RowStr {
+func (t *Table) getAutoIndexColumnIDs() RowStr {
 	row := make(RowStr, t.numColumns)
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
 		row[colIdx] = text.AlignCenter.Apply(util.AutoIndexColumnID(colIdx), maxColumnLength)
@@ -283,14 +253,9 @@ func (t *Table) getVAlign(colIdx int) text.VAlign {
 
 func (t *Table) initForRender() {
 	// pick a default style
-	if t.style == nil {
-		t.style = &StyleDefault
-	}
+	t.Style()
 
-	// turn off auto-index if a header is found
-	if t.autoIndex && len(t.rowsHeader) > 0 {
-		t.autoIndex = false
-	}
+	// auto-index: calc the index column's max length
 	t.autoIndexVIndexMaxLength = len(fmt.Sprint(len(t.rows)))
 
 	// default to a HTML CSS Class if none-defined
@@ -329,13 +294,13 @@ func (t *Table) initForRenderMaxColumnLength() {
 }
 
 func (t *Table) initForRenderRowSeparator() {
-	t.maxRowLength = (utf8.RuneCountInString(t.style.BoxMiddleSeparator) * t.numColumns) + 1
+	t.maxRowLength = (utf8.RuneCountInString(t.style.Box.MiddleSeparator) * t.numColumns) + 1
 	t.rowSeparator = make(RowStr, t.numColumns)
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
-		maxColumnLength += utf8.RuneCountInString(t.style.BoxPaddingLeft)
-		maxColumnLength += utf8.RuneCountInString(t.style.BoxPaddingRight)
+		maxColumnLength += utf8.RuneCountInString(t.style.Box.PaddingLeft)
+		maxColumnLength += utf8.RuneCountInString(t.style.Box.PaddingRight)
 		// TODO: handle case where BoxMiddleHorizontal is longer than 1 rune
-		horizontalSeparatorCol := strings.Repeat(t.style.BoxMiddleHorizontal, maxColumnLength)
+		horizontalSeparatorCol := strings.Repeat(t.style.Box.MiddleHorizontal, maxColumnLength)
 		t.maxRowLength += maxColumnLength
 		t.rowSeparator[colIdx] = horizontalSeparatorCol
 	}
