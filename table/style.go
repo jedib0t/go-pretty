@@ -9,10 +9,10 @@ import (
 // on how the Table gets rendered on the Console.
 type Style struct {
 	Name    string
-	Box     StyleBox
-	Color   StyleColor
-	Format  StyleFormat
-	Options StyleOptions
+	Box     BoxStyle
+	Color   ColorOptions
+	Format  FormatOptions
+	Options Options
 }
 
 var (
@@ -29,9 +29,9 @@ var (
 	StyleDefault = Style{
 		Name:    "StyleDefault",
 		Box:     StyleBoxDefault,
-		Color:   StyleColorDefault,
-		Format:  StyleFormatDefault,
-		Options: StyleOptionsDefault,
+		Color:   ColorOptionsDefault,
+		Format:  FormatOptionsDefault,
+		Options: OptionsDefault,
 	}
 
 	// StyleBold renders a Table like below:
@@ -47,9 +47,25 @@ var (
 	StyleBold = Style{
 		Name:    "StyleBold",
 		Box:     StyleBoxBold,
-		Color:   StyleColorDefault,
-		Format:  StyleFormatDefault,
-		Options: StyleOptionsDefault,
+		Color:   ColorOptionsDefault,
+		Format:  FormatOptionsDefault,
+		Options: OptionsDefault,
+	}
+
+	StyleColoredBright = Style{
+		Name:    "StyleColoredBright",
+		Box:     StyleBoxDefault,
+		Color:   ColorOptionsBright,
+		Format:  FormatOptionsDefault,
+		Options: OptionsNoBordersAndSeparators,
+	}
+
+	StyleColoredDark = Style{
+		Name:    "StyleColoredDark",
+		Box:     StyleBoxDefault,
+		Color:   ColorOptionsDark,
+		Format:  FormatOptionsDefault,
+		Options: OptionsNoBordersAndSeparators,
 	}
 
 	// StyleDouble renders a Table like below:
@@ -65,9 +81,9 @@ var (
 	StyleDouble = Style{
 		Name:    "StyleDouble",
 		Box:     StyleBoxDouble,
-		Color:   StyleColorDefault,
-		Format:  StyleFormatDefault,
-		Options: StyleOptionsDefault,
+		Color:   ColorOptionsDefault,
+		Format:  FormatOptionsDefault,
+		Options: OptionsDefault,
 	}
 
 	// StyleLight renders a Table like below:
@@ -83,9 +99,9 @@ var (
 	StyleLight = Style{
 		Name:    "StyleLight",
 		Box:     StyleBoxLight,
-		Color:   StyleColorDefault,
-		Format:  StyleFormatDefault,
-		Options: StyleOptionsDefault,
+		Color:   ColorOptionsDefault,
+		Format:  FormatOptionsDefault,
+		Options: OptionsDefault,
 	}
 
 	// StyleRounded renders a Table like below:
@@ -101,9 +117,9 @@ var (
 	StyleRounded = Style{
 		Name:    "StyleRounded",
 		Box:     StyleBoxRounded,
-		Color:   StyleColorDefault,
-		Format:  StyleFormatDefault,
-		Options: StyleOptionsDefault,
+		Color:   ColorOptionsDefault,
+		Format:  FormatOptionsDefault,
+		Options: OptionsDefault,
 	}
 
 	// styleTest renders a Table like below:
@@ -119,15 +135,15 @@ var (
 	styleTest = Style{
 		Name:    "styleTest",
 		Box:     styleBoxTest,
-		Color:   StyleColorDefault,
-		Format:  StyleFormatDefault,
-		Options: StyleOptionsDefault,
+		Color:   ColorOptionsDefault,
+		Format:  FormatOptionsDefault,
+		Options: OptionsDefault,
 	}
 )
 
-// StyleBox defines the characters/strings to use to render the borders and
+// BoxStyle defines the characters/strings to use to render the borders and
 // separators for the Table.
-type StyleBox struct {
+type BoxStyle struct {
 	BottomLeft       string
 	BottomRight      string
 	BottomSeparator  string
@@ -157,7 +173,7 @@ var (
 	//  +-----+------------+-----------+--------+-----------------------------+
 	//  |     |            | TOTAL     |  10000 |                             |
 	//  +-----+------------+-----------+--------+-----------------------------+
-	StyleBoxDefault = StyleBox{
+	StyleBoxDefault = BoxStyle{
 		BottomLeft:       "+",
 		BottomRight:      "+",
 		BottomSeparator:  "+",
@@ -186,7 +202,7 @@ var (
 	//  ┣━━━━━╋━━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
 	//  ┃     ┃            ┃ TOTAL     ┃  10000 ┃                             ┃
 	//  ┗━━━━━┻━━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-	StyleBoxBold = StyleBox{
+	StyleBoxBold = BoxStyle{
 		BottomLeft:       text.BoxBottomLeftBold,
 		BottomRight:      text.BoxBottomRightBold,
 		BottomSeparator:  text.BoxBottomSeparatorBold,
@@ -215,7 +231,7 @@ var (
 	//  ╠═════╬════════════╬═══════════╬════════╬═════════════════════════════╣
 	//  ║     ║            ║ TOTAL     ║  10000 ║                             ║
 	//  ╚═════╩════════════╩═══════════╩════════╩═════════════════════════════╝
-	StyleBoxDouble = StyleBox{
+	StyleBoxDouble = BoxStyle{
 		BottomLeft:       text.BoxBottomLeftDouble,
 		BottomRight:      text.BoxBottomRightDouble,
 		BottomSeparator:  text.BoxBottomSeparatorDouble,
@@ -244,7 +260,7 @@ var (
 	//  ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 	//  │     │            │ TOTAL     │  10000 │                             │
 	//  └─────┴────────────┴───────────┴────────┴─────────────────────────────┘
-	StyleBoxLight = StyleBox{
+	StyleBoxLight = BoxStyle{
 		BottomLeft:       text.BoxBottomLeft,
 		BottomRight:      text.BoxBottomRight,
 		BottomSeparator:  text.BoxBottomSeparator,
@@ -273,7 +289,7 @@ var (
 	//  ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 	//  │     │            │ TOTAL     │  10000 │                             │
 	//  ╰─────┴────────────┴───────────┴────────┴─────────────────────────────╯
-	StyleBoxRounded = StyleBox{
+	StyleBoxRounded = BoxStyle{
 		BottomLeft:       text.BoxBottomLeftRounded,
 		BottomRight:      text.BoxBottomRightRounded,
 		BottomSeparator:  text.BoxBottomSeparator,
@@ -302,7 +318,7 @@ var (
 	//  {-----+------------+-----------+--------+-----------------------------}
 	//  [<   >|<          >|<TOTAL    >|< 10000>|<                           >]
 	//  \-----v------------v-----------v--------v-----------------------------/
-	styleBoxTest = StyleBox{
+	styleBoxTest = BoxStyle{
 		BottomLeft:       "\\",
 		BottomRight:      "/",
 		BottomSeparator:  "v",
@@ -322,19 +338,19 @@ var (
 	}
 )
 
-// StyleColor defines the ANSI colors to use for parts of the Table.
-type StyleColor struct {
-	AutoIndexColumn text.Colors
-	FirstColumn     text.Colors
-	Footer          text.Colors
-	Header          text.Colors
-	Row             text.Colors
-	RowAlternate    text.Colors
+// ColorOptions defines the ANSI colors to use for parts of the Table.
+type ColorOptions struct {
+	AutoIndexColumn *color.Color
+	FirstColumn     *color.Color
+	Footer          *color.Color
+	Header          *color.Color
+	Row             *color.Color
+	RowAlternate    *color.Color
 }
 
 var (
-	// StyleColorDefault defines sensible ANSI color options - basically NONE.
-	StyleColorDefault = StyleColor{
+	// ColorOptionsDefault defines sensible ANSI color options - basically NONE.
+	ColorOptionsDefault = ColorOptions{
 		AutoIndexColumn: nil,
 		FirstColumn:     nil,
 		Footer:          nil,
@@ -343,50 +359,48 @@ var (
 		RowAlternate:    nil,
 	}
 
-	// StyleColorBright defines ANSI color options to render dark text on bright
-	// background.
-	StyleColorBright = StyleColor{
-		AutoIndexColumn: text.Colors{color.BgHiCyan, color.FgBlack},
+	// ColorOptionsBright defines ANSI color options to render dark text on
+	// bright background.
+	ColorOptionsBright = ColorOptions{
+		AutoIndexColumn: text.Colors{color.BgHiCyan, color.FgBlack}.GetColorizer(),
 		FirstColumn:     nil,
-		Footer:          text.Colors{color.BgCyan, color.FgBlack},
-		Header:          text.Colors{color.BgHiCyan, color.FgBlack},
-		Row:             text.Colors{color.BgWhite, color.FgBlack},
-		RowAlternate:    text.Colors{color.BgHiWhite, color.FgBlack},
+		Footer:          text.Colors{color.BgCyan, color.FgBlack}.GetColorizer(),
+		Header:          text.Colors{color.BgHiCyan, color.FgBlack}.GetColorizer(),
+		Row:             text.Colors{color.BgHiWhite, color.FgBlack}.GetColorizer(),
+		RowAlternate:    text.Colors{color.BgWhite, color.FgBlack}.GetColorizer(),
 	}
 
-	// StyleColorDark defines ANSI color options to render bright text on dark
+	// ColorOptionsDark defines ANSI color options to render bright text on dark
 	// background.
-	StyleColorDark = StyleColor{
-		AutoIndexColumn: text.Colors{color.FgHiCyan, color.BgBlack},
+	ColorOptionsDark = ColorOptions{
+		AutoIndexColumn: text.Colors{color.FgHiCyan, color.BgBlack}.GetColorizer(),
 		FirstColumn:     nil,
-		Footer:          text.Colors{color.FgCyan, color.BgBlack},
-		Header:          text.Colors{color.FgHiCyan, color.BgBlack},
-		Row:             text.Colors{color.FgWhite, color.BgBlack},
-		RowAlternate:    text.Colors{color.FgHiWhite, color.BgBlack},
+		Footer:          text.Colors{color.FgCyan, color.BgBlack}.GetColorizer(),
+		Header:          text.Colors{color.FgHiCyan, color.BgBlack}.GetColorizer(),
+		Row:             text.Colors{color.FgHiWhite, color.BgBlack}.GetColorizer(),
+		RowAlternate:    text.Colors{color.FgWhite, color.BgBlack}.GetColorizer(),
 	}
 )
 
-// StyleFormat defines the text-formatting to perform on parts of the Table.
-type StyleFormat struct {
-	FirstColumn text.Format
-	Footer      text.Format
-	Header      text.Format
-	Row         text.Format
+// FormatOptions defines the text-formatting to perform on parts of the Table.
+type FormatOptions struct {
+	Footer text.Format
+	Header text.Format
+	Row    text.Format
 }
 
 var (
-	// StyleFormatDefault defines sensible formatting options.
-	StyleFormatDefault = StyleFormat{
-		FirstColumn: text.FormatDefault,
-		Footer:      text.FormatUpper,
-		Header:      text.FormatUpper,
-		Row:         text.FormatDefault,
+	// FormatOptionsDefault defines sensible formatting options.
+	FormatOptionsDefault = FormatOptions{
+		Footer: text.FormatUpper,
+		Header: text.FormatUpper,
+		Row:    text.FormatDefault,
 	}
 )
 
-// StyleOptions defines the global options that determine how the Table is
+// Options defines the global options that determine how the Table is
 // rendered.
-type StyleOptions struct {
+type Options struct {
 	// DrawBorder enables or disables drawing the border around the Table.
 	// Example of a table where it is disabled:
 	//     # │ FIRST NAME │ LAST NAME │ SALARY │
@@ -451,12 +465,31 @@ type StyleOptions struct {
 }
 
 var (
-	// StyleOptionsDefault defines sensible global options.
-	StyleOptionsDefault = StyleOptions{
+	// OptionsDefault defines sensible global options.
+	OptionsDefault = Options{
 		DrawBorder:      true,
 		SeparateColumns: true,
 		SeparateFooter:  true,
 		SeparateHeader:  true,
+		SeparateRows:    false,
+	}
+
+	// OptionsNoBorders sets up a table without any borders.
+	OptionsNoBorders = Options{
+		DrawBorder:      false,
+		SeparateColumns: true,
+		SeparateFooter:  true,
+		SeparateHeader:  true,
+		SeparateRows:    false,
+	}
+
+	// OptionsNoBordersAndSeparators sets up a table without any borders or
+	// separators.
+	OptionsNoBordersAndSeparators = Options{
+		DrawBorder:      false,
+		SeparateColumns: false,
+		SeparateFooter:  false,
+		SeparateHeader:  false,
 		SeparateRows:    false,
 	}
 )

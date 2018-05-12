@@ -255,10 +255,7 @@ func (t *Table) initForRender() {
 	// pick a default style
 	t.Style()
 
-	// turn off auto-index if a header is found
-	if t.autoIndex && len(t.rowsHeader) > 0 {
-		t.autoIndex = false
-	}
+	// auto-index: calc the index column's max length
 	t.autoIndexVIndexMaxLength = len(fmt.Sprint(len(t.rows)))
 
 	// default to a HTML CSS Class if none-defined

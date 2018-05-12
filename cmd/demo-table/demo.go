@@ -298,7 +298,7 @@ func main() {
 	//==========================================================================
 	funkyStyle := table.Style{
 		Name: "funkyStyle",
-		Box: table.StyleBox{
+		Box: table.BoxStyle{
 			BottomLeft:       "\\",
 			BottomRight:      "/",
 			BottomSeparator:  "v",
@@ -318,7 +318,7 @@ func main() {
 		},
 	}
 	t.SetStyle(funkyStyle)
-	t.Style().Format = table.StyleFormat{
+	t.Style().Format = table.FormatOptions{
 		Footer: text.FormatLower,
 		Header: text.FormatLower,
 		Row:    text.FormatUpper,
@@ -390,7 +390,7 @@ func main() {
 	// I don't like borders!
 	//==========================================================================
 	t.Style().Options.DrawBorder = false
-	t.SetCaption("Table without Borders.\n")
+	t.SetCaption("Table without Options.\n")
 	fmt.Println(t.Render())
 	//   # ┃ FIRST NAME ┃ LAST NAME ┃ SALARY ┃
 	//━━━━━╋━━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -399,7 +399,7 @@ func main() {
 	// 300 ┃ Tyrion     ┃ Lannister ┃   5000 ┃
 	//━━━━━╋━━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 	//     ┃            ┃ TOTAL     ┃  10000 ┃
-	//Table without Borders.
+	//Table without Options.
 	//==========================================================================
 
 	//==========================================================================
@@ -407,7 +407,7 @@ func main() {
 	//==========================================================================
 	t.Style().Options.DrawBorder = true
 	t.Style().Options.SeparateRows = true
-	t.SetCaption("Table with Borders Everywhere!\n")
+	t.SetCaption("Table with Options Everywhere!\n")
 	fmt.Println(t.Render())
 	//┏━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 	//┃   # ┃ FIRST NAME ┃ LAST NAME ┃ SALARY ┃                             ┃
@@ -420,7 +420,7 @@ func main() {
 	//┣━━━━━╋━━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
 	//┃     ┃            ┃ TOTAL     ┃  10000 ┃                             ┃
 	//┗━━━━━┻━━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-	//Table with Borders Everywhere!
+	//Table with Options Everywhere!
 	//==========================================================================
 
 	//==========================================================================
@@ -431,14 +431,14 @@ func main() {
 	t.Style().Options.SeparateFooter = false
 	t.Style().Options.SeparateHeader = false
 	t.Style().Options.SeparateRows = false
-	t.SetCaption("Table without Any Borders or Separators!\n")
+	t.SetCaption("Table without Any Options or Separators!\n")
 	fmt.Println(t.Render())
 	//   #  FIRST NAME  LAST NAME  SALARY
 	//   1  Arya        Stark        3000
 	//  20  Jon         Snow         2000  You know nothing, Jon Snow!
 	// 300  Tyrion      Lannister    5000
 	//                  TOTAL       10000
-	//Table without Any Borders or Separators!
+	//Table without Any Options or Separators!
 	//==========================================================================
 
 	//==========================================================================
