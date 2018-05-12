@@ -114,7 +114,9 @@ Or if you want to use a full-color mode, and don't care for boxes, use:
     t.SetStyle(table.StyleColoredBright)
     t.Render()
 ```
-to get:<br/><img src="images/table-StyleColoredBright.png" width="480px"/>
+to get:
+
+<img src="images/table-StyleColoredBright.png" width="480px"/>
 
 ### Roll your own Style
 
