@@ -400,14 +400,38 @@ type StyleOptions struct {
 
 	// SeparateColumns enables or disable drawing border between columns.
 	// Example of a table where it is disabled:
+	//  ┌─────────────────────────────────────────────────────────────────┐
+	//  │   #  FIRST NAME  LAST NAME  SALARY                              │
+	//  ├─────────────────────────────────────────────────────────────────┤
+	//  │   1  Arya        Stark        3000                              │
+	//  │  20  Jon         Snow         2000  You know nothing, Jon Snow! │
+	//  │ 300  Tyrion      Lannister    5000                              │
+	//  │                  TOTAL       10000                              │
+	//  └─────────────────────────────────────────────────────────────────┘
 	SeparateColumns bool
 
 	// SeparateFooter enables or disable drawing border between the footer and
 	// the rows. Example of a table where it is disabled:
+	//  ┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
+	//  │   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
+	//  ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+	//  │   1 │ Arya       │ Stark     │   3000 │                             │
+	//  │  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │
+	//  │ 300 │ Tyrion     │ Lannister │   5000 │                             │
+	//  │     │            │ TOTAL     │  10000 │                             │
+	//  └─────┴────────────┴───────────┴────────┴─────────────────────────────┘
 	SeparateFooter bool
 
 	// SeparateHeader enables or disable drawing border between the header and
 	// the rows. Example of a table where it is disabled:
+	//  ┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
+	//  │   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
+	//  │   1 │ Arya       │ Stark     │   3000 │                             │
+	//  │  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │
+	//  │ 300 │ Tyrion     │ Lannister │   5000 │                             │
+	//  ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+	//  │     │            │ TOTAL     │  10000 │                             │
+	//  └─────┴────────────┴───────────┴────────┴─────────────────────────────┘
 	SeparateHeader bool
 
 	// SeparateRows enables or disables drawing separators between each row.
