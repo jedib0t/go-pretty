@@ -344,12 +344,12 @@ var (
 
 // ColorOptions defines the ANSI colors to use for parts of the Table.
 type ColorOptions struct {
-	AutoIndexColumn *color.Color
-	FirstColumn     *color.Color
-	Footer          *color.Color
-	Header          *color.Color
-	Row             *color.Color
-	RowAlternate    *color.Color
+	AutoIndexColumn text.Colors
+	FirstColumn     text.Colors
+	Footer          text.Colors
+	Header          text.Colors
+	Row             text.Colors
+	RowAlternate    text.Colors
 }
 
 var (
@@ -366,23 +366,23 @@ var (
 	// ColorOptionsBright defines ANSI color options to render dark text on
 	// bright background.
 	ColorOptionsBright = ColorOptions{
-		AutoIndexColumn: text.Colors{color.BgHiCyan, color.FgBlack}.GetColorizer(),
+		AutoIndexColumn: text.Colors{color.BgHiCyan, color.FgBlack},
 		FirstColumn:     nil,
-		Footer:          text.Colors{color.BgCyan, color.FgBlack}.GetColorizer(),
-		Header:          text.Colors{color.BgHiCyan, color.FgBlack}.GetColorizer(),
-		Row:             text.Colors{color.BgHiWhite, color.FgBlack}.GetColorizer(),
-		RowAlternate:    text.Colors{color.BgWhite, color.FgBlack}.GetColorizer(),
+		Footer:          text.Colors{color.BgCyan, color.FgBlack},
+		Header:          text.Colors{color.BgHiCyan, color.FgBlack},
+		Row:             text.Colors{color.BgHiWhite, color.FgBlack},
+		RowAlternate:    text.Colors{color.BgWhite, color.FgBlack},
 	}
 
 	// ColorOptionsDark defines ANSI color options to render bright text on dark
 	// background.
 	ColorOptionsDark = ColorOptions{
-		AutoIndexColumn: text.Colors{color.FgHiCyan, color.BgBlack}.GetColorizer(),
+		AutoIndexColumn: text.Colors{color.FgHiCyan, color.BgBlack},
 		FirstColumn:     nil,
-		Footer:          text.Colors{color.FgCyan, color.BgBlack}.GetColorizer(),
-		Header:          text.Colors{color.FgHiCyan, color.BgBlack}.GetColorizer(),
-		Row:             text.Colors{color.FgHiWhite, color.BgBlack}.GetColorizer(),
-		RowAlternate:    text.Colors{color.FgWhite, color.BgBlack}.GetColorizer(),
+		Footer:          text.Colors{color.FgCyan, color.BgBlack},
+		Header:          text.Colors{color.FgHiCyan, color.BgBlack},
+		Row:             text.Colors{color.FgHiWhite, color.BgBlack},
+		RowAlternate:    text.Colors{color.FgWhite, color.BgBlack},
 	}
 )
 

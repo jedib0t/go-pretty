@@ -19,6 +19,10 @@ type renderHint struct {
 	isSeparatorRow    bool
 }
 
+func (h *renderHint) isRegularRow() bool {
+	return !h.isHeaderRow && !h.isFooterRow
+}
+
 // Render renders the Table in a human-readable "pretty" format. Example:
 //  ┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
 //  │   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
@@ -125,13 +129,13 @@ func (t *Table) renderColumnColorized(out *strings.Builder, rowNum int, colIdx i
 	if colIdx < len(colors) && colors[colIdx] != nil {
 		out.WriteString(colors[colIdx].Sprint(colStr))
 	} else if hint.isHeaderRow && t.style.Color.Header != nil {
-		out.WriteString(t.style.Color.Header.Sprintf(colStr))
+		out.WriteString(t.style.Color.Header.Sprint(colStr))
 	} else if hint.isFooterRow && t.style.Color.Footer != nil {
-		out.WriteString(t.style.Color.Footer.Sprintf(colStr))
-	} else if rowNum%2 == 0 && t.style.Color.Row != nil {
-		out.WriteString(t.style.Color.Row.Sprint(colStr))
-	} else if rowNum%2 == 1 && t.style.Color.RowAlternate != nil {
+		out.WriteString(t.style.Color.Footer.Sprint(colStr))
+	} else if hint.isRegularRow() && rowNum%2 == 1 && t.style.Color.RowAlternate != nil {
 		out.WriteString(t.style.Color.RowAlternate.Sprint(colStr))
+	} else if hint.isRegularRow() && t.style.Color.Row != nil {
+		out.WriteString(t.style.Color.Row.Sprint(colStr))
 	} else {
 		out.WriteString(colStr)
 	}
