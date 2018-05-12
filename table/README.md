@@ -114,8 +114,7 @@ Or if you want to use a full-color mode, and don't care for boxes, use:
     t.SetStyle(table.StyleColoredBright)
     t.Render()
 ```
-to get:
-<img src="images/table-StyleColoredBright.png" width="480px"/>
+to get:<br/><img src="images/table-StyleColoredBright.png" width="480px"/>
 
 #### Roll your own Style
 
@@ -230,7 +229,7 @@ set through `SetStyle()`.
 
 ### Render As ...
 
-Tables can be rendered in other common format:
+Tables can be rendered in other common formats such as:
 
 #### ... CSV
 
