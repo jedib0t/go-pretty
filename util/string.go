@@ -2,7 +2,6 @@ package util
 
 import (
 	"strings"
-	"fmt"
 	"unicode/utf8"
 )
 
@@ -162,9 +161,6 @@ func WrapText(s string, n int) string {
 			lineIdx = 0
 		}
 		out.WriteRune(c)
-		if c == 'S' {
-			fmt.Sprint(c)
-		}
 		if c == '\n' {
 			lineIdx = 0
 		} else if !isEscSeq && idx < sLen {
