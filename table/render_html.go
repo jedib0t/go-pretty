@@ -5,6 +5,12 @@ import (
 	"strings"
 )
 
+const (
+	// DefaultHTMLCSSClass stores the css-class to use when none-provided via
+	// SetHTMLCSSClass(cssClass string).
+	DefaultHTMLCSSClass = "go-pretty-table"
+)
+
 // RenderHTML renders the Table in HTML format. Example:
 //  <table class="go-pretty-table">
 //    <thead>
@@ -55,7 +61,11 @@ func (t *Table) RenderHTML() string {
 	var out strings.Builder
 	if t.numColumns > 0 {
 		out.WriteString("<table class=\"")
-		out.WriteString(t.htmlCSSClass)
+		if t.htmlCSSClass != "" {
+			out.WriteString(t.htmlCSSClass)
+		} else {
+			out.WriteString(DefaultHTMLCSSClass)
+		}
 		out.WriteString("\">\n")
 		t.htmlRenderRows(&out, t.rowsHeader, true, false)
 		t.htmlRenderRows(&out, t.rows, false, false)

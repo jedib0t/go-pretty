@@ -9,6 +9,12 @@ import (
 	"github.com/jedib0t/go-pretty/util"
 )
 
+// Constants
+const (
+	escapeStart = rune(27) // \x1b
+	escapeStop  = 'm'
+)
+
 // Align denotes how text is to be aligned horizontally.
 type Align int
 
@@ -29,22 +35,24 @@ const (
 //  * AlignRight.Apply("Jon Snow",   12) returns "    Jon Snow"
 func (a Align) Apply(text string, maxLength int) string {
 	text = a.trimString(text)
-	textLength := utf8.RuneCountInString(text)
+	sLen := utf8.RuneCountInString(text)
+	sLenWoE := util.RuneCountWithoutEscapeSeq(text)
+	numEscChars := sLen - sLenWoE
 
 	// now, align the text
 	switch a {
 	case AlignDefault, AlignLeft:
-		return fmt.Sprintf("%-"+strconv.Itoa(maxLength)+"s", text)
+		return fmt.Sprintf("%-"+strconv.Itoa(maxLength+numEscChars)+"s", text)
 	case AlignCenter:
-		if textLength < maxLength {
-			// left pad with half the number of spaces needed before using %s
-			return fmt.Sprintf("%"+strconv.Itoa(maxLength)+"s",
-				text+strings.Repeat(" ", int((maxLength-textLength)/2)))
+		if sLenWoE < maxLength {
+			// left pad with half the number of spaces needed before using %text
+			return fmt.Sprintf("%"+strconv.Itoa(maxLength+numEscChars)+"s",
+				text+strings.Repeat(" ", int((maxLength-sLenWoE)/2)))
 		}
 	case AlignJustify:
-		return a.justifyText(text, textLength, maxLength)
+		return a.justifyText(text, sLenWoE, maxLength)
 	}
-	return fmt.Sprintf("%"+strconv.Itoa(maxLength)+"s", text)
+	return fmt.Sprintf("%"+strconv.Itoa(maxLength+numEscChars)+"s", text)
 }
 
 // HTMLProperty returns the equivalent HTML horizontal-align tag property.

@@ -12,6 +12,7 @@ func TestGetLongestLineLength(t *testing.T) {
 	assert.Equal(t, 5, GetLongestLineLength("Ghost"))
 	assert.Equal(t, 6, GetLongestLineLength("Winter\nIs\nComing"))
 	assert.Equal(t, 7, GetLongestLineLength("Mother\nOf\nDragons"))
+	assert.Equal(t, 7, GetLongestLineLength("\x1b[33mMother\x1b[0m\nOf\nDragons"))
 }
 
 func TestInsertRuneEveryN(t *testing.T) {
@@ -20,6 +21,11 @@ func TestInsertRuneEveryN(t *testing.T) {
 	assert.Equal(t, "Gho-st", InsertRuneEveryN("Ghost", '-', 3))
 	assert.Equal(t, "Ghos-t", InsertRuneEveryN("Ghost", '-', 4))
 	assert.Equal(t, "Ghost", InsertRuneEveryN("Ghost", '-', 5))
+	assert.Equal(t, "\x1b[33mG-h-o-s-t\x1b[0m", InsertRuneEveryN("\x1b[33mGhost\x1b[0m", '-', 1))
+	assert.Equal(t, "\x1b[33mGh-os-t\x1b[0m", InsertRuneEveryN("\x1b[33mGhost\x1b[0m", '-', 2))
+	assert.Equal(t, "\x1b[33mGho-st\x1b[0m", InsertRuneEveryN("\x1b[33mGhost\x1b[0m", '-', 3))
+	assert.Equal(t, "\x1b[33mGhos-t\x1b[0m", InsertRuneEveryN("\x1b[33mGhost\x1b[0m", '-', 4))
+	assert.Equal(t, "\x1b[33mGhost\x1b[0m", InsertRuneEveryN("\x1b[33mGhost\x1b[0m", '-', 5))
 }
 
 func TestRuneCountWithoutEscapeSeq(t *testing.T) {
@@ -48,6 +54,8 @@ func TestWrapText(t *testing.T) {
 	assert.Equal(t, "Jo\nn\nSn\now", WrapText("Jon\nSnow", 2))
 	assert.Equal(t, "Jo\nn\nSn\now\n", WrapText("Jon\nSnow\n", 2))
 	assert.Equal(t, "Jon\nSno\nw\n", WrapText("Jon\nSnow\n", 3))
+	assert.Equal(t, "\x1b[33mJon\x1b[0m\nSno\nw", WrapText("\x1b[33mJon\x1b[0m\nSnow", 3))
+	assert.Equal(t, "\x1b[33mJon\x1b[0m\nSno\nw\n", WrapText("\x1b[33mJon\x1b[0m\nSnow\n", 3))
 
 	complexIn := "+---+------+-------+------+\n| 1 | Arya | Stark | 3000 |\n+---+------+-------+------+"
 	assert.Equal(t, complexIn, WrapText(complexIn, 27))

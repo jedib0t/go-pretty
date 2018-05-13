@@ -220,14 +220,21 @@ func TestTable_Render_ColoredStyle(t *testing.T) {
 	table.SetStyle(StyleColoredBright)
 	table.Style().Color.FirstColumn = StyleColoredBright.Color.AutoIndexColumn
 
+	// colored is simple; lets render the colored table into another table
+	tableOuter := Table{}
+	tableOuter.AppendRow(Row{table.Render()})
+	tableOuter.SetStyle(StyleRounded)
+
 	expectedOut := strings.Join([]string{
-		"\x1b[106;30m   # \x1b[0m\x1b[106;30m FIRST NAME \x1b[0m\x1b[106;30m LAST NAME \x1b[0m\x1b[106;30m SALARY \x1b[0m\x1b[106;30m                             \x1b[0m",
-		"\x1b[106;30m   1 \x1b[0m\x1b[47;30m Arya       \x1b[0m\x1b[47;30m Stark     \x1b[0m\x1b[47;30m   3000 \x1b[0m\x1b[47;30m                             \x1b[0m",
-		"\x1b[106;30m  20 \x1b[0m\x1b[107;30m Jon        \x1b[0m\x1b[107;30m Snow      \x1b[0m\x1b[107;30m   2000 \x1b[0m\x1b[107;30m You know nothing, Jon Snow! \x1b[0m",
-		"\x1b[106;30m 300 \x1b[0m\x1b[47;30m Tyrion     \x1b[0m\x1b[47;30m Lannister \x1b[0m\x1b[47;30m   5000 \x1b[0m\x1b[47;30m                             \x1b[0m",
-		"\x1b[46;30m     \x1b[0m\x1b[46;30m            \x1b[0m\x1b[46;30m TOTAL     \x1b[0m\x1b[46;30m  10000 \x1b[0m\x1b[46;30m                             \x1b[0m",
+		"╭───────────────────────────────────────────────────────────────────╮",
+		"│ \x1b[106;30m   # \x1b[0m\x1b[106;30m FIRST NAME \x1b[0m\x1b[106;30m LAST NAME \x1b[0m\x1b[106;30m SALARY \x1b[0m\x1b[106;30m                             \x1b[0m │",
+		"│ \x1b[106;30m   1 \x1b[0m\x1b[47;30m Arya       \x1b[0m\x1b[47;30m Stark     \x1b[0m\x1b[47;30m   3000 \x1b[0m\x1b[47;30m                             \x1b[0m │",
+		"│ \x1b[106;30m  20 \x1b[0m\x1b[107;30m Jon        \x1b[0m\x1b[107;30m Snow      \x1b[0m\x1b[107;30m   2000 \x1b[0m\x1b[107;30m You know nothing, Jon Snow! \x1b[0m │",
+		"│ \x1b[106;30m 300 \x1b[0m\x1b[47;30m Tyrion     \x1b[0m\x1b[47;30m Lannister \x1b[0m\x1b[47;30m   5000 \x1b[0m\x1b[47;30m                             \x1b[0m │",
+		"│ \x1b[46;30m     \x1b[0m\x1b[46;30m            \x1b[0m\x1b[46;30m TOTAL     \x1b[0m\x1b[46;30m  10000 \x1b[0m\x1b[46;30m                             \x1b[0m │",
+		"╰───────────────────────────────────────────────────────────────────╯",
 	}, "\n")
-	out := table.Render()
+	out := tableOuter.Render()
 	assert.Equal(t, expectedOut, out)
 
 	// dump it out in a easy way to update the test if things are meant to
