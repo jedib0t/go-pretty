@@ -2,11 +2,11 @@ package text
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/util"
-	"strconv"
-	"strings"
 )
 
 // Colors represents an array of color.Attributes to define the color to

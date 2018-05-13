@@ -3,11 +3,11 @@ package table
 import (
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/text"
 	"github.com/stretchr/testify/assert"
-	"unicode/utf8"
 )
 
 var (

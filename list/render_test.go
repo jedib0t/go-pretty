@@ -2,11 +2,11 @@ package list
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"sort"
-	"strings"
 )
 
 func TestList_Render(t *testing.T) {

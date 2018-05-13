@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/jedib0t/go-pretty/list"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/jedib0t/go-pretty/text"
