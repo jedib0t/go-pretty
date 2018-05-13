@@ -7,9 +7,11 @@ import (
 
 // Constants
 const (
-	colorReset  = "\x1b[0m"
-	escapeStart = rune(27) // \x1b
-	escapeStop  = 'm'
+	EscapeReset     = EscapeStart + "0" + EscapeStop
+	EscapeStart     = "\x1b["
+	EscapeStartRune = rune(27) // \x1b
+	EscapeStop      = "m"
+	EscapeStopRune  = 'm'
 )
 
 // GetLongestLineLength returns the length of the longest "line" within the
@@ -18,9 +20,9 @@ const (
 func GetLongestLineLength(s string) int {
 	maxLength, currLength, isEscSeq := 0, 0, false
 	for _, c := range s {
-		if c == escapeStart {
+		if c == EscapeStartRune {
 			isEscSeq = true
-		} else if isEscSeq && c == escapeStop {
+		} else if isEscSeq && c == EscapeStopRune {
 			isEscSeq = false
 			continue
 		}
@@ -53,7 +55,7 @@ func InsertRuneEveryN(s string, r rune, n int) string {
 
 	outLen, isEscSeq := 0, false
 	for idx, c := range s {
-		if c == escapeStart {
+		if c == EscapeStartRune {
 			isEscSeq = true
 		}
 
@@ -65,7 +67,7 @@ func InsertRuneEveryN(s string, r rune, n int) string {
 			outLen++
 		}
 
-		if isEscSeq && c == escapeStop {
+		if isEscSeq && c == EscapeStopRune {
 			isEscSeq = false
 		}
 	}
@@ -81,10 +83,10 @@ func InsertRuneEveryN(s string, r rune, n int) string {
 func RuneCountWithoutEscapeSeq(s string) int {
 	count, isEscSeq := 0, false
 	for _, c := range s {
-		if c == escapeStart {
+		if c == EscapeStartRune {
 			isEscSeq = true
 		} else if isEscSeq {
-			if c == escapeStop {
+			if c == EscapeStopRune {
 				isEscSeq = false
 			}
 		} else {
@@ -111,13 +113,13 @@ func TrimTextWithoutEscapeSeq(s string, n int) string {
 	outLen, isEscSeq, lastEscSeq := 0, false, strings.Builder{}
 	for _, sChr := range s {
 		out.WriteRune(sChr)
-		if sChr == escapeStart {
+		if sChr == EscapeStartRune {
 			isEscSeq = true
 			lastEscSeq.Reset()
 			lastEscSeq.WriteRune(sChr)
 		} else if isEscSeq {
 			lastEscSeq.WriteRune(sChr)
-			if sChr == escapeStop {
+			if sChr == EscapeStopRune {
 				isEscSeq = false
 			}
 		} else {
@@ -127,8 +129,8 @@ func TrimTextWithoutEscapeSeq(s string, n int) string {
 			}
 		}
 	}
-	if lastEscSeq.Len() > 0 && lastEscSeq.String() != colorReset {
-		out.WriteString(colorReset)
+	if lastEscSeq.Len() > 0 && lastEscSeq.String() != EscapeReset {
+		out.WriteString(EscapeReset)
 	}
 	return out.String()
 }
@@ -152,7 +154,7 @@ func WrapText(s string, n int) string {
 	out.Grow(sLen + (sLen / n))
 	lineIdx, isEscSeq := 0, false
 	for idx, c := range s {
-		if c == escapeStart {
+		if c == EscapeStartRune {
 			isEscSeq = true
 		}
 
@@ -167,7 +169,7 @@ func WrapText(s string, n int) string {
 			lineIdx++
 		}
 
-		if isEscSeq && c == escapeStop {
+		if isEscSeq && c == EscapeStopRune {
 			isEscSeq = false
 		}
 	}

@@ -5,7 +5,6 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/text"
 	"github.com/jedib0t/go-pretty/util"
 )
@@ -71,7 +70,7 @@ func (t *Table) Render() string {
 	return t.render(&out)
 }
 
-func (t *Table) renderColumn(out *strings.Builder, rowNum int, row RowStr, colIdx int, maxColumnLength int, colors []*color.Color, format text.Format, hint renderHint) {
+func (t *Table) renderColumn(out *strings.Builder, rowNum int, row RowStr, colIdx int, maxColumnLength int, colors []text.Colors, format text.Format, hint renderHint) {
 	// when working on the first column, and autoIndex is true, insert a new
 	// column with the row number on it.
 	if colIdx == 0 && t.autoIndex {
@@ -124,8 +123,7 @@ func (t *Table) renderColumnAutoIndex(out *strings.Builder, rowNum int, hint ren
 	t.renderColumnSeparator(out, hint)
 }
 
-func (t *Table) renderColumnColorized(out *strings.Builder, rowNum int, colIdx int, colStr string, colors []*color.Color, hint renderHint) {
-	// colorize and then render the column content
+func (t *Table) renderColumnColorized(out *strings.Builder, rowNum int, colIdx int, colStr string, colors []text.Colors, hint renderHint) {
 	if colIdx < len(colors) && colors[colIdx] != nil {
 		out.WriteString(colors[colIdx].Sprint(colStr))
 	} else if hint.isHeaderRow && t.style.Color.Header != nil {
@@ -164,7 +162,7 @@ func (t *Table) renderColumnSeparator(out *strings.Builder, hint renderHint) {
 	}
 }
 
-func (t *Table) renderLine(out *strings.Builder, rowNum int, row RowStr, colors []*color.Color, format text.Format, hint renderHint) {
+func (t *Table) renderLine(out *strings.Builder, rowNum int, row RowStr, colors []text.Colors, format text.Format, hint renderHint) {
 	if len(row) > 0 {
 		// if the output has content, it means that this call is working on line
 		// number 2 or more; separate them with a newline
@@ -233,7 +231,7 @@ func (t *Table) renderMarginRight(out *strings.Builder, hint renderHint) {
 	}
 }
 
-func (t *Table) renderRow(out *strings.Builder, rowNum int, row RowStr, colors []*color.Color, format text.Format, hint renderHint) {
+func (t *Table) renderRow(out *strings.Builder, rowNum int, row RowStr, colors []text.Colors, format text.Format, hint renderHint) {
 	// fit every column into the allowedColumnLength/maxColumnLength limit and
 	// in the process find the max. number of lines in any column in this row
 	colMaxLines := 0
@@ -266,7 +264,7 @@ func (t *Table) renderRow(out *strings.Builder, rowNum int, row RowStr, colors [
 	}
 }
 
-func (t *Table) renderRows(out *strings.Builder, rows []RowStr, colors []*color.Color, format text.Format, hint renderHint) {
+func (t *Table) renderRows(out *strings.Builder, rows []RowStr, colors []text.Colors, format text.Format, hint renderHint) {
 	for idx, row := range rows {
 		t.renderRow(out, idx+1, row, colors, format, hint)
 		if t.style.Options.SeparateRows && idx < len(rows)-1 {
