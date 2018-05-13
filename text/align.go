@@ -9,12 +9,6 @@ import (
 	"github.com/jedib0t/go-pretty/util"
 )
 
-// Constants
-const (
-	escapeStart = rune(27) // \x1b
-	escapeStop  = 'm'
-)
-
 // Align denotes how text is to be aligned horizontally.
 type Align int
 

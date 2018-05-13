@@ -1,8 +1,9 @@
 package list
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestList_RenderHTML(t *testing.T) {

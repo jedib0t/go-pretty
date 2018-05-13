@@ -6,7 +6,6 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/text"
 	"github.com/jedib0t/go-pretty/util"
 )
@@ -33,11 +32,11 @@ type Table struct {
 	// get used when rendered as a CSV
 	caption string
 	// colors contains Colorization options for the body
-	colors []*color.Color
+	colors []text.Colors
 	// colorsFooter contains Colorization options for the footer
-	colorsFooter []*color.Color
+	colorsFooter []text.Colors
 	// colorsHeader contains Colorization options for the header
-	colorsHeader []*color.Color
+	colorsHeader []text.Colors
 	// columnIsNonNumeric stores if a column contains non-numbers in all rows
 	columnIsNonNumeric []bool
 	// htmlCSSClass stores the HTML CSS Class to use on the <table> node
@@ -126,27 +125,18 @@ func (t *Table) SetCaption(format string, a ...interface{}) {
 }
 
 // SetColors sets the colors for the rows in the Body.
-func (t *Table) SetColors(textColors []text.Colors) {
-	t.colors = make([]*color.Color, len(textColors))
-	for idx, textColor := range textColors {
-		t.colors[idx] = textColor.GetColorizer()
-	}
+func (t *Table) SetColors(colors []text.Colors) {
+	t.colors = colors
 }
 
 // SetColorsFooter sets the colors for the rows in the Footer.
-func (t *Table) SetColorsFooter(textColors []text.Colors) {
-	t.colorsFooter = make([]*color.Color, len(textColors))
-	for idx, textColor := range textColors {
-		t.colorsFooter[idx] = textColor.GetColorizer()
-	}
+func (t *Table) SetColorsFooter(colors []text.Colors) {
+	t.colorsFooter = colors
 }
 
 // SetColorsHeader sets the colors for the rows in the Header.
-func (t *Table) SetColorsHeader(textColors []text.Colors) {
-	t.colorsHeader = make([]*color.Color, len(textColors))
-	for idx, textColor := range textColors {
-		t.colorsHeader[idx] = textColor.GetColorizer()
-	}
+func (t *Table) SetColorsHeader(colors []text.Colors) {
+	t.colorsHeader = colors
 }
 
 // SetHTMLCSSClass sets the the HTML CSS Class to use on the <table> node

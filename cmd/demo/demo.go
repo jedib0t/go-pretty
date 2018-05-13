@@ -85,8 +85,8 @@ func demoTable() string {
 	tw := table.NewWriter()
 	tw.AppendRows(content)
 	tw.SetAlign([]text.Align{text.AlignRight, text.AlignLeft})
-	tw.SetStyle(table.StyleLight)
-	tw.Style().Options.SeparateRows = true
+	tw.SetStyle(table.StyleColoredBright)
+	tw.Style().Options.SeparateRows = false
 	tw.SetVAlign([]text.VAlign{text.VAlignMiddle, text.VAlignDefault})
 	return tw.Render()
 }
@@ -103,5 +103,6 @@ func main() {
 	})
 	demo.SetCaption("Generated with go-pretty; MIT License; Copyright (c) 2018 jedib0t.")
 	demo.SetStyle(table.StyleDouble)
+	demo.Style().Options.SeparateRows = true
 	fmt.Println(demo.Render())
 }
