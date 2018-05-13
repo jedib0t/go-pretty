@@ -49,8 +49,8 @@ func demoTable() string {
 		table.StyleDefault,
 		table.StyleLight,
 		table.StyleBold,
-		table.StyleDouble,
 		table.StyleRounded,
+		table.StyleColoredBright,
 	}
 	header := table.Row{"#", "First Name", "Last Name", "Salary"}
 	rows1And2 := []table.Row{

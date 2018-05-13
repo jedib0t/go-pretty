@@ -16,14 +16,21 @@ const (
 // argument string. For ex.:
 //  GetLongestLineLength("Ghost!\nCome back here!\nRight now!") == 15
 func GetLongestLineLength(s string) int {
-	maxLength, currLength := 0, 0
+	maxLength, currLength, isEscSeq := 0, 0, false
 	for _, c := range s {
+		if c == escapeStart {
+			isEscSeq = true
+		} else if isEscSeq && c == escapeStop {
+			isEscSeq = false
+			continue
+		}
+
 		if c == '\n' {
 			if currLength > maxLength {
 				maxLength = currLength
 			}
 			currLength = 0
-		} else {
+		} else if !isEscSeq {
 			currLength++
 		}
 	}
@@ -39,15 +46,27 @@ func GetLongestLineLength(s string) int {
 //  InsertRuneEveryN("Ghost", '-', 3) == "Gho-st"
 //  InsertRuneEveryN("Ghost", '-', 4) == "Ghos-t"
 //  InsertRuneEveryN("Ghost", '-', 5) == "Ghost"
-func InsertRuneEveryN(s string, c rune, n int) string {
-	sLen := utf8.RuneCountInString(s)
+func InsertRuneEveryN(s string, r rune, n int) string {
+	sLen := RuneCountWithoutEscapeSeq(s)
 	var out strings.Builder
 	out.Grow(sLen + (sLen / n))
 
-	for scIdx, sc := range s {
-		out.WriteRune(sc)
-		if ((scIdx+1)%n) == 0 && scIdx != (sLen-1) {
-			out.WriteRune(c)
+	outLen, isEscSeq := 0, false
+	for idx, c := range s {
+		if c == escapeStart {
+			isEscSeq = true
+		}
+
+		if !isEscSeq && outLen > 0 && (outLen%n) == 0 && idx != sLen {
+			out.WriteRune(r)
+		}
+		out.WriteRune(c)
+		if !isEscSeq {
+			outLen++
+		}
+
+		if isEscSeq && c == escapeStop {
+			isEscSeq = false
 		}
 	}
 	return out.String()
@@ -60,19 +79,19 @@ func InsertRuneEveryN(s string, c rune, n int) string {
 //  RuneCountWithoutEscapeSeq("\x1b[33mGhost\x1b[0m") == 5
 //  RuneCountWithoutEscapeSeq("\x1b[33mGhost\x1b[0") == 5
 func RuneCountWithoutEscapeSeq(s string) int {
-	out, isEscSeq := 0, false
-	for _, sChr := range s {
-		if sChr == escapeStart {
+	count, isEscSeq := 0, false
+	for _, c := range s {
+		if c == escapeStart {
 			isEscSeq = true
 		} else if isEscSeq {
-			if sChr == escapeStop {
+			if c == escapeStop {
 				isEscSeq = false
 			}
 		} else {
-			out++
+			count++
 		}
 	}
-	return out
+	return count
 }
 
 // TrimTextWithoutEscapeSeq trims a string to the given length accounting for
@@ -131,17 +150,25 @@ func WrapText(s string, n int) string {
 	var out strings.Builder
 	sLen := utf8.RuneCountInString(s)
 	out.Grow(sLen + (sLen / n))
-	sLineIdx := 0
-	for sIdx, sChr := range s {
-		if sLineIdx == n && sChr != '\n' {
-			out.WriteRune('\n')
-			sLineIdx = 0
+	lineIdx, isEscSeq := 0, false
+	for idx, c := range s {
+		if c == escapeStart {
+			isEscSeq = true
 		}
-		out.WriteRune(sChr)
-		if sChr == '\n' {
-			sLineIdx = 0
-		} else if sIdx < (sLen - 1) {
-			sLineIdx++
+
+		if !isEscSeq && lineIdx == n && c != '\n' {
+			out.WriteRune('\n')
+			lineIdx = 0
+		}
+		out.WriteRune(c)
+		if c == '\n' {
+			lineIdx = 0
+		} else if !isEscSeq && idx < sLen {
+			lineIdx++
+		}
+
+		if isEscSeq && c == escapeStop {
+			isEscSeq = false
 		}
 	}
 	return out.String()

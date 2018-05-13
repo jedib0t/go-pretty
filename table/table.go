@@ -11,12 +11,6 @@ import (
 	"github.com/jedib0t/go-pretty/util"
 )
 
-const (
-	// DefaultHTMLCSSClass stores the css-class to use when none-provided via
-	// SetHTMLCSSClass(cssClass string).
-	DefaultHTMLCSSClass = "go-pretty-table"
-)
-
 // Row defines a single row in the Table.
 type Row []interface{}
 
@@ -257,11 +251,6 @@ func (t *Table) initForRender() {
 
 	// auto-index: calc the index column's max length
 	t.autoIndexVIndexMaxLength = len(fmt.Sprint(len(t.rows)))
-
-	// default to a HTML CSS Class if none-defined
-	if t.htmlCSSClass == "" {
-		t.htmlCSSClass = DefaultHTMLCSSClass
-	}
 
 	// find the longest continuous line in the column string
 	t.initForRenderMaxColumnLength()

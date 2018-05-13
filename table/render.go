@@ -132,10 +132,16 @@ func (t *Table) renderColumnColorized(out *strings.Builder, rowNum int, colIdx i
 		out.WriteString(t.style.Color.Header.Sprint(colStr))
 	} else if hint.isFooterRow && t.style.Color.Footer != nil {
 		out.WriteString(t.style.Color.Footer.Sprint(colStr))
-	} else if hint.isRegularRow() && rowNum%2 == 1 && t.style.Color.RowAlternate != nil {
-		out.WriteString(t.style.Color.RowAlternate.Sprint(colStr))
-	} else if hint.isRegularRow() && t.style.Color.Row != nil {
-		out.WriteString(t.style.Color.Row.Sprint(colStr))
+	} else if hint.isRegularRow() {
+		if colIdx == 0 && t.style.Color.FirstColumn != nil {
+			out.WriteString(t.style.Color.FirstColumn.Sprint(colStr))
+		} else if rowNum%2 == 1 && t.style.Color.RowAlternate != nil {
+			out.WriteString(t.style.Color.RowAlternate.Sprint(colStr))
+		} else if t.style.Color.Row != nil {
+			out.WriteString(t.style.Color.Row.Sprint(colStr))
+		} else {
+			out.WriteString(colStr)
+		}
 	} else {
 		out.WriteString(colStr)
 	}

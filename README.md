@@ -97,9 +97,9 @@ The unit-tests for each of the above show how these are to be used.
 
 Partial output of `make bench`:
 ```
-BenchmarkList_Render-8                   1000000              1791 ns/op             808 B/op         22 allocs/op
-BenchmarkTable_Render-8                   100000             19501 ns/op            5330 B/op        191 allocs/op
-BenchmarkTable_RenderCSV-8                300000              4192 ns/op            2240 B/op         45 allocs/op
-BenchmarkTable_RenderHTML-8               200000              6142 ns/op            3697 B/op         44 allocs/op
-BenchmarkTable_RenderMarkdown-8           300000              4434 ns/op            2176 B/op         43 allocs/op
+BenchmarkList_Render-8                   1000000              1836 ns/op             808 B/op         22 allocs/op
+BenchmarkTable_Render-8                   100000             20736 ns/op            5426 B/op        191 allocs/op
+BenchmarkTable_RenderCSV-8                300000              4394 ns/op            2336 B/op         45 allocs/op
+BenchmarkTable_RenderHTML-8               200000              6563 ns/op            3793 B/op         44 allocs/op
+BenchmarkTable_RenderMarkdown-8           300000              4666 ns/op            2272 B/op         43 allocs/op
 ```
