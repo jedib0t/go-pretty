@@ -259,7 +259,7 @@ func TestTable_Render_ColoredTableWithinAColoredTable(t *testing.T) {
 	tableOuter := Table{}
 	tableOuter.AppendHeader(Row{"Colored Table within a Colored Table"})
 	tableOuter.AppendRow(Row{"\n" + table.Render() + "\n"})
-	tableOuter.SetAlign([]text.Align{text.AlignCenter})
+	tableOuter.SetAlignHeader([]text.Align{text.AlignCenter})
 	tableOuter.SetStyle(StyleColoredBright)
 
 	expectedOut := strings.Join([]string{
@@ -323,12 +323,13 @@ func TestTable_Render_TableWithinTable(t *testing.T) {
 	twInner.AppendHeader(testHeader)
 	twInner.AppendRows(testRows)
 	twInner.AppendFooter(testFooter)
+	twInner.SetAlignFooter([]text.Align{text.AlignDefault, text.AlignDefault, text.AlignLeft, text.AlignRight})
 	twInner.SetStyle(StyleLight)
 
 	twOuter := NewWriter()
 	twOuter.AppendHeader(Row{"Table within a Table"})
 	twOuter.AppendRow(Row{twInner.Render()})
-	twOuter.SetAlign([]text.Align{text.AlignCenter})
+	twOuter.SetAlignHeader([]text.Align{text.AlignCenter})
 	twOuter.SetStyle(StyleDouble)
 
 	expectedOut := `╔═════════════════════════════════════════════════════════════════════════╗

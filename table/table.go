@@ -20,6 +20,10 @@ type RowStr []string
 type Table struct {
 	// align describes the horizontal-align for each column
 	align []text.Align
+	// alignFooter describes the horizontal-align for each column in the footer
+	alignFooter []text.Align
+	// alignHeader describes the horizontal-align for each column in the header
+	alignHeader []text.Align
 	// allowedColumnLengths contains the max allowed length for each column
 	allowedColumnLengths []int
 	// allowedRowLength is the max allowed length for a row (or line of output)
@@ -62,6 +66,10 @@ type Table struct {
 	style *Style
 	// vAlign describes the vertical-align for each column
 	vAlign []text.VAlign
+	// vAlign describes the vertical-align for each column in the footer
+	vAlignFooter []text.VAlign
+	// vAlign describes the vertical-align for each column in the header
+	vAlignHeader []text.VAlign
 }
 
 // AppendFooter appends the row to the List of footers to render.
@@ -91,9 +99,19 @@ func (t *Table) Length() int {
 	return len(t.rows)
 }
 
-// SetAlign sets the horizontal-align for each column in all the rows.
+// SetAlign sets the horizontal-align for each column in the (data) rows.
 func (t *Table) SetAlign(align []text.Align) {
 	t.align = align
+}
+
+// SetAlignFooter sets the horizontal-align for each column in the footer.
+func (t *Table) SetAlignFooter(align []text.Align) {
+	t.alignFooter = align
+}
+
+// SetAlignHeader sets the horizontal-align for each column in the header.
+func (t *Table) SetAlignHeader(align []text.Align) {
+	t.alignHeader = align
 }
 
 // SetAllowedColumnLengths sets the maximum allowed length for each column in
@@ -161,6 +179,16 @@ func (t *Table) SetVAlign(vAlign []text.VAlign) {
 	t.vAlign = vAlign
 }
 
+// SetVAlignFooter sets the horizontal-align for each column in the footer.
+func (t *Table) SetVAlignFooter(vAlign []text.VAlign) {
+	t.vAlignFooter = vAlign
+}
+
+// SetVAlignHeader sets the horizontal-align for each column in the header.
+func (t *Table) SetVAlignHeader(vAlign []text.VAlign) {
+	t.vAlignHeader = vAlign
+}
+
 // Style returns the current style.
 func (t *Table) Style() *Style {
 	if t.style == nil {
@@ -168,6 +196,16 @@ func (t *Table) Style() *Style {
 		t.style = &tempStyle
 	}
 	return t.style
+}
+
+// renderHint has hints for the Render*() logic
+type renderHint struct {
+	isAutoIndexColumn bool
+	isFirstRow        bool
+	isFooterRow       bool
+	isHeaderRow       bool
+	isLastRow         bool
+	isSeparatorRow    bool
 }
 
 func (t *Table) analyzeAndStringify(row Row, isHeader bool, isFooter bool) RowStr {
@@ -201,9 +239,17 @@ func (t *Table) analyzeAndStringify(row Row, isHeader bool, isFooter bool) RowSt
 	return rowOut
 }
 
-func (t *Table) getAlign(colIdx int) text.Align {
+func (t *Table) getAlign(colIdx int, hint renderHint) text.Align {
 	align := text.AlignDefault
-	if colIdx < len(t.align) {
+	if hint.isHeaderRow {
+		if colIdx < len(t.alignHeader) {
+			align = t.alignHeader[colIdx]
+		}
+	} else if hint.isFooterRow {
+		if colIdx < len(t.alignFooter) {
+			align = t.alignFooter[colIdx]
+		}
+	} else if colIdx < len(t.align) {
 		align = t.align[colIdx]
 	}
 	if align == text.AlignDefault && !t.columnIsNonNumeric[colIdx] {
@@ -227,9 +273,17 @@ func (t *Table) getAutoIndexColumnIDs() RowStr {
 	return row
 }
 
-func (t *Table) getVAlign(colIdx int) text.VAlign {
+func (t *Table) getVAlign(colIdx int, hint renderHint) text.VAlign {
 	vAlign := text.VAlignDefault
-	if colIdx < len(t.vAlign) {
+	if hint.isHeaderRow {
+		if colIdx < len(t.vAlignHeader) {
+			vAlign = t.vAlignHeader[colIdx]
+		}
+	} else if hint.isFooterRow {
+		if colIdx < len(t.vAlignFooter) {
+			vAlign = t.vAlignFooter[colIdx]
+		}
+	} else if colIdx < len(t.vAlign) {
 		vAlign = t.vAlign[colIdx]
 	}
 	return vAlign

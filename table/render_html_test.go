@@ -16,6 +16,11 @@ func TestTable_RenderHTML(t *testing.T) {
 	tw.SetVAlign([]text.VAlign{
 		text.VAlignDefault, text.VAlignDefault, text.VAlignDefault, text.VAlignBottom, text.VAlignBottom,
 	})
+	headerFooterAlign := []text.VAlign{
+		text.VAlignDefault, text.VAlignDefault, text.VAlignDefault, text.VAlignDefault, text.VAlignDefault,
+	}
+	tw.SetVAlignFooter(headerFooterAlign)
+	tw.SetVAlignHeader(headerFooterAlign)
 
 	expectedOut := `<table class="go-pretty-table">
   <thead>
@@ -23,8 +28,8 @@ func TestTable_RenderHTML(t *testing.T) {
     <th align="right">#</th>
     <th>First Name</th>
     <th>Last Name</th>
-    <th align="right" valign="bottom">Salary</th>
-    <th valign="bottom">&nbsp;</th>
+    <th align="right">Salary</th>
+    <th>&nbsp;</th>
   </tr>
   </thead>
   <tbody>
@@ -62,8 +67,8 @@ func TestTable_RenderHTML(t *testing.T) {
     <td align="right">&nbsp;</td>
     <td>&nbsp;</td>
     <td>Total</td>
-    <td align="right" valign="bottom">10000</td>
-    <td valign="bottom">&nbsp;</td>
+    <td align="right">10000</td>
+    <td>&nbsp;</td>
   </tr>
   </tfoot>
 </table>`

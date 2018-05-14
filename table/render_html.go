@@ -67,15 +67,15 @@ func (t *Table) RenderHTML() string {
 			out.WriteString(DefaultHTMLCSSClass)
 		}
 		out.WriteString("\">\n")
-		t.htmlRenderRows(&out, t.rowsHeader, true, false)
-		t.htmlRenderRows(&out, t.rows, false, false)
-		t.htmlRenderRows(&out, t.rowsFooter, false, true)
+		t.htmlRenderRows(&out, t.rowsHeader, renderHint{isHeaderRow: true})
+		t.htmlRenderRows(&out, t.rows, renderHint{})
+		t.htmlRenderRows(&out, t.rowsFooter, renderHint{isFooterRow: true})
 		out.WriteString("</table>")
 	}
 	return t.render(&out)
 }
 
-func (t *Table) htmlRenderRow(out *strings.Builder, row RowStr, isHeader bool, isFooter bool) {
+func (t *Table) htmlRenderRow(out *strings.Builder, row RowStr, hint renderHint) {
 	out.WriteString("  <tr>\n")
 	for colIdx := 0; colIdx < t.numColumns; colIdx++ {
 		var colStr string
@@ -85,13 +85,13 @@ func (t *Table) htmlRenderRow(out *strings.Builder, row RowStr, isHeader bool, i
 
 		// header uses "th" instead of "td"
 		colTagName := "td"
-		if isHeader {
+		if hint.isHeaderRow {
 			colTagName = "th"
 		}
 
 		// determine the HTML "align"/"valign" property values
-		align := t.getAlign(colIdx).HTMLProperty()
-		vAlign := t.getVAlign(colIdx).HTMLProperty()
+		align := t.getAlign(colIdx, hint).HTMLProperty()
+		vAlign := t.getVAlign(colIdx, hint).HTMLProperty()
 
 		// write the row
 		out.WriteString("    <")
@@ -117,13 +117,13 @@ func (t *Table) htmlRenderRow(out *strings.Builder, row RowStr, isHeader bool, i
 	out.WriteString("  </tr>\n")
 }
 
-func (t *Table) htmlRenderRows(out *strings.Builder, rows []RowStr, isHeader bool, isFooter bool) {
+func (t *Table) htmlRenderRows(out *strings.Builder, rows []RowStr, hint renderHint) {
 	if len(rows) > 0 {
 		// determine that tag to use based on the type of the row
 		rowsTag := "tbody"
-		if isHeader {
+		if hint.isHeaderRow {
 			rowsTag = "thead"
-		} else if isFooter {
+		} else if hint.isFooterRow {
 			rowsTag = "tfoot"
 		}
 
@@ -136,7 +136,7 @@ func (t *Table) htmlRenderRows(out *strings.Builder, rows []RowStr, isHeader boo
 					out.WriteString(">\n")
 					renderedTagOpen = true
 				}
-				t.htmlRenderRow(out, row, isHeader, isFooter)
+				t.htmlRenderRow(out, row, hint)
 				shouldRenderTagClose = true
 			}
 		}

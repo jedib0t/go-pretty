@@ -18,6 +18,8 @@ type Writer interface {
 	RenderHTML() string
 	RenderMarkdown() string
 	SetAlign(align []text.Align)
+	SetAlignFooter(align []text.Align)
+	SetAlignHeader(align []text.Align)
 	SetAllowedColumnLengths(lengths []int)
 	SetAllowedRowLength(length int)
 	SetAutoIndex(autoIndex bool)
@@ -29,6 +31,8 @@ type Writer interface {
 	SetOutputMirror(mirror io.Writer)
 	SetStyle(style Style)
 	SetVAlign(vAlign []text.VAlign)
+	SetVAlignFooter(vAlign []text.VAlign)
+	SetVAlignHeader(vAlign []text.VAlign)
 	Style() *Style
 }
 
