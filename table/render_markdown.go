@@ -37,7 +37,7 @@ func (t *Table) markdownRenderRow(out *strings.Builder, row RowStr, isSeparator 
 		out.WriteRune('|')
 		for colIdx := 0; colIdx < t.numColumns; colIdx++ {
 			if isSeparator {
-				out.WriteString(t.getAlign(colIdx).MarkdownProperty())
+				out.WriteString(t.getAlign(colIdx, renderHint{}).MarkdownProperty())
 			} else {
 				var colStr string
 				if colIdx < len(row) {

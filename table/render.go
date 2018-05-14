@@ -9,15 +9,6 @@ import (
 	"github.com/jedib0t/go-pretty/util"
 )
 
-type renderHint struct {
-	isAutoIndexColumn bool
-	isFirstRow        bool
-	isFooterRow       bool
-	isHeaderRow       bool
-	isLastRow         bool
-	isSeparatorRow    bool
-}
-
 func (h *renderHint) isRegularRow() bool {
 	return !h.isHeaderRow && !h.isFooterRow
 }
@@ -87,7 +78,7 @@ func (t *Table) renderColumn(out *strings.Builder, rowNum int, row RowStr, colId
 	if colIdx < len(row) {
 		colStr = format.Apply(row[colIdx])
 	}
-	colStr = t.getAlign(colIdx).Apply(colStr, maxColumnLength)
+	colStr = t.getAlign(colIdx, hint).Apply(colStr, maxColumnLength)
 
 	// pad both sides of the column (when not a separator row)
 	if !hint.isSeparatorRow {
@@ -252,7 +243,7 @@ func (t *Table) renderRow(out *strings.Builder, rowNum int, row RowStr, colors [
 		// convert one row into N # of rows based on colMaxLines
 		rowLines := make([]RowStr, len(row))
 		for colIdx, colStr := range rowWrapped {
-			rowLines[colIdx] = t.getVAlign(colIdx).ApplyStr(colStr, colMaxLines)
+			rowLines[colIdx] = t.getVAlign(colIdx, hint).ApplyStr(colStr, colMaxLines)
 		}
 		for colLineIdx := 0; colLineIdx < colMaxLines; colLineIdx++ {
 			rowLine := make(RowStr, len(rowLines))
