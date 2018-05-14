@@ -75,7 +75,7 @@ func (t *Table) RenderHTML() string {
 	return t.render(&out)
 }
 
-func (t *Table) htmlRenderRow(out *strings.Builder, row RowStr, hint renderHint) {
+func (t *Table) htmlRenderRow(out *strings.Builder, row rowStr, hint renderHint) {
 	out.WriteString("  <tr>\n")
 	for colIdx := 0; colIdx < t.numColumns; colIdx++ {
 		var colStr string
@@ -117,7 +117,7 @@ func (t *Table) htmlRenderRow(out *strings.Builder, row RowStr, hint renderHint)
 	out.WriteString("  </tr>\n")
 }
 
-func (t *Table) htmlRenderRows(out *strings.Builder, rows []RowStr, hint renderHint) {
+func (t *Table) htmlRenderRows(out *strings.Builder, rows []rowStr, hint renderHint) {
 	if len(rows) > 0 {
 		// determine that tag to use based on the type of the row
 		rowsTag := "tbody"
