@@ -61,7 +61,7 @@ func (t *Table) Render() string {
 	return t.render(&out)
 }
 
-func (t *Table) renderColumn(out *strings.Builder, rowNum int, row RowStr, colIdx int, maxColumnLength int, colors []text.Colors, format text.Format, hint renderHint) {
+func (t *Table) renderColumn(out *strings.Builder, rowNum int, row rowStr, colIdx int, maxColumnLength int, colors []text.Colors, format text.Format, hint renderHint) {
 	// when working on the first column, and autoIndex is true, insert a new
 	// column with the row number on it.
 	if colIdx == 0 && t.autoIndex {
@@ -153,7 +153,7 @@ func (t *Table) renderColumnSeparator(out *strings.Builder, hint renderHint) {
 	}
 }
 
-func (t *Table) renderLine(out *strings.Builder, rowNum int, row RowStr, colors []text.Colors, format text.Format, hint renderHint) {
+func (t *Table) renderLine(out *strings.Builder, rowNum int, row rowStr, colors []text.Colors, format text.Format, hint renderHint) {
 	if len(row) > 0 {
 		// if the output has content, it means that this call is working on line
 		// number 2 or more; separate them with a newline
@@ -222,11 +222,11 @@ func (t *Table) renderMarginRight(out *strings.Builder, hint renderHint) {
 	}
 }
 
-func (t *Table) renderRow(out *strings.Builder, rowNum int, row RowStr, colors []text.Colors, format text.Format, hint renderHint) {
+func (t *Table) renderRow(out *strings.Builder, rowNum int, row rowStr, colors []text.Colors, format text.Format, hint renderHint) {
 	// fit every column into the allowedColumnLength/maxColumnLength limit and
 	// in the process find the max. number of lines in any column in this row
 	colMaxLines := 0
-	rowWrapped := make(RowStr, len(row))
+	rowWrapped := make(rowStr, len(row))
 	for colIdx, colStr := range row {
 		rowWrapped[colIdx] = util.WrapText(colStr, t.maxColumnLengths[colIdx])
 		colNumLines := strings.Count(rowWrapped[colIdx], "\n") + 1
@@ -241,12 +241,12 @@ func (t *Table) renderRow(out *strings.Builder, rowNum int, row RowStr, colors [
 		t.renderLine(out, rowNum, row, colors, format, hint)
 	} else {
 		// convert one row into N # of rows based on colMaxLines
-		rowLines := make([]RowStr, len(row))
+		rowLines := make([]rowStr, len(row))
 		for colIdx, colStr := range rowWrapped {
 			rowLines[colIdx] = t.getVAlign(colIdx, hint).ApplyStr(colStr, colMaxLines)
 		}
 		for colLineIdx := 0; colLineIdx < colMaxLines; colLineIdx++ {
-			rowLine := make(RowStr, len(rowLines))
+			rowLine := make(rowStr, len(rowLines))
 			for colIdx, colLines := range rowLines {
 				rowLine[colIdx] = colLines[colLineIdx]
 			}
@@ -255,7 +255,7 @@ func (t *Table) renderRow(out *strings.Builder, rowNum int, row RowStr, colors [
 	}
 }
 
-func (t *Table) renderRows(out *strings.Builder, rows []RowStr, colors []text.Colors, format text.Format, hint renderHint) {
+func (t *Table) renderRows(out *strings.Builder, rows []rowStr, colors []text.Colors, format text.Format, hint renderHint) {
 	for idx, row := range rows {
 		t.renderRow(out, idx+1, row, colors, format, hint)
 		if t.style.Options.SeparateRows && idx < len(rows)-1 {

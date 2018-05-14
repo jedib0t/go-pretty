@@ -29,7 +29,7 @@ var (
 		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
 		{300, "Tyrion", "Lannister", 5000},
 	}
-	testRowMultiLine = Row{0, "Winter", "Is", 0, "Coming.\nThe North Remembers!"}
+	testRowMultiLine = Row{0, "Winter", "Is", 0, "Coming.\nThe North Remembers!\nThis is known."}
 	testRowNewLines  = Row{0, "Valar", "Morghulis", 0, "Faceless\nMen"}
 	testRowPipes     = Row{0, "Valar", "Morghulis", 0, "Faceless|Men"}
 	testRowTabs      = Row{0, "Valar", "Morghulis", 0, "Faceless\tMen"}
@@ -134,17 +134,26 @@ func TestTable_SetAlign(t *testing.T) {
 	table.SetAlign([]text.Align{})
 	assert.NotNil(t, table.align)
 
+	table.AppendHeader(testHeader)
+	table.SetAlignHeader([]text.Align{text.AlignRight, text.AlignRight, text.AlignLeft, text.AlignRight, text.AlignRight})
 	table.AppendRows(testRows)
 	table.AppendRow(testRowMultiLine)
 	table.SetAlign([]text.Align{text.AlignDefault, text.AlignLeft, text.AlignLeft, text.AlignRight, text.AlignRight})
+	table.AppendFooter(testFooter)
+	table.SetAlignFooter([]text.Align{text.AlignRight, text.AlignRight, text.AlignRight, text.AlignRight, text.AlignRight})
 
-	expectedOut := `+-----+--------+-----------+------+-----------------------------+
-|   1 | Arya   | Stark     | 3000 |                             |
-|  20 | Jon    | Snow      | 2000 | You know nothing, Jon Snow! |
-| 300 | Tyrion | Lannister | 5000 |                             |
-|   0 | Winter | Is        |    0 |                     Coming. |
-|     |        |           |      |        The North Remembers! |
-+-----+--------+-----------+------+-----------------------------+`
+	expectedOut := `+-----+------------+-----------+--------+-----------------------------+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++-----+------------+-----------+--------+-----------------------------+
+|   1 | Arya       | Stark     |   3000 |                             |
+|  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
+| 300 | Tyrion     | Lannister |   5000 |                             |
+|   0 | Winter     | Is        |      0 |                     Coming. |
+|     |            |           |        |        The North Remembers! |
+|     |            |           |        |              This is known. |
++-----+------------+-----------+--------+-----------------------------+
+|     |            |     TOTAL |  10000 |                             |
++-----+------------+-----------+--------+-----------------------------+`
 	assert.Equal(t, expectedOut, table.Render())
 }
 
@@ -350,14 +359,26 @@ func TestTable_SetVAlign(t *testing.T) {
 	table.SetVAlign([]text.VAlign{})
 	assert.NotNil(t, table.vAlign)
 
+	table.AppendHeader(testRowMultiLine)
+	table.SetVAlignHeader([]text.VAlign{text.VAlignBottom, text.VAlignBottom, text.VAlignBottom, text.VAlignBottom})
 	table.AppendRow(testRowMultiLine)
-	table.SetVAlign([]text.VAlign{text.VAlignTop, text.VAlignMiddle, text.VAlignBottom, text.VAlignDefault})
+	table.SetVAlign([]text.VAlign{text.VAlignMiddle, text.VAlignMiddle, text.VAlignMiddle, text.VAlignMiddle})
+	table.AppendFooter(testRowMultiLine)
+	table.SetVAlignFooter([]text.VAlign{text.VAlignTop, text.VAlignTop, text.VAlignTop, text.VAlignTop})
 
 	expectedOut := `+---+--------+----+---+----------------------+
-| 0 | Winter |    | 0 | Coming.              |
-|   |        | Is |   | The North Remembers! |
+|   |        |    |   | COMING.              |
+|   |        |    |   | THE NORTH REMEMBERS! |
+| 0 | WINTER | IS | 0 | THIS IS KNOWN.       |
++---+--------+----+---+----------------------+
+|   |        |    |   | Coming.              |
+| 0 | Winter | Is | 0 | The North Remembers! |
+|   |        |    |   | This is known.       |
++---+--------+----+---+----------------------+
+| 0 | WINTER | IS | 0 | COMING.              |
+|   |        |    |   | THE NORTH REMEMBERS! |
+|   |        |    |   | THIS IS KNOWN.       |
 +---+--------+----+---+----------------------+`
-
 	assert.Equal(t, expectedOut, table.Render())
 }
 

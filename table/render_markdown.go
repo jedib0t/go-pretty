@@ -26,7 +26,7 @@ func (t *Table) RenderMarkdown() string {
 	return t.render(&out)
 }
 
-func (t *Table) markdownRenderRow(out *strings.Builder, row RowStr, isSeparator bool) {
+func (t *Table) markdownRenderRow(out *strings.Builder, row rowStr, isSeparator bool) {
 	if len(row) > 0 {
 		// when working on line number 2 or more, insert a newline first
 		if out.Len() > 0 {
@@ -58,7 +58,7 @@ func (t *Table) markdownRenderRow(out *strings.Builder, row RowStr, isSeparator 
 	}
 }
 
-func (t *Table) markdownRenderRows(out *strings.Builder, rows []RowStr, isHeader bool, isFooter bool) {
+func (t *Table) markdownRenderRows(out *strings.Builder, rows []rowStr, isHeader bool, isFooter bool) {
 	if len(rows) > 0 {
 		for idx, row := range rows {
 			t.markdownRenderRow(out, row, false)

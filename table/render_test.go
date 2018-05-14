@@ -28,6 +28,7 @@ func TestTable_Render(t *testing.T) {
 [<300>|<Tyrion    >|<Lannister>|<  5000>|<                           >]
 [<  0>|<Winter    >|<Is       >|<     0>|<Coming.                    >]
 [<   >|<          >|<         >|<      >|<The North Remembers!       >]
+[<   >|<          >|<         >|<      >|<This is known.             >]
 {-----+------------+-----------+--------+-----------------------------}
 [<   >|<          >|<TOTAL    >|< 10000>|<                           >]
 \-----v------------v-----------v--------v-----------------------------/
@@ -203,6 +204,7 @@ func TestTable_Render_ColoredCustom(t *testing.T) {
 		"│\x1b[32m 300 \x1b[0m│\x1b[32m Tyrion     \x1b[0m│\x1b[32m Lannister \x1b[0m│\x1b[32m   5000 \x1b[0m│\x1b[36m                             \x1b[0m│",
 		"│\x1b[32m   0 \x1b[0m│\x1b[32m Winter     \x1b[0m│\x1b[32m Is        \x1b[0m│\x1b[32m      0 \x1b[0m│\x1b[36m Coming.                     \x1b[0m│",
 		"│\x1b[32m     \x1b[0m│\x1b[32m            \x1b[0m│\x1b[32m           \x1b[0m│\x1b[32m        \x1b[0m│\x1b[36m The North Remembers!        \x1b[0m│",
+		"│\x1b[32m     \x1b[0m│\x1b[32m            \x1b[0m│\x1b[32m           \x1b[0m│\x1b[32m        \x1b[0m│\x1b[36m This is known.              \x1b[0m│",
 		"├─────┼────────────┼───────────┼────────┼─────────────────────────────┤",
 		"│     │            │\x1b[94;1m TOTAL     \x1b[0m│\x1b[94;1m  10000 \x1b[0m│                             │",
 		"╰─────┴────────────┴───────────┴────────┴─────────────────────────────╯",

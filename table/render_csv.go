@@ -31,7 +31,7 @@ func (t *Table) csvFixDoubleQuotes(str string) string {
 	return strings.Replace(str, "\"", "\\\"", -1)
 }
 
-func (t *Table) csvRenderRow(out *strings.Builder, row RowStr) {
+func (t *Table) csvRenderRow(out *strings.Builder, row rowStr) {
 	// when working on line number 2 or more, insert a newline first
 	if out.Len() > 0 {
 		out.WriteRune('\n')
@@ -55,7 +55,7 @@ func (t *Table) csvRenderRow(out *strings.Builder, row RowStr) {
 	}
 }
 
-func (t *Table) csvRenderRows(out *strings.Builder, rows []RowStr) {
+func (t *Table) csvRenderRows(out *strings.Builder, rows []rowStr) {
 	for _, row := range rows {
 		t.csvRenderRow(out, row)
 	}

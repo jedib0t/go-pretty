@@ -59,7 +59,7 @@ func TestTable_RenderHTML(t *testing.T) {
     <td>Winter</td>
     <td>Is</td>
     <td align="right" valign="bottom">0</td>
-    <td valign="bottom">Coming.<br/>The North Remembers!</td>
+    <td valign="bottom">Coming.<br/>The North Remembers!<br/>This is known.</td>
   </tr>
   </tbody>
   <tfoot>

@@ -13,8 +13,8 @@ import (
 // Row defines a single row in the Table.
 type Row []interface{}
 
-// RowStr defines a single row in the Table comprised of just string objects.
-type RowStr []string
+// rowStr defines a single row in the Table comprised of just string objects.
+type rowStr []string
 
 // Table helps print a 2-dimensional array in a human readable pretty-table.
 type Table struct {
@@ -54,14 +54,14 @@ type Table struct {
 	// outputMirror stores an io.Writer where the "Render" functions would write
 	outputMirror io.Writer
 	// rows stores the rows that make up the body
-	rows []RowStr
+	rows []rowStr
 	// rowsFooter stores the rows that make up the footer
-	rowsFooter []RowStr
+	rowsFooter []rowStr
 	// rowsHeader stores the rows that make up the header
-	rowsHeader []RowStr
+	rowsHeader []rowStr
 	// rowSeparator is a dummy row that contains the separator columns (dashes
 	// that make up the separator between header/body/footer
-	rowSeparator RowStr
+	rowSeparator rowStr
 	// style contains all the strings used to draw the table, and more
 	style *Style
 	// vAlign describes the vertical-align for each column
@@ -208,7 +208,7 @@ type renderHint struct {
 	isSeparatorRow    bool
 }
 
-func (t *Table) analyzeAndStringify(row Row, isHeader bool, isFooter bool) RowStr {
+func (t *Table) analyzeAndStringify(row Row, isHeader bool, isFooter bool) rowStr {
 	// update t.numColumns if this row is the longest seen till now
 	if len(row) > t.numColumns {
 		// init the slice for the first time; and pad it the rest of the time
@@ -222,7 +222,7 @@ func (t *Table) analyzeAndStringify(row Row, isHeader bool, isFooter bool) RowSt
 	}
 
 	// convert each column to string and figure out if it has non-numeric data
-	rowOut := make(RowStr, len(row))
+	rowOut := make(rowStr, len(row))
 	for colIdx, col := range row {
 		// if the column is not a number, keep track of it
 		if !isHeader && !isFooter && !t.columnIsNonNumeric[colIdx] && !util.IsNumber(col) {
@@ -265,8 +265,8 @@ func (t *Table) getAllowedColumnLength(colIdx int) int {
 	return 0
 }
 
-func (t *Table) getAutoIndexColumnIDs() RowStr {
-	row := make(RowStr, t.numColumns)
+func (t *Table) getAutoIndexColumnIDs() rowStr {
+	row := make(rowStr, t.numColumns)
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
 		row[colIdx] = text.AlignCenter.Apply(util.AutoIndexColumnID(colIdx), maxColumnLength)
 	}
@@ -304,7 +304,7 @@ func (t *Table) initForRender() {
 }
 
 func (t *Table) initForRenderMaxColumnLength() {
-	var findMaxColumnLengths = func(rows []RowStr) {
+	var findMaxColumnLengths = func(rows []rowStr) {
 		for _, row := range rows {
 			for colIdx, colStr := range row {
 				allowedColumnLength := t.getAllowedColumnLength(colIdx)
@@ -328,7 +328,7 @@ func (t *Table) initForRenderMaxColumnLength() {
 
 func (t *Table) initForRenderRowSeparator() {
 	t.maxRowLength = (utf8.RuneCountInString(t.style.Box.MiddleSeparator) * t.numColumns) + 1
-	t.rowSeparator = make(RowStr, t.numColumns)
+	t.rowSeparator = make(rowStr, t.numColumns)
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
 		maxColumnLength += utf8.RuneCountInString(t.style.Box.PaddingLeft)
 		maxColumnLength += utf8.RuneCountInString(t.style.Box.PaddingRight)
