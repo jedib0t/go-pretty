@@ -305,3 +305,8 @@ Table without Any Borders or Separators!
 [Markdown] |  |  | Total | 10000 |  |
 
 ```
+
+
+Output of `go run cmd/demo-table/demo.go colors`:
+
+<img src="demo-colors.png" width="600px"/>
