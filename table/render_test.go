@@ -220,7 +220,7 @@ func TestTable_Render_ColoredTableWithinATable(t *testing.T) {
 	table.AppendRows(testRows)
 	table.AppendFooter(testFooter)
 	table.SetStyle(StyleColoredBright)
-	table.Style().Color.FirstColumn = StyleColoredBright.Color.AutoIndexColumn
+	table.SetIndexColumn(1)
 
 	// colored is simple; render the colored table into another table
 	tableOuter := Table{}
@@ -230,9 +230,9 @@ func TestTable_Render_ColoredTableWithinATable(t *testing.T) {
 	expectedOut := strings.Join([]string{
 		"╭───────────────────────────────────────────────────────────────────╮",
 		"│ \x1b[106;30m   # \x1b[0m\x1b[106;30m FIRST NAME \x1b[0m\x1b[106;30m LAST NAME \x1b[0m\x1b[106;30m SALARY \x1b[0m\x1b[106;30m                             \x1b[0m │",
-		"│ \x1b[106;30m   1 \x1b[0m\x1b[47;30m Arya       \x1b[0m\x1b[47;30m Stark     \x1b[0m\x1b[47;30m   3000 \x1b[0m\x1b[47;30m                             \x1b[0m │",
-		"│ \x1b[106;30m  20 \x1b[0m\x1b[107;30m Jon        \x1b[0m\x1b[107;30m Snow      \x1b[0m\x1b[107;30m   2000 \x1b[0m\x1b[107;30m You know nothing, Jon Snow! \x1b[0m │",
-		"│ \x1b[106;30m 300 \x1b[0m\x1b[47;30m Tyrion     \x1b[0m\x1b[47;30m Lannister \x1b[0m\x1b[47;30m   5000 \x1b[0m\x1b[47;30m                             \x1b[0m │",
+		"│ \x1b[106;30m   1 \x1b[0m\x1b[107;30m Arya       \x1b[0m\x1b[107;30m Stark     \x1b[0m\x1b[107;30m   3000 \x1b[0m\x1b[107;30m                             \x1b[0m │",
+		"│ \x1b[106;30m  20 \x1b[0m\x1b[47;30m Jon        \x1b[0m\x1b[47;30m Snow      \x1b[0m\x1b[47;30m   2000 \x1b[0m\x1b[47;30m You know nothing, Jon Snow! \x1b[0m │",
+		"│ \x1b[106;30m 300 \x1b[0m\x1b[107;30m Tyrion     \x1b[0m\x1b[107;30m Lannister \x1b[0m\x1b[107;30m   5000 \x1b[0m\x1b[107;30m                             \x1b[0m │",
 		"│ \x1b[46;30m     \x1b[0m\x1b[46;30m            \x1b[0m\x1b[46;30m TOTAL     \x1b[0m\x1b[46;30m  10000 \x1b[0m\x1b[46;30m                             \x1b[0m │",
 		"╰───────────────────────────────────────────────────────────────────╯",
 	}, "\n")
@@ -255,7 +255,7 @@ func TestTable_Render_ColoredTableWithinAColoredTable(t *testing.T) {
 	table.AppendRows(testRows)
 	table.AppendFooter(testFooter)
 	table.SetStyle(StyleColoredBright)
-	table.Style().Color.FirstColumn = StyleColoredBright.Color.AutoIndexColumn
+	table.SetIndexColumn(1)
 
 	// colored is simple; render the colored table into another colored table
 	tableOuter := Table{}
@@ -266,13 +266,13 @@ func TestTable_Render_ColoredTableWithinAColoredTable(t *testing.T) {
 
 	expectedOut := strings.Join([]string{
 		"\x1b[106;30m                COLORED TABLE WITHIN A COLORED TABLE               \x1b[0m",
-		"\x1b[47;30m                                                                   \x1b[0m",
-		"\x1b[47;30m \x1b[106;30m   # \x1b[0m\x1b[47;30m\x1b[106;30m FIRST NAME \x1b[0m\x1b[47;30m\x1b[106;30m LAST NAME \x1b[0m\x1b[47;30m\x1b[106;30m SALARY \x1b[0m\x1b[47;30m\x1b[106;30m                             \x1b[0m\x1b[47;30m \x1b[0m",
-		"\x1b[47;30m \x1b[106;30m   1 \x1b[0m\x1b[47;30m\x1b[47;30m Arya       \x1b[0m\x1b[47;30m\x1b[47;30m Stark     \x1b[0m\x1b[47;30m\x1b[47;30m   3000 \x1b[0m\x1b[47;30m\x1b[47;30m                             \x1b[0m\x1b[47;30m \x1b[0m",
-		"\x1b[47;30m \x1b[106;30m  20 \x1b[0m\x1b[47;30m\x1b[107;30m Jon        \x1b[0m\x1b[47;30m\x1b[107;30m Snow      \x1b[0m\x1b[47;30m\x1b[107;30m   2000 \x1b[0m\x1b[47;30m\x1b[107;30m You know nothing, Jon Snow! \x1b[0m\x1b[47;30m \x1b[0m",
-		"\x1b[47;30m \x1b[106;30m 300 \x1b[0m\x1b[47;30m\x1b[47;30m Tyrion     \x1b[0m\x1b[47;30m\x1b[47;30m Lannister \x1b[0m\x1b[47;30m\x1b[47;30m   5000 \x1b[0m\x1b[47;30m\x1b[47;30m                             \x1b[0m\x1b[47;30m \x1b[0m",
-		"\x1b[47;30m \x1b[46;30m     \x1b[0m\x1b[47;30m\x1b[46;30m            \x1b[0m\x1b[47;30m\x1b[46;30m TOTAL     \x1b[0m\x1b[47;30m\x1b[46;30m  10000 \x1b[0m\x1b[47;30m\x1b[46;30m                             \x1b[0m\x1b[47;30m \x1b[0m",
-		"\x1b[47;30m                                                                   \x1b[0m",
+		"\x1b[107;30m                                                                   \x1b[0m",
+		"\x1b[107;30m \x1b[106;30m   # \x1b[0m\x1b[107;30m\x1b[106;30m FIRST NAME \x1b[0m\x1b[107;30m\x1b[106;30m LAST NAME \x1b[0m\x1b[107;30m\x1b[106;30m SALARY \x1b[0m\x1b[107;30m\x1b[106;30m                             \x1b[0m\x1b[107;30m \x1b[0m",
+		"\x1b[107;30m \x1b[106;30m   1 \x1b[0m\x1b[107;30m\x1b[107;30m Arya       \x1b[0m\x1b[107;30m\x1b[107;30m Stark     \x1b[0m\x1b[107;30m\x1b[107;30m   3000 \x1b[0m\x1b[107;30m\x1b[107;30m                             \x1b[0m\x1b[107;30m \x1b[0m",
+		"\x1b[107;30m \x1b[106;30m  20 \x1b[0m\x1b[107;30m\x1b[47;30m Jon        \x1b[0m\x1b[107;30m\x1b[47;30m Snow      \x1b[0m\x1b[107;30m\x1b[47;30m   2000 \x1b[0m\x1b[107;30m\x1b[47;30m You know nothing, Jon Snow! \x1b[0m\x1b[107;30m \x1b[0m",
+		"\x1b[107;30m \x1b[106;30m 300 \x1b[0m\x1b[107;30m\x1b[107;30m Tyrion     \x1b[0m\x1b[107;30m\x1b[107;30m Lannister \x1b[0m\x1b[107;30m\x1b[107;30m   5000 \x1b[0m\x1b[107;30m\x1b[107;30m                             \x1b[0m\x1b[107;30m \x1b[0m",
+		"\x1b[107;30m \x1b[46;30m     \x1b[0m\x1b[107;30m\x1b[46;30m            \x1b[0m\x1b[107;30m\x1b[46;30m TOTAL     \x1b[0m\x1b[107;30m\x1b[46;30m  10000 \x1b[0m\x1b[107;30m\x1b[46;30m                             \x1b[0m\x1b[107;30m \x1b[0m",
+		"\x1b[107;30m                                                                   \x1b[0m",
 	}, "\n")
 	out := tableOuter.Render()
 	assert.Equal(t, expectedOut, out)
@@ -296,11 +296,11 @@ func TestTable_Render_ColoredStyleAutoIndex(t *testing.T) {
 	table.SetStyle(StyleColoredDark)
 
 	expectedOut := strings.Join([]string{
-		"\x1b[96;40m   \x1b[0m\x1b[96;40m   # \x1b[0m\x1b[96;40m FIRST NAME \x1b[0m\x1b[96;40m LAST NAME \x1b[0m\x1b[96;40m SALARY \x1b[0m\x1b[96;40m                             \x1b[0m",
-		"\x1b[96;40m 1 \x1b[0m\x1b[37;40m   1 \x1b[0m\x1b[37;40m Arya       \x1b[0m\x1b[37;40m Stark     \x1b[0m\x1b[37;40m   3000 \x1b[0m\x1b[37;40m                             \x1b[0m",
-		"\x1b[96;40m 2 \x1b[0m\x1b[97;40m  20 \x1b[0m\x1b[97;40m Jon        \x1b[0m\x1b[97;40m Snow      \x1b[0m\x1b[97;40m   2000 \x1b[0m\x1b[97;40m You know nothing, Jon Snow! \x1b[0m",
-		"\x1b[96;40m 3 \x1b[0m\x1b[37;40m 300 \x1b[0m\x1b[37;40m Tyrion     \x1b[0m\x1b[37;40m Lannister \x1b[0m\x1b[37;40m   5000 \x1b[0m\x1b[37;40m                             \x1b[0m",
-		"\x1b[96;40m   \x1b[0m\x1b[36;40m     \x1b[0m\x1b[36;40m            \x1b[0m\x1b[36;40m TOTAL     \x1b[0m\x1b[36;40m  10000 \x1b[0m\x1b[36;40m                             \x1b[0m",
+		"\x1b[96;100m   \x1b[0m\x1b[96;100m   # \x1b[0m\x1b[96;100m FIRST NAME \x1b[0m\x1b[96;100m LAST NAME \x1b[0m\x1b[96;100m SALARY \x1b[0m\x1b[96;100m                             \x1b[0m",
+		"\x1b[96;100m 1 \x1b[0m\x1b[97;40m   1 \x1b[0m\x1b[97;40m Arya       \x1b[0m\x1b[97;40m Stark     \x1b[0m\x1b[97;40m   3000 \x1b[0m\x1b[97;40m                             \x1b[0m",
+		"\x1b[96;100m 2 \x1b[0m\x1b[90;40m  20 \x1b[0m\x1b[90;40m Jon        \x1b[0m\x1b[90;40m Snow      \x1b[0m\x1b[90;40m   2000 \x1b[0m\x1b[90;40m You know nothing, Jon Snow! \x1b[0m",
+		"\x1b[96;100m 3 \x1b[0m\x1b[97;40m 300 \x1b[0m\x1b[97;40m Tyrion     \x1b[0m\x1b[97;40m Lannister \x1b[0m\x1b[97;40m   5000 \x1b[0m\x1b[97;40m                             \x1b[0m",
+		"\x1b[96;100m   \x1b[0m\x1b[36;100m     \x1b[0m\x1b[36;100m            \x1b[0m\x1b[36;100m TOTAL     \x1b[0m\x1b[36;100m  10000 \x1b[0m\x1b[36;100m                             \x1b[0m",
 	}, "\n")
 	out := table.Render()
 	assert.Equal(t, expectedOut, out)

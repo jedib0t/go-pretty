@@ -9,10 +9,6 @@ import (
 	"github.com/jedib0t/go-pretty/util"
 )
 
-func (h *renderHint) isRegularRow() bool {
-	return !h.isHeaderRow && !h.isFooterRow
-}
-
 // Render renders the Table in a human-readable "pretty" format. Example:
 //  ┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
 //  │   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
@@ -106,8 +102,8 @@ func (t *Table) renderColumnAutoIndex(out *strings.Builder, rowNum int, hint ren
 		outAutoIndex.WriteString(t.style.Box.PaddingRight)
 	}
 
-	if t.style.Color.AutoIndexColumn != nil {
-		out.WriteString(t.style.Color.AutoIndexColumn.Sprintf(outAutoIndex.String()))
+	if t.style.Color.IndexColumn != nil {
+		out.WriteString(t.style.Color.IndexColumn.Sprintf(outAutoIndex.String()))
 	} else {
 		out.WriteString(outAutoIndex.String())
 	}
@@ -122,9 +118,9 @@ func (t *Table) renderColumnColorized(out *strings.Builder, rowNum int, colIdx i
 	} else if hint.isFooterRow && t.style.Color.Footer != nil {
 		out.WriteString(t.style.Color.Footer.Sprint(colStr))
 	} else if hint.isRegularRow() {
-		if colIdx == 0 && t.style.Color.FirstColumn != nil {
-			out.WriteString(t.style.Color.FirstColumn.Sprint(colStr))
-		} else if rowNum%2 == 1 && t.style.Color.RowAlternate != nil {
+		if colIdx == t.indexColumn-1 && t.style.Color.IndexColumn != nil {
+			out.WriteString(t.style.Color.IndexColumn.Sprint(colStr))
+		} else if rowNum%2 == 0 && t.style.Color.RowAlternate != nil {
 			out.WriteString(t.style.Color.RowAlternate.Sprint(colStr))
 		} else if t.style.Color.Row != nil {
 			out.WriteString(t.style.Color.Row.Sprint(colStr))

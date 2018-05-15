@@ -45,6 +45,8 @@ type Table struct {
 	columnIsNonNumeric []bool
 	// htmlCSSClass stores the HTML CSS Class to use on the <table> node
 	htmlCSSClass string
+	// indexColumn stores the number of the column considered as the "index"
+	indexColumn int
 	// maxColumnLengths stores the length of the longest line in each column
 	maxColumnLengths []int
 	// maxRowLength stores the length of the longest row
@@ -163,6 +165,12 @@ func (t *Table) SetHTMLCSSClass(cssClass string) {
 	t.htmlCSSClass = cssClass
 }
 
+// SetIndexColumn sets the given Column # as the column that has the row
+// "Index". Valid values range from 1 to N. Note that this is not 0-indexed.
+func (t *Table) SetIndexColumn(colNum int) {
+	t.indexColumn = colNum
+}
+
 // SetOutputMirror sets an io.Writer for all the Render functions to "Write" to
 // in addition to returning a string.
 func (t *Table) SetOutputMirror(mirror io.Writer) {
@@ -206,6 +214,10 @@ type renderHint struct {
 	isHeaderRow       bool
 	isLastRow         bool
 	isSeparatorRow    bool
+}
+
+func (h *renderHint) isRegularRow() bool {
+	return !h.isHeaderRow && !h.isFooterRow
 }
 
 func (t *Table) analyzeAndStringify(row Row, isHeader bool, isFooter bool) rowStr {
