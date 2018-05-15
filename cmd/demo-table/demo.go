@@ -2,13 +2,53 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/jedib0t/go-pretty/text"
 )
 
-func main() {
+func demoTableColors() {
+	tw := table.NewWriter()
+	tw.AppendHeader(table.Row{"#", "First Name", "Last Name", "Salary"})
+	tw.AppendRows([]table.Row{
+		{1, "Arya", "Stark", 3000},
+		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
+		{300, "Tyrion", "Lannister", 5000},
+	})
+	tw.AppendFooter(table.Row{"", "", "Total", 10000})
+	tw.SetIndexColumn(1)
+
+	stylePairs := [][]table.Style{
+		{table.StyleColoredBright, table.StyleColoredDark},
+		{table.StyleColoredBlackOnBlueWhite, table.StyleColoredBlueWhiteOnBlack},
+		{table.StyleColoredBlackOnCyanWhite, table.StyleColoredCyanWhiteOnBlack},
+		{table.StyleColoredBlackOnGreenWhite, table.StyleColoredGreenWhiteOnBlack},
+		{table.StyleColoredBlackOnMagentaWhite, table.StyleColoredMagentaWhiteOnBlack},
+		{table.StyleColoredBlackOnRedWhite, table.StyleColoredRedWhiteOnBlack},
+		{table.StyleColoredBlackOnYellowWhite, table.StyleColoredYellowWhiteOnBlack},
+	}
+
+	twOuter := table.NewWriter()
+	twOuter.AppendHeader(table.Row{"Bright", "Dark"})
+	twOuter.SetAlignHeader([]text.Align{text.AlignCenter, text.AlignCenter})
+	for _, stylePair := range stylePairs {
+		row := make(table.Row, 2)
+		for idx, style := range stylePair {
+			tw.SetStyle(style)
+			tw.SetCaption("%s", style.Name)
+			row[idx] = tw.Render()
+		}
+		twOuter.AppendRow(row)
+	}
+	twOuter.SetAlign([]text.Align{text.AlignCenter, text.AlignCenter})
+	twOuter.SetStyle(table.StyleLight)
+	twOuter.Style().Options.SeparateRows = true
+	fmt.Println(twOuter.Render())
+}
+
+func demoTableFeatures() {
 	//==========================================================================
 	// Initialization
 	//==========================================================================
@@ -551,4 +591,18 @@ func main() {
 	//==========================================================================
 	// That's it for today! New features will always find a place in this demo!
 	//==========================================================================
+}
+
+func main() {
+	demoWhat := "features"
+	if len(os.Args) > 1 {
+		demoWhat = os.Args[1]
+	}
+
+	switch strings.ToLower(demoWhat) {
+	case "colors":
+		demoTableColors()
+	default:
+		demoTableFeatures()
+	}
 }

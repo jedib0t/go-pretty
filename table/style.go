@@ -51,8 +51,9 @@ var (
 		Options: OptionsDefault,
 	}
 
-	// StyleColoredBright renders a Table without any borders or separators, and
-	// with every row colored with a Bright background.
+	// StyleColoredBright renders a Table without any borders or separators,
+	// and with Black text on Cyan background for Header/Footer and
+	// White background for other rows.
 	StyleColoredBright = Style{
 		Name:    "StyleColoredBright",
 		Box:     StyleBoxDefault,
@@ -62,11 +63,144 @@ var (
 	}
 
 	// StyleColoredDark renders a Table without any borders or separators, and
-	// with every row colored with a Dark background.
+	// with Header/Footer in Cyan text and other rows with White text, all on
+	// Black background.
 	StyleColoredDark = Style{
 		Name:    "StyleColoredDark",
 		Box:     StyleBoxDefault,
 		Color:   ColorOptionsDark,
+		Format:  FormatOptionsDefault,
+		Options: OptionsNoBordersAndSeparators,
+	}
+
+	// StyleColoredBlackOnBlueWhite renders a Table without any borders or
+	// separators, and with Black text on Blue background for Header/Footer and
+	// White background for other rows.
+	StyleColoredBlackOnBlueWhite = Style{
+		Name:    "StyleColoredBlackOnBlueWhite",
+		Box:     StyleBoxDefault,
+		Color:   ColorOptionsBlackOnBlueWhite,
+		Format:  FormatOptionsDefault,
+		Options: OptionsNoBordersAndSeparators,
+	}
+
+	// StyleColoredBlackOnCyanWhite renders a Table without any borders or
+	// separators, and with Black text on Cyan background for Header/Footer and
+	// White background for other rows.
+	StyleColoredBlackOnCyanWhite = Style{
+		Name:    "StyleColoredBlackOnCyanWhite",
+		Box:     StyleBoxDefault,
+		Color:   ColorOptionsBlackOnCyanWhite,
+		Format:  FormatOptionsDefault,
+		Options: OptionsNoBordersAndSeparators,
+	}
+
+	// StyleColoredBlackOnGreenWhite renders a Table without any borders or
+	// separators, and with Black text on Green background for Header/Footer and
+	// White background for other rows.
+	StyleColoredBlackOnGreenWhite = Style{
+		Name:    "StyleColoredBlackOnGreenWhite",
+		Box:     StyleBoxDefault,
+		Color:   ColorOptionsBlackOnGreenWhite,
+		Format:  FormatOptionsDefault,
+		Options: OptionsNoBordersAndSeparators,
+	}
+
+	// StyleColoredBlackOnMagentaWhite renders a Table without any borders or
+	// separators, and with Black text on Magenta background for Header/Footer and
+	// White background for other rows.
+	StyleColoredBlackOnMagentaWhite = Style{
+		Name:    "StyleColoredBlackOnMagentaWhite",
+		Box:     StyleBoxDefault,
+		Color:   ColorOptionsBlackOnMagentaWhite,
+		Format:  FormatOptionsDefault,
+		Options: OptionsNoBordersAndSeparators,
+	}
+
+	// StyleColoredBlackOnYellowWhite renders a Table without any borders or
+	// separators, and with Black text on Yellow background for Header/Footer and
+	// White background for other rows.
+	StyleColoredBlackOnYellowWhite = Style{
+		Name:    "StyleColoredBlackOnYellowWhite",
+		Box:     StyleBoxDefault,
+		Color:   ColorOptionsBlackOnYellowWhite,
+		Format:  FormatOptionsDefault,
+		Options: OptionsNoBordersAndSeparators,
+	}
+
+	// StyleColoredBlackOnRedWhite renders a Table without any borders or
+	// separators, and with Black text on Red background for Header/Footer and
+	// White background for other rows.
+	StyleColoredBlackOnRedWhite = Style{
+		Name:    "StyleColoredBlackOnRedWhite",
+		Box:     StyleBoxDefault,
+		Color:   ColorOptionsBlackOnRedWhite,
+		Format:  FormatOptionsDefault,
+		Options: OptionsNoBordersAndSeparators,
+	}
+
+	// StyleColoredBlueWhiteOnBlack renders a Table without any borders or
+	// separators, and with Header/Footer in Blue text and other rows with
+	// White text, all on Black background.
+	StyleColoredBlueWhiteOnBlack = Style{
+		Name:    "StyleColoredBlueWhiteOnBlack",
+		Box:     StyleBoxDefault,
+		Color:   ColorOptionsBlueWhiteOnBlack,
+		Format:  FormatOptionsDefault,
+		Options: OptionsNoBordersAndSeparators,
+	}
+
+	// StyleColoredCyanWhiteOnBlack renders a Table without any borders or
+	// separators, and with Header/Footer in Cyan text and other rows with
+	// White text, all on Black background.
+	StyleColoredCyanWhiteOnBlack = Style{
+		Name:    "StyleColoredCyanWhiteOnBlack",
+		Box:     StyleBoxDefault,
+		Color:   ColorOptionsCyanWhiteOnBlack,
+		Format:  FormatOptionsDefault,
+		Options: OptionsNoBordersAndSeparators,
+	}
+
+	// StyleColoredGreenWhiteOnBlack renders a Table without any borders or
+	// separators, and with Header/Footer in Green text and other rows with
+	// White text, all on Black background.
+	StyleColoredGreenWhiteOnBlack = Style{
+		Name:    "StyleColoredGreenWhiteOnBlack",
+		Box:     StyleBoxDefault,
+		Color:   ColorOptionsGreenWhiteOnBlack,
+		Format:  FormatOptionsDefault,
+		Options: OptionsNoBordersAndSeparators,
+	}
+
+	// StyleColoredMagentaWhiteOnBlack renders a Table without any borders or
+	// separators, and with Header/Footer in Magenta text and other rows with
+	// White text, all on Black background.
+	StyleColoredMagentaWhiteOnBlack = Style{
+		Name:    "StyleColoredMagentaWhiteOnBlack",
+		Box:     StyleBoxDefault,
+		Color:   ColorOptionsMagentaWhiteOnBlack,
+		Format:  FormatOptionsDefault,
+		Options: OptionsNoBordersAndSeparators,
+	}
+
+	// StyleColoredRedWhiteOnBlack renders a Table without any borders or
+	// separators, and with Header/Footer in Red text and other rows with
+	// White text, all on Black background.
+	StyleColoredRedWhiteOnBlack = Style{
+		Name:    "StyleColoredRedWhiteOnBlack",
+		Box:     StyleBoxDefault,
+		Color:   ColorOptionsRedWhiteOnBlack,
+		Format:  FormatOptionsDefault,
+		Options: OptionsNoBordersAndSeparators,
+	}
+
+	// StyleColoredYellowWhiteOnBlack renders a Table without any borders or
+	// separators, and with Header/Footer in Yellow text and other rows with
+	// White text, all on Black background.
+	StyleColoredYellowWhiteOnBlack = Style{
+		Name:    "StyleColoredYellowWhiteOnBlack",
+		Box:     StyleBoxDefault,
+		Color:   ColorOptionsYellowWhiteOnBlack,
 		Format:  FormatOptionsDefault,
 		Options: OptionsNoBordersAndSeparators,
 	}
@@ -352,17 +486,25 @@ type ColorOptions struct {
 
 var (
 	// ColorOptionsDefault defines sensible ANSI color options - basically NONE.
-	ColorOptionsDefault = ColorOptions{
-		IndexColumn:  nil,
-		Footer:       nil,
-		Header:       nil,
-		Row:          nil,
-		RowAlternate: nil,
+	ColorOptionsDefault = ColorOptions{}
+
+	// ColorOptionsBright renders dark text on bright background.
+	ColorOptionsBright = ColorOptionsBlackOnCyanWhite
+
+	// ColorOptionsDark renders bright text on dark background.
+	ColorOptionsDark = ColorOptionsCyanWhiteOnBlack
+
+	// ColorOptionsBlackOnBlueWhite renders Black text on Blue/White background.
+	ColorOptionsBlackOnBlueWhite = ColorOptions{
+		IndexColumn:  text.Colors{text.BgHiBlue, text.FgBlack},
+		Footer:       text.Colors{text.BgBlue, text.FgBlack},
+		Header:       text.Colors{text.BgHiBlue, text.FgBlack},
+		Row:          text.Colors{text.BgHiWhite, text.FgBlack},
+		RowAlternate: text.Colors{text.BgWhite, text.FgBlack},
 	}
 
-	// ColorOptionsBright defines ANSI color options to render dark text on
-	// bright background.
-	ColorOptionsBright = ColorOptions{
+	// ColorOptionsBlackOnCyanWhite renders Black text on Cyan/White background.
+	ColorOptionsBlackOnCyanWhite = ColorOptions{
 		IndexColumn:  text.Colors{text.BgHiCyan, text.FgBlack},
 		Footer:       text.Colors{text.BgCyan, text.FgBlack},
 		Header:       text.Colors{text.BgHiCyan, text.FgBlack},
@@ -370,14 +512,100 @@ var (
 		RowAlternate: text.Colors{text.BgWhite, text.FgBlack},
 	}
 
-	// ColorOptionsDark defines ANSI color options to render bright text on dark
+	// ColorOptionsBlackOnGreenWhite renders Black text on Green/White
 	// background.
-	ColorOptionsDark = ColorOptions{
+	ColorOptionsBlackOnGreenWhite = ColorOptions{
+		IndexColumn:  text.Colors{text.BgHiGreen, text.FgBlack},
+		Footer:       text.Colors{text.BgGreen, text.FgBlack},
+		Header:       text.Colors{text.BgHiGreen, text.FgBlack},
+		Row:          text.Colors{text.BgHiWhite, text.FgBlack},
+		RowAlternate: text.Colors{text.BgWhite, text.FgBlack},
+	}
+
+	// ColorOptionsBlackOnMagentaWhite renders Black text on Magenta/White
+	// background.
+	ColorOptionsBlackOnMagentaWhite = ColorOptions{
+		IndexColumn:  text.Colors{text.BgHiMagenta, text.FgBlack},
+		Footer:       text.Colors{text.BgMagenta, text.FgBlack},
+		Header:       text.Colors{text.BgHiMagenta, text.FgBlack},
+		Row:          text.Colors{text.BgHiWhite, text.FgBlack},
+		RowAlternate: text.Colors{text.BgWhite, text.FgBlack},
+	}
+
+	// ColorOptionsBlackOnRedWhite renders Black text on Red/White background.
+	ColorOptionsBlackOnRedWhite = ColorOptions{
+		IndexColumn:  text.Colors{text.BgHiRed, text.FgBlack},
+		Footer:       text.Colors{text.BgRed, text.FgBlack},
+		Header:       text.Colors{text.BgHiRed, text.FgBlack},
+		Row:          text.Colors{text.BgHiWhite, text.FgBlack},
+		RowAlternate: text.Colors{text.BgWhite, text.FgBlack},
+	}
+
+	// ColorOptionsBlackOnYellowWhite renders Black text on Yellow/White
+	// background.
+	ColorOptionsBlackOnYellowWhite = ColorOptions{
+		IndexColumn:  text.Colors{text.BgHiYellow, text.FgBlack},
+		Footer:       text.Colors{text.BgYellow, text.FgBlack},
+		Header:       text.Colors{text.BgHiYellow, text.FgBlack},
+		Row:          text.Colors{text.BgHiWhite, text.FgBlack},
+		RowAlternate: text.Colors{text.BgWhite, text.FgBlack},
+	}
+
+	// ColorOptionsBlueWhiteOnBlack renders Blue/White text on Black background.
+	ColorOptionsBlueWhiteOnBlack = ColorOptions{
+		IndexColumn:  text.Colors{text.FgHiBlue, text.BgHiBlack},
+		Footer:       text.Colors{text.FgBlue, text.BgHiBlack},
+		Header:       text.Colors{text.FgHiBlue, text.BgHiBlack},
+		Row:          text.Colors{text.FgHiWhite, text.BgBlack},
+		RowAlternate: text.Colors{text.FgWhite, text.BgBlack},
+	}
+
+	// ColorOptionsCyanWhiteOnBlack renders Cyan/White text on Black background.
+	ColorOptionsCyanWhiteOnBlack = ColorOptions{
 		IndexColumn:  text.Colors{text.FgHiCyan, text.BgHiBlack},
 		Footer:       text.Colors{text.FgCyan, text.BgHiBlack},
 		Header:       text.Colors{text.FgHiCyan, text.BgHiBlack},
 		Row:          text.Colors{text.FgHiWhite, text.BgBlack},
-		RowAlternate: text.Colors{text.FgHiBlack, text.BgBlack},
+		RowAlternate: text.Colors{text.FgWhite, text.BgBlack},
+	}
+
+	// ColorOptionsGreenWhiteOnBlack renders Green/White text on Black
+	// background.
+	ColorOptionsGreenWhiteOnBlack = ColorOptions{
+		IndexColumn:  text.Colors{text.FgHiGreen, text.BgHiBlack},
+		Footer:       text.Colors{text.FgGreen, text.BgHiBlack},
+		Header:       text.Colors{text.FgHiGreen, text.BgHiBlack},
+		Row:          text.Colors{text.FgHiWhite, text.BgBlack},
+		RowAlternate: text.Colors{text.FgWhite, text.BgBlack},
+	}
+
+	// ColorOptionsMagentaWhiteOnBlack renders Magenta/White text on Black
+	// background.
+	ColorOptionsMagentaWhiteOnBlack = ColorOptions{
+		IndexColumn:  text.Colors{text.FgHiMagenta, text.BgHiBlack},
+		Footer:       text.Colors{text.FgMagenta, text.BgHiBlack},
+		Header:       text.Colors{text.FgHiMagenta, text.BgHiBlack},
+		Row:          text.Colors{text.FgHiWhite, text.BgBlack},
+		RowAlternate: text.Colors{text.FgWhite, text.BgBlack},
+	}
+
+	// ColorOptionsRedWhiteOnBlack renders Red/White text on Black background.
+	ColorOptionsRedWhiteOnBlack = ColorOptions{
+		IndexColumn:  text.Colors{text.FgHiRed, text.BgHiBlack},
+		Footer:       text.Colors{text.FgRed, text.BgHiBlack},
+		Header:       text.Colors{text.FgHiRed, text.BgHiBlack},
+		Row:          text.Colors{text.FgHiWhite, text.BgBlack},
+		RowAlternate: text.Colors{text.FgWhite, text.BgBlack},
+	}
+
+	// ColorOptionsYellowWhiteOnBlack renders Yellow/White text on Black
+	// background.
+	ColorOptionsYellowWhiteOnBlack = ColorOptions{
+		IndexColumn:  text.Colors{text.FgHiYellow, text.BgHiBlack},
+		Footer:       text.Colors{text.FgYellow, text.BgHiBlack},
+		Header:       text.Colors{text.FgHiYellow, text.BgHiBlack},
+		Row:          text.Colors{text.FgHiWhite, text.BgBlack},
+		RowAlternate: text.Colors{text.FgWhite, text.BgBlack},
 	}
 )
 
