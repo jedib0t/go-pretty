@@ -1,7 +1,6 @@
 package table
 
 import (
-	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/text"
 )
 
@@ -344,45 +343,41 @@ var (
 
 // ColorOptions defines the ANSI colors to use for parts of the Table.
 type ColorOptions struct {
-	AutoIndexColumn text.Colors
-	FirstColumn     text.Colors
-	Footer          text.Colors
-	Header          text.Colors
-	Row             text.Colors
-	RowAlternate    text.Colors
+	IndexColumn  text.Colors
+	Footer       text.Colors
+	Header       text.Colors
+	Row          text.Colors
+	RowAlternate text.Colors
 }
 
 var (
 	// ColorOptionsDefault defines sensible ANSI color options - basically NONE.
 	ColorOptionsDefault = ColorOptions{
-		AutoIndexColumn: nil,
-		FirstColumn:     nil,
-		Footer:          nil,
-		Header:          nil,
-		Row:             nil,
-		RowAlternate:    nil,
+		IndexColumn:  nil,
+		Footer:       nil,
+		Header:       nil,
+		Row:          nil,
+		RowAlternate: nil,
 	}
 
 	// ColorOptionsBright defines ANSI color options to render dark text on
 	// bright background.
 	ColorOptionsBright = ColorOptions{
-		AutoIndexColumn: text.Colors{color.BgHiCyan, color.FgBlack},
-		FirstColumn:     nil,
-		Footer:          text.Colors{color.BgCyan, color.FgBlack},
-		Header:          text.Colors{color.BgHiCyan, color.FgBlack},
-		Row:             text.Colors{color.BgHiWhite, color.FgBlack},
-		RowAlternate:    text.Colors{color.BgWhite, color.FgBlack},
+		IndexColumn:  text.Colors{text.BgHiCyan, text.FgBlack},
+		Footer:       text.Colors{text.BgCyan, text.FgBlack},
+		Header:       text.Colors{text.BgHiCyan, text.FgBlack},
+		Row:          text.Colors{text.BgHiWhite, text.FgBlack},
+		RowAlternate: text.Colors{text.BgWhite, text.FgBlack},
 	}
 
 	// ColorOptionsDark defines ANSI color options to render bright text on dark
 	// background.
 	ColorOptionsDark = ColorOptions{
-		AutoIndexColumn: text.Colors{color.FgHiCyan, color.BgBlack},
-		FirstColumn:     nil,
-		Footer:          text.Colors{color.FgCyan, color.BgBlack},
-		Header:          text.Colors{color.FgHiCyan, color.BgBlack},
-		Row:             text.Colors{color.FgHiWhite, color.BgBlack},
-		RowAlternate:    text.Colors{color.FgWhite, color.BgBlack},
+		IndexColumn:  text.Colors{text.FgHiCyan, text.BgHiBlack},
+		Footer:       text.Colors{text.FgCyan, text.BgHiBlack},
+		Header:       text.Colors{text.FgHiCyan, text.BgHiBlack},
+		Row:          text.Colors{text.FgHiWhite, text.BgBlack},
+		RowAlternate: text.Colors{text.FgHiBlack, text.BgBlack},
 	}
 )
 

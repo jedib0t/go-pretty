@@ -5,7 +5,6 @@ import (
 	"testing"
 	"unicode/utf8"
 
-	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/text"
 	"github.com/stretchr/testify/assert"
 )
@@ -13,12 +12,12 @@ import (
 var (
 	testAlign           = []text.Align{text.AlignDefault, text.AlignLeft, text.AlignLeft, text.AlignRight}
 	testCaption         = "test-caption"
-	testColor           = text.Colors{color.FgGreen}
-	testColorBoW        = text.Colors{color.FgBlack, color.BgWhite}
-	testColorHiRedBold  = text.Colors{color.FgHiRed, color.Bold}
-	testColorHiBlueBold = text.Colors{color.FgHiBlue, color.Bold}
-	testColorWoB        = text.Colors{color.FgWhite, color.BgBlack}
-	testColors          = []text.Colors{testColor, testColor, testColor, testColor, {color.FgCyan}}
+	testColor           = text.Colors{text.FgGreen}
+	testColorBoW        = text.Colors{text.FgBlack, text.BgWhite}
+	testColorHiRedBold  = text.Colors{text.FgHiRed, text.Bold}
+	testColorHiBlueBold = text.Colors{text.FgHiBlue, text.Bold}
+	testColorWoB        = text.Colors{text.FgWhite, text.BgBlack}
+	testColors          = []text.Colors{testColor, testColor, testColor, testColor, {text.FgCyan}}
 	testColorsFooter    = []text.Colors{{}, {}, testColorHiBlueBold, testColorHiBlueBold}
 	testColorsHeader    = []text.Colors{testColorHiRedBold, testColorHiRedBold, testColorHiRedBold, testColorHiRedBold}
 	testCSSClass        = "test-css-class"

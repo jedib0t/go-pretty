@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/jedib0t/go-pretty/text"
 )
@@ -352,9 +351,9 @@ func main() {
 	// I need some color in my life!
 	//==========================================================================
 	t.SetStyle(table.StyleBold)
-	colorBOnW := text.Colors{color.BgWhite, color.FgBlack}
+	colorBOnW := text.Colors{text.BgWhite, text.FgBlack}
 	t.SetColorsHeader([]text.Colors{colorBOnW, colorBOnW, colorBOnW, colorBOnW, colorBOnW})
-	t.SetColors([]text.Colors{{color.FgYellow}, {color.FgHiRed}, {color.FgHiRed}, {color.FgGreen}, {color.FgCyan}})
+	t.SetColors([]text.Colors{{text.FgYellow}, {text.FgHiRed}, {text.FgHiRed}, {text.FgGreen}, {text.FgCyan}})
 	t.SetColorsFooter([]text.Colors{{}, {}, colorBOnW, colorBOnW})
 	t.SetCaption("Table with Colors.\n")
 	fmt.Println(t.Render())

@@ -14,7 +14,7 @@ Pretty-print tables into ASCII/Unicode strings.
   - Mirror output to an io.Writer object (like os.StdOut)
   - Completely customizable styles
     - Many ready-to-use styles: [style.go](style.go)
-    - Colorize Headers/Body/Footers using [github.com/fatih/color](https://github.com/fatih/color)
+    - Colorize Headers/Body/Footers using [../text/color](../text/color)
     - Custom text-case for Headers/Body/Footers
     - Enable separators between each row
     - Render table without a Border

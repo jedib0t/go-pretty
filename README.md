@@ -23,7 +23,7 @@ Pretty-print tables into ASCII/Unicode strings.
   - Mirror output to an io.Writer object (like os.StdOut)
   - Completely customizable styles
     - Many ready-to-use styles: [table/style.go](table/style.go)
-    - Colorize Headers/Body/Footers using [github.com/fatih/color](https://github.com/fatih/color)
+    - Colorize Headers/Body/Footers using [text/color](text/color.go)
     - Custom text-case for Headers/Body/Footers
     - Enable separators between each row
     - Render table without a Border
@@ -86,7 +86,7 @@ Specifically, `table` and `list` use these extensively:
      - [text/align.go](text/align.go)
    - Align text vertically
      - [text/valign.go](text/valign.go)
-   - Colorize text using a simpler interface to [github.com/fatih/color](https://github.com/fatih/color)
+   - Colorize text
      - [text/color.go](text/color.go)
    - Format text (convert case for now)
      - [text/format.go](text/format.go)

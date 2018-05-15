@@ -47,10 +47,10 @@ func demoList() string {
 func demoTable() string {
 	styles := []table.Style{
 		table.StyleDefault,
-		table.StyleLight,
-		table.StyleBold,
 		table.StyleRounded,
+		table.StyleBold,
 		table.StyleColoredBright,
+		table.StyleColoredDark,
 	}
 	header := table.Row{"#", "First Name", "Last Name", "Salary"}
 	rows1And2 := []table.Row{
@@ -74,6 +74,7 @@ func demoTable() string {
 		tw.AppendRow(row3)
 		tw.AppendFooter(footer)
 		tw.SetAlign(align)
+		tw.SetIndexColumn(1)
 		tw.SetStyle(style)
 
 		if len(content) == 0 {
