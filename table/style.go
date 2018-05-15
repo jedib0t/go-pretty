@@ -1,7 +1,6 @@
 package table
 
 import (
-	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/text"
 )
 
@@ -364,21 +363,21 @@ var (
 	// ColorOptionsBright defines ANSI color options to render dark text on
 	// bright background.
 	ColorOptionsBright = ColorOptions{
-		IndexColumn:  text.Colors{color.BgHiCyan, color.FgBlack},
-		Footer:       text.Colors{color.BgCyan, color.FgBlack},
-		Header:       text.Colors{color.BgHiCyan, color.FgBlack},
-		Row:          text.Colors{color.BgHiWhite, color.FgBlack},
-		RowAlternate: text.Colors{color.BgWhite, color.FgBlack},
+		IndexColumn:  text.Colors{text.BgHiCyan, text.FgBlack},
+		Footer:       text.Colors{text.BgCyan, text.FgBlack},
+		Header:       text.Colors{text.BgHiCyan, text.FgBlack},
+		Row:          text.Colors{text.BgHiWhite, text.FgBlack},
+		RowAlternate: text.Colors{text.BgWhite, text.FgBlack},
 	}
 
 	// ColorOptionsDark defines ANSI color options to render bright text on dark
 	// background.
 	ColorOptionsDark = ColorOptions{
-		IndexColumn:  text.Colors{color.FgHiCyan, color.BgHiBlack},
-		Footer:       text.Colors{color.FgCyan, color.BgHiBlack},
-		Header:       text.Colors{color.FgHiCyan, color.BgHiBlack},
-		Row:          text.Colors{color.FgHiWhite, color.BgBlack},
-		RowAlternate: text.Colors{color.FgHiBlack, color.BgBlack},
+		IndexColumn:  text.Colors{text.FgHiCyan, text.BgHiBlack},
+		Footer:       text.Colors{text.FgCyan, text.BgHiBlack},
+		Header:       text.Colors{text.FgHiCyan, text.BgHiBlack},
+		Row:          text.Colors{text.FgHiWhite, text.BgBlack},
+		RowAlternate: text.Colors{text.FgHiBlack, text.BgBlack},
 	}
 )
 
