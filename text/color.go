@@ -23,7 +23,7 @@ type Color int
 
 // Base colors -- attributes in reality
 const (
-	Reset        Color = iota
+	Reset Color = iota
 	Bold
 	Faint
 	Italic
@@ -37,7 +37,7 @@ const (
 
 // Foreground text colors
 const (
-	FgBlack   Color = iota + 30
+	FgBlack Color = iota + 30
 	FgRed
 	FgGreen
 	FgYellow
@@ -49,7 +49,7 @@ const (
 
 // Foreground Hi-Intensity text colors
 const (
-	FgHiBlack   Color = iota + 90
+	FgHiBlack Color = iota + 90
 	FgHiRed
 	FgHiGreen
 	FgHiYellow
@@ -61,7 +61,7 @@ const (
 
 // Background text colors
 const (
-	BgBlack   Color = iota + 40
+	BgBlack Color = iota + 40
 	BgRed
 	BgGreen
 	BgYellow
@@ -73,7 +73,7 @@ const (
 
 // Background Hi-Intensity text colors
 const (
-	BgHiBlack   Color = iota + 100
+	BgHiBlack Color = iota + 100
 	BgHiRed
 	BgHiGreen
 	BgHiYellow
