@@ -90,29 +90,12 @@ func (ca Color) GetEscapeSeq() string {
 
 // Sprint colorizes and prints the given string(s).
 func (ca Color) Sprint(a ...interface{}) string {
-	return ca.colorize(fmt.Sprint(a...))
+	return colorize(fmt.Sprint(a...), ca.GetEscapeSeq())
 }
 
 // Sprintf formats and colorizes and prints the given string(s).
 func (ca Color) Sprintf(format string, a ...interface{}) string {
-	return ca.colorize(fmt.Sprintf(format, a...))
-}
-
-func (ca Color) colorize(s string) string {
-	escapeSeq := ca.GetEscapeSeq()
-
-	out := ""
-	if !strings.HasPrefix(s, util.EscapeStart) {
-		out += escapeSeq
-	}
-	out += strings.Replace(s, util.EscapeReset, util.EscapeReset+escapeSeq, -1)
-	if !strings.HasSuffix(out, util.EscapeReset) {
-		out += util.EscapeReset
-	}
-	if strings.Contains(out, escapeSeq+util.EscapeReset) {
-		out = strings.Replace(out, escapeSeq+util.EscapeReset, "", -1)
-	}
-	return out
+	return colorize(fmt.Sprintf(format, a...), ca.GetEscapeSeq())
 }
 
 // Colors represents an array of Color objects to render text with.
@@ -132,11 +115,11 @@ func (ca Colors) GetEscapeSeq() string {
 	colorsKey := fmt.Sprintf("%#v", ca)
 	escapeSeq := colorsSeqMap[colorsKey]
 	if escapeSeq == "" {
-		escapeSeqForColors := make([]string, len(ca))
+		colorNums := make([]string, len(ca))
 		for idx, c := range ca {
-			escapeSeqForColors[idx] = strconv.Itoa(int(c))
+			colorNums[idx] = strconv.Itoa(int(c))
 		}
-		escapeSeq = util.EscapeStart + strings.Join(escapeSeqForColors, ";") + util.EscapeStop
+		escapeSeq = util.EscapeStart + strings.Join(colorNums, ";") + util.EscapeStop
 		colorsSeqMap[colorsKey] = escapeSeq
 	}
 	return escapeSeq
@@ -144,16 +127,15 @@ func (ca Colors) GetEscapeSeq() string {
 
 // Sprint colorizes and prints the given string(s).
 func (ca Colors) Sprint(a ...interface{}) string {
-	return ca.colorize(fmt.Sprint(a...))
+	return colorize(fmt.Sprint(a...), ca.GetEscapeSeq())
 }
 
 // Sprintf formats and colorizes and prints the given string(s).
 func (ca Colors) Sprintf(format string, a ...interface{}) string {
-	return ca.colorize(fmt.Sprintf(format, a...))
+	return colorize(fmt.Sprintf(format, a...), ca.GetEscapeSeq())
 }
 
-func (ca Colors) colorize(s string) string {
-	escapeSeq := ca.GetEscapeSeq()
+func colorize(s string, escapeSeq string) string {
 	if escapeSeq == "" {
 		return s
 	}
