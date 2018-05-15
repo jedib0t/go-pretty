@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"os"
+	"strings"
 
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/jedib0t/go-pretty/text"

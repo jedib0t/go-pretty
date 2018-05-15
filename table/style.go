@@ -569,7 +569,7 @@ var (
 		RowAlternate: text.Colors{text.FgWhite, text.BgBlack},
 	}
 
-	// ColorOptionsGreenWhiteOnBlack renders Green/White text on Black 
+	// ColorOptionsGreenWhiteOnBlack renders Green/White text on Black
 	// background.
 	ColorOptionsGreenWhiteOnBlack = ColorOptions{
 		IndexColumn:  text.Colors{text.FgHiGreen, text.BgHiBlack},
