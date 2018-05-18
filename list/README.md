@@ -26,4 +26,5 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
    ■ The Gunslinger
 ```
 
-A demonstration of all the capabilities can be found here: [../cmd/demo-list](../cmd/demo-list)
+A demonstration of all the capabilities can be found here:
+[../cmd/demo-list](../cmd/demo-list)

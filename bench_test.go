@@ -4,8 +4,11 @@ import (
 	"testing"
 
 	"github.com/jedib0t/go-pretty/list"
+	"github.com/jedib0t/go-pretty/progress"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/jedib0t/go-pretty/text"
+	"io/ioutil"
+	"time"
 )
 
 var (
@@ -21,6 +24,9 @@ var (
 		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
 		{300, "Tyrion", "Lannister", 5000},
 	}
+	tracker1 = progress.Tracker{Message: "Calculation Total   # 1", Total: 1000, Units: progress.UnitsDefault}
+	tracker2 = progress.Tracker{Message: "Downloading File    # 2", Total: 1000, Units: progress.UnitsBytes}
+	tracker3 = progress.Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: progress.UnitsCurrencyDollar}
 )
 
 func generateBenchmarkTable() table.Writer {
@@ -42,6 +48,26 @@ func BenchmarkList_Render(b *testing.B) {
 		lw.Indent()
 		lw.AppendItems(listItems3)
 		lw.Render()
+	}
+}
+
+func BenchmarkProgress_Render(b *testing.B) {
+	trackSomething := func(pw progress.Writer, tracker *progress.Tracker) {
+		tracker.Reset()
+		pw.AppendTracker(tracker)
+		time.Sleep(time.Millisecond * 500)
+		tracker.Increment(tracker.Total)
+	}
+
+	for i := 0; i < b.N; i++ {
+		pw := progress.NewWriter()
+		pw.SetAutoStop(true)
+		pw.SetOutputWriter(ioutil.Discard)
+		go trackSomething(pw, &tracker1)
+		go trackSomething(pw, &tracker2)
+		go trackSomething(pw, &tracker3)
+		time.Sleep(time.Millisecond * 50)
+		pw.Render()
 	}
 }
 
