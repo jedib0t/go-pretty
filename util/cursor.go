@@ -25,10 +25,15 @@ const (
 	EraseLine Cursor = 'K'
 )
 
-// Sprint prints the Escape Sequence to move the Cursor "x" times.
-func (c Cursor) Sprint(x ...int) string {
-	if len(x) > 0 && x[0] > 0 {
-		return fmt.Sprintf("%s%d%c", EscapeStart, x[0], c)
-	}
+// Sprint prints the Escape Sequence to move the Cursor once.
+func (c Cursor) Sprint() string {
 	return fmt.Sprintf("%s%c", EscapeStart, c)
+}
+
+// Sprintn prints the Escape Sequence to move the Cursor "n" times.
+func (c Cursor) Sprintn(n int) string {
+	if c == EraseLine {
+		return c.Sprint()
+	}
+	return fmt.Sprintf("%s%d%c", EscapeStart, n, c)
 }

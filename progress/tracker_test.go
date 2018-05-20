@@ -1,8 +1,10 @@
 package progress
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"time"
 )
 
 func TestTracker_Increment(t *testing.T) {
@@ -47,6 +49,28 @@ func TestTracker_PercentDone(t *testing.T) {
 		tracker.Increment(1)
 		assert.Equal(t, float64(idx), tracker.PercentDone())
 	}
+}
+
+func TestTracker_Reset(t *testing.T) {
+	tracker := Tracker{Total: 100}
+	assert.False(t, tracker.done)
+	assert.Equal(t, time.Time{}, tracker.timeStart)
+	assert.Equal(t, time.Time{}, tracker.timeStop)
+	assert.Equal(t, int64(0), tracker.value)
+
+	tracker.start()
+	tracker.Increment(tracker.Total)
+	tracker.stop()
+	assert.True(t, tracker.done)
+	assert.NotEqual(t, time.Time{}, tracker.timeStart)
+	assert.NotEqual(t, time.Time{}, tracker.timeStop)
+	assert.Equal(t, tracker.Total, tracker.value)
+
+	tracker.Reset()
+	assert.False(t, tracker.done)
+	assert.Equal(t, time.Time{}, tracker.timeStart)
+	assert.Equal(t, time.Time{}, tracker.timeStop)
+	assert.Equal(t, int64(0), tracker.value)
 }
 
 func TestUnits_Sprint(t *testing.T) {

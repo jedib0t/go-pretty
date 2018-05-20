@@ -31,7 +31,7 @@ func (p *Progress) Render() {
 func (p *Progress) renderTrackers() {
 	// move up N times based on the number of active trackers
 	if len(p.trackersActive) > 0 {
-		p.write(util.CursorUp.Sprint(len(p.trackersActive)))
+		p.write(util.CursorUp.Sprintn(len(p.trackersActive)))
 	}
 
 	// move trackers waiting in queue to the active list

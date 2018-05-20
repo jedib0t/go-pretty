@@ -1,11 +1,12 @@
 package progress
 
 import (
-	"github.com/stretchr/testify/assert"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type outputWriter struct {
