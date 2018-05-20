@@ -80,7 +80,6 @@ A demonstration of all the capabilities can be found here:
 [cmd/demo-list](cmd/demo-list)
 
 # Progress
-[![GoDoc](https://godoc.org/github.com/jedib0t/go-pretty/progress?status.svg)](https://godoc.org/github.com/jedib0t/go-pretty/progress)
 
 Track the Progress of one or more Tasks (like downloading multiple files in
 parallel).
