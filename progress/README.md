@@ -28,7 +28,7 @@ Downloading File    #  9 ... 32.1% (●●●●●●●○◌◌◌◌◌◌�
 Transferring Amount # 10 ... 13.0% (●●○◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌) [£32.50K in 198.84ms]
 ```
 
-Real-time playback of the output @ asciinema.org:
+Real-time playback of the demo @ asciinema.org:
 [![asciicast](https://asciinema.org/a/KcPw8aoBSsYCBOj60wluhu5z3.png)](https://asciinema.org/a/KcPw8aoBSsYCBOj60wluhu5z3)
 
 A demonstration of all the capabilities can be found here:

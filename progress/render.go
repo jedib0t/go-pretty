@@ -15,11 +15,12 @@ func (p *Progress) Render() {
 		p.initForRender()
 
 		c := time.Tick(p.updateFrequency)
+		lastRenderLength := 0
 		for p.renderInProgress = true; p.renderInProgress; {
 			select {
 			case <-c:
 				if len(p.trackersInQueue) > 0 || len(p.trackersActive) > 0 {
-					p.renderTrackers()
+					lastRenderLength = p.renderTrackers(lastRenderLength)
 				}
 			case <-p.done:
 				p.renderInProgress = false
@@ -28,24 +29,28 @@ func (p *Progress) Render() {
 	}
 }
 
-func (p *Progress) renderTrackers() {
+func (p *Progress) renderTrackers(lastRenderLength int) int {
+	// buffer all output into a strings.Builder object
+	var out strings.Builder
+	out.Grow(lastRenderLength)
+
 	// move up N times based on the number of active trackers
 	if len(p.trackersActive) > 0 {
-		p.write(util.CursorUp.Sprintn(len(p.trackersActive)))
+		out.WriteString(util.CursorUp.Sprintn(len(p.trackersActive)))
 	}
 
 	// move trackers waiting in queue to the active list
 	if len(p.trackersInQueue) > 0 {
 		p.trackersInQueueMutex.Lock()
 		p.trackersActive = append(p.trackersActive, p.trackersInQueue...)
-		p.trackersInQueue = []*Tracker{}
+		p.trackersInQueue = make([]*Tracker, 0)
 		p.trackersInQueueMutex.Unlock()
 	}
 
 	// render the finished trackers and move them to the "done" list
 	for idx, tracker := range p.trackersActive {
 		if tracker.IsDone() {
-			p.renderTracker(tracker)
+			p.renderTracker(&out, tracker)
 			if idx < len(p.trackersActive) {
 				p.trackersActive = append(p.trackersActive[:idx], p.trackersActive[idx+1:]...)
 			}
@@ -56,109 +61,122 @@ func (p *Progress) renderTrackers() {
 	// sort and render the active trackers
 	p.sortBy.Sort(p.trackersActive)
 	for _, tracker := range p.trackersActive {
-		p.renderTracker(tracker)
+		p.renderTracker(&out, tracker)
 	}
+
+	// write the text to the output writer
+	p.outputWriter.Write([]byte(out.String()))
 
 	// stop if auto stop is enabled and there are no more active trackers
 	if p.autoStop && len(p.trackersInQueue) == 0 && len(p.trackersActive) == 0 {
 		p.done <- true
 	}
+
+	return out.Len()
 }
 
-func (p *Progress) renderTracker(t *Tracker) {
-	p.write(util.EraseLine.Sprint())
-
-	pDotValue := float64(t.Total) / float64(p.lengthProgress)
-	pFinishedDots := float64(t.value) / pDotValue
-	pFinishedLen := int(math.Ceil(pFinishedDots))
-	pUnfinishedLen := p.lengthProgress - pFinishedLen
-
-	var pFinished, pInProgress, pUnfinished string
-	if pFinishedLen > 0 {
-		pFinished = strings.Repeat(p.style.Chars.Finished, pFinishedLen-1)
-	}
-	if pUnfinishedLen > 0 {
-		pUnfinished = strings.Repeat(p.style.Chars.Unfinished, pUnfinishedLen)
-	}
-
-	pFinishedDecimals := pFinishedDots - float64(int(pFinishedDots))
-	if pFinishedDecimals > 0.75 {
-		pInProgress = p.style.Chars.Finished75
-	} else if pFinishedDecimals > 0.50 {
-		pInProgress = p.style.Chars.Finished50
-	} else if pFinishedDecimals > 0.25 {
-		pInProgress = p.style.Chars.Finished25
-	} else {
-		pInProgress = p.style.Chars.Unfinished
-	}
+func (p *Progress) renderTracker(out *strings.Builder, t *Tracker) {
+	out.WriteString(util.EraseLine.Sprint())
 
 	if t.IsDone() {
-		p.renderTrackerDone(t)
+		p.renderTrackerDone(out, t)
 	} else {
-		p.renderTrackerProgress(t, p.style.Colors.Tracker.Sprintf("%s%s%s%s%s",
+		pDotValue := float64(t.Total) / float64(p.lengthProgress)
+		pFinishedDots := float64(t.value) / pDotValue
+		pFinishedLen := int(math.Ceil(pFinishedDots))
+		pUnfinishedLen := p.lengthProgress - pFinishedLen
+
+		var pFinished, pInProgress, pUnfinished string
+		if pFinishedLen > 0 {
+			pFinished = strings.Repeat(p.style.Chars.Finished, pFinishedLen-1)
+		}
+		if pUnfinishedLen > 0 {
+			pUnfinished = strings.Repeat(p.style.Chars.Unfinished, pUnfinishedLen)
+		}
+
+		pFinishedDecimals := pFinishedDots - float64(int(pFinishedDots))
+		if pFinishedDecimals > 0.75 {
+			pInProgress = p.style.Chars.Finished75
+		} else if pFinishedDecimals > 0.50 {
+			pInProgress = p.style.Chars.Finished50
+		} else if pFinishedDecimals > 0.25 {
+			pInProgress = p.style.Chars.Finished25
+		} else {
+			pInProgress = p.style.Chars.Unfinished
+		}
+
+		p.renderTrackerProgress(out, t, p.style.Colors.Tracker.Sprintf("%s%s%s%s%s",
 			p.style.Chars.BoxLeft, pFinished, pInProgress, pUnfinished, p.style.Chars.BoxRight,
 		))
 	}
 }
 
-func (p *Progress) renderTrackerDone(t *Tracker) {
-	p.write(p.style.Colors.Message.Sprint(t.Message))
-	p.write(" " + p.style.Options.MessageTrackerSeparator + " ")
-	p.write(p.style.Colors.Done.Sprint(p.style.Options.DoneString))
-	p.renderTrackerValueAndTime(t)
-	p.write("\n")
+func (p *Progress) renderTrackerDone(out *strings.Builder, t *Tracker) {
+	out.WriteString(p.style.Colors.Message.Sprint(t.Message))
+	out.WriteRune(' ')
+	out.WriteString(p.style.Options.MessageTrackerSeparator)
+	out.WriteRune(' ')
+	out.WriteString(p.style.Colors.Done.Sprint(p.style.Options.DoneString))
+	p.renderTrackerStats(out, t)
+	out.WriteRune('\n')
 }
 
-func (p *Progress) renderTrackerProgress(t *Tracker, trackerStr string) {
+func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, trackerStr string) {
 	if p.trackerPosition == PositionRight {
-		p.write(p.style.Colors.Message.Sprint(t.Message))
-		p.write(" " + p.style.Options.MessageTrackerSeparator + " ")
-		p.renderTrackerPercentage(t)
+		out.WriteString(p.style.Colors.Message.Sprint(t.Message))
+		out.WriteRune(' ')
+		out.WriteString(p.style.Options.MessageTrackerSeparator)
+		out.WriteRune(' ')
+		p.renderTrackerPercentage(out, t)
 		if !p.hideTracker {
-			p.write(" " + p.style.Colors.Tracker.Sprint(trackerStr))
+			out.WriteRune(' ')
+			out.WriteString(p.style.Colors.Tracker.Sprint(trackerStr))
 		}
-		p.renderTrackerValueAndTime(t)
-		p.write("\n")
+		p.renderTrackerStats(out, t)
+		out.WriteString("\n")
 	} else {
-		p.renderTrackerPercentage(t)
+		p.renderTrackerPercentage(out, t)
 		if !p.hideTracker {
-			p.write(" " + p.style.Colors.Tracker.Sprint(trackerStr))
+			out.WriteRune(' ')
+			out.WriteString(p.style.Colors.Tracker.Sprint(trackerStr))
 		}
-		p.renderTrackerValueAndTime(t)
-		p.write(" " + p.style.Options.MessageTrackerSeparator + " ")
-		p.write(p.style.Colors.Message.Sprint(t.Message))
-		p.write("\n")
+		p.renderTrackerStats(out, t)
+		out.WriteRune(' ')
+		out.WriteString(p.style.Options.MessageTrackerSeparator)
+		out.WriteRune(' ')
+		out.WriteString(p.style.Colors.Message.Sprint(t.Message))
+		out.WriteRune(' ')
 	}
 }
 
-func (p *Progress) renderTrackerPercentage(t *Tracker) {
+func (p *Progress) renderTrackerPercentage(out *strings.Builder, t *Tracker) {
 	if !p.hidePercentage {
-		p.write(p.style.Colors.Percent.Sprintf(p.style.Options.PercentFormat, t.PercentDone()))
+		out.WriteString(p.style.Colors.Percent.Sprintf(p.style.Options.PercentFormat, t.PercentDone()))
 	}
 }
 
-func (p *Progress) renderTrackerValueAndTime(t *Tracker) {
+func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker) {
 	if !p.hideValue || !p.hideTime {
-		var out strings.Builder
-		out.WriteString(" [")
+		var outStats strings.Builder
+		outStats.WriteString(" [")
 		if !p.hideValue {
-			out.WriteString(p.style.Colors.Value.Sprint(t.Units.Sprint(t.value)))
+			outStats.WriteString(p.style.Colors.Value.Sprint(t.Units.Sprint(t.value)))
 		}
 		if !p.hideValue && !p.hideTime {
-			out.WriteString(" ")
+			outStats.WriteRune(' ')
 		}
 		if !p.hideTime {
-			out.WriteString("in ")
+			outStats.WriteString("in ")
 			if t.IsDone() {
-				out.WriteString(p.style.Colors.Time.Sprint(
+				outStats.WriteString(p.style.Colors.Time.Sprint(
 					t.timeStop.Sub(t.timeStart).Round(p.style.Options.TimeDonePrecision)))
 			} else {
-				out.WriteString(p.style.Colors.Time.Sprint(
+				outStats.WriteString(p.style.Colors.Time.Sprint(
 					time.Since(t.timeStart).Round(p.style.Options.TimeInProgressPrecision)))
 			}
 		}
-		out.WriteString("]")
+		outStats.WriteRune(']')
 
-		p.write(p.style.Colors.Stats.Sprint(out.String()))
+		out.WriteString(p.style.Colors.Stats.Sprint(outStats.String()))
 	}
 }
