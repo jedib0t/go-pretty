@@ -4,7 +4,7 @@
 rm -fr profile
 
 # profile each supported package
-for what in "list" "table"
+for what in "list" "progress" "table"
 do
     echo "Profiling ${what} ..."
     mkdir -p profile/${what}

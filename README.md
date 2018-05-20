@@ -45,7 +45,8 @@ Pretty-print tables into ASCII/Unicode strings.
 +-----+------------+-----------+--------+-----------------------------+
 ```
 
-A demonstration of all the capabilities can be found here: [cmd/demo-table](cmd/demo-table)
+A demonstration of all the capabilities can be found here:
+[cmd/demo-table](cmd/demo-table)
 
 ## List
 
@@ -75,7 +76,40 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
    ■ The Gunslinger
 ```
 
-A demonstration of all the capabilities can be found here: [cmd/demo-list](cmd/demo-list)
+A demonstration of all the capabilities can be found here:
+[cmd/demo-list](cmd/demo-list)
+
+# Progress
+
+Track the Progress of one or more Tasks (like downloading multiple files in
+parallel).
+
+  - Track one or more Tasks at the same time
+  - Dynamically add one or more Task Trackers while `Render()` is in progress
+  - Choose to have the Writer auto-stop the Render when no more Trackers are
+    in queue, or manually stop using `Stop()`
+  - Redirect output to an io.Writer object (like os.StdOut)
+  - Completely customizable styles
+    - Many ready-to-use styles: [progress/style.go](progress/style.go)
+    - Colorize various parts of the Tracker using `StyleColors`
+    - Customize how Trackers get rendered using `StyleOptions`
+
+Sample Progress Tracking:
+```
+Calculating Total   #  1 ... done! [3.25K in 100ms]
+Calculating Total   #  2 ... done! [6.50K in 100ms]
+Downloading File    #  3 ... done! [9.75KB in 100ms]
+Transferring Amount #  4 ... done! [$26.00K in 200ms]
+Transferring Amount #  5 ... done! [£32.50K in 201ms]
+Downloading File    #  6 ... done! [58.50KB in 300ms]
+Calculating Total   #  7 ... done! [91.00K in 400ms]
+Transferring Amount #  8 ... 60.9% (●●●●●●●●●●●●●●◌◌◌◌◌◌◌◌◌) [$78.00K in 399.071ms]
+Downloading File    #  9 ... 32.1% (●●●●●●●○◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌) [58.50KB in 298.947ms]
+Transferring Amount # 10 ... 13.0% (●●○◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌) [£32.50K in 198.84ms]
+```
+
+A demonstration of all the capabilities can be found here:
+[cmd/demo-progress](cmd/demo-progress)
 
 ## Text
 
@@ -97,9 +131,10 @@ The unit-tests for each of the above show how these are to be used.
 
 Partial output of `make bench`:
 ```
-BenchmarkList_Render-8                   1000000              1836 ns/op             808 B/op         22 allocs/op
-BenchmarkTable_Render-8                   100000             20736 ns/op            5426 B/op        191 allocs/op
-BenchmarkTable_RenderCSV-8                300000              4394 ns/op            2336 B/op         45 allocs/op
-BenchmarkTable_RenderHTML-8               200000              6563 ns/op            3793 B/op         44 allocs/op
-BenchmarkTable_RenderMarkdown-8           300000              4666 ns/op            2272 B/op         43 allocs/op
+BenchmarkList_Render-8                   1000000              1848 ns/op             808 B/op         22 allocs/op
+BenchmarkProgress_Render-8                     2         800904500 ns/op            8832 B/op        373 allocs/op
+BenchmarkTable_Render-8                   100000             21025 ns/op            5538 B/op        188 allocs/op
+BenchmarkTable_RenderCSV-8                300000              4507 ns/op            2464 B/op         45 allocs/op
+BenchmarkTable_RenderHTML-8               200000              6471 ns/op            3921 B/op         44 allocs/op
+BenchmarkTable_RenderMarkdown-8           300000              4720 ns/op            2400 B/op         43 allocs/op
 ```
