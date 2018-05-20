@@ -129,9 +129,8 @@ func (tu Units) sprintAll(value int64) string {
 		return fmt.Sprintf("%.2fB", float64(value)/1000000000.0)
 	} else if value < 1000000000000000 {
 		return fmt.Sprintf("%.2fT", float64(value)/1000000000000.0)
-	} else {
-		return fmt.Sprintf("%.2fQ", float64(value)/1000000000000000.0)
 	}
+	return fmt.Sprintf("%.2fQ", float64(value)/1000000000000000.0)
 }
 
 func (tu Units) sprintBytes(value int64) string {
@@ -145,9 +144,8 @@ func (tu Units) sprintBytes(value int64) string {
 		return fmt.Sprintf("%.2fGB", float64(value)/1000000000.0)
 	} else if value < 1000000000000000 {
 		return fmt.Sprintf("%.2fTB", float64(value)/1000000000000.0)
-	} else {
-		return fmt.Sprintf("%.2fPB", float64(value)/1000000000000000.0)
 	}
+	return fmt.Sprintf("%.2fPB", float64(value)/1000000000000000.0)
 }
 
 // SortBy helps sort a list of Trackers by various means.

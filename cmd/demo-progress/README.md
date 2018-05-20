@@ -20,5 +20,5 @@ Calculating Total   # 13 ... done! [549.25K in 1.301s]
 All done!
 ```
 
-Real-time playback of the output @ asciinema.org:
+Real-time playback of the demo @ asciinema.org:
 [![asciicast](https://asciinema.org/a/KcPw8aoBSsYCBOj60wluhu5z3.png)](https://asciinema.org/a/KcPw8aoBSsYCBOj60wluhu5z3)

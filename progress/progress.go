@@ -1,7 +1,6 @@
 package progress
 
 import (
-	"fmt"
 	"io"
 	"math"
 	"os"
@@ -196,8 +195,4 @@ func (p *Progress) initForRender() {
 	if p.updateFrequency <= 0 {
 		p.updateFrequency = DefaultUpdateFrequency
 	}
-}
-
-func (p *Progress) write(a ...interface{}) {
-	p.outputWriter.Write([]byte(fmt.Sprint(a...)))
 }
