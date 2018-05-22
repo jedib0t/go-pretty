@@ -2,7 +2,6 @@ package progress
 
 import (
 	"fmt"
-	"sort"
 	"time"
 )
 
@@ -147,85 +146,3 @@ func (tu Units) sprintBytes(value int64) string {
 	}
 	return fmt.Sprintf("%.2fPB", float64(value)/1000000000000000.0)
 }
-
-// SortBy helps sort a list of Trackers by various means.
-type SortBy int
-
-const (
-	// SortByNone doesn't do any sorting == sort by insertion order.
-	SortByNone SortBy = iota
-
-	// SortByMessage sorts by the Message alphabetically in ascending order.
-	SortByMessage
-
-	// SortByMessageDsc sorts by the Message alphabetically in descending order.
-	SortByMessageDsc
-
-	// SortByPercent sorts by the Percentage complete in ascending order.
-	SortByPercent
-
-	// SortByPercentDsc sorts by the Percentage complete in descending order.
-	SortByPercentDsc
-
-	// SortByValue sorts by the Value in ascending order.
-	SortByValue
-
-	// SortByValueDsc sorts by the Value in descending order.
-	SortByValueDsc
-)
-
-// Sort applies the sorting method defined by SortBy.
-func (ts SortBy) Sort(trackers []*Tracker) {
-	switch ts {
-	case SortByMessage:
-		sort.Sort(sortByMessage(trackers))
-	case SortByMessageDsc:
-		sort.Sort(sortByMessageDsc(trackers))
-	case SortByPercent:
-		sort.Sort(sortByPercent(trackers))
-	case SortByPercentDsc:
-		sort.Sort(sortByPercentDsc(trackers))
-	case SortByValue:
-		sort.Sort(sortByValue(trackers))
-	case SortByValueDsc:
-		sort.Sort(sortByValueDsc(trackers))
-	default:
-		// no sort
-	}
-}
-
-type sortByMessage []*Tracker
-
-func (ta sortByMessage) Len() int           { return len(ta) }
-func (ta sortByMessage) Swap(i, j int)      { ta[i], ta[j] = ta[j], ta[i] }
-func (ta sortByMessage) Less(i, j int) bool { return ta[i].Message < ta[j].Message }
-
-type sortByMessageDsc []*Tracker
-
-func (ta sortByMessageDsc) Len() int           { return len(ta) }
-func (ta sortByMessageDsc) Swap(i, j int)      { ta[i], ta[j] = ta[j], ta[i] }
-func (ta sortByMessageDsc) Less(i, j int) bool { return ta[i].Message > ta[j].Message }
-
-type sortByPercent []*Tracker
-
-func (ta sortByPercent) Len() int           { return len(ta) }
-func (ta sortByPercent) Swap(i, j int)      { ta[i], ta[j] = ta[j], ta[i] }
-func (ta sortByPercent) Less(i, j int) bool { return ta[i].PercentDone() < ta[j].PercentDone() }
-
-type sortByPercentDsc []*Tracker
-
-func (ta sortByPercentDsc) Len() int           { return len(ta) }
-func (ta sortByPercentDsc) Swap(i, j int)      { ta[i], ta[j] = ta[j], ta[i] }
-func (ta sortByPercentDsc) Less(i, j int) bool { return ta[i].PercentDone() > ta[j].PercentDone() }
-
-type sortByValue []*Tracker
-
-func (ta sortByValue) Len() int           { return len(ta) }
-func (ta sortByValue) Swap(i, j int)      { ta[i], ta[j] = ta[j], ta[i] }
-func (ta sortByValue) Less(i, j int) bool { return ta[i].value < ta[j].value }
-
-type sortByValueDsc []*Tracker
-
-func (ta sortByValueDsc) Len() int           { return len(ta) }
-func (ta sortByValueDsc) Swap(i, j int)      { ta[i], ta[j] = ta[j], ta[i] }
-func (ta sortByValueDsc) Less(i, j int) bool { return ta[i].value > ta[j].value }

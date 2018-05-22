@@ -21,6 +21,7 @@ Pretty-print tables into ASCII/Unicode strings.
     - Custom (horizontal) Align per column
     - Custom (vertical) VAlign per column (and multi-line column support)
   - Mirror output to an io.Writer object (like os.StdOut)
+  - Sort by any of the Columns (by Column Name or Number)
   - Completely customizable styles
     - Many ready-to-use styles: [table/style.go](table/style.go)
     - Colorize Headers/Body/Footers using [text/color](text/color.go)

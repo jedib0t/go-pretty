@@ -351,6 +351,17 @@ func TestTable_SetOutputMirror(t *testing.T) {
 	assert.Equal(t, expectedOut+"\n", mockOutputMirror.mirroredOutput)
 }
 
+func TestTable_SortByColumn(t *testing.T) {
+	table := Table{}
+	assert.Empty(t, table.sortBy)
+
+	table.SortBy([]SortBy{{Name: "#", Mode: Asc}})
+	assert.Equal(t, 1, len(table.sortBy))
+
+	table.SortBy([]SortBy{{Name: "First Name", Mode: Dsc}, {Name: "Last Name", Mode: Asc}})
+	assert.Equal(t, 2, len(table.sortBy))
+}
+
 func TestTable_SetVAlign(t *testing.T) {
 	table := Table{}
 	assert.Nil(t, table.vAlign)

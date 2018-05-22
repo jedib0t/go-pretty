@@ -320,6 +320,29 @@ func TestTable_Render_Empty(t *testing.T) {
 	assert.Empty(t, tw.Render())
 }
 
+func TestTable_Render_Sorted(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendRow(Row{11, "Sansa", "Stark", 6000})
+	tw.AppendFooter(testFooter)
+	tw.SetStyle(StyleLight)
+	tw.SortBy([]SortBy{{Name: "Last Name", Mode: Asc}, {Name: "First Name", Mode: Asc}})
+
+	expectedOut := `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
+│   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
+├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+│ 300 │ Tyrion     │ Lannister │   5000 │                             │
+│  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │
+│   1 │ Arya       │ Stark     │   3000 │                             │
+│  11 │ Sansa      │ Stark     │   6000 │                             │
+├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+│     │            │ TOTAL     │  10000 │                             │
+└─────┴────────────┴───────────┴────────┴─────────────────────────────┘`
+	fmt.Println(tw.Render())
+	assert.Equal(t, expectedOut, tw.Render())
+}
+
 func TestTable_Render_TableWithinTable(t *testing.T) {
 	twInner := NewWriter()
 	twInner.AppendHeader(testHeader)
