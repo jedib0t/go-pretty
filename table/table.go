@@ -283,6 +283,36 @@ func (t *Table) getAutoIndexColumnIDs() rowStr {
 	return row
 }
 
+func (t *Table) getColors(hint renderHint) []text.Colors {
+	if hint.isSeparatorRow {
+		return nil
+	} else if hint.isHeaderRow {
+		return t.colorsHeader
+	} else if hint.isFooterRow {
+		return t.colorsFooter
+	}
+	return t.colors
+}
+
+func (t *Table) getFormat(hint renderHint) text.Format {
+	if hint.isSeparatorRow {
+		return text.FormatDefault
+	} else if hint.isHeaderRow {
+		return t.style.Format.Header
+	} else if hint.isFooterRow {
+		return t.style.Format.Footer
+	}
+	return t.style.Format.Row
+}
+
+func (t *Table) getRowsSorted() []rowStr {
+	sortedRows := make([]rowStr, len(t.rows))
+	for idx := range t.rows {
+		sortedRows[idx] = t.rows[t.sortedRowIndices[idx]]
+	}
+	return sortedRows
+}
+
 func (t *Table) getVAlign(colIdx int, hint renderHint) text.VAlign {
 	vAlign := text.VAlignDefault
 	if hint.isHeaderRow {
@@ -372,5 +402,5 @@ type renderHint struct {
 }
 
 func (h *renderHint) isRegularRow() bool {
-	return !h.isHeaderRow && !h.isFooterRow
+	return !h.isHeaderRow && !h.isFooterRow && !h.isSeparatorRow
 }
