@@ -2,9 +2,9 @@ package progress
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
-	"time"
 )
 
 func TestTracker_Increment(t *testing.T) {
@@ -113,47 +113,4 @@ func TestUnits_Sprint(t *testing.T) {
 	assert.Equal(t, "£1.50T", UnitsCurrencyPound.Sprint(1500000000000))
 	assert.Equal(t, "£1.50Q", UnitsCurrencyPound.Sprint(1500000000000000))
 	assert.Equal(t, "£1500.00Q", UnitsCurrencyPound.Sprint(1500000000000000000))
-}
-
-func TestSortBy(t *testing.T) {
-	trackers := []*Tracker{
-		{Message: "Downloading File # 2", Total: 1000, value: 300},
-		{Message: "Downloading File # 1", Total: 1000, value: 100},
-		{Message: "Downloading File # 3", Total: 1000, value: 500},
-	}
-
-	SortByNone.Sort(trackers)
-	assert.Equal(t, "Downloading File # 2", trackers[0].Message)
-	assert.Equal(t, "Downloading File # 1", trackers[1].Message)
-	assert.Equal(t, "Downloading File # 3", trackers[2].Message)
-
-	SortByMessage.Sort(trackers)
-	assert.Equal(t, "Downloading File # 1", trackers[0].Message)
-	assert.Equal(t, "Downloading File # 2", trackers[1].Message)
-	assert.Equal(t, "Downloading File # 3", trackers[2].Message)
-
-	SortByMessageDsc.Sort(trackers)
-	assert.Equal(t, "Downloading File # 3", trackers[0].Message)
-	assert.Equal(t, "Downloading File # 2", trackers[1].Message)
-	assert.Equal(t, "Downloading File # 1", trackers[2].Message)
-
-	SortByPercent.Sort(trackers)
-	assert.Equal(t, "Downloading File # 1", trackers[0].Message)
-	assert.Equal(t, "Downloading File # 2", trackers[1].Message)
-	assert.Equal(t, "Downloading File # 3", trackers[2].Message)
-
-	SortByPercentDsc.Sort(trackers)
-	assert.Equal(t, "Downloading File # 3", trackers[0].Message)
-	assert.Equal(t, "Downloading File # 2", trackers[1].Message)
-	assert.Equal(t, "Downloading File # 1", trackers[2].Message)
-
-	SortByValue.Sort(trackers)
-	assert.Equal(t, "Downloading File # 1", trackers[0].Message)
-	assert.Equal(t, "Downloading File # 2", trackers[1].Message)
-	assert.Equal(t, "Downloading File # 3", trackers[2].Message)
-
-	SortByValueDsc.Sort(trackers)
-	assert.Equal(t, "Downloading File # 3", trackers[0].Message)
-	assert.Equal(t, "Downloading File # 2", trackers[1].Message)
-	assert.Equal(t, "Downloading File # 1", trackers[2].Message)
 }
