@@ -37,7 +37,7 @@ func (t *Table) Render() string {
 		}
 
 		// (data) rows
-		t.renderRows(&out, t.rows, renderHint{})
+		t.renderRows(&out, t.getRowsSorted(), renderHint{})
 
 		// footer rows
 		if len(t.rowsFooter) > 0 {
@@ -112,7 +112,7 @@ func (t *Table) renderColumnAutoIndex(out *strings.Builder, rowNum int, hint ren
 
 func (t *Table) renderColumnColorized(out *strings.Builder, rowNum int, colIdx int, colStr string, hint renderHint) {
 	colors := t.getColors(hint)
-	if colors != nil && colIdx < len(colors) && colors[colIdx] != nil {
+	if colIdx < len(colors) && colors[colIdx] != nil {
 		out.WriteString(colors[colIdx].Sprint(colStr))
 	} else if hint.isHeaderRow && t.style.Color.Header != nil {
 		out.WriteString(t.style.Color.Header.Sprint(colStr))
@@ -256,13 +256,8 @@ func (t *Table) renderRows(out *strings.Builder, rows []rowStr, hint renderHint)
 	hintSeparator := hint
 	hintSeparator.isSeparatorRow = true
 
-	for idx := range rows {
-		sortedIdx := idx
-		if hint.isRegularRow() {
-			sortedIdx = t.sortedRowIndices[idx]
-		}
-
-		t.renderRow(out, idx+1, rows[sortedIdx], hint)
+	for idx, row := range rows {
+		t.renderRow(out, idx+1, row, hint)
 		if t.style.Options.SeparateRows && idx < len(rows)-1 {
 			t.renderRowSeparator(out, hintSeparator)
 		}

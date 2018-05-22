@@ -66,9 +66,6 @@ type Table struct {
 	rowSeparator rowStr
 	// sortBy stores a map of Column
 	sortBy []SortBy
-	// sortedRowIndices is used to temporarily store the order of rows after
-	// sorting as defined by the sortBy
-	sortedRowIndices []int
 	// style contains all the strings used to draw the table, and more
 	style *Style
 	// vAlign describes the vertical-align for each column
@@ -306,9 +303,14 @@ func (t *Table) getFormat(hint renderHint) text.Format {
 }
 
 func (t *Table) getRowsSorted() []rowStr {
+	if t.sortBy == nil || len(t.sortBy) == 0 {
+		return t.rows
+	}
+
+	sortedRowIndices := t.sortRows(t.rows)
 	sortedRows := make([]rowStr, len(t.rows))
 	for idx := range t.rows {
-		sortedRows[idx] = t.rows[t.sortedRowIndices[idx]]
+		sortedRows[idx] = t.rows[sortedRowIndices[idx]]
 	}
 	return sortedRows
 }
@@ -341,9 +343,6 @@ func (t *Table) initForRender() {
 
 	// generate a separator row and calculate maximum row length
 	t.initForRenderRowSeparator()
-
-	// sort and get the indices for the rows in sort order
-	t.sortedRowIndices = t.sortRows(t.rows)
 }
 
 func (t *Table) initForRenderMaxColumnLength() {

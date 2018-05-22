@@ -132,10 +132,10 @@ The unit-tests for each of the above show how these are to be used.
 
 Partial output of `make bench`:
 ```
-BenchmarkList_Render-8                   1000000              1845 ns/op             808 B/op         22 allocs/op
-BenchmarkProgress_Render-8                     2         801518500 ns/op            7492 B/op        211 allocs/op
-BenchmarkTable_Render-8                   100000             20641 ns/op            5538 B/op        188 allocs/op
-BenchmarkTable_RenderCSV-8                300000              4448 ns/op            2464 B/op         45 allocs/op
-BenchmarkTable_RenderHTML-8               200000              6626 ns/op            3921 B/op         44 allocs/op
-BenchmarkTable_RenderMarkdown-8           300000              4602 ns/op            2400 B/op         43 allocs/op
+BenchmarkList_Render-8                   1000000              1850 ns/op             808 B/op         22 allocs/op
+BenchmarkProgress_Render-8                     2         800863000 ns/op            7200 B/op        209 allocs/op
+BenchmarkTable_Render-8                   100000             20839 ns/op            5538 B/op        188 allocs/op
+BenchmarkTable_RenderCSV-8                300000              4479 ns/op            2464 B/op         45 allocs/op
+BenchmarkTable_RenderHTML-8               200000              6422 ns/op            3921 B/op         44 allocs/op
+BenchmarkTable_RenderMarkdown-8           300000              4755 ns/op            2400 B/op         43 allocs/op
 ```
