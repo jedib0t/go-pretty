@@ -108,7 +108,6 @@ var (
 // StyleColors defines what colors to use for various parts of the Progress and
 // Tracker texts.
 type StyleColors struct {
-	Done    text.Colors
 	Message text.Colors
 	Percent text.Colors
 	Stats   text.Colors
@@ -124,7 +123,6 @@ var (
 	// StyleColorsExample defines a few choice color options. Use this is just as
 	// an example to customize the Tracker/text colors.
 	StyleColorsExample = StyleColors{
-		Done:    text.Colors{text.FgWhite, text.BgBlack},
 		Message: text.Colors{text.FgWhite, text.BgBlack},
 		Percent: text.Colors{text.FgHiRed, text.BgBlack},
 		Stats:   text.Colors{text.FgHiBlack, text.BgBlack},
@@ -138,7 +136,7 @@ var (
 // gets rendered.
 type StyleOptions struct {
 	DoneString              string
-	MessageTrackerSeparator string
+	Separator               string
 	PercentFormat           string
 	TimeDonePrecision       time.Duration
 	TimeInProgressPrecision time.Duration
@@ -149,7 +147,7 @@ var (
 	// example to customize the Tracker rendering.
 	StyleOptionsDefault = StyleOptions{
 		DoneString:              "done!",
-		MessageTrackerSeparator: "...",
+		Separator:               " ... ",
 		PercentFormat:           "%5.2f%%",
 		TimeDonePrecision:       time.Millisecond,
 		TimeInProgressPrecision: time.Microsecond,

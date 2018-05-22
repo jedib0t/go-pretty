@@ -33,7 +33,6 @@ func TestTable_Render(t *testing.T) {
 [<   >|<          >|<TOTAL    >|< 10000>|<                           >]
 \-----v------------v-----------v--------v-----------------------------/
 test-caption`
-
 	assert.Equal(t, expectedOut, tw.Render())
 }
 
@@ -63,7 +62,6 @@ func TestTable_Render_AutoIndex(t *testing.T) {
 │  9 │ A9  │ B9  │ C9  │ D9  │ E9  │ F9  │ G9  │ H9  │ I9  │ J9  │
 │ 10 │ A10 │ B10 │ C10 │ D10 │ E10 │ F10 │ G10 │ H10 │ I10 │ J10 │
 └────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘`
-
 	assert.Equal(t, expectedOut, tw.Render())
 }
 
@@ -210,7 +208,6 @@ func TestTable_Render_ColoredCustom(t *testing.T) {
 		"╰─────┴────────────┴───────────┴────────┴─────────────────────────────╯",
 		"test-caption",
 	}
-
 	assert.Equal(t, strings.Join(expectedOut, "\n"), tw.Render())
 }
 
@@ -339,7 +336,6 @@ func TestTable_Render_Sorted(t *testing.T) {
 ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 │     │            │ TOTAL     │  10000 │                             │
 └─────┴────────────┴───────────┴────────┴─────────────────────────────┘`
-	fmt.Println(tw.Render())
 	assert.Equal(t, expectedOut, tw.Render())
 }
 
@@ -370,6 +366,5 @@ func TestTable_Render_TableWithinTable(t *testing.T) {
 ║ │     │            │ TOTAL     │  10000 │                             │ ║
 ║ └─────┴────────────┴───────────┴────────┴─────────────────────────────┘ ║
 ╚═════════════════════════════════════════════════════════════════════════╝`
-
 	assert.Equal(t, expectedOut, twOuter.Render())
 }
