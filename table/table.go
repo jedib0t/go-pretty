@@ -64,6 +64,11 @@ type Table struct {
 	// rowSeparator is a dummy row that contains the separator columns (dashes
 	// that make up the separator between header/body/footer
 	rowSeparator rowStr
+	// sortBy stores a map of Column
+	sortBy []SortBy
+	// sortedRowIndices is used to temporarily store the order of rows after
+	// sorting as defined by the sortBy
+	sortedRowIndices []int
 	// style contains all the strings used to draw the table, and more
 	style *Style
 	// vAlign describes the vertical-align for each column
@@ -166,7 +171,7 @@ func (t *Table) SetHTMLCSSClass(cssClass string) {
 }
 
 // SetIndexColumn sets the given Column # as the column that has the row
-// "Index". Valid values range from 1 to N. Note that this is not 0-indexed.
+// "Number". Valid values range from 1 to N. Note that this is not 0-indexed.
 func (t *Table) SetIndexColumn(colNum int) {
 	t.indexColumn = colNum
 }
@@ -197,6 +202,13 @@ func (t *Table) SetVAlignHeader(vAlign []text.VAlign) {
 	t.vAlignHeader = vAlign
 }
 
+// SortBy sets the rules for sorting the Rows in the order specified. i.e., the
+// first SortBy instruction takes precedence over the second and so on. Any
+// duplicate instructions on the same column will be discarded while sorting.
+func (t *Table) SortBy(sortBy []SortBy) {
+	t.sortBy = sortBy
+}
+
 // Style returns the current style.
 func (t *Table) Style() *Style {
 	if t.style == nil {
@@ -204,20 +216,6 @@ func (t *Table) Style() *Style {
 		t.style = &tempStyle
 	}
 	return t.style
-}
-
-// renderHint has hints for the Render*() logic
-type renderHint struct {
-	isAutoIndexColumn bool
-	isFirstRow        bool
-	isFooterRow       bool
-	isHeaderRow       bool
-	isLastRow         bool
-	isSeparatorRow    bool
-}
-
-func (h *renderHint) isRegularRow() bool {
-	return !h.isHeaderRow && !h.isFooterRow
 }
 
 func (t *Table) analyzeAndStringify(row Row, isHeader bool, isFooter bool) rowStr {
@@ -313,6 +311,9 @@ func (t *Table) initForRender() {
 
 	// generate a separator row and calculate maximum row length
 	t.initForRenderRowSeparator()
+
+	// sort and get the indices for the rows in sort order
+	t.sortedRowIndices = t.sortRows(t.rows)
 }
 
 func (t *Table) initForRenderMaxColumnLength() {
@@ -358,4 +359,18 @@ func (t *Table) render(out *strings.Builder) string {
 		t.outputMirror.Write([]byte("\n"))
 	}
 	return outStr
+}
+
+// renderHint has hints for the Render*() logic
+type renderHint struct {
+	isAutoIndexColumn bool
+	isFirstRow        bool
+	isFooterRow       bool
+	isHeaderRow       bool
+	isLastRow         bool
+	isSeparatorRow    bool
+}
+
+func (h *renderHint) isRegularRow() bool {
+	return !h.isHeaderRow && !h.isFooterRow
 }

@@ -83,4 +83,3 @@ type sortByValueDsc []*Tracker
 func (sb sortByValueDsc) Len() int           { return len(sb) }
 func (sb sortByValueDsc) Swap(i, j int)      { sb[i], sb[j] = sb[j], sb[i] }
 func (sb sortByValueDsc) Less(i, j int) bool { return sb[i].value > sb[j].value }
-

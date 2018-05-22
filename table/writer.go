@@ -34,6 +34,7 @@ type Writer interface {
 	SetVAlign(vAlign []text.VAlign)
 	SetVAlignFooter(vAlign []text.VAlign)
 	SetVAlignHeader(vAlign []text.VAlign)
+	SortBy(sortBy []SortBy)
 	Style() *Style
 }
 

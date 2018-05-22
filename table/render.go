@@ -252,8 +252,13 @@ func (t *Table) renderRow(out *strings.Builder, rowNum int, row rowStr, colors [
 }
 
 func (t *Table) renderRows(out *strings.Builder, rows []rowStr, colors []text.Colors, format text.Format, hint renderHint) {
-	for idx, row := range rows {
-		t.renderRow(out, idx+1, row, colors, format, hint)
+	for idx := range rows {
+		sortedIdx := idx
+		if hint.isRegularRow() {
+			sortedIdx = t.sortedRowIndices[idx]
+		}
+
+		t.renderRow(out, idx+1, rows[sortedIdx], colors, format, hint)
 		if t.style.Options.SeparateRows && idx < len(rows)-1 {
 			t.renderRowSeparator(out, hint)
 		}
