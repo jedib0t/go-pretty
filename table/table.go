@@ -53,8 +53,15 @@ type Table struct {
 	maxRowLength int
 	// numColumns stores the (max.) number of columns seen
 	numColumns int
+	// numLinesRendered keeps track of the number of lines rendered and helps in
+	// paginating long tables
+	numLinesRendered int
 	// outputMirror stores an io.Writer where the "Render" functions would write
 	outputMirror io.Writer
+	// pageSize stores the maximum lines to render before rendering the header
+	// again (to denote a page break) - useful when you are dealing with really
+	// long tables
+	pageSize int
 	// rows stores the rows that make up the body
 	rows []rowStr
 	// rowsFooter stores the rows that make up the footer
@@ -177,6 +184,14 @@ func (t *Table) SetIndexColumn(colNum int) {
 // in addition to returning a string.
 func (t *Table) SetOutputMirror(mirror io.Writer) {
 	t.outputMirror = mirror
+}
+
+// SetPageSize sets the maximum number of lines to render before rendering the
+// header rows again. This can be useful when dealing with tables containing a
+// long list of rows that can span pages. Please note that the pagination logic
+// will not consider Header/Footer lines for paging.
+func (t *Table) SetPageSize(numLines int) {
+	t.pageSize = numLines
 }
 
 // SetStyle overrides the DefaultStyle with the provided one.
@@ -343,6 +358,9 @@ func (t *Table) initForRender() {
 
 	// generate a separator row and calculate maximum row length
 	t.initForRenderRowSeparator()
+
+	// reset the counter for the number of lines rendered
+	t.numLinesRendered = 0
 }
 
 func (t *Table) initForRenderMaxColumnLength() {
@@ -392,14 +410,21 @@ func (t *Table) render(out *strings.Builder) string {
 
 // renderHint has hints for the Render*() logic
 type renderHint struct {
-	isAutoIndexColumn bool
-	isFirstRow        bool
-	isFooterRow       bool
-	isHeaderRow       bool
-	isLastRow         bool
-	isSeparatorRow    bool
+	isAutoIndexColumn bool // auto-index column?
+	isBorderBottom    bool // bottom-border?
+	isBorderTop       bool // top-border?
+	isFirstRow        bool // first-row of header/footer/regular-rows?
+	isFooterRow       bool // footer row?
+	isHeaderRow       bool // header row?
+	isLastLineOfRow   bool // last-line of the current row?
+	isLastRow         bool // last-row of header/footer/regular-rows?
+	isSeparatorRow    bool // separator row?
 }
 
 func (h *renderHint) isRegularRow() bool {
 	return !h.isHeaderRow && !h.isFooterRow && !h.isSeparatorRow
+}
+
+func (h *renderHint) isLastLineOfLastRow() bool {
+	return h.isLastLineOfRow && h.isLastRow
 }

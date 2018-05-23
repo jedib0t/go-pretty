@@ -30,6 +30,7 @@ type Writer interface {
 	SetHTMLCSSClass(cssClass string)
 	SetIndexColumn(colNum int)
 	SetOutputMirror(mirror io.Writer)
+	SetPageSize(numLines int)
 	SetStyle(style Style)
 	SetVAlign(vAlign []text.VAlign)
 	SetVAlignFooter(vAlign []text.VAlign)

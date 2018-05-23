@@ -291,6 +291,7 @@ type BoxStyle struct {
 	MiddleVertical   string
 	PaddingLeft      string
 	PaddingRight     string
+	PageSeparator    string
 	Right            string
 	RightSeparator   string
 	TopLeft          string
@@ -321,6 +322,7 @@ var (
 		MiddleVertical:   "|",
 		PaddingLeft:      " ",
 		PaddingRight:     " ",
+		PageSeparator:    "\n",
 		Right:            "|",
 		RightSeparator:   "+",
 		TopLeft:          "+",
@@ -350,6 +352,7 @@ var (
 		MiddleVertical:   text.BoxVerticalBold,
 		PaddingLeft:      " ",
 		PaddingRight:     " ",
+		PageSeparator:    "\n",
 		Right:            text.BoxRightBold,
 		RightSeparator:   text.BoxRightSeparatorBold,
 		TopLeft:          text.BoxTopLeftBold,
@@ -379,6 +382,7 @@ var (
 		MiddleVertical:   text.BoxVerticalDouble,
 		PaddingLeft:      " ",
 		PaddingRight:     " ",
+		PageSeparator:    "\n",
 		Right:            text.BoxRightDouble,
 		RightSeparator:   text.BoxRightSeparatorDouble,
 		TopLeft:          text.BoxTopLeftDouble,
@@ -408,6 +412,7 @@ var (
 		MiddleVertical:   text.BoxVertical,
 		PaddingLeft:      " ",
 		PaddingRight:     " ",
+		PageSeparator:    "\n",
 		Right:            text.BoxRight,
 		RightSeparator:   text.BoxRightSeparator,
 		TopLeft:          text.BoxTopLeft,
@@ -437,6 +442,7 @@ var (
 		MiddleVertical:   text.BoxVertical,
 		PaddingLeft:      " ",
 		PaddingRight:     " ",
+		PageSeparator:    "\n",
 		Right:            text.BoxRight,
 		RightSeparator:   text.BoxRightSeparator,
 		TopLeft:          text.BoxTopLeftRounded,
@@ -466,6 +472,7 @@ var (
 		MiddleVertical:   "|",
 		PaddingLeft:      "<",
 		PaddingRight:     ">",
+		PageSeparator:    "\n",
 		Right:            "]",
 		RightSeparator:   "}",
 		TopLeft:          "(",
