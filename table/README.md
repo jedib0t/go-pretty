@@ -7,6 +7,7 @@ Pretty-print tables into ASCII/Unicode strings.
   - Add Header(s) and Footer(s)
   - Auto Index Rows (1, 2, 3 ...) and Columns (A, B, C, ...)
   - Limit the length of the Rows; limit the length of individual Columns
+  - Page results by a specified number of Lines
   - Alignment - Horizontal & Vertical
     - Auto (horizontal) Align (numeric columns are aligned Right)
     - Custom (horizontal) Align per column
@@ -172,6 +173,41 @@ Or you can use one of the ready-to-use Styles, and just make a few tweaks:
     t.Style().Color.Header = text.Colors{color.BgHiCyan, color.FgBlack}
     t.Style().Format.Footer = text.FormatLower
     t.Style().Options.DrawBorder = false
+```
+
+## Paging
+
+You can limit then number of lines rendered in a single "Page". This logic
+can handle rows with multiple lines too. Here is a simple example:
+```go
+    t.SetPageSize(1)
+    t.Render()
+```
+to get:
+```
++-----+------------+-----------+--------+-----------------------------+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++-----+------------+-----------+--------+-----------------------------+
+|   1 | Arya       | Stark     |   3000 |                             |
++-----+------------+-----------+--------+-----------------------------+
+|     |            | TOTAL     |  10000 |                             |
++-----+------------+-----------+--------+-----------------------------+
+
++-----+------------+-----------+--------+-----------------------------+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++-----+------------+-----------+--------+-----------------------------+
+|  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
++-----+------------+-----------+--------+-----------------------------+
+|     |            | TOTAL     |  10000 |                             |
++-----+------------+-----------+--------+-----------------------------+
+
++-----+------------+-----------+--------+-----------------------------+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++-----+------------+-----------+--------+-----------------------------+
+| 300 | Tyrion     | Lannister |   5000 |                             |
++-----+------------+-----------+--------+-----------------------------+
+|     |            | TOTAL     |  10000 |                             |
++-----+------------+-----------+--------+-----------------------------+
 ```
 
 ## Wrapping (or) Row/Column Width restrictions

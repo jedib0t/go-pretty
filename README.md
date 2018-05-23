@@ -16,6 +16,7 @@ Pretty-print tables into ASCII/Unicode strings.
   - Add Header(s) and Footer(s)
   - Auto Index Rows (1, 2, 3 ...) and Columns (A, B, C, ...)
   - Limit the length of the Rows; limit the length of individual Columns
+  - Page results by a specified number of Lines
   - Alignment - Horizontal & Vertical
     - Auto (horizontal) Align (numeric columns are aligned Right)
     - Custom (horizontal) Align per column

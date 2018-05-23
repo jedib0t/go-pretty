@@ -351,6 +351,14 @@ func TestTable_SetOutputMirror(t *testing.T) {
 	assert.Equal(t, expectedOut+"\n", mockOutputMirror.mirroredOutput)
 }
 
+func TestTable_SePageSize(t *testing.T) {
+	table := Table{}
+	assert.Equal(t, 0, table.pageSize)
+
+	table.SetPageSize(13)
+	assert.Equal(t, 13, table.pageSize)
+}
+
 func TestTable_SortByColumn(t *testing.T) {
 	table := Table{}
 	assert.Empty(t, table.sortBy)
