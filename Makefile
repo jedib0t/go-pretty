@@ -1,6 +1,6 @@
 .PHONY: all dep profile test
 
-default: build
+default: test
 
 all: dep test bench
 
@@ -12,11 +12,17 @@ tools:
 bench:
 	go test -bench=. -benchmem
 
-build:
-	go run cmd/demo/demo.go
-
 cyclo:
 	gocyclo -over 13 ./*/*.go
+
+demo-list:
+	go run cmd/demo-list/demo.go
+
+demo-progress:
+	go run cmd/demo-progress/demo.go
+
+demo-table:
+	go run cmd/demo-table/demo.go
 
 dep:
 	dep ensure

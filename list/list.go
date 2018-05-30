@@ -100,20 +100,10 @@ func (l *List) Style() *Style {
 }
 
 func (l *List) analyzeAndStringify(item interface{}) *listItem {
-	listEntry := &listItem{
+	return &listItem{
 		Level: l.level,
 		Text:  fmt.Sprint(item),
 	}
-
-	// account for the following when incrementing approxSize: 1. length of
-	// text, 2. left-padding, 3. list-prefix, 4. right-padding, 5. newline
-	l.approxSize += utf8.RuneCountInString(listEntry.Text) + (l.level * 2) + 2 + 1 + 1
-	// 6. connector in case of level change
-	if len(l.items) > 0 && listEntry.Level > l.items[len(l.items)-1].Level {
-		l.approxSize++
-	}
-
-	return listEntry
 }
 
 // UnIndent un-indents the following items to appear left-shifted.
@@ -126,6 +116,20 @@ func (l *List) UnIndent() {
 func (l *List) initForRender() {
 	// pick a default style
 	l.Style()
+
+	// calculate the approximate size needed by looking at all entries
+	l.approxSize = 0
+	for _, item := range l.items {
+		// account for the following when incrementing approxSize:
+		// 1. prefix, 2. padding, 3. bullet, 4. text, 5. newline
+		l.approxSize += utf8.RuneCountInString(l.style.LinePrefix)
+		if item.Level > 0 {
+			l.approxSize += utf8.RuneCountInString(l.style.CharItemVertical) * item.Level
+		}
+		l.approxSize += utf8.RuneCountInString(l.style.CharItemVertical)
+		l.approxSize += utf8.RuneCountInString(item.Text)
+		l.approxSize += utf8.RuneCountInString(l.style.CharNewline)
+	}
 
 	// default to a HTML CSS Class if none-defined
 	if l.htmlCSSClass == "" {
@@ -151,4 +155,13 @@ func (l *List) render(out *strings.Builder) string {
 		l.outputMirror.Write([]byte("\n"))
 	}
 	return outStr
+}
+
+// renderHint has hints for the Render*() logic
+type renderHint struct {
+	isTopItem    bool
+	isFirstItem  bool
+	isOnlyItem   bool
+	isLastItem   bool
+	isBottomItem bool
 }

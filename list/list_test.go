@@ -130,10 +130,10 @@ func TestList_SetStyle(t *testing.T) {
 	list.SetStyle(StyleConnectedLight)
 	assert.NotNil(t, list.Style())
 	assert.Equal(t, &StyleConnectedLight, list.Style())
-	expectedOut = `┌─ Game Of Thrones
-└─┬─ Winter
-  ├─ Is
-  └─ Coming`
+	expectedOut = `── Game Of Thrones
+   ├─ Winter
+   ├─ Is
+   └─ Coming`
 	assert.Equal(t, expectedOut, list.Render())
 }
 

@@ -33,26 +33,26 @@ A List using the Style 'StyleBulletCircle':
 A List using the Style 'StyleConnectedRounded':
 -----------------------------------------------
 ╭─ Game Of Thrones
-├─┬─ Winter
-│ ├─ Is
-│ ├─ Coming
-│ ╰─┬─ This
-│   ├─ Is
-│   ╰─ Known
-├─ The Dark Tower
-╰─── The Gunslinger
+│  ├─ Winter
+│  ├─ Is
+│  ╰─ Coming
+│     ├─ This
+│     ├─ Is
+│     ╰─ Known
+╰─ The Dark Tower
+   ╰─ The Gunslinger
 
 A List using the Style 'funkyStyle':
 ------------------------------------
-^> GAME OF THRONES
-~f> WINTER
- i> IS
- i> COMING
- c~f> THIS
-   i> IS
-   v> KNOWN
-i> THE DARK TOWER
-c~> THE GUNSLINGER
+t GAME OF THRONES
+|f WINTER
+|m IS
+|b COMING
+| f THIS
+| m IS
+| b KNOWN
+b THE DARK TOWER
+ b THE GUNSLINGER
 
 A List in HTML format:
 ----------------------

@@ -2,6 +2,7 @@ package list
 
 import (
 	"strings"
+	"unicode/utf8"
 )
 
 // Render renders the List in a human-readable "pretty" format. Example:
@@ -20,12 +21,21 @@ func (l *List) Render() string {
 	var out strings.Builder
 	out.Grow(l.approxSize)
 	for idx, item := range l.items {
-		l.renderItem(&out, idx, item)
+		hint := renderHint{
+			isTopItem:    bool(idx == 0),
+			isFirstItem:  bool(idx == 0 || item.Level > l.items[idx-1].Level),
+			isLastItem:   !l.hasMoreItemsInLevel(item.Level, idx),
+			isBottomItem: bool(idx == len(l.items)-1),
+		}
+		if hint.isFirstItem && hint.isLastItem {
+			hint.isOnlyItem = true
+		}
+		l.renderItem(&out, idx, item, hint)
 	}
 	return l.render(&out)
 }
 
-func (l *List) renderItem(out *strings.Builder, idx int, item *listItem) {
+func (l *List) renderItem(out *strings.Builder, idx int, item *listItem, hint renderHint) {
 	// when working on item number 2 or more, render a newline first
 	if idx > 0 {
 		out.WriteRune('\n')
@@ -33,14 +43,17 @@ func (l *List) renderItem(out *strings.Builder, idx int, item *listItem) {
 
 	var renderItemLine = func(lineIdx int, lineStr string) {
 		// render the prefix or the leading text before the actual item
-		l.renderItemBulletPrefix(out, idx, item.Level, lineIdx)
-		l.renderItemBullet(out, idx, item.Level, lineIdx)
+		l.renderItemBulletPrefix(out, idx, item.Level, lineIdx, hint)
+		l.renderItemBullet(out, idx, item.Level, lineIdx, hint)
 
 		// render the actual item
 		out.WriteString(lineStr)
 	}
 
 	itemStr := l.style.Format.Apply(item.Text)
+	if strings.Contains(itemStr, "\n") && l.style.CharNewline != "\n" {
+		itemStr = strings.Replace(itemStr, "\n", l.style.CharNewline, -1)
+	}
 	if strings.Contains(itemStr, "\n") {
 		for lineIdx, lineStr := range strings.Split(itemStr, "\n") {
 			if lineIdx > 0 {
@@ -53,63 +66,46 @@ func (l *List) renderItem(out *strings.Builder, idx int, item *listItem) {
 	}
 }
 
-func (l *List) renderItemBullet(out *strings.Builder, itemIdx int, itemLevel int, lineIdx int) {
-	isFirstItem := bool(itemIdx == 0)
-	isLastItem := bool(itemIdx == (len(l.items) - 1))
-	isLastItemInSubList := bool(itemIdx < (len(l.items)-1) && itemLevel > l.items[itemIdx+1].Level)
-	isNewLevel := bool(itemIdx > 0 && l.items[itemIdx].Level > l.items[itemIdx-1].Level)
-
+func (l *List) renderItemBullet(out *strings.Builder, itemIdx int, itemLevel int, lineIdx int, hint renderHint) {
 	if lineIdx > 0 {
-		out.WriteString(l.style.CharVertical)
-		out.WriteString("  ")
+		if hint.isLastItem {
+			out.WriteString(strings.Repeat(" ", utf8.RuneCountInString(l.style.CharItemVertical)))
+		} else {
+			out.WriteString(l.style.CharItemVertical)
+		}
 	} else {
-		if isFirstItem {
-			out.WriteString(l.style.CharItemTop)
-		} else if isNewLevel {
-			if isLastItem {
+		if hint.isOnlyItem {
+			if hint.isTopItem {
 				out.WriteString(l.style.CharItemSingle)
 			} else {
-				out.WriteString(l.style.CharItemFirst)
+				out.WriteString(l.style.CharItemBottom)
 			}
-		} else if isLastItem {
-			out.WriteString(l.style.CharItemBottom)
-		} else if isLastItemInSubList {
+		} else if hint.isTopItem {
+			out.WriteString(l.style.CharItemTop)
+		} else if hint.isFirstItem {
+			out.WriteString(l.style.CharItemFirst)
+		} else if hint.isBottomItem || hint.isLastItem {
 			out.WriteString(l.style.CharItemBottom)
 		} else {
-			out.WriteString(l.style.CharItem)
+			out.WriteString(l.style.CharItemMiddle)
 		}
-
-		// pad as directed before rendering the item text
-		out.WriteString(l.style.CharPaddingRight)
+	}
+	if lineIdx == 0 {
 		out.WriteRune(' ')
 	}
 }
 
-func (l *List) renderItemBulletPrefix(out *strings.Builder, itemIdx int, itemLevel int, lineIdx int) {
+func (l *List) renderItemBulletPrefix(out *strings.Builder, itemIdx int, itemLevel int, lineIdx int, hint renderHint) {
 	if l.style.LinePrefix != "" {
 		out.WriteString(l.style.LinePrefix)
 	}
 
-	isFirstItem := bool(itemIdx == 0)
-	isFirstLine := bool(lineIdx == 0)
-	isFirstLineOfNonFirstItem := bool(isFirstLine && !isFirstItem)
-	isIndentedFromPreviousItem := bool(!isFirstItem && itemLevel > l.items[itemIdx-1].Level)
-
 	// render spaces and connectors until the item's position
 	for levelIdx := 0; levelIdx < itemLevel; levelIdx++ {
 		if l.hasMoreItemsInLevel(levelIdx, itemIdx) {
-			if isFirstLineOfNonFirstItem && isIndentedFromPreviousItem && levelIdx == itemLevel-1 {
-				out.WriteString(l.style.CharVerticalConnect)
-				out.WriteString(l.style.CharHorizontal)
-			} else {
-				out.WriteString(l.style.CharVertical)
-				out.WriteRune(' ')
-			}
-		} else if isFirstLineOfNonFirstItem && levelIdx == l.items[itemIdx-1].Level {
-			out.WriteString(l.style.CharConnectBottom)
-			out.WriteString(l.style.CharHorizontal)
+			out.WriteString(l.style.CharItemVertical)
 		} else {
-			out.WriteString("  ")
+			out.WriteString(strings.Repeat(" ", utf8.RuneCountInString(l.style.CharItemVertical)))
 		}
 	}
 }
