@@ -133,7 +133,7 @@ The unit-tests for each of the above show how these are to be used.
 
 Partial output of `make bench`:
 ```
-BenchmarkList_Render-8                   1000000              1850 ns/op             808 B/op         22 allocs/op
+BenchmarkList_Render-8                    500000              2182 ns/op             760 B/op         40 allocs/op
 BenchmarkProgress_Render-8                     2         800863000 ns/op            7200 B/op        209 allocs/op
 BenchmarkTable_Render-8                   100000             20839 ns/op            5538 B/op        188 allocs/op
 BenchmarkTable_RenderCSV-8                300000              4479 ns/op            2464 B/op         45 allocs/op

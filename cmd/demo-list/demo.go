@@ -102,30 +102,30 @@ func main() {
 	// I want my own Style!
 	//==========================================================================
 	funkyStyle := list.Style{
-		Name:              "funkyStyle",
-		CharConnectBottom: "c",
-		CharHorizontal:    "~",
-		CharItem:          "i",
-		CharItemBottom:    "v",
-		CharItemFirst:     "f",
-		CharItemTop:       "^",
-		CharPaddingLeft:   "<",
-		CharPaddingRight:  ">",
-		Format:            text.FormatUpper,
+		CharItemSingle:   "s",
+		CharItemTop:      "t",
+		CharItemFirst:    "f",
+		CharItemMiddle:   "m",
+		CharItemVertical: "|",
+		CharItemBottom:   "b",
+		CharNewline:      "\n",
+		Format:           text.FormatUpper,
+		LinePrefix:       "",
+		Name:             "styleTest",
 	}
 	l.SetStyle(funkyStyle)
 	demoPrint("A List using the Style 'funkyStyle'", l.Render(), "")
 	//A List using the Style 'funkyStyle':
 	//------------------------------------
-	//^> GAME OF THRONES
-	//~f> WINTER
-	// i> IS
-	// i> COMING
-	// c~f> THIS
-	//   i> IS
-	//   v> KNOWN
-	//i> THE DARK TOWER
-	//c~> THE GUNSLINGER
+	//t GAME OF THRONES
+	//|f WINTER
+	//|m IS
+	//|b COMING
+	//| f THIS
+	//| m IS
+	//| b KNOWN
+	//b THE DARK TOWER
+	// b THE GUNSLINGER
 	//==========================================================================
 
 	//==========================================================================
