@@ -2,18 +2,18 @@ package list
 
 import "github.com/jedib0t/go-pretty/text"
 
-// Style declares how to render the List.
+// Style declares how to render the List (items).
 type Style struct {
-	Format           text.Format
-	CharItemSingle   string
-	CharItemTop      string
-	CharItemFirst    string
-	CharItemMiddle   string
-	CharItemVertical string
-	CharItemBottom   string
-	CharNewline      string
-	LinePrefix       string
-	Name             string
+	Format           text.Format // formatting for the Text
+	CharItemSingle   string      // the bullet for a single-item list
+	CharItemTop      string      // the bullet for the top-most item
+	CharItemFirst    string      // the bullet for the first item
+	CharItemMiddle   string      // the bullet for non-first/non-last item
+	CharItemVertical string      // the vertical connector from one bullet to the next
+	CharItemBottom   string      // the bullet for the bottom-most item
+	CharNewline      string      // new-line character to use
+	LinePrefix       string      // prefix for every single line
+	Name             string      // name of the Style
 }
 
 var (
@@ -52,12 +52,12 @@ var (
 	//    ● The Gunslinger
 	StyleBulletCircle = Style{
 		Format:           text.FormatDefault,
-		CharItemSingle:   text.BulletCircle,
-		CharItemTop:      text.BulletCircle,
-		CharItemFirst:    text.BulletCircle,
-		CharItemMiddle:   text.BulletCircle,
+		CharItemSingle:   "●",
+		CharItemTop:      "●",
+		CharItemFirst:    "●",
+		CharItemMiddle:   "●",
 		CharItemVertical: "  ",
-		CharItemBottom:   text.BulletCircle,
+		CharItemBottom:   "●",
 		CharNewline:      "\n",
 		LinePrefix:       "",
 		Name:             "StyleBulletCircle",
@@ -75,12 +75,12 @@ var (
 	//    ✽ The Gunslinger
 	StyleBulletFlower = Style{
 		Format:           text.FormatDefault,
-		CharItemSingle:   text.BulletFlower,
-		CharItemTop:      text.BulletFlower,
-		CharItemFirst:    text.BulletFlower,
-		CharItemMiddle:   text.BulletFlower,
+		CharItemSingle:   "✽",
+		CharItemTop:      "✽",
+		CharItemFirst:    "✽",
+		CharItemMiddle:   "✽",
 		CharItemVertical: "  ",
-		CharItemBottom:   text.BulletFlower,
+		CharItemBottom:   "✽",
 		CharNewline:      "\n",
 		LinePrefix:       "",
 		Name:             "StyleBulletFlower",
@@ -98,12 +98,12 @@ var (
 	//    ■ The Gunslinger
 	StyleBulletSquare = Style{
 		Format:           text.FormatDefault,
-		CharItemSingle:   text.BulletSquare,
-		CharItemTop:      text.BulletSquare,
-		CharItemFirst:    text.BulletSquare,
-		CharItemMiddle:   text.BulletSquare,
+		CharItemSingle:   "■",
+		CharItemTop:      "■",
+		CharItemFirst:    "■",
+		CharItemMiddle:   "■",
 		CharItemVertical: "  ",
-		CharItemBottom:   text.BulletSquare,
+		CharItemBottom:   "■",
 		CharNewline:      "\n",
 		LinePrefix:       "",
 		Name:             "StyleBulletSquare",
@@ -121,12 +121,12 @@ var (
 	//    ★ The Gunslinger
 	StyleBulletStar = Style{
 		Format:           text.FormatDefault,
-		CharItemSingle:   text.BulletStar,
-		CharItemTop:      text.BulletStar,
-		CharItemFirst:    text.BulletStar,
-		CharItemMiddle:   text.BulletStar,
+		CharItemSingle:   "★",
+		CharItemTop:      "★",
+		CharItemFirst:    "★",
+		CharItemMiddle:   "★",
 		CharItemVertical: "  ",
-		CharItemBottom:   text.BulletStar,
+		CharItemBottom:   "★",
 		CharNewline:      "\n",
 		LinePrefix:       "",
 		Name:             "StyleBulletStar",
@@ -144,12 +144,12 @@ var (
 	//    ▶ The Gunslinger
 	StyleBulletTriangle = Style{
 		Format:           text.FormatDefault,
-		CharItemSingle:   text.BulletTrianglePointingRight,
-		CharItemTop:      text.BulletTrianglePointingRight,
-		CharItemFirst:    text.BulletTrianglePointingRight,
-		CharItemMiddle:   text.BulletTrianglePointingRight,
+		CharItemSingle:   "▶",
+		CharItemTop:      "▶",
+		CharItemFirst:    "▶",
+		CharItemMiddle:   "▶",
 		CharItemVertical: "  ",
-		CharItemBottom:   text.BulletTrianglePointingRight,
+		CharItemBottom:   "▶",
 		CharNewline:      "\n",
 		LinePrefix:       "",
 		Name:             "StyleBulletTriangle",

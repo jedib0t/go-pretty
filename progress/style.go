@@ -8,10 +8,10 @@ import (
 
 // Style declares how to render the Progress/Trackers.
 type Style struct {
-	Name    string
-	Chars   StyleChars
-	Colors  StyleColors
-	Options StyleOptions
+	Name    string       // name of the Style
+	Chars   StyleChars   // characters to use on the progress bar
+	Colors  StyleColors  // colors to use on the progress bar
+	Options StyleOptions // misc. options for the progress bar
 }
 
 var (
@@ -50,13 +50,13 @@ var (
 
 // StyleChars defines the characters/strings to use for rendering the Tracker.
 type StyleChars struct {
-	BoxLeft    string
-	BoxRight   string
-	Finished   string
-	Finished25 string
-	Finished50 string
-	Finished75 string
-	Unfinished string
+	BoxLeft    string // left-border
+	BoxRight   string // right-border
+	Finished   string // finished block
+	Finished25 string // 25% finished block
+	Finished50 string // 50% finished block
+	Finished75 string // 75% finished block
+	Unfinished string // 0% finished block
 }
 
 var (
@@ -108,12 +108,12 @@ var (
 // StyleColors defines what colors to use for various parts of the Progress and
 // Tracker texts.
 type StyleColors struct {
-	Message text.Colors
-	Percent text.Colors
-	Stats   text.Colors
-	Time    text.Colors
-	Tracker text.Colors
-	Value   text.Colors
+	Message text.Colors // message text colors
+	Percent text.Colors // percentage text colors
+	Stats   text.Colors // stats text (time, value) colors
+	Time    text.Colors // time text colors (overrides Stats)
+	Tracker text.Colors // tracker text colors
+	Value   text.Colors // value text colors (overrides Stats)
 }
 
 var (
@@ -135,11 +135,11 @@ var (
 // StyleOptions defines misc. options to control how the Tracker or its parts
 // gets rendered.
 type StyleOptions struct {
-	DoneString              string
-	Separator               string
-	PercentFormat           string
-	TimeDonePrecision       time.Duration
-	TimeInProgressPrecision time.Duration
+	DoneString              string        // "done!" string
+	Separator               string        // text between message and tracker
+	PercentFormat           string        // formatting to use for percentage
+	TimeDonePrecision       time.Duration // precision for time when done
+	TimeInProgressPrecision time.Duration // precision for time when in progress
 }
 
 var (

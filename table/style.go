@@ -7,11 +7,11 @@ import (
 // Style declares how to render the Table and provides very fine-grained control
 // on how the Table gets rendered on the Console.
 type Style struct {
-	Name    string
-	Box     BoxStyle
-	Color   ColorOptions
-	Format  FormatOptions
-	Options Options
+	Name    string        // name of the Style
+	Box     BoxStyle      // characters to use for the boxes
+	Color   ColorOptions  // colors to use for the rows and columns
+	Format  FormatOptions // formatting options for the rows and columns
+	Options Options       // misc. options for the table
 }
 
 var (
@@ -342,23 +342,23 @@ var (
 	//  ┃     ┃            ┃ TOTAL     ┃  10000 ┃                             ┃
 	//  ┗━━━━━┻━━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 	StyleBoxBold = BoxStyle{
-		BottomLeft:       text.BoxBottomLeftBold,
-		BottomRight:      text.BoxBottomRightBold,
-		BottomSeparator:  text.BoxBottomSeparatorBold,
-		Left:             text.BoxLeftBold,
-		LeftSeparator:    text.BoxLeftSeparatorBold,
-		MiddleHorizontal: text.BoxHorizontalBold,
-		MiddleSeparator:  text.BoxSeparatorBold,
-		MiddleVertical:   text.BoxVerticalBold,
+		BottomLeft:       "┗",
+		BottomRight:      "┛",
+		BottomSeparator:  "┻",
+		Left:             "┃",
+		LeftSeparator:    "┣",
+		MiddleHorizontal: "━",
+		MiddleSeparator:  "╋",
+		MiddleVertical:   "┃",
 		PaddingLeft:      " ",
 		PaddingRight:     " ",
 		PageSeparator:    "\n",
-		Right:            text.BoxRightBold,
-		RightSeparator:   text.BoxRightSeparatorBold,
-		TopLeft:          text.BoxTopLeftBold,
-		TopRight:         text.BoxTopRightBold,
-		TopSeparator:     text.BoxTopSeparatorBold,
-		UnfinishedRow:    " " + text.BoxUnfinishedLine,
+		Right:            "┃",
+		RightSeparator:   "┫",
+		TopLeft:          "┏",
+		TopRight:         "┓",
+		TopSeparator:     "┳",
+		UnfinishedRow:    " ≈",
 	}
 
 	// StyleBoxDouble defines a Boxed-Table like below:
@@ -372,23 +372,23 @@ var (
 	//  ║     ║            ║ TOTAL     ║  10000 ║                             ║
 	//  ╚═════╩════════════╩═══════════╩════════╩═════════════════════════════╝
 	StyleBoxDouble = BoxStyle{
-		BottomLeft:       text.BoxBottomLeftDouble,
-		BottomRight:      text.BoxBottomRightDouble,
-		BottomSeparator:  text.BoxBottomSeparatorDouble,
-		Left:             text.BoxLeftDouble,
-		LeftSeparator:    text.BoxLeftSeparatorDouble,
-		MiddleHorizontal: text.BoxHorizontalDouble,
-		MiddleSeparator:  text.BoxSeparatorDouble,
-		MiddleVertical:   text.BoxVerticalDouble,
+		BottomLeft:       "╚",
+		BottomRight:      "╝",
+		BottomSeparator:  "╩",
+		Left:             "║",
+		LeftSeparator:    "╠",
+		MiddleHorizontal: "═",
+		MiddleSeparator:  "╬",
+		MiddleVertical:   "║",
 		PaddingLeft:      " ",
 		PaddingRight:     " ",
 		PageSeparator:    "\n",
-		Right:            text.BoxRightDouble,
-		RightSeparator:   text.BoxRightSeparatorDouble,
-		TopLeft:          text.BoxTopLeftDouble,
-		TopRight:         text.BoxTopRightDouble,
-		TopSeparator:     text.BoxTopSeparatorDouble,
-		UnfinishedRow:    " " + text.BoxUnfinishedLine,
+		Right:            "║",
+		RightSeparator:   "╣",
+		TopLeft:          "╔",
+		TopRight:         "╗",
+		TopSeparator:     "╦",
+		UnfinishedRow:    " ≈",
 	}
 
 	// StyleBoxLight defines a Boxed-Table like below:
@@ -402,23 +402,23 @@ var (
 	//  │     │            │ TOTAL     │  10000 │                             │
 	//  └─────┴────────────┴───────────┴────────┴─────────────────────────────┘
 	StyleBoxLight = BoxStyle{
-		BottomLeft:       text.BoxBottomLeft,
-		BottomRight:      text.BoxBottomRight,
-		BottomSeparator:  text.BoxBottomSeparator,
-		Left:             text.BoxLeft,
-		LeftSeparator:    text.BoxLeftSeparator,
-		MiddleHorizontal: text.BoxHorizontal,
-		MiddleSeparator:  text.BoxSeparator,
-		MiddleVertical:   text.BoxVertical,
+		BottomLeft:       "└",
+		BottomRight:      "┘",
+		BottomSeparator:  "┴",
+		Left:             "│",
+		LeftSeparator:    "├",
+		MiddleHorizontal: "─",
+		MiddleSeparator:  "┼",
+		MiddleVertical:   "│",
 		PaddingLeft:      " ",
 		PaddingRight:     " ",
 		PageSeparator:    "\n",
-		Right:            text.BoxRight,
-		RightSeparator:   text.BoxRightSeparator,
-		TopLeft:          text.BoxTopLeft,
-		TopRight:         text.BoxTopRight,
-		TopSeparator:     text.BoxTopSeparator,
-		UnfinishedRow:    " " + text.BoxUnfinishedLine,
+		Right:            "│",
+		RightSeparator:   "┤",
+		TopLeft:          "┌",
+		TopRight:         "┐",
+		TopSeparator:     "┬",
+		UnfinishedRow:    " ≈",
 	}
 
 	// StyleBoxRounded defines a Boxed-Table like below:
@@ -432,23 +432,23 @@ var (
 	//  │     │            │ TOTAL     │  10000 │                             │
 	//  ╰─────┴────────────┴───────────┴────────┴─────────────────────────────╯
 	StyleBoxRounded = BoxStyle{
-		BottomLeft:       text.BoxBottomLeftRounded,
-		BottomRight:      text.BoxBottomRightRounded,
-		BottomSeparator:  text.BoxBottomSeparator,
-		Left:             text.BoxLeft,
-		LeftSeparator:    text.BoxLeftSeparator,
-		MiddleHorizontal: text.BoxHorizontal,
-		MiddleSeparator:  text.BoxSeparator,
-		MiddleVertical:   text.BoxVertical,
+		BottomLeft:       "╰",
+		BottomRight:      "╯",
+		BottomSeparator:  "┴",
+		Left:             "│",
+		LeftSeparator:    "├",
+		MiddleHorizontal: "─",
+		MiddleSeparator:  "┼",
+		MiddleVertical:   "│",
 		PaddingLeft:      " ",
 		PaddingRight:     " ",
 		PageSeparator:    "\n",
-		Right:            text.BoxRight,
-		RightSeparator:   text.BoxRightSeparator,
-		TopLeft:          text.BoxTopLeftRounded,
-		TopRight:         text.BoxTopRightRounded,
-		TopSeparator:     text.BoxTopSeparator,
-		UnfinishedRow:    " " + text.BoxUnfinishedLine,
+		Right:            "│",
+		RightSeparator:   "┤",
+		TopLeft:          "╭",
+		TopRight:         "╮",
+		TopSeparator:     "┬",
+		UnfinishedRow:    " ≈",
 	}
 
 	// styleBoxTest defines a Boxed-Table like below:
@@ -484,11 +484,11 @@ var (
 
 // ColorOptions defines the ANSI colors to use for parts of the Table.
 type ColorOptions struct {
-	IndexColumn  text.Colors
-	Footer       text.Colors
-	Header       text.Colors
-	Row          text.Colors
-	RowAlternate text.Colors
+	IndexColumn  text.Colors // index-column colors (row #, etc.)
+	Footer       text.Colors // footer row(s) colors
+	Header       text.Colors // header row(s) colors
+	Row          text.Colors // regular row(s) colors
+	RowAlternate text.Colors // regular row(s) colors for the even-numbered rows
 }
 
 var (
@@ -618,9 +618,9 @@ var (
 
 // FormatOptions defines the text-formatting to perform on parts of the Table.
 type FormatOptions struct {
-	Footer text.Format
-	Header text.Format
-	Row    text.Format
+	Footer text.Format // footer row(s) text format
+	Header text.Format // header row(s) text format
+	Row    text.Format // (data) row(s) text format
 }
 
 var (
