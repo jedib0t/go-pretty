@@ -37,53 +37,6 @@ b The Dark Tower
 
 func TestList_Render_Complex(t *testing.T) {
 	lw := NewWriter()
-	lw.AppendItem(testItem1)
-	lw.Indent()
-	lw.AppendItems(testItems2)
-	lw.Indent()
-	lw.AppendItems(testItems3)
-	lw.UnIndent()
-	lw.UnIndent()
-	lw.AppendItem(testItem4)
-	lw.Indent()
-	lw.AppendItem(testItem5)
-
-	styles := map[Style]string{
-		StyleBulletCircle:     "● Game Of Thrones\n  ● Winter\n  ● Is\n  ● Coming\n    ● This\n    ● Is\n    ● Known\n● The Dark Tower\n  ● The Gunslinger",
-		StyleBulletFlower:     "✽ Game Of Thrones\n  ✽ Winter\n  ✽ Is\n  ✽ Coming\n    ✽ This\n    ✽ Is\n    ✽ Known\n✽ The Dark Tower\n  ✽ The Gunslinger",
-		StyleBulletSquare:     "■ Game Of Thrones\n  ■ Winter\n  ■ Is\n  ■ Coming\n    ■ This\n    ■ Is\n    ■ Known\n■ The Dark Tower\n  ■ The Gunslinger",
-		StyleBulletStar:       "★ Game Of Thrones\n  ★ Winter\n  ★ Is\n  ★ Coming\n    ★ This\n    ★ Is\n    ★ Known\n★ The Dark Tower\n  ★ The Gunslinger",
-		StyleBulletTriangle:   "▶ Game Of Thrones\n  ▶ Winter\n  ▶ Is\n  ▶ Coming\n    ▶ This\n    ▶ Is\n    ▶ Known\n▶ The Dark Tower\n  ▶ The Gunslinger",
-		StyleConnectedBold:    "┏━ Game Of Thrones\n┃  ┣━ Winter\n┃  ┣━ Is\n┃  ┗━ Coming\n┃     ┣━ This\n┃     ┣━ Is\n┃     ┗━ Known\n┗━ The Dark Tower\n   ┗━ The Gunslinger",
-		StyleConnectedDouble:  "╔═ Game Of Thrones\n║  ╠═ Winter\n║  ╠═ Is\n║  ╚═ Coming\n║     ╠═ This\n║     ╠═ Is\n║     ╚═ Known\n╚═ The Dark Tower\n   ╚═ The Gunslinger",
-		StyleConnectedLight:   "┌─ Game Of Thrones\n│  ├─ Winter\n│  ├─ Is\n│  └─ Coming\n│     ├─ This\n│     ├─ Is\n│     └─ Known\n└─ The Dark Tower\n   └─ The Gunslinger",
-		StyleConnectedRounded: "╭─ Game Of Thrones\n│  ├─ Winter\n│  ├─ Is\n│  ╰─ Coming\n│     ├─ This\n│     ├─ Is\n│     ╰─ Known\n╰─ The Dark Tower\n   ╰─ The Gunslinger",
-		StyleDefault:          "* Game Of Thrones\n  * Winter\n  * Is\n  * Coming\n    * This\n    * Is\n    * Known\n* The Dark Tower\n  * The Gunslinger",
-		StyleMarkdown:         "  * Game Of Thrones\n    * Winter\n    * Is\n    * Coming\n      * This\n      * Is\n      * Known\n  * The Dark Tower\n    * The Gunslinger",
-		styleTest:             "t Game Of Thrones\n|f Winter\n|m Is\n|b Coming\n| f This\n| m Is\n| b Known\nb The Dark Tower\n b The Gunslinger",
-	}
-	var mismatches []string
-	for style, expectedOut := range styles {
-		lw.SetStyle(style)
-		out := lw.Render()
-		assert.Equal(t, expectedOut, out)
-		if expectedOut != out {
-			mismatches = append(mismatches, fmt.Sprintf("%s: %#v,", style.Name, out))
-			fmt.Printf("// %s renders a List like below:\n", style.Name)
-			for _, line := range strings.Split(out, "\n") {
-				fmt.Printf("//  %s\n", line)
-			}
-			fmt.Println()
-		}
-	}
-	sort.Strings(mismatches)
-	for _, mismatch := range mismatches {
-		fmt.Println(mismatch)
-	}
-}
-
-func TestList_Render_Complex2(t *testing.T) {
-	lw := NewWriter()
 	lw.AppendItem("The Houses of Westeros")
 	lw.Indent()
 	lw.AppendItem("The Starks of Winterfell")
@@ -288,4 +241,51 @@ func TestList_Render_MultiLine(t *testing.T) {
   * The Dark Tower<br/>// Stephen King
     * The Gunslinger`
 	assert.Equal(t, expectedOutMarkdown, lw.RenderMarkdown())
+}
+
+func TestList_Render_Styles(t *testing.T) {
+	lw := NewWriter()
+	lw.AppendItem(testItem1)
+	lw.Indent()
+	lw.AppendItems(testItems2)
+	lw.Indent()
+	lw.AppendItems(testItems3)
+	lw.UnIndent()
+	lw.UnIndent()
+	lw.AppendItem(testItem4)
+	lw.Indent()
+	lw.AppendItem(testItem5)
+
+	styles := map[Style]string{
+		StyleBulletCircle:     "● Game Of Thrones\n  ● Winter\n  ● Is\n  ● Coming\n    ● This\n    ● Is\n    ● Known\n● The Dark Tower\n  ● The Gunslinger",
+		StyleBulletFlower:     "✽ Game Of Thrones\n  ✽ Winter\n  ✽ Is\n  ✽ Coming\n    ✽ This\n    ✽ Is\n    ✽ Known\n✽ The Dark Tower\n  ✽ The Gunslinger",
+		StyleBulletSquare:     "■ Game Of Thrones\n  ■ Winter\n  ■ Is\n  ■ Coming\n    ■ This\n    ■ Is\n    ■ Known\n■ The Dark Tower\n  ■ The Gunslinger",
+		StyleBulletStar:       "★ Game Of Thrones\n  ★ Winter\n  ★ Is\n  ★ Coming\n    ★ This\n    ★ Is\n    ★ Known\n★ The Dark Tower\n  ★ The Gunslinger",
+		StyleBulletTriangle:   "▶ Game Of Thrones\n  ▶ Winter\n  ▶ Is\n  ▶ Coming\n    ▶ This\n    ▶ Is\n    ▶ Known\n▶ The Dark Tower\n  ▶ The Gunslinger",
+		StyleConnectedBold:    "┏━ Game Of Thrones\n┃  ┣━ Winter\n┃  ┣━ Is\n┃  ┗━ Coming\n┃     ┣━ This\n┃     ┣━ Is\n┃     ┗━ Known\n┗━ The Dark Tower\n   ┗━ The Gunslinger",
+		StyleConnectedDouble:  "╔═ Game Of Thrones\n║  ╠═ Winter\n║  ╠═ Is\n║  ╚═ Coming\n║     ╠═ This\n║     ╠═ Is\n║     ╚═ Known\n╚═ The Dark Tower\n   ╚═ The Gunslinger",
+		StyleConnectedLight:   "┌─ Game Of Thrones\n│  ├─ Winter\n│  ├─ Is\n│  └─ Coming\n│     ├─ This\n│     ├─ Is\n│     └─ Known\n└─ The Dark Tower\n   └─ The Gunslinger",
+		StyleConnectedRounded: "╭─ Game Of Thrones\n│  ├─ Winter\n│  ├─ Is\n│  ╰─ Coming\n│     ├─ This\n│     ├─ Is\n│     ╰─ Known\n╰─ The Dark Tower\n   ╰─ The Gunslinger",
+		StyleDefault:          "* Game Of Thrones\n  * Winter\n  * Is\n  * Coming\n    * This\n    * Is\n    * Known\n* The Dark Tower\n  * The Gunslinger",
+		StyleMarkdown:         "  * Game Of Thrones\n    * Winter\n    * Is\n    * Coming\n      * This\n      * Is\n      * Known\n  * The Dark Tower\n    * The Gunslinger",
+		styleTest:             "t Game Of Thrones\n|f Winter\n|m Is\n|b Coming\n| f This\n| m Is\n| b Known\nb The Dark Tower\n b The Gunslinger",
+	}
+	var mismatches []string
+	for style, expectedOut := range styles {
+		lw.SetStyle(style)
+		out := lw.Render()
+		assert.Equal(t, expectedOut, out)
+		if expectedOut != out {
+			mismatches = append(mismatches, fmt.Sprintf("%s: %#v,", style.Name, out))
+			fmt.Printf("// %s renders a List like below:\n", style.Name)
+			for _, line := range strings.Split(out, "\n") {
+				fmt.Printf("//  %s\n", line)
+			}
+			fmt.Println()
+		}
+	}
+	sort.Strings(mismatches)
+	for _, mismatch := range mismatches {
+		fmt.Println(mismatch)
+	}
 }

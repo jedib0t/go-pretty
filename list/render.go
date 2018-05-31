@@ -41,7 +41,20 @@ func (l *List) renderItem(out *strings.Builder, idx int, item *listItem, hint re
 		out.WriteRune('\n')
 	}
 
-	var renderItemLine = func(lineIdx int, lineStr string) {
+	// format item.Text as directed in l.style
+	itemStr := l.style.Format.Apply(item.Text)
+
+	// convert newlines if newlines are not "\n" in l.style
+	if strings.Contains(itemStr, "\n") && l.style.CharNewline != "\n" {
+		itemStr = strings.Replace(itemStr, "\n", l.style.CharNewline, -1)
+	}
+
+	// render the item.Text line by line
+	for lineIdx, lineStr := range strings.Split(itemStr, "\n") {
+		if lineIdx > 0 {
+			out.WriteRune('\n')
+		}
+
 		// render the prefix or the leading text before the actual item
 		l.renderItemBulletPrefix(out, idx, item.Level, lineIdx, hint)
 		l.renderItemBullet(out, idx, item.Level, lineIdx, hint)
@@ -49,31 +62,18 @@ func (l *List) renderItem(out *strings.Builder, idx int, item *listItem, hint re
 		// render the actual item
 		out.WriteString(lineStr)
 	}
-
-	itemStr := l.style.Format.Apply(item.Text)
-	if strings.Contains(itemStr, "\n") && l.style.CharNewline != "\n" {
-		itemStr = strings.Replace(itemStr, "\n", l.style.CharNewline, -1)
-	}
-	if strings.Contains(itemStr, "\n") {
-		for lineIdx, lineStr := range strings.Split(itemStr, "\n") {
-			if lineIdx > 0 {
-				out.WriteRune('\n')
-			}
-			renderItemLine(lineIdx, lineStr)
-		}
-	} else {
-		renderItemLine(0, itemStr)
-	}
 }
 
 func (l *List) renderItemBullet(out *strings.Builder, itemIdx int, itemLevel int, lineIdx int, hint renderHint) {
 	if lineIdx > 0 {
+		// multi-line item.Text
 		if hint.isLastItem {
 			out.WriteString(strings.Repeat(" ", utf8.RuneCountInString(l.style.CharItemVertical)))
 		} else {
 			out.WriteString(l.style.CharItemVertical)
 		}
 	} else {
+		// single-line item.Text (or first line of a multi-line item.Text)
 		if hint.isOnlyItem {
 			if hint.isTopItem {
 				out.WriteString(l.style.CharItemSingle)
@@ -89,13 +89,12 @@ func (l *List) renderItemBullet(out *strings.Builder, itemIdx int, itemLevel int
 		} else {
 			out.WriteString(l.style.CharItemMiddle)
 		}
-	}
-	if lineIdx == 0 {
 		out.WriteRune(' ')
 	}
 }
 
 func (l *List) renderItemBulletPrefix(out *strings.Builder, itemIdx int, itemLevel int, lineIdx int, hint renderHint) {
+	// write a prefix if one has been set in l.style
 	if l.style.LinePrefix != "" {
 		out.WriteString(l.style.LinePrefix)
 	}
