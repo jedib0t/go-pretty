@@ -8,8 +8,8 @@ package list
 //        * This
 //        * Is
 //        * Known
-//      * The Dark Tower
-//        * The Gunslinger
+//    * The Dark Tower
+//      * The Gunslinger
 func (l *List) RenderMarkdown() string {
 	// make a copy of the original style and ensure it is restored on exit
 	originalStyle := l.style
