@@ -28,6 +28,14 @@ func TestInsertRuneEveryN(t *testing.T) {
 	assert.Equal(t, "\x1b[33mGhost\x1b[0m", InsertRuneEveryN("\x1b[33mGhost\x1b[0m", '-', 5))
 }
 
+func TestRepeatAndTrim(t *testing.T) {
+	assert.Equal(t, "", RepeatAndTrim("Ghost", 0))
+	assert.Equal(t, "", RepeatAndTrim("Ghost", 0))
+	assert.Equal(t, "Ghost", RepeatAndTrim("Ghost", 5))
+	assert.Equal(t, "GhostGh", RepeatAndTrim("Ghost", 7))
+	assert.Equal(t, "GhostGhost", RepeatAndTrim("Ghost", 10))
+}
+
 func TestRuneCountWithoutEscapeSeq(t *testing.T) {
 	assert.Equal(t, 0, RuneCountWithoutEscapeSeq(""))
 	assert.Equal(t, 5, RuneCountWithoutEscapeSeq("Ghost"))

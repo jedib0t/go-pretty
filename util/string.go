@@ -74,6 +74,20 @@ func InsertRuneEveryN(s string, r rune, n int) string {
 	return out.String()
 }
 
+// RepeatMax repeats the given string until it is as long as maxRunes. For ex.:
+//  RepeatAndTrim("Ghost", 0) == ""
+//  RepeatAndTrim("Ghost", 5) == "Ghost"
+//  RepeatAndTrim("Ghost", 7) == "GhostGh"
+//  RepeatAndTrim("Ghost", 10) == "GhostGhost"
+func RepeatAndTrim(s string, maxRunes int) string {
+	if maxRunes == 0 {
+		return ""
+	} else if maxRunes == len(s) {
+		return s
+	}
+	return TrimTextWithoutEscapeSeq(strings.Repeat(s, int(maxRunes/utf8.RuneCountInString(s))+1), maxRunes)
+}
+
 // RuneCountWithoutEscapeSeq is similar to utf8.RuneCountInString, except for
 // the fact that it ignores escape sequences in the counting. For ex.:
 //  RuneCountWithoutEscapeSeq("") == 0
