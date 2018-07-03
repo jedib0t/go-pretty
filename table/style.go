@@ -467,7 +467,7 @@ var (
 		BottomSeparator:  "v",
 		Left:             "[",
 		LeftSeparator:    "{",
-		MiddleHorizontal: "-",
+		MiddleHorizontal: "--",
 		MiddleSeparator:  "+",
 		MiddleVertical:   "|",
 		PaddingLeft:      "<",

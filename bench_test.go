@@ -1,14 +1,14 @@
 package gopretty
 
 import (
+	"io/ioutil"
 	"testing"
+	"time"
 
 	"github.com/jedib0t/go-pretty/list"
 	"github.com/jedib0t/go-pretty/progress"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/jedib0t/go-pretty/text"
-	"io/ioutil"
-	"time"
 )
 
 var (
@@ -28,16 +28,6 @@ var (
 	tracker2 = progress.Tracker{Message: "Downloading File    # 2", Total: 1000, Units: progress.UnitsBytes}
 	tracker3 = progress.Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: progress.UnitsCurrencyDollar}
 )
-
-func generateBenchmarkTable() table.Writer {
-	tw := table.NewWriter()
-	tw.AppendHeader(tableRowHeader)
-	tw.AppendRows(tableRows)
-	tw.AppendFooter(tableRowFooter)
-	tw.SetAlign(tableRowAlign)
-	tw.SetCaption(tableCaption)
-	return tw
-}
 
 func BenchmarkList_Render(b *testing.B) {
 	for i := 0; i < b.N; i++ {
@@ -69,6 +59,16 @@ func BenchmarkProgress_Render(b *testing.B) {
 		time.Sleep(time.Millisecond * 50)
 		pw.Render()
 	}
+}
+
+func generateBenchmarkTable() table.Writer {
+	tw := table.NewWriter()
+	tw.AppendHeader(tableRowHeader)
+	tw.AppendRows(tableRows)
+	tw.AppendFooter(tableRowFooter)
+	tw.SetAlign(tableRowAlign)
+	tw.SetCaption(tableCaption)
+	return tw
 }
 
 func BenchmarkTable_Render(b *testing.B) {
