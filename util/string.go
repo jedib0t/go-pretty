@@ -74,7 +74,8 @@ func InsertRuneEveryN(s string, r rune, n int) string {
 	return out.String()
 }
 
-// RepeatMax repeats the given string until it is as long as maxRunes. For ex.:
+// RepeatAndTrim repeats the given string until it is as long as maxRunes.
+// For ex.:
 //  RepeatAndTrim("Ghost", 0) == ""
 //  RepeatAndTrim("Ghost", 5) == "Ghost"
 //  RepeatAndTrim("Ghost", 7) == "GhostGh"
