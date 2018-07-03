@@ -82,8 +82,7 @@ func (t *Table) renderColumnAutoIndex(out *strings.Builder, rowNum int, hint ren
 	if rowNum < 0 {
 		numChars := t.autoIndexVIndexMaxLength + utf8.RuneCountInString(t.style.Box.PaddingLeft) +
 			utf8.RuneCountInString(t.style.Box.PaddingRight)
-		outAutoIndex.WriteString(util.TrimTextWithoutEscapeSeq(
-			strings.Repeat(t.style.Box.MiddleHorizontal, numChars), numChars))
+		outAutoIndex.WriteString(util.RepeatAndTrim(t.style.Box.MiddleHorizontal, numChars))
 	} else {
 		outAutoIndex.WriteString(t.style.Box.PaddingLeft)
 		rowNumStr := fmt.Sprint(rowNum)

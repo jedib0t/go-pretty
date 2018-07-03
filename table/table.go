@@ -392,11 +392,7 @@ func (t *Table) initForRenderRowSeparator() {
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
 		maxColumnLength += utf8.RuneCountInString(t.style.Box.PaddingLeft)
 		maxColumnLength += utf8.RuneCountInString(t.style.Box.PaddingRight)
-		horizontalSeparatorCol := strings.Repeat(t.style.Box.MiddleHorizontal, maxColumnLength)
-		// in case of the MiddleHorizontal being longer than 1 tune, trim it
-		if util.RuneCountWithoutEscapeSeq(horizontalSeparatorCol) > maxColumnLength {
-			horizontalSeparatorCol = util.TrimTextWithoutEscapeSeq(horizontalSeparatorCol, maxColumnLength)
-		}
+		horizontalSeparatorCol := util.RepeatAndTrim(t.style.Box.MiddleHorizontal, maxColumnLength)
 		t.maxRowLength += maxColumnLength
 		t.rowSeparator[colIdx] = horizontalSeparatorCol
 	}
