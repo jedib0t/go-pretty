@@ -118,7 +118,7 @@ Or if you want to use a full-color mode, and don't care for boxes, use:
 ```
 to get:
 
-<img src="images/table-StyleColoredBright.png" width="600px"/>
+<img src="images/table-StyleColoredBright.png" width="640px"/>
 
 ### Roll your own Style
 
