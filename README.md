@@ -10,30 +10,8 @@ Utilities to prettify console output of tables, lists, text, etc.
 
 ## Table
 
-Pretty-print tables into ASCII/Unicode strings.
-
-  - Add Rows one-by-one or as a group
-  - Add Header(s) and Footer(s)
-  - Auto Index Rows (1, 2, 3 ...) and Columns (A, B, C, ...)
-  - Limit the length of the Rows; limit the length of individual Columns
-  - Page results by a specified number of Lines
-  - Alignment - Horizontal & Vertical
-    - Auto (horizontal) Align (numeric columns are aligned Right)
-    - Custom (horizontal) Align per column
-    - Custom (vertical) VAlign per column (and multi-line column support)
-  - Mirror output to an io.Writer object (like os.StdOut)
-  - Sort by any of the Columns (by Column Name or Number)
-  - Completely customizable styles
-    - Many ready-to-use styles: [table/style.go](table/style.go)
-    - Colorize Headers/Body/Footers using [text/color](text/color.go)
-    - Custom text-case for Headers/Body/Footers
-    - Enable separators between each row
-    - Render table without a Border
-  - Render as:
-    - (ASCII/Unicode) Table
-    - CSV
-    - HTML Table (with custom CSS Style)
-    - Markdown Table 
+Pretty-print tables into ASCII/Unicode strings. Detailed documentation can be
+found here: [table/](table/)
 
 ```
 +-----+------------+-----------+--------+-----------------------------+
@@ -47,24 +25,13 @@ Pretty-print tables into ASCII/Unicode strings.
 +-----+------------+-----------+--------+-----------------------------+
 ```
 
-A demonstration of all the capabilities can be found here:
-[cmd/demo-table](cmd/demo-table)
+<img src="table/images/table-StyleColoredBright.png" width="800px"/>
+
 
 ## List
 
 Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
-
-  - Append Items one-by-one or as a group
-  - Indent/UnIndent as you like
-  - Limit the length of the Lines/Items
-  - Support Items with Multiple-lines
-  - Mirror output to an io.Writer object (like os.StdOut)
-  - Completely customizable styles
-    - Many ready-to-use styles: [list/style.go](list/style.go)
-  - Render as:
-    - (ASCII/Unicode) List
-    - HTML List (with custom CSS Class)
-    - Markdown List
+Detailed documentation can be found here: [list/](list/)
 
 ```
  ■ Game Of Thrones
@@ -78,23 +45,10 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
    ■ The Gunslinger
 ```
 
-A demonstration of all the capabilities can be found here:
-[cmd/demo-list](cmd/demo-list)
-
 # Progress
 
 Track the Progress of one or more Tasks (like downloading multiple files in
-parallel).
-
-  - Track one or more Tasks at the same time
-  - Dynamically add one or more Task Trackers while `Render()` is in progress
-  - Choose to have the Writer auto-stop the Render when no more Trackers are
-    in queue, or manually stop using `Stop()`
-  - Redirect output to an io.Writer object (like os.StdOut)
-  - Completely customizable styles
-    - Many ready-to-use styles: [progress/style.go](progress/style.go)
-    - Colorize various parts of the Tracker using `StyleColors`
-    - Customize how Trackers get rendered using `StyleOptions`
+parallel). Detailed documentation can be found here: [progress/](progress/)
 
 Sample Progress Tracking:
 ```
@@ -110,13 +64,9 @@ Downloading File    #  9 ... 32.1% (●●●●●●●○◌◌◌◌◌◌�
 Transferring Amount # 10 ... 13.0% (●●○◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌) [£32.50K in 198.84ms]
 ```
 
-A demonstration of all the capabilities can be found here:
-[cmd/demo-progress](cmd/demo-progress)
-
 ## Text
 
 The following features are all used by the other packages in this project.
-Specifically, `table` and `list` use these extensively:
 
    - Align text horizontally
      - [text/align.go](text/align.go)
@@ -127,7 +77,7 @@ Specifically, `table` and `list` use these extensively:
    - Format text (convert case for now)
      - [text/format.go](text/format.go)
 
-The unit-tests for each of the above show how these are to be used.
+The unit-tests for each of the above show how these can be used.
 
 ## Benchmarks
 
