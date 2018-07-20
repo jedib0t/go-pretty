@@ -10,8 +10,7 @@ Utilities to prettify console output of tables, lists, text, etc.
 
 ## Table
 
-Pretty-print tables into ASCII/Unicode strings. Detailed documentation can be
-found here: [table/](table/)
+Pretty-print tables into ASCII/Unicode strings.
 
 ```
 +-----+------------+-----------+--------+-----------------------------+
@@ -25,13 +24,13 @@ found here: [table/](table/)
 +-----+------------+-----------+--------+-----------------------------+
 ```
 
-<img src="table/images/table-StyleColoredBright.png" width="800px"/>
+<img src="table/images/table-StyleColoredBright.png" width="640px"/>
 
+Detailed documentation can be found here: [table/](table/)
 
 ## List
 
 Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
-Detailed documentation can be found here: [list/](list/)
 
 ```
  ■ Game Of Thrones
@@ -45,10 +44,12 @@ Detailed documentation can be found here: [list/](list/)
    ■ The Gunslinger
 ```
 
+Detailed documentation can be found here: [list/](list/)
+
 # Progress
 
 Track the Progress of one or more Tasks (like downloading multiple files in
-parallel). Detailed documentation can be found here: [progress/](progress/)
+parallel).
 
 Sample Progress Tracking:
 ```
@@ -63,6 +64,8 @@ Transferring Amount #  8 ... 60.9% (●●●●●●●●●●●●●●�
 Downloading File    #  9 ... 32.1% (●●●●●●●○◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌) [58.50KB in 298.947ms]
 Transferring Amount # 10 ... 13.0% (●●○◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌) [£32.50K in 198.84ms]
 ```
+
+Detailed documentation can be found here: [progress/](progress/)
 
 ## Text
 
