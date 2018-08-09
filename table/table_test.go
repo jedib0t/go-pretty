@@ -264,6 +264,19 @@ func TestTable_SetAutoIndex(t *testing.T) {
 \---v-----v------------v-----------v--------v-----------------------------/`
 	assert.True(t, table.autoIndex)
 	assert.Equal(t, expectedOut, table.Render())
+
+	table.AppendRow(testRowMultiLine)
+	expectedOut = `(---^-----^------------^-----------^--------^-----------------------------)
+[< >|<  #>|<FIRST NAME>|<LAST NAME>|<SALARY>|<                           >]
+{---+-----+------------+-----------+--------+-----------------------------}
+[<1>|<  1>|<Arya      >|<Stark    >|<  3000>|<                           >]
+[<2>|< 20>|<Jon       >|<Snow     >|<  2000>|<You know nothing, Jon Snow!>]
+[<3>|<300>|<Tyrion    >|<Lannister>|<  5000>|<                           >]
+[<4>|<  0>|<Winter    >|<Is       >|<     0>|<Coming.                    >]
+[< >|<   >|<          >|<         >|<      >|<The North Remembers!       >]
+[< >|<   >|<          >|<         >|<      >|<This is known.             >]
+\---v-----v------------v-----------v--------v-----------------------------/`
+	assert.Equal(t, expectedOut, table.Render())
 }
 
 func TestTable_SetCaption(t *testing.T) {

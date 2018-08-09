@@ -79,14 +79,14 @@ func (t *Table) renderColumnAutoIndex(out *strings.Builder, rowNum int, hint ren
 	var outAutoIndex strings.Builder
 	outAutoIndex.Grow(t.maxColumnLengths[0])
 
-	if rowNum < 0 {
+	if hint.isSeparatorRow {
 		numChars := t.autoIndexVIndexMaxLength + utf8.RuneCountInString(t.style.Box.PaddingLeft) +
 			utf8.RuneCountInString(t.style.Box.PaddingRight)
 		outAutoIndex.WriteString(util.RepeatAndTrim(t.style.Box.MiddleHorizontal, numChars))
 	} else {
 		outAutoIndex.WriteString(t.style.Box.PaddingLeft)
 		rowNumStr := fmt.Sprint(rowNum)
-		if hint.isHeaderRow || hint.isFooterRow {
+		if hint.isHeaderRow || hint.isFooterRow || hint.rowLineNumber > 1 {
 			rowNumStr = strings.Repeat(" ", t.autoIndexVIndexMaxLength)
 		}
 		outAutoIndex.WriteString(text.AlignRight.Apply(rowNumStr, t.autoIndexVIndexMaxLength))
@@ -254,6 +254,7 @@ func (t *Table) renderRow(out *strings.Builder, rowNum int, row rowStr, hint ren
 					rowLine[colIdx] = colLines[colLineIdx]
 				}
 				hint.isLastLineOfRow = bool(colLineIdx == colMaxLines-1)
+				hint.rowLineNumber = colLineIdx + 1
 				t.renderLine(out, rowNum, rowLine, hint)
 			}
 		}
