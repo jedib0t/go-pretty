@@ -32,7 +32,7 @@ func generateWriter() Writer {
 	pw.SetSortBy(SortByNone)
 	pw.SetStyle(StyleDefault)
 	pw.SetTrackerPosition(PositionRight)
-	pw.SetUpdateFrequency(time.Millisecond * 100)
+	pw.SetUpdateFrequency(time.Millisecond * 50)
 	pw.Style().Colors = StyleColors{}
 	pw.Style().Options = StyleOptions{
 		DoneString:              "done!",
