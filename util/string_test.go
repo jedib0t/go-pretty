@@ -6,6 +6,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestFixedLengthString(t *testing.T) {
+	assert.Equal(t, "Ghost", FixedLengthString("Ghost", 0, "~"))
+	assert.Equal(t, "~", FixedLengthString("Ghost", 1, "~"))
+	assert.Equal(t, "Gh~", FixedLengthString("Ghost", 3, "~"))
+	assert.Equal(t, "Ghost", FixedLengthString("Ghost", 5, "~"))
+	assert.Equal(t, "Ghost  ", FixedLengthString("Ghost", 7, "~"))
+}
+
 func TestGetLongestLineLength(t *testing.T) {
 	assert.Equal(t, 0, GetLongestLineLength(""))
 	assert.Equal(t, 0, GetLongestLineLength("\n\n"))

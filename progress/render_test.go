@@ -34,13 +34,7 @@ func generateWriter() Writer {
 	pw.SetTrackerPosition(PositionRight)
 	pw.SetUpdateFrequency(time.Millisecond * 50)
 	pw.Style().Colors = StyleColors{}
-	pw.Style().Options = StyleOptions{
-		DoneString:              "done!",
-		Separator:               " ... ",
-		PercentFormat:           "%5.2f%%",
-		TimeDonePrecision:       time.Millisecond,
-		TimeInProgressPrecision: time.Microsecond,
-	}
+	pw.Style().Options = StyleOptionsDefault
 	return pw
 }
 
@@ -185,12 +179,12 @@ func TestProgress_RenderSomeTrackers_WithLineWidth1(t *testing.T) {
 	renderAndWait(pw, false)
 
 	expectedOutPatterns := []*regexp.Regexp{
-		regexp.MustCompile(`\x1b\[KCalcu \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+ in [\d.]+ms]`),
-		regexp.MustCompile(`\x1b\[KDownl \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+B in [\d.]+ms]`),
-		regexp.MustCompile(`\x1b\[KTrans \.\.\. \d+\.\d+% \[[#.]{23}] \[\$\d+ in [\d.]+ms]`),
-		regexp.MustCompile(`\x1b\[KCalcu \.\.\. done! \[\d+\.\d+K in [\d.]+ms]`),
-		regexp.MustCompile(`\x1b\[KDownl \.\.\. done! \[\d+\.\d+KB in [\d.]+ms]`),
-		regexp.MustCompile(`\x1b\[KTrans \.\.\. done! \[\$\d+\.\d+K in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KCalc~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+ in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KDown~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+B in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KTran~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\$\d+ in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KCalc~ \.\.\. done! \[\d+\.\d+K in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KDown~ \.\.\. done! \[\d+\.\d+KB in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KTran~ \.\.\. done! \[\$\d+\.\d+K in [\d.]+ms]`),
 	}
 	out := renderOutput.String()
 	for _, expectedOutPattern := range expectedOutPatterns {
