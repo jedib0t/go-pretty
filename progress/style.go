@@ -137,6 +137,7 @@ var (
 type StyleOptions struct {
 	DoneString              string        // "done!" string
 	Separator               string        // text between message and tracker
+	SnipIndicator           string        // text denoting message snipping
 	PercentFormat           string        // formatting to use for percentage
 	TimeDonePrecision       time.Duration // precision for time when done
 	TimeInProgressPrecision time.Duration // precision for time when in progress
@@ -147,8 +148,9 @@ var (
 	// example to customize the Tracker rendering.
 	StyleOptionsDefault = StyleOptions{
 		DoneString:              "done!",
-		Separator:               " ... ",
 		PercentFormat:           "%5.2f%%",
+		Separator:               " ... ",
+		SnipIndicator:           "~",
 		TimeDonePrecision:       time.Millisecond,
 		TimeInProgressPrecision: time.Microsecond,
 	}

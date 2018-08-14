@@ -3,6 +3,7 @@ package util
 import (
 	"strings"
 	"unicode/utf8"
+	"fmt"
 )
 
 // Constants
@@ -13,6 +14,25 @@ const (
 	EscapeStop      = "m"
 	EscapeStopRune  = 'm'
 )
+
+// FixedLengthString returns the given string with a fixed length. For ex.:
+//  FixedLengthString("Ghost", 0, "~") == "Ghost"
+//  FixedLengthString("Ghost", 1, "~") == "~"
+//  FixedLengthString("Ghost", 3, "~") == "Gh~"
+//  FixedLengthString("Ghost", 5, "~") == "Ghost"
+//  FixedLengthString("Ghost", 7, "~") == "Ghost  "
+func FixedLengthString(s string, length int, snipIndicator string) string {
+	if length > 0 {
+		lenStr := RuneCountWithoutEscapeSeq(s)
+		if lenStr < length {
+			return fmt.Sprintf("%-"+fmt.Sprint(length)+"s", s)
+		} else if lenStr > length {
+			lenStrFinal := length - RuneCountWithoutEscapeSeq(snipIndicator)
+			return TrimTextWithoutEscapeSeq(s, lenStrFinal) + snipIndicator
+		}
+	}
+	return s
+}
 
 // GetLongestLineLength returns the length of the longest "line" within the
 // argument string. For ex.:

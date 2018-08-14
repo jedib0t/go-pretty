@@ -1,7 +1,6 @@
 package progress
 
 import (
-	"fmt"
 	"math"
 	"strings"
 	"time"
@@ -130,12 +129,7 @@ func (p *Progress) renderTrackerDone(out *strings.Builder, t *Tracker) {
 
 func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, trackerStr string) {
 	if p.messageWidth > 0 {
-		lenMessage := util.RuneCountWithoutEscapeSeq(t.Message)
-		if lenMessage > p.messageWidth {
-			t.Message = util.TrimTextWithoutEscapeSeq(t.Message, p.messageWidth)
-		} else if lenMessage < p.messageWidth {
-			t.Message = fmt.Sprintf("%-"+fmt.Sprint(p.messageWidth)+"s", t.Message)
-		}
+		t.Message = util.FixedLengthString(t.Message, p.messageWidth, p.style.Options.SnipIndicator)
 	}
 
 	if p.trackerPosition == PositionRight {
