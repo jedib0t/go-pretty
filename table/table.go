@@ -367,14 +367,9 @@ func (t *Table) initForRenderMaxColumnLength() {
 	var findMaxColumnLengths = func(rows []rowStr) {
 		for _, row := range rows {
 			for colIdx, colStr := range row {
-				allowedColumnLength := t.getAllowedColumnLength(colIdx)
-				if allowedColumnLength > 0 {
-					t.maxColumnLengths[colIdx] = allowedColumnLength
-				} else {
-					colLongestLineLength := util.GetLongestLineLength(colStr)
-					if colLongestLineLength > t.maxColumnLengths[colIdx] {
-						t.maxColumnLengths[colIdx] = colLongestLineLength
-					}
+				longestLineLen := util.GetLongestLineLength(colStr)
+				if longestLineLen > t.maxColumnLengths[colIdx] {
+					t.maxColumnLengths[colIdx] = longestLineLen
 				}
 			}
 		}
@@ -384,6 +379,14 @@ func (t *Table) initForRenderMaxColumnLength() {
 	findMaxColumnLengths(t.rowsHeader)
 	findMaxColumnLengths(t.rows)
 	findMaxColumnLengths(t.rowsFooter)
+
+	// restrict the column lengths if any are overthe allowed lengths
+	for colIdx := range t.maxColumnLengths {
+		allowedLen := t.getAllowedColumnLength(colIdx)
+		if allowedLen > 0 && t.maxColumnLengths[colIdx] > allowedLen {
+			t.maxColumnLengths[colIdx] = allowedLen
+		}
+	}
 }
 
 func (t *Table) initForRenderRowSeparator() {
