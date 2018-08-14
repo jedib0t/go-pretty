@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/jedib0t/go-pretty/util"
 )
@@ -105,6 +106,9 @@ type Colors []Color
 var (
 	// colorsSeqMap caches the escape sequence for a set of colors
 	colorsSeqMap = make(map[string]string)
+
+	// colorsSeqMapMutex should be used to lock writes to the map
+	colorsSeqMapMutex = sync.Mutex{}
 )
 
 // GetEscapeSeq returns the ANSI escape sequence for the colors set.
@@ -120,7 +124,9 @@ func (c Colors) GetEscapeSeq() string {
 			colorNums[idx] = strconv.Itoa(int(c))
 		}
 		escapeSeq = util.EscapeStart + strings.Join(colorNums, ";") + util.EscapeStop
+		colorsSeqMapMutex.Lock()
 		colorsSeqMap[colorsKey] = escapeSeq
+		colorsSeqMapMutex.Unlock()
 	}
 	return escapeSeq
 }

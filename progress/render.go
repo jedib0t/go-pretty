@@ -48,22 +48,29 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 		p.trackersInQueueMutex.Unlock()
 	}
 
-	// render the finished trackers and move them to the "done" list
-	for idx, tracker := range p.trackersActive {
-		if tracker.IsDone() {
-			p.renderTracker(&out, tracker)
-			if idx < len(p.trackersActive) {
-				p.trackersActive = append(p.trackersActive[:idx], p.trackersActive[idx+1:]...)
-			}
-			p.trackersDone = append(p.trackersDone, tracker)
+	// find the currently "active" and "done" trackers
+	var trackersActive, trackersDone []*Tracker
+	for _, tracker := range p.trackersActive {
+		if !tracker.IsDone() {
+			trackersActive = append(trackersActive, tracker)
+		} else {
+			trackersDone = append(trackersDone, tracker)
 		}
 	}
 
-	// sort and render the active trackers
-	p.sortBy.Sort(p.trackersActive)
-	for _, tracker := range p.trackersActive {
+	// sort and render the done trackers
+	p.sortBy.Sort(trackersDone)
+	for _, tracker := range trackersDone {
 		p.renderTracker(&out, tracker)
 	}
+	p.trackersDone = append(p.trackersDone, trackersDone...)
+
+	// sort and render the active trackers
+	p.sortBy.Sort(trackersActive)
+	for _, tracker := range trackersActive {
+		p.renderTracker(&out, tracker)
+	}
+	p.trackersActive = trackersActive
 
 	// write the text to the output writer
 	p.outputWriter.Write([]byte(out.String()))
