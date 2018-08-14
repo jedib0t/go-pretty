@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 	"unicode/utf8"
+	"github.com/jedib0t/go-pretty/util"
 )
 
 var (
@@ -29,6 +30,7 @@ type Progress struct {
 	hideTracker          bool
 	hideValue            bool
 	hidePercentage       bool
+	messageWidth         int
 	renderInProgress     bool
 	sortBy               SortBy
 	style                *Style
@@ -55,13 +57,16 @@ const (
 // AppendTracker appends a single Tracker for tracking. The Tracker gets added
 // to a queue, which gets picked up by the Render logic in the next rendering
 // cycle.
-func (p *Progress) AppendTracker(tracker *Tracker) {
-	p.trackersInQueueMutex.Lock()
-	if tracker.Total <= 0 {
-		tracker.Total = math.MaxInt64
+func (p *Progress) AppendTracker(t *Tracker) {
+	if p.messageWidth > 0 && util.RuneCountWithoutEscapeSeq(t.Message) > p.messageWidth {
+		t.Message = util.TrimTextWithoutEscapeSeq(t.Message, p.messageWidth)
 	}
-	tracker.start()
-	p.trackersInQueue = append(p.trackersInQueue, tracker)
+	if t.Total <= 0 {
+		t.Total = math.MaxInt64
+	}
+	t.start()
+	p.trackersInQueueMutex.Lock()
+	p.trackersInQueue = append(p.trackersInQueue, t)
 	p.trackersInQueueMutex.Unlock()
 }
 
@@ -94,6 +99,12 @@ func (p *Progress) LengthActive() int {
 // will have to call Progress.Stop() to stop the Render() logic. Default: false.
 func (p *Progress) SetAutoStop(autoStop bool) {
 	p.autoStop = autoStop
+}
+
+// SetMessageWidth sets the (printed) length of the tracker message. Any message
+// longer that specified width will be snipped abruptly.
+func (p *Progress) SetMessageWidth(width int) {
+	p.messageWidth = width
 }
 
 // SetOutputWriter redirects the output of Render to an io.writer object like

@@ -140,7 +140,6 @@ func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, track
 		p.renderTrackerStats(out, t)
 		out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.Separator))
 		out.WriteString(p.style.Colors.Message.Sprint(t.Message))
-		out.WriteString(p.style.Colors.Message.Sprint(t.Message))
 		out.WriteRune('\n')
 	}
 }
@@ -159,10 +158,9 @@ func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker) {
 			outStats.WriteString(p.style.Colors.Value.Sprint(t.Units.Sprint(t.value)))
 		}
 		if !p.hideValue && !p.hideTime {
-			outStats.WriteRune(' ')
+			outStats.WriteString(" in ")
 		}
 		if !p.hideTime {
-			outStats.WriteString("in ")
 			if t.IsDone() {
 				outStats.WriteString(p.style.Colors.Time.Sprint(
 					t.timeStop.Sub(t.timeStart).Round(p.style.Options.TimeDonePrecision)))
