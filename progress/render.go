@@ -1,6 +1,7 @@
 package progress
 
 import (
+	"fmt"
 	"math"
 	"strings"
 	"time"
@@ -47,22 +48,29 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 		p.trackersInQueueMutex.Unlock()
 	}
 
-	// render the finished trackers and move them to the "done" list
-	for idx, tracker := range p.trackersActive {
-		if tracker.IsDone() {
-			p.renderTracker(&out, tracker)
-			if idx < len(p.trackersActive) {
-				p.trackersActive = append(p.trackersActive[:idx], p.trackersActive[idx+1:]...)
-			}
-			p.trackersDone = append(p.trackersDone, tracker)
+	// find the currently "active" and "done" trackers
+	var trackersActive, trackersDone []*Tracker
+	for _, tracker := range p.trackersActive {
+		if !tracker.IsDone() {
+			trackersActive = append(trackersActive, tracker)
+		} else {
+			trackersDone = append(trackersDone, tracker)
 		}
 	}
 
-	// sort and render the active trackers
-	p.sortBy.Sort(p.trackersActive)
-	for _, tracker := range p.trackersActive {
+	// sort and render the done trackers
+	p.sortBy.Sort(trackersDone)
+	for _, tracker := range trackersDone {
 		p.renderTracker(&out, tracker)
 	}
+	p.trackersDone = append(p.trackersDone, trackersDone...)
+
+	// sort and render the active trackers
+	p.sortBy.Sort(trackersActive)
+	for _, tracker := range trackersActive {
+		p.renderTracker(&out, tracker)
+	}
+	p.trackersActive = trackersActive
 
 	// write the text to the output writer
 	p.outputWriter.Write([]byte(out.String()))
@@ -121,6 +129,15 @@ func (p *Progress) renderTrackerDone(out *strings.Builder, t *Tracker) {
 }
 
 func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, trackerStr string) {
+	if p.messageWidth > 0 {
+		lenMessage := util.RuneCountWithoutEscapeSeq(t.Message)
+		if lenMessage > p.messageWidth {
+			t.Message = util.TrimTextWithoutEscapeSeq(t.Message, p.messageWidth)
+		} else if lenMessage < p.messageWidth {
+			t.Message = fmt.Sprintf("%-"+fmt.Sprint(p.messageWidth)+"s", t.Message)
+		}
+	}
+
 	if p.trackerPosition == PositionRight {
 		out.WriteString(p.style.Colors.Message.Sprint(t.Message))
 		out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.Separator))
@@ -140,7 +157,6 @@ func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, track
 		p.renderTrackerStats(out, t)
 		out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.Separator))
 		out.WriteString(p.style.Colors.Message.Sprint(t.Message))
-		out.WriteString(p.style.Colors.Message.Sprint(t.Message))
 		out.WriteRune('\n')
 	}
 }
@@ -159,10 +175,9 @@ func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker) {
 			outStats.WriteString(p.style.Colors.Value.Sprint(t.Units.Sprint(t.value)))
 		}
 		if !p.hideValue && !p.hideTime {
-			outStats.WriteRune(' ')
+			outStats.WriteString(" in ")
 		}
 		if !p.hideTime {
-			outStats.WriteString("in ")
 			if t.IsDone() {
 				outStats.WriteString(p.style.Colors.Time.Sprint(
 					t.timeStop.Sub(t.timeStart).Round(p.style.Options.TimeDonePrecision)))

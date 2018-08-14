@@ -14,6 +14,7 @@ type Writer interface {
 	Length() int
 	LengthActive() int
 	SetAutoStop(autoStop bool)
+	SetMessageWidth(width int)
 	SetOutputWriter(output io.Writer)
 	SetSortBy(sortBy SortBy)
 	SetStyle(style Style)
