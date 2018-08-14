@@ -1,9 +1,9 @@
 package util
 
 import (
+	"fmt"
 	"strings"
 	"unicode/utf8"
-	"fmt"
 )
 
 // Constants
