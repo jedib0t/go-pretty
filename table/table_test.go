@@ -188,6 +188,18 @@ func TestTable_SetAllowedColumnLengths(t *testing.T) {
 \-----v---v----v-----v---------/`
 	assert.Equal(t, []int{0, 1, 2, 3, 7}, table.allowedColumnLengths)
 	assert.Equal(t, expectedOut, table.Render())
+
+	table.SetAllowedColumnLengths([]int{100, 100, 100, 100, 7})
+	expectedOut = `(-----^--------^-----------^------^---------)
+[<  1>|<Arya  >|<Stark    >|<3000>|<       >]
+[< 20>|<Jon   >|<Snow     >|<2000>|<You kno>]
+[<   >|<      >|<         >|<    >|<w nothi>]
+[<   >|<      >|<         >|<    >|<ng, Jon>]
+[<   >|<      >|<         >|<    >|< Snow! >]
+[<300>|<Tyrion>|<Lannister>|<5000>|<       >]
+\-----v--------v-----------v------v---------/`
+	assert.Equal(t, []int{100, 100, 100, 100, 7}, table.allowedColumnLengths)
+	assert.Equal(t, expectedOut, table.Render())
 }
 
 func TestTable_SetAllowedRowLength(t *testing.T) {
