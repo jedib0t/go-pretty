@@ -172,7 +172,7 @@ func TestProgress_RenderSomeTrackers_WithAutoStop(t *testing.T) {
 	}
 }
 
-func TestProgress_RenderSomeTrackers_WithLineWidth(t *testing.T) {
+func TestProgress_RenderSomeTrackers_WithLineWidth1(t *testing.T) {
 	renderOutput := outputWriter{}
 
 	pw := generateWriter()
@@ -191,6 +191,34 @@ func TestProgress_RenderSomeTrackers_WithLineWidth(t *testing.T) {
 		regexp.MustCompile(`\x1b\[KCalcu \.\.\. done! \[\d+\.\d+K in [\d.]+ms]`),
 		regexp.MustCompile(`\x1b\[KDownl \.\.\. done! \[\d+\.\d+KB in [\d.]+ms]`),
 		regexp.MustCompile(`\x1b\[KTrans \.\.\. done! \[\$\d+\.\d+K in [\d.]+ms]`),
+	}
+	out := renderOutput.String()
+	for _, expectedOutPattern := range expectedOutPatterns {
+		if !expectedOutPattern.MatchString(out) {
+			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
+		}
+	}
+}
+
+func TestProgress_RenderSomeTrackers_WithLineWidth2(t *testing.T) {
+	renderOutput := outputWriter{}
+
+	pw := generateWriter()
+	pw.SetMessageWidth(50)
+	pw.SetOutputWriter(&renderOutput)
+	pw.SetTrackerPosition(PositionRight)
+	go trackSomething(pw, &Tracker{Message: "Calculation Total   # 1", Total: 1000, Units: UnitsDefault})
+	go trackSomething(pw, &Tracker{Message: "Downloading File    # 2", Total: 1000, Units: UnitsBytes})
+	go trackSomething(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
+	renderAndWait(pw, false)
+
+	expectedOutPatterns := []*regexp.Regexp{
+		regexp.MustCompile(`\x1b\[KCalculation Total   # 1\s{28}\.\.\. \d+\.\d+% \[[#.]{23}] \[\d+ in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KDownloading File    # 2\s{28}\.\.\. \d+\.\d+% \[[#.]{23}] \[\d+B in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KTransferring Amount # 3\s{28}\.\.\. \d+\.\d+% \[[#.]{23}] \[\$\d+ in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KCalculation Total   # 1\s{28}\.\.\. done! \[\d+\.\d+K in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KDownloading File    # 2\s{28}\.\.\. done! \[\d+\.\d+KB in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KTransferring Amount # 3\s{28}\.\.\. done! \[\$\d+\.\d+K in [\d.]+ms]`),
 	}
 	out := renderOutput.String()
 	for _, expectedOutPattern := range expectedOutPatterns {

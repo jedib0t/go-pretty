@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 	"unicode/utf8"
-	"github.com/jedib0t/go-pretty/util"
 )
 
 var (
@@ -58,9 +57,6 @@ const (
 // to a queue, which gets picked up by the Render logic in the next rendering
 // cycle.
 func (p *Progress) AppendTracker(t *Tracker) {
-	if p.messageWidth > 0 && util.RuneCountWithoutEscapeSeq(t.Message) > p.messageWidth {
-		t.Message = util.TrimTextWithoutEscapeSeq(t.Message, p.messageWidth)
-	}
 	if t.Total <= 0 {
 		t.Total = math.MaxInt64
 	}
@@ -102,7 +98,8 @@ func (p *Progress) SetAutoStop(autoStop bool) {
 }
 
 // SetMessageWidth sets the (printed) length of the tracker message. Any message
-// longer that specified width will be snipped abruptly.
+// longer the specified width will be snipped abruptly. Any message shorter than
+// the specified width will be padded with spaces.
 func (p *Progress) SetMessageWidth(width int) {
 	p.messageWidth = width
 }
