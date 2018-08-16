@@ -92,17 +92,12 @@ func (p *Progress) renderTracker(out *strings.Builder, t *Tracker) {
 		pFinishedDots := float64(t.value) / pDotValue
 		pFinishedDotsFraction := pFinishedDots - float64(int(pFinishedDots))
 		pFinishedLen := int(math.Ceil(pFinishedDots))
-		pUnfinishedLen := p.lengthProgress - pFinishedLen
 
-		var pFinished, pUnfinished string
+		var pFinished, pInProgress, pUnfinished string
 		if pFinishedLen > 0 {
 			pFinished = strings.Repeat(p.style.Chars.Finished, pFinishedLen-1)
 		}
-		if pUnfinishedLen > 0 {
-			pUnfinished = strings.Repeat(p.style.Chars.Unfinished, pUnfinishedLen)
-		}
-
-		pInProgress := p.style.Chars.Unfinished
+		pInProgress = p.style.Chars.Unfinished
 		if pFinishedDotsFraction > 0.75 {
 			pInProgress = p.style.Chars.Finished75
 		} else if pFinishedDotsFraction > 0.50 {
@@ -111,6 +106,10 @@ func (p *Progress) renderTracker(out *strings.Builder, t *Tracker) {
 			pInProgress = p.style.Chars.Finished25
 		} else if pFinishedDotsFraction == 0 {
 			pInProgress = ""
+		}
+		pFinishedStrLen := util.RuneCountWithoutEscapeSeq(pFinished + pInProgress)
+		if pFinishedStrLen < p.lengthProgress {
+			pUnfinished = strings.Repeat(p.style.Chars.Unfinished, p.lengthProgress-pFinishedStrLen)
 		}
 
 		p.renderTrackerProgress(out, t, p.style.Colors.Tracker.Sprintf("%s%s%s%s%s",
