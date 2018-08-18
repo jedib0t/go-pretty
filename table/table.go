@@ -3,11 +3,11 @@ package table
 import (
 	"fmt"
 	"io"
+	"reflect"
 	"strings"
 	"unicode/utf8"
 
 	"github.com/jedib0t/go-pretty/text"
-	"github.com/jedib0t/go-pretty/util"
 )
 
 // Row defines a single row in the Table.
@@ -247,12 +247,17 @@ func (t *Table) analyzeAndStringify(row Row, isHeader bool, isFooter bool) rowSt
 	rowOut := make(rowStr, len(row))
 	for colIdx, col := range row {
 		// if the column is not a number, keep track of it
-		if !isHeader && !isFooter && !t.columnIsNonNumeric[colIdx] && !util.IsNumber(col) {
+		if !isHeader && !isFooter && !t.columnIsNonNumeric[colIdx] && !IsNumber(col) {
 			t.columnIsNonNumeric[colIdx] = true
 		}
 
 		// convert to a string and store it in the row
-		colStr := util.AsString(col)
+		var colStr string
+		if reflect.TypeOf(col).Kind() == reflect.String {
+			colStr = col.(string)
+		} else {
+			colStr = fmt.Sprint(col)
+		}
 		if strings.Contains(colStr, "\t") {
 			colStr = strings.Replace(colStr, "\t", "    ", -1)
 		}
@@ -290,7 +295,7 @@ func (t *Table) getAllowedColumnLength(colIdx int) int {
 func (t *Table) getAutoIndexColumnIDs() rowStr {
 	row := make(rowStr, t.numColumns)
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
-		row[colIdx] = text.AlignCenter.Apply(util.AutoIndexColumnID(colIdx), maxColumnLength)
+		row[colIdx] = text.AlignCenter.Apply(AutoIndexColumnID(colIdx), maxColumnLength)
 	}
 	return row
 }
@@ -367,7 +372,7 @@ func (t *Table) initForRenderMaxColumnLength() {
 	var findMaxColumnLengths = func(rows []rowStr) {
 		for _, row := range rows {
 			for colIdx, colStr := range row {
-				longestLineLen := util.GetLongestLineLength(colStr)
+				longestLineLen := text.GetLongestLineLength(colStr)
 				if longestLineLen > t.maxColumnLengths[colIdx] {
 					t.maxColumnLengths[colIdx] = longestLineLen
 				}
@@ -395,7 +400,7 @@ func (t *Table) initForRenderRowSeparator() {
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
 		maxColumnLength += utf8.RuneCountInString(t.style.Box.PaddingLeft)
 		maxColumnLength += utf8.RuneCountInString(t.style.Box.PaddingRight)
-		horizontalSeparatorCol := util.RepeatAndTrim(t.style.Box.MiddleHorizontal, maxColumnLength)
+		horizontalSeparatorCol := text.RepeatAndTrim(t.style.Box.MiddleHorizontal, maxColumnLength)
 		t.maxRowLength += maxColumnLength
 		t.rowSeparator[colIdx] = horizontalSeparatorCol
 	}

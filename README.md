@@ -77,6 +77,8 @@ The following features are all used by the other packages in this project.
      - [text/valign.go](text/valign.go)
    - Colorize text
      - [text/color.go](text/color.go)
+   - Cursor Movement
+     - [text/cursor.go](text/cursor.go)
    - Format text (convert case for now)
      - [text/format.go](text/format.go)
 

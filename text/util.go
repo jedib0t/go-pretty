@@ -1,4 +1,4 @@
-package util
+package text
 
 // FilterStrings filters the slice 's' to items which return truth when passed
 // to 'f'.
