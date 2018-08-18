@@ -8,7 +8,7 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-func isANSISupported() bool {
+func areANSICodesSupported() bool {
 	outHandle := windows.Handle(os.Stdout.Fd())
 	var outMode uint32
 	if err := windows.GetConsoleMode(outHandle, &outMode); err == nil {

@@ -2,6 +2,6 @@
 
 package text
 
-func isANSISupported() bool {
+func areANSICodesSupported() bool {
 	return true
 }
