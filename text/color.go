@@ -142,7 +142,7 @@ func (c Colors) Sprintf(format string, a ...interface{}) string {
 }
 
 func colorize(s string, escapeSeq string) string {
-	if escapeSeq == "" {
+	if !ANSISupported || escapeSeq == "" {
 		return s
 	}
 
