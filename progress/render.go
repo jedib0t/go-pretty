@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jedib0t/go-pretty/util"
+	"github.com/jedib0t/go-pretty/text"
 )
 
 // Render renders the Progress tracker and handles all existing trackers and
@@ -36,7 +36,7 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 
 	// move up N times based on the number of active trackers
 	if len(p.trackersActive) > 0 {
-		out.WriteString(util.CursorUp.Sprintn(len(p.trackersActive)))
+		out.WriteString(text.CursorUp.Sprintn(len(p.trackersActive)))
 	}
 
 	// move trackers waiting in queue to the active list
@@ -83,7 +83,7 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 }
 
 func (p *Progress) renderTracker(out *strings.Builder, t *Tracker) {
-	out.WriteString(util.EraseLine.Sprint())
+	out.WriteString(text.EraseLine.Sprint())
 
 	if t.IsDone() {
 		p.renderTrackerDone(out, t)
@@ -107,7 +107,7 @@ func (p *Progress) renderTracker(out *strings.Builder, t *Tracker) {
 		} else if pFinishedDotsFraction == 0 {
 			pInProgress = ""
 		}
-		pFinishedStrLen := util.RuneCountWithoutEscapeSeq(pFinished + pInProgress)
+		pFinishedStrLen := text.RuneCountWithoutEscapeSeq(pFinished + pInProgress)
 		if pFinishedStrLen < p.lengthProgress {
 			pUnfinished = strings.Repeat(p.style.Chars.Unfinished, p.lengthProgress-pFinishedStrLen)
 		}
@@ -128,7 +128,7 @@ func (p *Progress) renderTrackerDone(out *strings.Builder, t *Tracker) {
 
 func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, trackerStr string) {
 	if p.messageWidth > 0 {
-		t.Message = util.FixedLengthString(t.Message, p.messageWidth, p.style.Options.SnipIndicator)
+		t.Message = text.FixedLengthString(t.Message, p.messageWidth, p.style.Options.SnipIndicator)
 	}
 
 	if p.trackerPosition == PositionRight {

@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/jedib0t/go-pretty/text"
-	"github.com/jedib0t/go-pretty/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -42,7 +41,7 @@ func TestTable_Render_AutoIndex(t *testing.T) {
 	for rowIdx := 0; rowIdx < 10; rowIdx++ {
 		row := make(Row, 10)
 		for colIdx := 0; colIdx < 10; colIdx++ {
-			row[colIdx] = fmt.Sprintf("%s%d", util.AutoIndexColumnID(colIdx), rowIdx+1)
+			row[colIdx] = fmt.Sprintf("%s%d", AutoIndexColumnID(colIdx), rowIdx+1)
 		}
 		tw.AppendRow(row)
 	}

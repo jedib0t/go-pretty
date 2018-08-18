@@ -6,7 +6,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/jedib0t/go-pretty/text"
-	"github.com/jedib0t/go-pretty/util"
 )
 
 // Render renders the Table in a human-readable "pretty" format. Example:
@@ -82,7 +81,7 @@ func (t *Table) renderColumnAutoIndex(out *strings.Builder, rowNum int, hint ren
 	if hint.isSeparatorRow {
 		numChars := t.autoIndexVIndexMaxLength + utf8.RuneCountInString(t.style.Box.PaddingLeft) +
 			utf8.RuneCountInString(t.style.Box.PaddingRight)
-		outAutoIndex.WriteString(util.RepeatAndTrim(t.style.Box.MiddleHorizontal, numChars))
+		outAutoIndex.WriteString(text.RepeatAndTrim(t.style.Box.MiddleHorizontal, numChars))
 	} else {
 		outAutoIndex.WriteString(t.style.Box.PaddingLeft)
 		rowNumStr := fmt.Sprint(rowNum)
@@ -167,10 +166,10 @@ func (t *Table) renderLine(out *strings.Builder, rowNum int, row rowStr, hint re
 	// merge the strings.Builder objects if a new one was created earlier
 	if outLine != out {
 		outLineStr := outLine.String()
-		if util.RuneCountWithoutEscapeSeq(outLineStr) > t.allowedRowLength {
+		if text.RuneCountWithoutEscapeSeq(outLineStr) > t.allowedRowLength {
 			trimLength := t.allowedRowLength - utf8.RuneCountInString(t.style.Box.UnfinishedRow)
 			if trimLength > 0 {
-				out.WriteString(util.TrimTextWithoutEscapeSeq(outLineStr, trimLength))
+				out.WriteString(text.TrimTextWithoutEscapeSeq(outLineStr, trimLength))
 				out.WriteString(t.style.Box.UnfinishedRow)
 			}
 		} else {
@@ -230,7 +229,7 @@ func (t *Table) renderRow(out *strings.Builder, rowNum int, row rowStr, hint ren
 		colMaxLines := 0
 		rowWrapped := make(rowStr, len(row))
 		for colIdx, colStr := range row {
-			rowWrapped[colIdx] = util.WrapText(colStr, t.maxColumnLengths[colIdx])
+			rowWrapped[colIdx] = text.WrapText(colStr, t.maxColumnLengths[colIdx])
 			colNumLines := strings.Count(rowWrapped[colIdx], "\n") + 1
 			if colNumLines > colMaxLines {
 				colMaxLines = colNumLines

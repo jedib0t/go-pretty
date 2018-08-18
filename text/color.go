@@ -5,21 +5,19 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-
-	"github.com/jedib0t/go-pretty/util"
 )
 
 // The logic here is inspired from github.com/fatih/color; the following is
-// the the bare minimum logic required to print Colored text to the console.
+// the the bare minimum logic required to print Colored to the console.
 // The differences:
 // * This one does not determine if the terminal/console can display Colored
-//   text; it is left to the user to determine using other packages/utilities
+//    it is left to the user to determine using other packages/utilities
 // * This one caches the escape sequences for cases with multiple colors
-// * This one handles cases where the incoming text already has colors in the
-//   form of escape sequences; in which case, the text that does not have any
+// * This one handles cases where the incoming already has colors in the
+//   form of escape sequences; in which case, the that does not have any
 //   escape sequences are colored/escaped
 
-// Color represents a single color to render text with.
+// Color represents a single color to render with.
 type Color int
 
 // Base colors -- attributes in reality
@@ -36,7 +34,7 @@ const (
 	CrossedOut
 )
 
-// Foreground text colors
+// Foreground colors
 const (
 	FgBlack Color = iota + 30
 	FgRed
@@ -48,7 +46,7 @@ const (
 	FgWhite
 )
 
-// Foreground Hi-Intensity text colors
+// Foreground Hi-Intensity colors
 const (
 	FgHiBlack Color = iota + 90
 	FgHiRed
@@ -60,7 +58,7 @@ const (
 	FgHiWhite
 )
 
-// Background text colors
+// Background colors
 const (
 	BgBlack Color = iota + 40
 	BgRed
@@ -72,7 +70,7 @@ const (
 	BgWhite
 )
 
-// Background Hi-Intensity text colors
+// Background Hi-Intensity colors
 const (
 	BgHiBlack Color = iota + 100
 	BgHiRed
@@ -86,7 +84,7 @@ const (
 
 // GetEscapeSeq returns the ANSI escape sequence for the color.
 func (c Color) GetEscapeSeq() string {
-	return util.EscapeStart + strconv.Itoa(int(c)) + util.EscapeStop
+	return EscapeStart + strconv.Itoa(int(c)) + EscapeStop
 }
 
 // Sprint colorizes and prints the given string(s).
@@ -99,7 +97,7 @@ func (c Color) Sprintf(format string, a ...interface{}) string {
 	return colorize(fmt.Sprintf(format, a...), c.GetEscapeSeq())
 }
 
-// Colors represents an array of Color objects to render text with.
+// Colors represents an array of Color objects to render with.
 // Example: Colors{FgCyan, BgBlack}
 type Colors []Color
 
@@ -123,7 +121,7 @@ func (c Colors) GetEscapeSeq() string {
 		for idx, c := range c {
 			colorNums[idx] = strconv.Itoa(int(c))
 		}
-		escapeSeq = util.EscapeStart + strings.Join(colorNums, ";") + util.EscapeStop
+		escapeSeq = EscapeStart + strings.Join(colorNums, ";") + EscapeStop
 		colorsSeqMapMutex.Lock()
 		colorsSeqMap[colorsKey] = escapeSeq
 		colorsSeqMapMutex.Unlock()
@@ -147,15 +145,15 @@ func colorize(s string, escapeSeq string) string {
 	}
 
 	out := ""
-	if !strings.HasPrefix(s, util.EscapeStart) {
+	if !strings.HasPrefix(s, EscapeStart) {
 		out += escapeSeq
 	}
-	out += strings.Replace(s, util.EscapeReset, util.EscapeReset+escapeSeq, -1)
-	if !strings.HasSuffix(out, util.EscapeReset) {
-		out += util.EscapeReset
+	out += strings.Replace(s, EscapeReset, EscapeReset+escapeSeq, -1)
+	if !strings.HasSuffix(out, EscapeReset) {
+		out += EscapeReset
 	}
-	if strings.Contains(out, escapeSeq+util.EscapeReset) {
-		out = strings.Replace(out, escapeSeq+util.EscapeReset, "", -1)
+	if strings.Contains(out, escapeSeq+EscapeReset) {
+		out = strings.Replace(out, escapeSeq+EscapeReset, "", -1)
 	}
 	return out
 }
