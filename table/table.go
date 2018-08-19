@@ -3,7 +3,6 @@ package table
 import (
 	"fmt"
 	"io"
-	"reflect"
 	"strings"
 	"unicode/utf8"
 
@@ -253,8 +252,8 @@ func (t *Table) analyzeAndStringify(row Row, isHeader bool, isFooter bool) rowSt
 
 		// convert to a string and store it in the row
 		var colStr string
-		if reflect.TypeOf(col).Kind() == reflect.String {
-			colStr = col.(string)
+		if colStrVal, ok := col.(string); ok {
+			colStr = colStrVal
 		} else {
 			colStr = fmt.Sprint(col)
 		}
