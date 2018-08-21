@@ -15,11 +15,13 @@ type Writer interface {
 	LengthActive() int
 	SetAutoStop(autoStop bool)
 	SetMessageWidth(width int)
+	SetNumTrackersExpected(numTrackers int)
 	SetOutputWriter(output io.Writer)
 	SetSortBy(sortBy SortBy)
 	SetStyle(style Style)
 	SetTrackerLength(length int)
 	SetTrackerPosition(position Position)
+	ShowOverallTracker(show bool)
 	ShowPercentage(show bool)
 	ShowTime(show bool)
 	ShowTracker(show bool)
