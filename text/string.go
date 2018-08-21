@@ -103,10 +103,11 @@ func InsertRuneEveryN(s string, r rune, n int) string {
 func RepeatAndTrim(s string, maxRunes int) string {
 	if maxRunes == 0 {
 		return ""
-	} else if maxRunes == len(s) {
+	} else if maxRunes == utf8.RuneCountInString(s) {
 		return s
 	}
-	return TrimTextWithoutEscapeSeq(strings.Repeat(s, int(maxRunes/utf8.RuneCountInString(s))+1), maxRunes)
+	repeatedS := strings.Repeat(s, int(maxRunes/utf8.RuneCountInString(s))+1)
+	return TrimTextWithoutEscapeSeq(repeatedS, maxRunes)
 }
 
 // RuneCountWithoutEscapeSeq is similar to utf8.RuneCountInString, except for

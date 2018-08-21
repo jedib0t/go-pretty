@@ -42,6 +42,7 @@ func TestRepeatAndTrim(t *testing.T) {
 	assert.Equal(t, "Ghost", RepeatAndTrim("Ghost", 5))
 	assert.Equal(t, "GhostGh", RepeatAndTrim("Ghost", 7))
 	assert.Equal(t, "GhostGhost", RepeatAndTrim("Ghost", 10))
+	assert.Equal(t, "───", RepeatAndTrim("─", 3))
 }
 
 func TestRuneCountWithoutEscapeSeq(t *testing.T) {
