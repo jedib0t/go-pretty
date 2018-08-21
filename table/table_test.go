@@ -200,6 +200,23 @@ func TestTable_SetAllowedColumnLengths(t *testing.T) {
 \-----v--------v-----------v------v---------/`
 	assert.Equal(t, []int{100, 100, 100, 100, 7}, table.allowedColumnLengths)
 	assert.Equal(t, expectedOut, table.Render())
+
+	table.AppendRow(
+		Row{20, "Jon", "Snow", 2000, text.FgHiRed.Sprint("You know nothing, Jon Snow!")},
+	)
+	expectedOut = "(-----^--------^-----------^------^---------)\n" +
+		"[<  1>|<Arya  >|<Stark    >|<3000>|<       >]\n" +
+		"[< 20>|<Jon   >|<Snow     >|<2000>|<You kno>]\n" +
+		"[<   >|<      >|<         >|<    >|<w nothi>]\n" +
+		"[<   >|<      >|<         >|<    >|<ng, Jon>]\n" +
+		"[<   >|<      >|<         >|<    >|< Snow! >]\n" +
+		"[<300>|<Tyrion>|<Lannister>|<5000>|<       >]\n" +
+		"[< 20>|<Jon   >|<Snow     >|<2000>|<\x1b[91mYou kno\x1b[0m>]\n" +
+		"[<   >|<      >|<         >|<    >|<\x1b[91mw nothi\x1b[0m>]\n" +
+		"[<   >|<      >|<         >|<    >|<\x1b[91mng, Jon\x1b[0m>]\n" +
+		"[<   >|<      >|<         >|<    >|<\x1b[91m Snow!\x1b[0m >]\n" +
+		"\\-----v--------v-----------v------v---------/"
+	assert.Equal(t, expectedOut, table.Render())
 }
 
 func TestTable_SetAllowedRowLength(t *testing.T) {
@@ -288,6 +305,19 @@ func TestTable_SetAutoIndex(t *testing.T) {
 [< >|<   >|<          >|<         >|<      >|<The North Remembers!       >]
 [< >|<   >|<          >|<         >|<      >|<This is known.             >]
 \---v-----v------------v-----------v--------v-----------------------------/`
+	assert.Equal(t, expectedOut, table.Render())
+
+	table.SetStyle(StyleLight)
+	expectedOut = `┌───┬─────┬────────────┬───────────┬────────┬─────────────────────────────┐
+│   │   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
+├───┼─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+│ 1 │   1 │ Arya       │ Stark     │   3000 │                             │
+│ 2 │  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │
+│ 3 │ 300 │ Tyrion     │ Lannister │   5000 │                             │
+│ 4 │   0 │ Winter     │ Is        │      0 │ Coming.                     │
+│   │     │            │           │        │ The North Remembers!        │
+│   │     │            │           │        │ This is known.              │
+└───┴─────┴────────────┴───────────┴────────┴─────────────────────────────┘`
 	assert.Equal(t, expectedOut, table.Render())
 }
 
