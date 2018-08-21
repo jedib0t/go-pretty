@@ -4,11 +4,19 @@ package text
 
 import (
 	"os"
+	"sync"
 
 	"golang.org/x/sys/windows"
 )
 
+var (
+	enableVTPMutex = sync.Mutex{}
+)
+
 func areANSICodesSupported() bool {
+	enableVTPMutex.Lock()
+	defer enableVTPMutex.Unlock()
+
 	outHandle := windows.Handle(os.Stdout.Fd())
 	var outMode uint32
 	if err := windows.GetConsoleMode(outHandle, &outMode); err == nil {

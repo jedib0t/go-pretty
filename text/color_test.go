@@ -6,6 +6,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestColor_EnableAndDisable(t *testing.T) {
+	defer EnableColors()
+
+	EnableColors()
+	assert.Equal(t, "\x1b[31mtest\x1b[0m", FgRed.Sprint("test"))
+
+	DisableColors()
+	assert.Equal(t, "test", FgRed.Sprint("test"))
+
+	EnableColors()
+	assert.Equal(t, "\x1b[31mtest\x1b[0m", FgRed.Sprint("test"))
+}
+
 func TestColor_GetEscapeSeq(t *testing.T) {
 	assert.Equal(t, "\x1b[40m", BgBlack.GetEscapeSeq())
 }
