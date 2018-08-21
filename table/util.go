@@ -25,4 +25,3 @@ func IsNumber(x interface{}) bool {
 	}
 	return false
 }
-
