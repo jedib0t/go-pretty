@@ -73,6 +73,9 @@ func TestWrapText(t *testing.T) {
 	assert.Equal(t, "Jon\nSno\nw\n", WrapText("Jon\nSnow\n", 3))
 	assert.Equal(t, "\x1b[33mJon\x1b[0m\nSno\nw", WrapText("\x1b[33mJon\x1b[0m\nSnow", 3))
 	assert.Equal(t, "\x1b[33mJon\x1b[0m\nSno\nw\n", WrapText("\x1b[33mJon\x1b[0m\nSnow\n", 3))
+	assert.Equal(t, "\x1b[33mJon\x1b[0m\n\x1b[33m Sn\x1b[0m\n\x1b[33mow\x1b[0m", WrapText("\x1b[33mJon Snow\x1b[0m", 3))
+	assert.Equal(t, "\x1b[33mJon\x1b[0m\n\x1b[33m Sn\x1b[0m\n\x1b[33mow\x1b[0m\n\x1b[33m\x1b[0m", WrapText("\x1b[33mJon Snow\n", 3))
+	assert.Equal(t, "\x1b[33mJon\x1b[0m\n\x1b[33m Sn\x1b[0m\n\x1b[33mow\x1b[0m\n\x1b[33m\x1b[0m", WrapText("\x1b[33mJon Snow\n\x1b[0m", 3))
 
 	complexIn := "+---+------+-------+------+\n| 1 | Arya | Stark | 3000 |\n+---+------+-------+------+"
 	assert.Equal(t, complexIn, WrapText(complexIn, 27))

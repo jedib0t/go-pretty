@@ -188,26 +188,48 @@ func WrapText(s string, n int) string {
 	var out strings.Builder
 	sLen := utf8.RuneCountInString(s)
 	out.Grow(sLen + (sLen / n))
-	lineIdx, isEscSeq := 0, false
+	lineIdx, isEscSeq, lastEscSeq := 0, false, ""
 	for idx, c := range s {
 		if c == EscapeStartRune {
 			isEscSeq = true
+			lastEscSeq = ""
+		}
+		if isEscSeq {
+			lastEscSeq += string(c)
 		}
 
-		if !isEscSeq && lineIdx == n && c != '\n' {
-			out.WriteRune('\n')
-			lineIdx = 0
-		}
-		out.WriteRune(c)
-		if c == '\n' {
-			lineIdx = 0
-		} else if !isEscSeq && idx < sLen {
-			lineIdx++
-		}
+		wrapRune(sLen, n, idx, c, &lineIdx, isEscSeq, lastEscSeq, &out)
 
 		if isEscSeq && c == EscapeStopRune {
 			isEscSeq = false
 		}
+		if lastEscSeq == EscapeReset {
+			lastEscSeq = ""
+		}
+	}
+	if lastEscSeq != "" && lastEscSeq != EscapeReset {
+		out.WriteString(EscapeReset)
 	}
 	return out.String()
+}
+
+func wrapRune(sLen int, wrapLen int, idx int, c int32, lineIdx *int, isEscSeq bool, lastEscSeq string, out *strings.Builder) {
+	if !isEscSeq && *lineIdx == wrapLen && c != '\n' {
+		if lastEscSeq != "" {
+			out.WriteString(EscapeReset)
+		}
+		out.WriteRune('\n')
+		out.WriteString(lastEscSeq)
+		*lineIdx = 0
+	}
+	if c == '\n' && lastEscSeq != "" {
+		out.WriteString(EscapeReset)
+	}
+	out.WriteRune(c)
+	if c == '\n' {
+		out.WriteString(lastEscSeq)
+		*lineIdx = 0
+	} else if !isEscSeq && idx < sLen {
+		*lineIdx++
+	}
 }
