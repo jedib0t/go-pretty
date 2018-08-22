@@ -189,16 +189,14 @@ func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, track
 		out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.Separator))
 		p.renderTrackerPercentage(out, t)
 		if !p.hideTracker {
-			out.WriteRune(' ')
-			out.WriteString(p.style.Colors.Tracker.Sprint(trackerStr))
+			out.WriteString(p.style.Colors.Tracker.Sprint(" " + trackerStr))
 		}
 		p.renderTrackerStats(out, t, hint)
 		out.WriteRune('\n')
 	} else {
 		p.renderTrackerPercentage(out, t)
 		if !p.hideTracker {
-			out.WriteRune(' ')
-			out.WriteString(p.style.Colors.Tracker.Sprint(trackerStr))
+			out.WriteString(p.style.Colors.Tracker.Sprint(" " + trackerStr))
 		}
 		p.renderTrackerStats(out, t, hint)
 		out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.Separator))
