@@ -67,14 +67,14 @@ func (p *Progress) AppendTracker(t *Tracker) {
 	if p.overallTracker == nil {
 		p.overallTracker = &Tracker{Total: 1}
 		if p.numTrackersExpected > 0 {
-			p.overallTracker.Total = p.numTrackersExpected
+			p.overallTracker.Total = p.numTrackersExpected * 100
 		}
 		p.overallTracker.start()
 	}
 	p.trackersInQueueMutex.Lock()
 	p.trackersInQueue = append(p.trackersInQueue, t)
-	if p.overallTracker.Total < int64(p.Length()) {
-		p.overallTracker.Total = int64(p.Length())
+	if p.overallTracker.Total < int64(p.Length())*100 {
+		p.overallTracker.Total = int64(p.Length()) * 100
 	}
 	p.trackersInQueueMutex.Unlock()
 }
@@ -227,4 +227,11 @@ func (p *Progress) initForRender() {
 	if p.updateFrequency <= 0 {
 		p.updateFrequency = DefaultUpdateFrequency
 	}
+}
+
+// renderHint has hints for the Render*() logic
+type renderHint struct {
+	hideTime         bool // hide the time
+	hideValue        bool // hide the value
+	isOverallTracker bool // is the Overall Progress tracker
 }

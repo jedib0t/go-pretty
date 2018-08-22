@@ -23,6 +23,19 @@ type Tracker struct {
 	value     int64
 }
 
+// ETA returns the expected time of "arrival" or completion of this tracker. It
+// is an estimate and is not guaranteed.
+func (t *Tracker) ETA() time.Duration {
+	percDone := t.PercentDone()
+	if percDone == 0 {
+		return time.Duration(0)
+	}
+
+	timeTaken := time.Since(t.timeStart)
+	eta := time.Duration((int64(timeTaken) / int64(percDone)) * 100)
+	return eta
+}
+
 // Increment updates the current value of the task being tracked.
 func (t *Tracker) Increment(value int64) {
 	if !t.done {
