@@ -32,7 +32,7 @@ func (t *Tracker) ETA() time.Duration {
 	}
 
 	timeTaken := time.Since(t.timeStart)
-	eta := time.Duration((int64(timeTaken) / int64(percDone)) * 100)
+	eta := time.Duration((int64(timeTaken) / int64(percDone)) * int64(100-percDone))
 	return eta
 }
 
