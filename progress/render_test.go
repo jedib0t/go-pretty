@@ -231,6 +231,7 @@ func TestProgress_RenderSomeTrackers_WithOverallTracker(t *testing.T) {
 	pw.SetOutputWriter(&renderOutput)
 	pw.SetTrackerPosition(PositionRight)
 	pw.ShowOverallTracker(true)
+	pw.Style().Options.TimeOverallPrecision = time.Millisecond
 	go trackSomething(pw, &Tracker{Message: "Calculation Total   # 1", Total: 1000, Units: UnitsDefault})
 	go trackSomething(pw, &Tracker{Message: "Downloading File    # 2", Total: 1000, Units: UnitsBytes})
 	go trackSomething(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
@@ -243,7 +244,7 @@ func TestProgress_RenderSomeTrackers_WithOverallTracker(t *testing.T) {
 		regexp.MustCompile(`\x1b\[KCalculation Total   # 1 \.\.\. done! \[\d+\.\d+K in [\d.]+ms]`),
 		regexp.MustCompile(`\x1b\[KDownloading File    # 2 \.\.\. done! \[\d+\.\d+KB in [\d.]+ms]`),
 		regexp.MustCompile(`\x1b\[KTransferring Amount # 3 \.\.\. done! \[\$\d+\.\d+K in [\d.]+ms]`),
-		regexp.MustCompile(`\[[\d.]+s; ~ETA: [\d.]+s`),
+		regexp.MustCompile(`\[[\d.ms]+; ~ETA: [\d.ms]+`),
 	}
 	out := renderOutput.String()
 	for _, expectedOutPattern := range expectedOutPatterns {

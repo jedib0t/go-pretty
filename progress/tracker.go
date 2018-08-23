@@ -12,6 +12,9 @@ import (
 type Tracker struct {
 	// Message should contain a short description of the "task"
 	Message string
+	// ExpectedDuration tells how long this task is expected to take; and will
+	// be used in calculation of the ETA value
+	ExpectedDuration time.Duration
 	// Total should be set to the (expected) Total/Final value to be reached
 	Total int64
 	// Units defines the type of the "value" being tracked
@@ -26,14 +29,16 @@ type Tracker struct {
 // ETA returns the expected time of "arrival" or completion of this tracker. It
 // is an estimate and is not guaranteed.
 func (t *Tracker) ETA() time.Duration {
-	percDone := t.PercentDone()
-	if percDone == 0 {
-		return time.Duration(0)
+	timeTaken := time.Since(t.timeStart)
+	if t.ExpectedDuration > time.Duration(0) && t.ExpectedDuration > timeTaken {
+		return t.ExpectedDuration - timeTaken
 	}
 
-	timeTaken := time.Since(t.timeStart)
-	eta := time.Duration((int64(timeTaken) / int64(percDone)) * int64(100-percDone))
-	return eta
+	pDone := t.PercentDone()
+	if pDone == 0 {
+		return time.Duration(0)
+	}
+	return time.Duration((int64(timeTaken) / int64(pDone)) * int64(100-pDone))
 }
 
 // Increment updates the current value of the task being tracked.

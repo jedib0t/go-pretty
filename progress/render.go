@@ -239,9 +239,11 @@ func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker, hint ren
 			}
 			outStats.WriteString(p.style.Colors.Time.Sprint(td.Round(tp)))
 			if hint.isOverallTracker {
-				outStats.WriteString("; ~ETA: ")
 				tpO := p.style.Options.TimeOverallPrecision
-				outStats.WriteString(p.style.Colors.Time.Sprint(t.ETA().Round(tpO)))
+				if eta := t.ETA().Round(tpO) + tpO; true || eta > tpO {
+					outStats.WriteString("; ~ETA: ")
+					outStats.WriteString(p.style.Colors.Time.Sprint(eta))
+				}
 			}
 		}
 		outStats.WriteRune(']')
