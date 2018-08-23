@@ -35,7 +35,9 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 	out.Grow(lastRenderLength)
 
 	// move up N times based on the number of active trackers
-	p.moveCursorToTheTop(&out)
+	if lastRenderLength > 0 {
+		p.moveCursorToTheTop(&out)
+	}
 
 	// find the currently "active" and "done" trackers
 	trackersActive, trackersDone := p.extractDoneAndActiveTrackers()
