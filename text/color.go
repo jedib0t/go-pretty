@@ -117,10 +117,7 @@ type Colors []Color
 
 var (
 	// colorsSeqMap caches the escape sequence for a set of colors
-	colorsSeqMap = make(map[string]string)
-
-	// colorsSeqMapMutex should be used to lock writes to the map
-	colorsSeqMapMutex = sync.Mutex{}
+	colorsSeqMap = sync.Map{}
 )
 
 // GetEscapeSeq returns the ANSI escape sequence for the colors set.
@@ -129,18 +126,16 @@ func (c Colors) GetEscapeSeq() string {
 		return ""
 	}
 	colorsKey := fmt.Sprintf("%#v", c)
-	escapeSeq := colorsSeqMap[colorsKey]
-	if escapeSeq == "" {
+	escapeSeq, ok := colorsSeqMap.Load(colorsKey)
+	if !ok || escapeSeq == "" {
 		colorNums := make([]string, len(c))
 		for idx, c := range c {
 			colorNums[idx] = strconv.Itoa(int(c))
 		}
 		escapeSeq = EscapeStart + strings.Join(colorNums, ";") + EscapeStop
-		colorsSeqMapMutex.Lock()
-		colorsSeqMap[colorsKey] = escapeSeq
-		colorsSeqMapMutex.Unlock()
+		colorsSeqMap.Store(colorsKey, escapeSeq)
 	}
-	return escapeSeq
+	return escapeSeq.(string)
 }
 
 // Sprint colorizes and prints the given string(s).
