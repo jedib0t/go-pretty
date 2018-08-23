@@ -10,35 +10,35 @@ import (
 
 var (
 	autoStop    = flag.Bool("auto-stop", false, "Auto-stop rendering?")
-	numTrackers = flag.Int64("num-trackers", 13, "Number of Trackers")
+	numTrackers = flag.Int("num-trackers", 13, "Number of Trackers")
 )
 
 func trackSomething(pw progress.Writer, idx int64) {
 	total := idx * idx * idx * 250
-	incrementPerCycle := idx * (*numTrackers) * 250
+	incrementPerCycle := idx * int64(*numTrackers) * 250
 
-	var units progress.Units
+	var units *progress.Units
 	switch {
 	case idx%5 == 0:
-		units = progress.UnitsCurrencyPound
+		units = &progress.UnitsCurrencyPound
 	case idx%4 == 0:
-		units = progress.UnitsCurrencyDollar
+		units = &progress.UnitsCurrencyDollar
 	case idx%3 == 0:
-		units = progress.UnitsBytes
+		units = &progress.UnitsBytes
 	default:
-		units = progress.UnitsDefault
+		units = &progress.UnitsDefault
 	}
 
 	var message string
 	switch units {
-	case progress.UnitsBytes:
+	case &progress.UnitsBytes:
 		message = fmt.Sprintf("Downloading File    #%3d", idx)
-	case progress.UnitsCurrencyDollar, progress.UnitsCurrencyEuro, progress.UnitsCurrencyPound:
+	case &progress.UnitsCurrencyDollar, &progress.UnitsCurrencyEuro, &progress.UnitsCurrencyPound:
 		message = fmt.Sprintf("Transferring Amount #%3d", idx)
 	default:
 		message = fmt.Sprintf("Calculating Total   #%3d", idx)
 	}
-	tracker := progress.Tracker{Message: message, Total: total, Units: units}
+	tracker := progress.Tracker{Message: message, Total: total, Units: *units}
 
 	pw.AppendTracker(&tracker)
 
@@ -59,11 +59,14 @@ func main() {
 	pw := progress.NewWriter()
 	pw.SetAutoStop(*autoStop)
 	pw.SetTrackerLength(25)
+	pw.ShowOverallTracker(true)
 	pw.ShowTime(true)
 	pw.ShowTracker(true)
 	pw.ShowValue(true)
+	pw.SetMessageWidth(24)
+	pw.SetNumTrackersExpected(*numTrackers)
 	pw.SetSortBy(progress.SortByPercentDsc)
-	pw.SetStyle(progress.StyleCircle)
+	pw.SetStyle(progress.StyleDefault)
 	pw.SetTrackerPosition(progress.PositionRight)
 	pw.SetUpdateFrequency(time.Millisecond * 100)
 	pw.Style().Colors = progress.StyleColorsExample
@@ -75,7 +78,7 @@ func main() {
 	// add a bunch of trackers with random parameters to demo most of the
 	// features available; do this in async too like a client might do (for ex.
 	// when downloading a bunch of files in parallel)
-	for idx := int64(1); idx <= *numTrackers; idx++ {
+	for idx := int64(1); idx <= int64(*numTrackers); idx++ {
 		go trackSomething(pw, idx)
 
 		// in auto-stop mode, the Render logic terminates the moment it detects

@@ -7,6 +7,20 @@ import (
 	"sync"
 )
 
+var (
+	colorsEnabled = areANSICodesSupported()
+)
+
+// DisableColors (forcefully) disables color coding globally.
+func DisableColors() {
+	colorsEnabled = false
+}
+
+// EnableColors (forcefully) enables color coding globally.
+func EnableColors() {
+	colorsEnabled = true
+}
+
 // The logic here is inspired from github.com/fatih/color; the following is
 // the the bare minimum logic required to print Colored to the console.
 // The differences:
@@ -140,7 +154,7 @@ func (c Colors) Sprintf(format string, a ...interface{}) string {
 }
 
 func colorize(s string, escapeSeq string) string {
-	if !ANSICodesSupported || escapeSeq == "" {
+	if !colorsEnabled || escapeSeq == "" {
 		return s
 	}
 

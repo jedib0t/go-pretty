@@ -141,6 +141,7 @@ type StyleOptions struct {
 	PercentFormat           string        // formatting to use for percentage
 	TimeDonePrecision       time.Duration // precision for time when done
 	TimeInProgressPrecision time.Duration // precision for time when in progress
+	TimeOverallPrecision    time.Duration // precision for overall time
 }
 
 var (
@@ -153,5 +154,6 @@ var (
 		SnipIndicator:           "~",
 		TimeDonePrecision:       time.Millisecond,
 		TimeInProgressPrecision: time.Microsecond,
+		TimeOverallPrecision:    time.Second,
 	}
 )

@@ -27,13 +27,16 @@ demo-table:
 dep:
 	dep ensure
 
+fmt:
+	go fmt $(shell go list ./...)
+
 lint:
 	golint -set_exit_status $(shell go list ./...)
 
 profile:
 	sh profile.sh
 
-test: lint vet cyclo
+test: fmt lint vet cyclo
 	go test -cover -coverprofile=.coverprofile $(shell go list ./...)
 
 vet:

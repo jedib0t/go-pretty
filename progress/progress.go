@@ -30,7 +30,10 @@ type Progress struct {
 	hideValue            bool
 	hidePercentage       bool
 	messageWidth         int
+	numTrackersExpected  int64
+	overallTracker       *Tracker
 	renderInProgress     bool
+	showOverallTracker   bool
 	sortBy               SortBy
 	style                *Style
 	trackerPosition      Position
@@ -61,8 +64,18 @@ func (p *Progress) AppendTracker(t *Tracker) {
 		t.Total = math.MaxInt64
 	}
 	t.start()
+	if p.overallTracker == nil {
+		p.overallTracker = &Tracker{Total: 1}
+		if p.numTrackersExpected > 0 {
+			p.overallTracker.Total = p.numTrackersExpected * 100
+		}
+		p.overallTracker.start()
+	}
 	p.trackersInQueueMutex.Lock()
 	p.trackersInQueue = append(p.trackersInQueue, t)
+	if p.overallTracker.Total < int64(p.Length())*100 {
+		p.overallTracker.Total = int64(p.Length()) * 100
+	}
 	p.trackersInQueueMutex.Unlock()
 }
 
@@ -104,6 +117,12 @@ func (p *Progress) SetMessageWidth(width int) {
 	p.messageWidth = width
 }
 
+// SetNumTrackersExpected sets the expected number of trackers to be tracked.
+// This helps calculate the overall progress with better accuracy.
+func (p *Progress) SetNumTrackersExpected(numTrackers int) {
+	p.numTrackersExpected = int64(numTrackers)
+}
+
 // SetOutputWriter redirects the output of Render to an io.writer object like
 // os.Stdout or os.Stderr or a file. Warning: redirecting the output to a file
 // may not work well as the Render() logic moves the cursor around a lot.
@@ -143,6 +162,11 @@ func (p *Progress) SetUpdateFrequency(frequency time.Duration) {
 // ShowPercentage toggles showing the Percent complete for each Tracker.
 func (p *Progress) ShowPercentage(show bool) {
 	p.hidePercentage = !show
+}
+
+// ShowOverallTracker toggles showing the Overall progress tracker.
+func (p *Progress) ShowOverallTracker(show bool) {
+	p.showOverallTracker = show
 }
 
 // ShowTime toggles showing the Time taken by each Tracker.
@@ -203,4 +227,11 @@ func (p *Progress) initForRender() {
 	if p.updateFrequency <= 0 {
 		p.updateFrequency = DefaultUpdateFrequency
 	}
+}
+
+// renderHint has hints for the Render*() logic
+type renderHint struct {
+	hideTime         bool // hide the time
+	hideValue        bool // hide the value
+	isOverallTracker bool // is the Overall Progress tracker
 }
