@@ -13,10 +13,10 @@ func TestTracker_ETA(t *testing.T) {
 
 	tracker.timeStart = time.Now()
 	time.Sleep(time.Millisecond * 100)
-	tracker.value = 10
+	tracker.value = 50
 	eta := tracker.ETA()
 	assert.NotEqual(t, time.Duration(0), eta)
-	assert.True(t, eta > time.Second)
+	assert.True(t, eta < time.Second)
 }
 
 func TestTracker_Increment(t *testing.T) {
