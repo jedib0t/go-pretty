@@ -108,18 +108,18 @@ func (p *Progress) generateTrackerStr(t *Tracker, maxLen int) string {
 	pDotValue := float64(t.Total) / float64(maxLen)
 	pFinishedDots := float64(t.value) / pDotValue
 	pFinishedDotsFraction := pFinishedDots - float64(int(pFinishedDots))
-	pFinishedLen := int(math.Ceil(pFinishedDots))
+	pFinishedLen := int(math.Floor(pFinishedDots))
 
 	var pFinished, pInProgress, pUnfinished string
 	if pFinishedLen > 0 {
-		pFinished = strings.Repeat(p.style.Chars.Finished, pFinishedLen-1)
+		pFinished = strings.Repeat(p.style.Chars.Finished, pFinishedLen)
 	}
 	pInProgress = p.style.Chars.Unfinished
-	if pFinishedDotsFraction > 0.75 {
+	if pFinishedDotsFraction >= 0.75 {
 		pInProgress = p.style.Chars.Finished75
-	} else if pFinishedDotsFraction > 0.50 {
+	} else if pFinishedDotsFraction >= 0.50 {
 		pInProgress = p.style.Chars.Finished50
-	} else if pFinishedDotsFraction > 0.25 {
+	} else if pFinishedDotsFraction >= 0.25 {
 		pInProgress = p.style.Chars.Finished25
 	} else if pFinishedDotsFraction == 0 {
 		pInProgress = ""
@@ -239,9 +239,11 @@ func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker, hint ren
 			}
 			outStats.WriteString(p.style.Colors.Time.Sprint(td.Round(tp)))
 			if hint.isOverallTracker {
-				outStats.WriteString("; ~ETA: ")
 				tpO := p.style.Options.TimeOverallPrecision
-				outStats.WriteString(p.style.Colors.Time.Sprint(t.ETA().Round(tpO)))
+				if eta := t.ETA().Round(tpO) + tpO; true || eta > tpO {
+					outStats.WriteString("; ~ETA: ")
+					outStats.WriteString(p.style.Colors.Time.Sprint(eta))
+				}
 			}
 		}
 		outStats.WriteRune(']')

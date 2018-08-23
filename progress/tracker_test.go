@@ -8,15 +8,26 @@ import (
 )
 
 func TestTracker_ETA(t *testing.T) {
+	timeDelayUnit := time.Millisecond
+	timeDelay := timeDelayUnit * 25
+
 	tracker := Tracker{Total: 100}
+	tracker.start()
+	assert.Equal(t, time.Duration(0), tracker.ETA())
+	time.Sleep(timeDelay)
+	tracker.Increment(50)
+	assert.NotEqual(t, time.Duration(0), tracker.ETA())
+	tracker.Increment(50)
 	assert.Equal(t, time.Duration(0), tracker.ETA())
 
-	tracker.timeStart = time.Now()
-	time.Sleep(time.Millisecond * 100)
-	tracker.value = 50
-	eta := tracker.ETA()
-	assert.NotEqual(t, time.Duration(0), eta)
-	assert.True(t, eta < time.Second)
+	tracker = Tracker{Total: 100, ExpectedDuration: timeDelay}
+	tracker.start()
+	assert.True(t, tracker.ExpectedDuration > tracker.ETA())
+	time.Sleep(timeDelay)
+	tracker.Increment(50)
+	assert.NotEqual(t, time.Duration(0), tracker.ETA())
+	tracker.Increment(50)
+	assert.Equal(t, time.Duration(0), tracker.ETA())
 }
 
 func TestTracker_Increment(t *testing.T) {
