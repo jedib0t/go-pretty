@@ -63,6 +63,14 @@ func TestProgress_SetAutoStop(t *testing.T) {
 	assert.True(t, p.autoStop)
 }
 
+func TestProgress_SetNumTrackersExpected(t *testing.T) {
+	p := Progress{}
+	assert.Equal(t, int64(0), p.numTrackersExpected)
+
+	p.SetNumTrackersExpected(5)
+	assert.Equal(t, int64(5), p.numTrackersExpected)
+}
+
 func TestProgress_SetOutputWriter(t *testing.T) {
 	p := Progress{}
 	assert.Nil(t, p.outputWriter)
@@ -115,6 +123,14 @@ func TestProgress_SetUpdateFrequency(t *testing.T) {
 
 	p.SetUpdateFrequency(time.Duration(time.Second))
 	assert.Equal(t, time.Duration(time.Second), p.updateFrequency)
+}
+
+func TestProgress_ShowOverallTracker(t *testing.T) {
+	p := Progress{}
+	assert.False(t, p.showOverallTracker)
+
+	p.ShowOverallTracker(true)
+	assert.True(t, p.showOverallTracker)
 }
 
 func TestProgress_ShowPercentage(t *testing.T) {

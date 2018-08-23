@@ -7,6 +7,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestTracker_ETA(t *testing.T) {
+	tracker := Tracker{Total: 100}
+	assert.Equal(t, time.Duration(0), tracker.ETA())
+
+	tracker.timeStart = time.Now()
+	time.Sleep(time.Millisecond * 100)
+	tracker.value = 10
+	eta := tracker.ETA()
+	assert.NotEqual(t, time.Duration(0), eta)
+	assert.True(t, eta > time.Second)
+}
+
 func TestTracker_Increment(t *testing.T) {
 	tracker := Tracker{Total: 100}
 	assert.Equal(t, int64(0), tracker.value)
