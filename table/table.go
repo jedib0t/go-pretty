@@ -426,10 +426,11 @@ type renderHint struct {
 	isLastRow         bool // last-row of header/footer/regular-rows?
 	isSeparatorRow    bool // separator row?
 	rowLineNumber     int  // the line number for a multi-line row
+	rowNumber         int  // the row number/index
 }
 
 func (h *renderHint) isRegularRow() bool {
-	return !h.isHeaderRow && !h.isFooterRow && !h.isSeparatorRow
+	return !h.isHeaderRow && !h.isFooterRow
 }
 
 func (h *renderHint) isLastLineOfLastRow() bool {
