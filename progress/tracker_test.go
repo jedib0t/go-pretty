@@ -11,7 +11,10 @@ func TestTracker_ETA(t *testing.T) {
 	timeDelayUnit := time.Millisecond
 	timeDelay := timeDelayUnit * 25
 
-	tracker := Tracker{Total: 100}
+	tracker := Tracker{}
+	assert.Equal(t, time.Duration(0), tracker.ETA())
+
+	tracker.Total = 100
 	tracker.start()
 	assert.Equal(t, time.Duration(0), tracker.ETA())
 	time.Sleep(timeDelay)
@@ -65,7 +68,10 @@ func TestTracker_MarkAsDone(t *testing.T) {
 }
 
 func TestTracker_PercentDone(t *testing.T) {
-	tracker := Tracker{Total: 100}
+	tracker := Tracker{}
+	assert.Equal(t, 0.00, tracker.PercentDone())
+
+	tracker.Total = 100
 	assert.Equal(t, 0.00, tracker.PercentDone())
 
 	for idx := 1; idx <= 100; idx++ {

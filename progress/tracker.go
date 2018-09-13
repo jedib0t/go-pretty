@@ -34,11 +34,11 @@ func (t *Tracker) ETA() time.Duration {
 		return t.ExpectedDuration - timeTaken
 	}
 
-	pDone := t.PercentDone()
+	pDone := int64(t.PercentDone())
 	if pDone == 0 {
 		return time.Duration(0)
 	}
-	return time.Duration((int64(timeTaken) / int64(pDone)) * int64(100-pDone))
+	return time.Duration((int64(timeTaken) / pDone) * (100 - pDone))
 }
 
 // Increment updates the current value of the task being tracked.
@@ -66,6 +66,9 @@ func (t *Tracker) MarkAsDone() {
 
 // PercentDone returns the currently completed percentage value.
 func (t *Tracker) PercentDone() float64 {
+	if t.Total == 0 {
+		return 0
+	}
 	return float64(t.value) * 100.0 / float64(t.Total)
 }
 
