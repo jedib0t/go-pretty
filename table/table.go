@@ -371,7 +371,7 @@ func (t *Table) initForRenderMaxColumnLength() {
 	var findMaxColumnLengths = func(rows []rowStr) {
 		for _, row := range rows {
 			for colIdx, colStr := range row {
-				longestLineLen := text.GetLongestLineLength(colStr)
+				longestLineLen := text.LongestLineLen(colStr)
 				if longestLineLen > t.maxColumnLengths[colIdx] {
 					t.maxColumnLengths[colIdx] = longestLineLen
 				}

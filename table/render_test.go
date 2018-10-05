@@ -33,6 +33,7 @@ func TestTable_Render(t *testing.T) {
 [<   >|<          >|<TOTAL    >|< 10000>|<                           >]
 \-----v------------v-----------v--------v-----------------------------/
 test-caption`
+	fmt.Println(tw.Render())
 	assert.Equal(t, expectedOut, tw.Render())
 }
 

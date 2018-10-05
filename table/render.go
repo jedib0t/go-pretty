@@ -179,10 +179,10 @@ func (t *Table) renderLine(out *strings.Builder, row rowStr, hint renderHint) {
 	// merge the strings.Builder objects if a new one was created earlier
 	if outLine != out {
 		outLineStr := outLine.String()
-		if text.RuneCountWithoutEscapeSeq(outLineStr) > t.allowedRowLength {
+		if text.RuneCount(outLineStr) > t.allowedRowLength {
 			trimLength := t.allowedRowLength - utf8.RuneCountInString(t.style.Box.UnfinishedRow)
 			if trimLength > 0 {
-				out.WriteString(text.TrimTextWithoutEscapeSeq(outLineStr, trimLength))
+				out.WriteString(text.Trim(outLineStr, trimLength))
 				out.WriteString(t.style.Box.UnfinishedRow)
 			}
 		} else {
@@ -251,8 +251,9 @@ func (t *Table) renderMarginRight(out *strings.Builder, hint renderHint) {
 
 func (t *Table) renderRow(out *strings.Builder, rowNum int, row rowStr, hint renderHint) {
 	if len(row) > 0 {
-		// fit every column into the allowedColumnLength/maxColumnLength limit and
-		// in the process find the max. number of lines in any column in this row
+		// fit every column into the allowedColumnLength/maxColumnLength limit
+		// and in the process find the max. number of lines in any column in
+		// this row
 		colMaxLines := 0
 		rowWrapped := make(rowStr, len(row))
 		for colIdx, colStr := range row {
@@ -263,8 +264,8 @@ func (t *Table) renderRow(out *strings.Builder, rowNum int, row rowStr, hint ren
 			}
 		}
 
-		// if there is just 1 line in all columns, add the row as such; else split
-		// each column into individual lines and render them one-by-one
+		// if there is just 1 line in all columns, add the row as such; else
+		// split each column into individual lines and render them one-by-one
 		if colMaxLines == 1 {
 			hint.isLastLineOfRow = true
 			t.renderLine(out, row, hint)

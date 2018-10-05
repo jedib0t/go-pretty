@@ -96,19 +96,19 @@ const (
 	BgHiWhite
 )
 
-// GetEscapeSeq returns the ANSI escape sequence for the color.
-func (c Color) GetEscapeSeq() string {
+// EscapeSeq returns the ANSI escape sequence for the color.
+func (c Color) EscapeSeq() string {
 	return EscapeStart + strconv.Itoa(int(c)) + EscapeStop
 }
 
 // Sprint colorizes and prints the given string(s).
 func (c Color) Sprint(a ...interface{}) string {
-	return colorize(fmt.Sprint(a...), c.GetEscapeSeq())
+	return colorize(fmt.Sprint(a...), c.EscapeSeq())
 }
 
 // Sprintf formats and colorizes and prints the given string(s).
 func (c Color) Sprintf(format string, a ...interface{}) string {
-	return colorize(fmt.Sprintf(format, a...), c.GetEscapeSeq())
+	return colorize(fmt.Sprintf(format, a...), c.EscapeSeq())
 }
 
 // Colors represents an array of Color objects to render with.
@@ -120,8 +120,8 @@ var (
 	colorsSeqMap = sync.Map{}
 )
 
-// GetEscapeSeq returns the ANSI escape sequence for the colors set.
-func (c Colors) GetEscapeSeq() string {
+// EscapeSeq returns the ANSI escape sequence for the colors set.
+func (c Colors) EscapeSeq() string {
 	if len(c) == 0 {
 		return ""
 	}
@@ -140,12 +140,12 @@ func (c Colors) GetEscapeSeq() string {
 
 // Sprint colorizes and prints the given string(s).
 func (c Colors) Sprint(a ...interface{}) string {
-	return colorize(fmt.Sprint(a...), c.GetEscapeSeq())
+	return colorize(fmt.Sprint(a...), c.EscapeSeq())
 }
 
 // Sprintf formats and colorizes and prints the given string(s).
 func (c Colors) Sprintf(format string, a ...interface{}) string {
-	return colorize(fmt.Sprintf(format, a...), c.GetEscapeSeq())
+	return colorize(fmt.Sprintf(format, a...), c.EscapeSeq())
 }
 
 func colorize(s string, escapeSeq string) string {
