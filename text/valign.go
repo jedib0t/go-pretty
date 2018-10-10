@@ -13,7 +13,7 @@ const (
 	VAlignBottom                // "\n\nbottom"
 )
 
-// Apply aligns the lines vertically. Examples:
+// Apply aligns the lines vertically. For ex.:
 //  * VAlignTop.Apply({"Game", "Of", "Thrones"},    5)
 // 	    returns {"Game", "Of", "Thrones", "", ""}
 //  * VAlignMiddle.Apply({"Game", "Of", "Thrones"}, 5)
@@ -41,7 +41,7 @@ func (va VAlign) Apply(lines []string, maxLines int) []string {
 	return linesOut
 }
 
-// ApplyStr aligns the string (of 1 or more lines) vertically. Examples:
+// ApplyStr aligns the string (of 1 or more lines) vertically. For ex.:
 //  * VAlignTop.ApplyStr("Game\nOf\nThrones",    5)
 // 	    returns {"Game", "Of", "Thrones", "", ""}
 //  * VAlignMiddle.ApplyStr("Game\nOf\nThrones", 5)

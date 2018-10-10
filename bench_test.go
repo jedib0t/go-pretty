@@ -45,8 +45,10 @@ func BenchmarkProgress_Render(b *testing.B) {
 	trackSomething := func(pw progress.Writer, tracker *progress.Tracker) {
 		tracker.Reset()
 		pw.AppendTracker(tracker)
-		time.Sleep(time.Millisecond * 500)
-		tracker.Increment(tracker.Total)
+		time.Sleep(time.Millisecond * 100)
+		tracker.Increment(tracker.Total / 2)
+		time.Sleep(time.Millisecond * 100)
+		tracker.Increment(tracker.Total / 2)
 	}
 
 	for i := 0; i < b.N; i++ {

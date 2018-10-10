@@ -19,7 +19,7 @@ const (
 	AlignRight                // "       right"
 )
 
-// Apply aligns the text as directed. Examples:
+// Apply aligns the text as directed. For ex.:
 //  * AlignDefault.Apply("Jon Snow", 12) returns "Jon Snow    "
 //  * AlignLeft.Apply("Jon Snow",    12) returns "Jon Snow    "
 //  * AlignCenter.Apply("Jon Snow",  12) returns "  Jon Snow  "
