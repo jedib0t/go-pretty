@@ -124,7 +124,7 @@ func (p *Progress) generateTrackerStr(t *Tracker, maxLen int) string {
 	} else if pFinishedDotsFraction == 0 {
 		pInProgress = ""
 	}
-	pFinishedStrLen := text.RuneCountWithoutEscapeSeq(pFinished + pInProgress)
+	pFinishedStrLen := text.RuneCount(pFinished + pInProgress)
 	if pFinishedStrLen < maxLen {
 		pUnfinished = strings.Repeat(p.style.Chars.Unfinished, maxLen-pFinishedStrLen)
 	}
@@ -153,8 +153,8 @@ func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHi
 	if hint.isOverallTracker {
 		if !t.IsDone() {
 			trackerLen := p.messageWidth
-			trackerLen += text.RuneCountWithoutEscapeSeq(p.style.Options.Separator)
-			trackerLen += text.RuneCountWithoutEscapeSeq(p.style.Options.DoneString)
+			trackerLen += text.RuneCount(p.style.Options.Separator)
+			trackerLen += text.RuneCount(p.style.Options.DoneString)
 			trackerLen += p.lengthProgress + 1
 			hint := renderHint{hideValue: true, isOverallTracker: true}
 			p.renderTrackerProgress(out, t, p.generateTrackerStr(t, trackerLen), hint)
@@ -179,7 +179,12 @@ func (p *Progress) renderTrackerDone(out *strings.Builder, t *Tracker) {
 
 func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, trackerStr string, hint renderHint) {
 	if p.messageWidth > 0 {
-		t.Message = text.FixedLengthString(t.Message, p.messageWidth, p.style.Options.SnipIndicator)
+		messageLen := text.RuneCount(t.Message)
+		if messageLen < p.messageWidth {
+			t.Message = text.Pad(t.Message, p.messageWidth, ' ')
+		} else {
+			t.Message = text.Snip(t.Message, p.messageWidth, p.style.Options.SnipIndicator)
+		}
 	}
 
 	if hint.isOverallTracker {

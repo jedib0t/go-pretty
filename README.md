@@ -69,29 +69,33 @@ Detailed documentation can be found here: [progress/](progress/)
 
 ## Text
 
-The following features are all used by the other packages in this project.
+Utility functions to manipulate text with or without ANSI escape sequences. Most
+of the functions available are used in one or more of the other packages here.
 
-   - Align text horizontally
-     - [text/align.go](text/align.go)
-   - Align text vertically
-     - [text/valign.go](text/valign.go)
+   - Align text horizontally or vertically
+     - [text/align.go](text/align.go) and [text/valign.go](text/valign.go)
    - Colorize text
      - [text/color.go](text/color.go)
    - Cursor Movement
      - [text/cursor.go](text/cursor.go)
    - Format text (convert case for now)
      - [text/format.go](text/format.go)
+   - String Manipulation (Pad, RepeatAndTrim, RuneCount, Trim, etc.)
+     - [text/string.go](text/string.go)
+   - Wrap text
+     - [text/wrap.go](text/wrap.go)
 
-The unit-tests for each of the above show how these can be used.
+The unit-tests for each of the above show how these can be used. There GoDoc
+should also have examples for all the available functions.
 
 ## Benchmarks
 
 Partial output of `make bench`:
 ```
-BenchmarkList_Render-8                    500000              2182 ns/op             760 B/op         40 allocs/op
-BenchmarkProgress_Render-8                     2         800863000 ns/op            7200 B/op        209 allocs/op
-BenchmarkTable_Render-8                   100000             20839 ns/op            5538 B/op        188 allocs/op
-BenchmarkTable_RenderCSV-8                300000              4479 ns/op            2464 B/op         45 allocs/op
-BenchmarkTable_RenderHTML-8               200000              6422 ns/op            3921 B/op         44 allocs/op
-BenchmarkTable_RenderMarkdown-8           300000              4755 ns/op            2400 B/op         43 allocs/op
+BenchmarkList_Render-8            	  500000	      2491 ns/op	     872 B/op	      47 allocs/op
+BenchmarkProgress_Render-8        	       2	 551176831 ns/op	    6512 B/op	     184 allocs/op
+BenchmarkTable_Render-8           	  100000	     21528 ns/op	    5698 B/op	     193 allocs/op
+BenchmarkTable_RenderCSV-8        	  300000	      4828 ns/op	    2624 B/op	      50 allocs/op
+BenchmarkTable_RenderHTML-8       	  200000	      6688 ns/op	    4081 B/op	      49 allocs/op
+BenchmarkTable_RenderMarkdown-8   	  300000	      4972 ns/op	    2560 B/op	      48 allocs/op
 ```

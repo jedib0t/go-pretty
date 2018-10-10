@@ -28,7 +28,7 @@ const (
 func (a Align) Apply(text string, maxLength int) string {
 	text = a.trimString(text)
 	sLen := utf8.RuneCountInString(text)
-	sLenWoE := RuneCountWithoutEscapeSeq(text)
+	sLenWoE := RuneCount(text)
 	numEscChars := sLen - sLenWoE
 
 	// now, align the text
@@ -80,7 +80,7 @@ func (a Align) MarkdownProperty() string {
 func (a Align) justifyText(text string, textLength int, maxLength int) string {
 	// split the text into individual words
 	wordsUnfiltered := strings.Split(text, " ")
-	words := FilterStrings(wordsUnfiltered, func(item string) bool {
+	words := Filter(wordsUnfiltered, func(item string) bool {
 		return item != ""
 	})
 	// empty string implies spaces for maxLength
