@@ -88,10 +88,10 @@ The unit-tests for each of the above show how these can be used.
 
 Partial output of `make bench`:
 ```
-BenchmarkList_Render-8            	  500000	      2486 ns/op	     872 B/op	      47 allocs/op
-BenchmarkProgress_Render-8        	       2	 551831183 ns/op	    7264 B/op	     187 allocs/op
-BenchmarkTable_Render-8           	   50000	     31286 ns/op	    7682 B/op	     371 allocs/op
-BenchmarkTable_RenderCSV-8        	  300000	      4957 ns/op	    2624 B/op	      50 allocs/op
-BenchmarkTable_RenderHTML-8       	  200000	      6740 ns/op	    4081 B/op	      49 allocs/op
-BenchmarkTable_RenderMarkdown-8   	  300000	      5011 ns/op	    2560 B/op	      48 allocs/op
+BenchmarkList_Render-8            	  500000	      2491 ns/op	     872 B/op	      47 allocs/op
+BenchmarkProgress_Render-8        	       2	 551176831 ns/op	    6512 B/op	     184 allocs/op
+BenchmarkTable_Render-8           	  100000	     21528 ns/op	    5698 B/op	     193 allocs/op
+BenchmarkTable_RenderCSV-8        	  300000	      4828 ns/op	    2624 B/op	      50 allocs/op
+BenchmarkTable_RenderHTML-8       	  200000	      6688 ns/op	    4081 B/op	      49 allocs/op
+BenchmarkTable_RenderMarkdown-8   	  300000	      4972 ns/op	    2560 B/op	      48 allocs/op
 ```
