@@ -5,7 +5,7 @@ import (
 	"github.com/jedib0t/go-pretty/text"
 )
 
-func Example() {
+func Example_simple() {
 	// simple table with zero customizations
 	tw := NewWriter()
 	// append a header row
@@ -33,7 +33,7 @@ func Example() {
 	// +-----+------------+-----------+--------+-----------------------------+
 }
 
-func Example_2() {
+func Example_styled() {
 	// table with some amount of customization
 	tw := NewWriter()
 	// append a header row
