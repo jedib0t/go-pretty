@@ -246,7 +246,7 @@ func (t *Table) analyzeAndStringify(row Row, isHeader bool, isFooter bool) rowSt
 	rowOut := make(rowStr, len(row))
 	for colIdx, col := range row {
 		// if the column is not a number, keep track of it
-		if !isHeader && !isFooter && !t.columnIsNonNumeric[colIdx] && !IsNumber(col) {
+		if !isHeader && !isFooter && !t.columnIsNonNumeric[colIdx] && !isNumber(col) {
 			t.columnIsNonNumeric[colIdx] = true
 		}
 
