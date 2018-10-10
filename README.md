@@ -69,20 +69,24 @@ Detailed documentation can be found here: [progress/](progress/)
 
 ## Text
 
-The following features are all used by the other packages in this project.
+Utility functions to manipulate text with or without ANSI escape sequences. Most
+of the functions available are used in one or more of the other packages here.
 
-   - Align text horizontally
-     - [text/align.go](text/align.go)
-   - Align text vertically
-     - [text/valign.go](text/valign.go)
+   - Align text horizontally or vertically
+     - [text/align.go](text/align.go) and [text/valign.go](text/valign.go)
    - Colorize text
      - [text/color.go](text/color.go)
    - Cursor Movement
      - [text/cursor.go](text/cursor.go)
    - Format text (convert case for now)
      - [text/format.go](text/format.go)
+   - String Manipulation (Pad, RepeatAndTrim, RuneCount, Trim, etc.)
+     - [text/string.go](text/string.go)
+   - Wrap text
+     - [text/wrap.go](text/wrap.go)
 
-The unit-tests for each of the above show how these can be used.
+The unit-tests for each of the above show how these can be used. There GoDoc
+should also have examples for all the available functions.
 
 ## Benchmarks
 
