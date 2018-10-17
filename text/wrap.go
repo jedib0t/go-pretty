@@ -7,18 +7,9 @@ import (
 
 // WrapHard wraps a string to the given length using a newline. Handles strings
 // with ANSI escape sequences (such as text color) without breaking the text
-// formatting. Breaks all words that go beyond the line boundary. For ex.:
-//  Wrap("Ghost", 1) == "G\nh\no\ns\nt"
-//  Wrap("Ghost", 2) == "Gh\nos\nt"
-//  Wrap("Ghost", 3) == "Gho\nst"
-//  Wrap("Ghost", 4) == "Ghos\nt"
-//  Wrap("Ghost", 5) == "Ghost"
-//  Wrap("Ghost", 6) == "Ghost"
-//  Wrap("Jon\nSnow", 2) == "Jo\nn\nSn\now"
-//  Wrap("Jon\nSnow\n", 2) == "Jo\nn\nSn\now\n"
-//  Wrap("Jon is a Snow", 5) == "Jon i\ns a S\nnow"
-//  Wrap("\x1b[33mJon\x1b[0m\nSnow", 3) == "\x1b[33mJon\x1b[0m\nSno\nw"
-//  Wrap("\x1b[33mJon Snow\x1b[0m", 3) == "\x1b[33mJon\x1b[0m\n\x1b[33m Sn\x1b[0m\n\x1b[33mow\x1b[0m"
+// formatting. Breaks all words that go beyond the line boundary.
+//
+// For examples, refer to the unit-tests or GoDoc examples.
 func WrapHard(str string, wrapLen int) string {
 	if wrapLen <= 0 {
 		return ""
@@ -44,18 +35,9 @@ func WrapHard(str string, wrapLen int) string {
 // WrapSoft wraps a string to the given length using a newline. Handles strings
 // with ANSI escape sequences (such as text color) without breaking the text
 // formatting. Tries to move words that go beyond the line boundary to the next
-// line. For ex.:
-//  Wrap("Ghost", 1) == "G\nh\no\ns\nt"
-//  Wrap("Ghost", 2) == "Gh\nos\nt"
-//  Wrap("Ghost", 3) == "Gho\nst"
-//  Wrap("Ghost", 4) == "Ghos\nt"
-//  Wrap("Ghost", 5) == "Ghost"
-//  Wrap("Ghost", 6) == "Ghost"
-//  Wrap("Jon\nSnow", 2) == "Jo\nn\nSn\now"
-//  Wrap("Jon\nSnow\n", 2) == "Jo\nn\nSn\now\n"
-//  Wrap("Jon is a Snow", 5) == "Jon \nis a \nSnow"
-//  Wrap("\x1b[33mJon\x1b[0m\nSnow", 3) == "\x1b[33mJon\x1b[0m\nSno\nw"
-//  Wrap("\x1b[33mJon Snow\x1b[0m", 3) == "\x1b[33mJon\x1b[0m\n\x1b[33mSno\x1b[0m\n\x1b[33mw\x1b[0m"
+// line.
+//
+// For examples, refer to the unit-tests or GoDoc examples.
 func WrapSoft(str string, wrapLen int) string {
 	if wrapLen <= 0 {
 		return ""
@@ -80,17 +62,9 @@ func WrapSoft(str string, wrapLen int) string {
 
 // WrapText is very similar to WrapHard except for one minor difference. Unlike
 // WrapHard which discards line-breaks and respects only paragraph-breaks, this
-// function respects line-breaks too. For ex.:
-//  WrapText("Ghost", 1) == "G\nh\no\ns\nt"
-//  WrapText("Ghost", 2) == "Gh\nos\nt"
-//  WrapText("Ghost", 3) == "Gho\nst"
-//  WrapText("Ghost", 4) == "Ghos\nt"
-//  WrapText("Ghost", 5) == "Ghost"
-//  WrapText("Ghost", 6) == "Ghost"
-//  WrapText("Jon\nSnow", 2) == "Jo\nn\nSn\now"
-//  WrapText("Jon\nSnow\n", 2) == "Jo\nn\nSn\now\n"
-//  WrapText("\x1b[33mJon\x1b[0m\nSnow", 3)) == "\x1b[33mJon\x1b[0m\nSno\nw"
-//	WrapText("\x1b[33mJon\x1b[0m\nSnow\n", 3)) == "\x1b[33mJon\x1b[0m\nSno\nw\n"
+// function respects line-breaks too.
+//
+// For examples, refer to the unit-tests or GoDoc examples.
 func WrapText(str string, wrapLen int) string {
 	if wrapLen <= 0 {
 		return ""
