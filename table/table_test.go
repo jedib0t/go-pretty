@@ -28,7 +28,7 @@ var (
 		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
 		{300, "Tyrion", "Lannister", 5000},
 	}
-	testRowMultiLine = Row{0, "Winter", "Is", 0, "Coming.\nThe North Remembers!\nThis is known."}
+	testRowMultiLine = Row{0, "Winter", "Is", 0, "Coming.\r\nThe North Remembers!\nThis is known."}
 	testRowNewLines  = Row{0, "Valar", "Morghulis", 0, "Faceless\nMen"}
 	testRowPipes     = Row{0, "Valar", "Morghulis", 0, "Faceless|Men"}
 	testRowTabs      = Row{0, "Valar", "Morghulis", 0, "Faceless\tMen"}

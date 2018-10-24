@@ -260,6 +260,9 @@ func (t *Table) analyzeAndStringify(row Row, isHeader bool, isFooter bool) rowSt
 		if strings.Contains(colStr, "\t") {
 			colStr = strings.Replace(colStr, "\t", "    ", -1)
 		}
+		if strings.Contains(colStr, "\r") {
+			colStr = strings.Replace(colStr, "\r", "", -1)
+		}
 		rowOut[colIdx] = colStr
 	}
 	return rowOut

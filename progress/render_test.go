@@ -218,8 +218,8 @@ func TestProgress_RenderSomeTrackers_OnLeftSide(t *testing.T) {
 	pw := generateWriter()
 	pw.SetOutputWriter(&renderOutput)
 	pw.SetTrackerPosition(PositionLeft)
-	go trackSomething(pw, &Tracker{Message: "Calculation Total   # 1", Total: 1000, Units: UnitsDefault})
-	go trackSomething(pw, &Tracker{Message: "Downloading File    # 2", Total: 1000, Units: UnitsBytes})
+	go trackSomething(pw, &Tracker{Message: "Calculation Total   # 1\r", Total: 1000, Units: UnitsDefault})
+	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes})
 	go trackSomething(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
 	renderAndWait(pw, false)
 
@@ -245,8 +245,8 @@ func TestProgress_RenderSomeTrackers_OnRightSide(t *testing.T) {
 	pw := generateWriter()
 	pw.SetOutputWriter(&renderOutput)
 	pw.SetTrackerPosition(PositionRight)
-	go trackSomething(pw, &Tracker{Message: "Calculation Total   # 1", Total: 1000, Units: UnitsDefault})
-	go trackSomething(pw, &Tracker{Message: "Downloading File    # 2", Total: 1000, Units: UnitsBytes})
+	go trackSomething(pw, &Tracker{Message: "Calculation Total   # 1\r", Total: 1000, Units: UnitsDefault})
+	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes})
 	go trackSomething(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
 	renderAndWait(pw, false)
 
@@ -273,8 +273,8 @@ func TestProgress_RenderSomeTrackers_WithAutoStop(t *testing.T) {
 	pw.SetAutoStop(true)
 	pw.SetOutputWriter(&renderOutput)
 	pw.SetTrackerPosition(PositionRight)
-	go trackSomething(pw, &Tracker{Message: "Calculation Total   # 1", Total: 1000, Units: UnitsDefault})
-	go trackSomething(pw, &Tracker{Message: "Downloading File    # 2", Total: 1000, Units: UnitsBytes})
+	go trackSomething(pw, &Tracker{Message: "Calculation Total   # 1\r", Total: 1000, Units: UnitsDefault})
+	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes})
 	go trackSomething(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
 	renderAndWait(pw, true)
 
@@ -301,8 +301,8 @@ func TestProgress_RenderSomeTrackers_WithLineWidth1(t *testing.T) {
 	pw.SetMessageWidth(5)
 	pw.SetOutputWriter(&renderOutput)
 	pw.SetTrackerPosition(PositionRight)
-	go trackSomething(pw, &Tracker{Message: "Calculation Total   # 1", Total: 1000, Units: UnitsDefault})
-	go trackSomething(pw, &Tracker{Message: "Downloading File    # 2", Total: 1000, Units: UnitsBytes})
+	go trackSomething(pw, &Tracker{Message: "Calculation Total   # 1\r", Total: 1000, Units: UnitsDefault})
+	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes})
 	go trackSomething(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
 	renderAndWait(pw, false)
 
@@ -329,8 +329,8 @@ func TestProgress_RenderSomeTrackers_WithLineWidth2(t *testing.T) {
 	pw.SetMessageWidth(50)
 	pw.SetOutputWriter(&renderOutput)
 	pw.SetTrackerPosition(PositionRight)
-	go trackSomething(pw, &Tracker{Message: "Calculation Total   # 1", Total: 1000, Units: UnitsDefault})
-	go trackSomething(pw, &Tracker{Message: "Downloading File    # 2", Total: 1000, Units: UnitsBytes})
+	go trackSomething(pw, &Tracker{Message: "Calculation Total   # 1\r", Total: 1000, Units: UnitsDefault})
+	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes})
 	go trackSomething(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
 	renderAndWait(pw, false)
 
@@ -358,8 +358,8 @@ func TestProgress_RenderSomeTrackers_WithOverallTracker(t *testing.T) {
 	pw.SetTrackerPosition(PositionRight)
 	pw.ShowOverallTracker(true)
 	pw.Style().Options.TimeOverallPrecision = time.Millisecond
-	go trackSomething(pw, &Tracker{Message: "Calculation Total   # 1", Total: 1000, Units: UnitsDefault})
-	go trackSomething(pw, &Tracker{Message: "Downloading File    # 2", Total: 1000, Units: UnitsBytes})
+	go trackSomething(pw, &Tracker{Message: "Calculation Total   # 1\r", Total: 1000, Units: UnitsDefault})
+	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes})
 	go trackSomething(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
 	renderAndWait(pw, false)
 

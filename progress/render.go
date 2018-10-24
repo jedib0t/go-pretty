@@ -148,6 +148,12 @@ func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHi
 	if hint.isOverallTracker && !p.showOverallTracker {
 		return
 	}
+	if strings.Contains(t.Message, "\t") {
+		t.Message = strings.Replace(t.Message, "\t", "    ", -1)
+	}
+	if strings.Contains(t.Message, "\r") {
+		t.Message = strings.Replace(t.Message, "\r", "", -1)
+	}
 
 	out.WriteString(text.EraseLine.Sprint())
 	if hint.isOverallTracker {
