@@ -100,9 +100,16 @@ func (l *List) Style() *Style {
 }
 
 func (l *List) analyzeAndStringify(item interface{}) *listItem {
+	itemStr := fmt.Sprint(item)
+	if strings.Contains(itemStr, "\t") {
+		itemStr = strings.Replace(itemStr, "\t", "    ", -1)
+	}
+	if strings.Contains(itemStr, "\r") {
+		itemStr = strings.Replace(itemStr, "\r", "", -1)
+	}
 	return &listItem{
 		Level: l.level,
-		Text:  fmt.Sprint(item),
+		Text:  itemStr,
 	}
 }
 

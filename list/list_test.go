@@ -9,13 +9,13 @@ import (
 var (
 	testCSSClass = "test-css-class"
 	testItem1    = "Game Of Thrones"
-	testItem1ML  = testItem1 + "\n// George. R. R. Martin"
+	testItem1ML  = testItem1 + "\n\t// George. R. R. Martin"
 	testItems2   = []interface{}{"Winter", "Is", "Coming"}
-	testItems2ML = []interface{}{"Winter\nIs\nComing", "Is", "Coming"}
+	testItems2ML = []interface{}{"Winter\r\nIs\nComing", "Is", "Coming"}
 	testItems3   = []interface{}{"This", "Is", "Known"}
 	testItems3ML = []interface{}{"This\nIs\nKnown", "Is", "Known"}
 	testItem4    = "The Dark Tower"
-	testItem4ML  = testItem4 + "\n// Stephen King"
+	testItem4ML  = testItem4 + "\n\t// Stephen King"
 	testItem5    = "The Gunslinger"
 )
 
