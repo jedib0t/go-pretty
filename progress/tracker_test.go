@@ -101,3 +101,17 @@ func TestTracker_Reset(t *testing.T) {
 	assert.Equal(t, time.Time{}, tracker.timeStop)
 	assert.Equal(t, int64(0), tracker.value)
 }
+
+func TestTracker_SetValue(t *testing.T) {
+	tracker := Tracker{Total: 100}
+	assert.Equal(t, int64(0), tracker.value)
+	assert.False(t, tracker.done)
+
+	tracker.SetValue(5)
+	assert.Equal(t, int64(5), tracker.value)
+	assert.False(t, tracker.done)
+
+	tracker.SetValue(tracker.Total)
+	assert.Equal(t, tracker.Total, tracker.value)
+	assert.True(t, tracker.done)
+}
