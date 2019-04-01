@@ -147,10 +147,10 @@ You can also roll your own style:
         Color: table.ColorOptions{
             AutoIndexColumn: nil,
             FirstColumn:     nil,
-            Footer:          text.Colors{color.BgCyan, color.FgBlack},
-            Header:          text.Colors{color.BgHiCyan, color.FgBlack},
-            Row:             text.Colors{color.BgHiWhite, color.FgBlack},
-            RowAlternate:    text.Colors{color.BgWhite, color.FgBlack},
+            Footer:          text.Colors{text.BgCyan, text.FgBlack},
+            Header:          text.Colors{text.BgHiCyan, text.FgBlack},
+            Row:             text.Colors{text.BgHiWhite, text.FgBlack},
+            RowAlternate:    text.Colors{text.BgWhite, text.FgBlack},
         },
         Format: table.FormatOptions{
             Footer: text.FormatUpper,
@@ -170,7 +170,7 @@ You can also roll your own style:
 Or you can use one of the ready-to-use Styles, and just make a few tweaks:
 ```go
     t.SetStyle(table.StyleLight)
-    t.Style().Color.Header = text.Colors{color.BgHiCyan, color.FgBlack}
+    t.Style().Color.Header = text.Colors{text.BgHiCyan, text.FgBlack}
     t.Style().Format.Footer = text.FormatLower
     t.Style().Options.DrawBorder = false
 ```
@@ -261,9 +261,9 @@ set through `SetStyle()`.
 ```go
     t.SetAlign([]text.Align{text.AlignDefault, text.AlignRight, text.AlignDefault, text.AlignDefault, text.AlignCenter})
     t.SetVAlign([]text.VAlign{text.VAlignDefault, text.VAlignMiddle, text.VAlignBottom, text.VAlignMiddle})
-    t.SetColors([]text.Colors{{color.FgWhite, color.BgBlack}, {color.FgWhite, color.BgBlack}})
-    t.SetColorsFooter([]text.Colors{{color.FgRed}, {color.FgGreen}, {color.FgBlue}})
-    t.SetColorsHeader([]text.Colors{{color.FgCyan}, {color.FgMagenta}, {color.FgYellow}, {color.FgBlack, color.BgWhite}})
+    t.SetColors([]text.Colors{{text.FgWhite, text.BgBlack}, {text.FgWhite, text.BgBlack}})
+    t.SetColorsFooter([]text.Colors{{text.FgRed}, {text.FgGreen}, {text.FgBlue}})
+    t.SetColorsHeader([]text.Colors{{text.FgCyan}, {text.FgMagenta}, {text.FgYellow}, {text.FgBlack, text.BgWhite}})
 ```
 
 ## Render As ...
