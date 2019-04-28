@@ -37,12 +37,14 @@ func ExampleInsertEveryN() {
 
 func TestInsertEveryN(t *testing.T) {
 	assert.Equal(t, "Ghost", InsertEveryN("Ghost", '-', 0))
+	assert.Equal(t, "Gツhツoツsツt", InsertEveryN("Ghost", 'ツ', 1))
 	assert.Equal(t, "G-h-o-s-t", InsertEveryN("Ghost", '-', 1))
 	assert.Equal(t, "Gh-os-t", InsertEveryN("Ghost", '-', 2))
 	assert.Equal(t, "Gho-st", InsertEveryN("Ghost", '-', 3))
 	assert.Equal(t, "Ghos-t", InsertEveryN("Ghost", '-', 4))
 	assert.Equal(t, "Ghost", InsertEveryN("Ghost", '-', 5))
 	assert.Equal(t, "\x1b[33mGhost\x1b[0m", InsertEveryN("\x1b[33mGhost\x1b[0m", '-', 0))
+	assert.Equal(t, "\x1b[33mGツhツoツsツt\x1b[0m", InsertEveryN("\x1b[33mGhost\x1b[0m", 'ツ', 1))
 	assert.Equal(t, "\x1b[33mG-h-o-s-t\x1b[0m", InsertEveryN("\x1b[33mGhost\x1b[0m", '-', 1))
 	assert.Equal(t, "\x1b[33mGh-os-t\x1b[0m", InsertEveryN("\x1b[33mGhost\x1b[0m", '-', 2))
 	assert.Equal(t, "\x1b[33mGho-st\x1b[0m", InsertEveryN("\x1b[33mGhost\x1b[0m", '-', 3))
@@ -54,6 +56,7 @@ func ExampleLongestLineLen() {
 	fmt.Printf("LongestLineLen(\"\"): %d\n", LongestLineLen(""))
 	fmt.Printf("LongestLineLen(\"\\n\\n\"): %d\n", LongestLineLen("\n\n"))
 	fmt.Printf("LongestLineLen(\"Ghost\"): %d\n", LongestLineLen("Ghost"))
+	fmt.Printf("LongestLineLen(\"Ghostツ\"): %d\n", LongestLineLen("Ghostツ"))
 	fmt.Printf("LongestLineLen(\"Winter\\nIs\\nComing\"): %d\n", LongestLineLen("Winter\nIs\nComing"))
 	fmt.Printf("LongestLineLen(\"Mother\\nOf\\nDragons\"): %d\n", LongestLineLen("Mother\nOf\nDragons"))
 	fmt.Printf("LongestLineLen(\"\\x1b[33mMother\\x1b[0m\\nOf\\nDragons\"): %d\n", LongestLineLen("\x1b[33mMother\x1b[0m\nOf\nDragons"))
@@ -61,6 +64,7 @@ func ExampleLongestLineLen() {
 	// Output: LongestLineLen(""): 0
 	// LongestLineLen("\n\n"): 0
 	// LongestLineLen("Ghost"): 5
+	// LongestLineLen("Ghostツ"): 7
 	// LongestLineLen("Winter\nIs\nComing"): 6
 	// LongestLineLen("Mother\nOf\nDragons"): 7
 	// LongestLineLen("\x1b[33mMother\x1b[0m\nOf\nDragons"): 7
@@ -70,6 +74,7 @@ func TestLongestLineLen(t *testing.T) {
 	assert.Equal(t, 0, LongestLineLen(""))
 	assert.Equal(t, 0, LongestLineLen("\n\n"))
 	assert.Equal(t, 5, LongestLineLen("Ghost"))
+	assert.Equal(t, 7, LongestLineLen("Ghostツ"))
 	assert.Equal(t, 6, LongestLineLen("Winter\nIs\nComing"))
 	assert.Equal(t, 7, LongestLineLen("Mother\nOf\nDragons"))
 	assert.Equal(t, 7, LongestLineLen("\x1b[33mMother\x1b[0m\nOf\nDragons"))
@@ -125,11 +130,13 @@ func TestRepeatAndTrim(t *testing.T) {
 func ExampleRuneCount() {
 	fmt.Printf("RuneCount(\"\"): %d\n", RuneCount(""))
 	fmt.Printf("RuneCount(\"Ghost\"): %d\n", RuneCount("Ghost"))
+	fmt.Printf("RuneCount(\"Ghostツ\"): %d\n", RuneCount("Ghostツ"))
 	fmt.Printf("RuneCount(\"\\x1b[33mGhost\\x1b[0m\"): %d\n", RuneCount("\x1b[33mGhost\x1b[0m"))
 	fmt.Printf("RuneCount(\"\\x1b[33mGhost\\x1b[0\"): %d\n", RuneCount("\x1b[33mGhost\x1b[0"))
 
 	// Output: RuneCount(""): 0
 	// RuneCount("Ghost"): 5
+	// RuneCount("Ghostツ"): 7
 	// RuneCount("\x1b[33mGhost\x1b[0m"): 5
 	// RuneCount("\x1b[33mGhost\x1b[0"): 5
 }
@@ -137,8 +144,31 @@ func ExampleRuneCount() {
 func TestRuneCount(t *testing.T) {
 	assert.Equal(t, 0, RuneCount(""))
 	assert.Equal(t, 5, RuneCount("Ghost"))
+	assert.Equal(t, 7, RuneCount("Ghostツ"))
 	assert.Equal(t, 5, RuneCount("\x1b[33mGhost\x1b[0m"))
 	assert.Equal(t, 5, RuneCount("\x1b[33mGhost\x1b[0"))
+}
+
+func ExampleRuneWidth() {
+	fmt.Printf("RuneWidth('A'): %d\n", RuneWidth('A'))
+	fmt.Printf("RuneWidth('ツ'): %d\n", RuneWidth('ツ'))
+	fmt.Printf("RuneWidth('⊙'): %d\n", RuneWidth('⊙'))
+	fmt.Printf("RuneWidth('︿'): %d\n", RuneWidth('︿'))
+	fmt.Printf("RuneWidth(rune(27)): %d\n", RuneWidth(rune(27))) // ANSI escape sequence
+
+	// Output: RuneWidth('A'): 1
+	// RuneWidth('ツ'): 2
+	// RuneWidth('⊙'): 1
+	// RuneWidth('︿'): 2
+	// RuneWidth(rune(27)): 0
+}
+
+func TestRuneWidth(t *testing.T) {
+	assert.Equal(t, 1, RuneWidth('A'))
+	assert.Equal(t, 2, RuneWidth('ツ'))
+	assert.Equal(t, 1, RuneWidth('⊙'))
+	assert.Equal(t, 2, RuneWidth('︿'))
+	assert.Equal(t, 0, RuneWidth(rune(27))) // ANSI escape sequence
 }
 
 func ExampleSnip() {

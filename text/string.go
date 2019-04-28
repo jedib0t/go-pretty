@@ -3,6 +3,8 @@ package text
 import (
 	"strings"
 	"unicode/utf8"
+
+	"github.com/mattn/go-runewidth"
 )
 
 // Constants
@@ -39,7 +41,7 @@ func InsertEveryN(str string, runeToInsert rune, n int) string {
 		}
 		out.WriteRune(c)
 		if !isEscSeq {
-			outLen++
+			outLen += RuneWidth(c)
 		}
 
 		if isEscSeq && c == EscapeStopRune {
@@ -68,11 +70,11 @@ func LongestLineLen(str string) int {
 			}
 			currLength = 0
 		} else if !isEscSeq {
-			currLength++
+			currLength += RuneWidth(c)
 		}
 	}
 	if currLength > maxLength {
-		return currLength
+		maxLength = currLength
 	}
 	return maxLength
 }
@@ -125,10 +127,22 @@ func RuneCount(str string) int {
 				isEscSeq = false
 			}
 		} else {
-			count++
+			count += RuneWidth(c)
 		}
 	}
 	return count
+}
+
+// RuneWidth returns the mostly accurate character-width of the rune. This is
+// not 100% accurate as the character width is usually dependant on the
+// typeface (font) used in the console/terminal. For ex.:
+//  RuneWidth('A') == 1
+//  RuneWidth('ツ') == 2
+//  RuneWidth('⊙') == 1
+//  RuneWidth('︿') == 2
+//  RuneWidth(0x27) == 0
+func RuneWidth(r rune) int {
+	return runewidth.RuneWidth(r)
 }
 
 // Snip returns the given string with a fixed length. For ex.:
