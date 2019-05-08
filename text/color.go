@@ -152,17 +152,5 @@ func colorize(s string, escapeSeq string) string {
 	if !colorsEnabled || escapeSeq == "" {
 		return s
 	}
-
-	out := ""
-	if !strings.HasPrefix(s, EscapeStart) {
-		out += escapeSeq
-	}
-	out += strings.Replace(s, EscapeReset, EscapeReset+escapeSeq, -1)
-	if !strings.HasSuffix(out, EscapeReset) {
-		out += EscapeReset
-	}
-	if strings.Contains(out, escapeSeq+EscapeReset) {
-		out = strings.Replace(out, escapeSeq+EscapeReset, "", -1)
-	}
-	return out
+	return Escape(s, escapeSeq)
 }
