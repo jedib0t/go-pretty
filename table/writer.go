@@ -17,26 +17,39 @@ type Writer interface {
 	RenderCSV() string
 	RenderHTML() string
 	RenderMarkdown() string
-	SetAlign(align []text.Align)
-	SetAlignFooter(align []text.Align)
-	SetAlignHeader(align []text.Align)
-	SetAllowedColumnLengths(lengths []int)
 	SetAllowedRowLength(length int)
 	SetAutoIndex(autoIndex bool)
 	SetCaption(format string, a ...interface{})
-	SetColors(colors []text.Colors)
-	SetColorsFooter(colors []text.Colors)
-	SetColorsHeader(colors []text.Colors)
+	SetColumnConfigs(configs []ColumnConfig)
 	SetHTMLCSSClass(cssClass string)
 	SetIndexColumn(colNum int)
 	SetOutputMirror(mirror io.Writer)
 	SetPageSize(numLines int)
+	SetRowPainter(painter RowPainter)
 	SetStyle(style Style)
-	SetVAlign(vAlign []text.VAlign)
-	SetVAlignFooter(vAlign []text.VAlign)
-	SetVAlignHeader(vAlign []text.VAlign)
 	SortBy(sortBy []SortBy)
 	Style() *Style
+
+	// deprecated; use SetColumnConfigs instead
+	SetAlign(align []text.Align)
+	// deprecated; use SetColumnConfigs instead
+	SetAlignFooter(align []text.Align)
+	// deprecated; use SetColumnConfigs instead
+	SetAlignHeader(align []text.Align)
+	// deprecated; use SetColumnConfigs instead
+	SetAllowedColumnLengths(lengths []int)
+	// deprecated; use SetColumnConfigs instead
+	SetColors(colors []text.Colors)
+	// deprecated; use SetColumnConfigs instead
+	SetColorsFooter(colors []text.Colors)
+	// deprecated; use SetColumnConfigs instead
+	SetColorsHeader(colors []text.Colors)
+	// deprecated; use SetColumnConfigs instead
+	SetVAlign(vAlign []text.VAlign)
+	// deprecated; use SetColumnConfigs instead
+	SetVAlignFooter(vAlign []text.VAlign)
+	// deprecated; use SetColumnConfigs instead
+	SetVAlignHeader(vAlign []text.VAlign)
 }
 
 // NewWriter initializes and returns a Writer.

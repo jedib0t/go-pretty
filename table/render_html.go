@@ -68,7 +68,7 @@ func (t *Table) RenderHTML() string {
 		}
 		out.WriteString("\">\n")
 		t.htmlRenderRows(&out, t.rowsHeader, renderHint{isHeaderRow: true})
-		t.htmlRenderRows(&out, t.getRowsSorted(), renderHint{})
+		t.htmlRenderRows(&out, t.rows, renderHint{})
 		t.htmlRenderRows(&out, t.rowsFooter, renderHint{isFooterRow: true})
 		out.WriteString("</table>")
 	}

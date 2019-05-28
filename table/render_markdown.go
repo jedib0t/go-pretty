@@ -15,7 +15,7 @@ func (t *Table) RenderMarkdown() string {
 	var out strings.Builder
 	if t.numColumns > 0 {
 		t.markdownRenderRows(&out, t.rowsHeader, true, false)
-		t.markdownRenderRows(&out, t.getRowsSorted(), false, false)
+		t.markdownRenderRows(&out, t.rows, false, false)
 		t.markdownRenderRows(&out, t.rowsFooter, false, true)
 		if t.caption != "" {
 			out.WriteString("\n_")

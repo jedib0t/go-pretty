@@ -30,7 +30,7 @@ func (t *Table) Render() string {
 		t.renderRowsHeader(&out)
 
 		// (data) rows
-		t.renderRows(&out, t.getRowsSorted(), renderHint{})
+		t.renderRows(&out, t.rows, renderHint{})
 
 		// footer rows
 		t.renderRowsFooter(&out)
@@ -106,9 +106,9 @@ func (t *Table) renderColumnAutoIndex(out *strings.Builder, hint renderHint) {
 }
 
 func (t *Table) renderColumnColorized(out *strings.Builder, colIdx int, colStr string, hint renderHint) {
-	colors := t.getRowColors(hint)
-	if colIdx < len(colors) && colors[colIdx] != nil {
-		out.WriteString(colors[colIdx].Sprint(colStr))
+	colors := t.getColumnColors(colIdx, hint)
+	if colors != nil {
+		out.WriteString(colors.Sprint(colStr))
 	} else if hint.isHeaderRow && t.style.Color.Header != nil {
 		out.WriteString(t.style.Color.Header.Sprint(colStr))
 	} else if hint.isFooterRow && t.style.Color.Footer != nil {
