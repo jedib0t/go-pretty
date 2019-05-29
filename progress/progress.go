@@ -20,28 +20,31 @@ var (
 
 // Progress helps track progress for one or more tasks.
 type Progress struct {
-	autoStop             bool
-	done                 chan bool
-	lengthTracker        int
-	lengthProgress       int
-	outputWriter         io.Writer
-	hideTime             bool
-	hideTracker          bool
-	hideValue            bool
-	hidePercentage       bool
-	messageWidth         int
-	numTrackersExpected  int64
-	overallTracker       *Tracker
-	renderInProgress     bool
-	showOverallTracker   bool
-	sortBy               SortBy
-	style                *Style
-	trackerPosition      Position
-	trackersActive       []*Tracker
-	trackersDone         []*Tracker
-	trackersInQueue      []*Tracker
-	trackersInQueueMutex sync.Mutex
-	updateFrequency      time.Duration
+	autoStop              bool
+	done                  chan bool
+	lengthTracker         int
+	lengthProgress        int
+	outputWriter          io.Writer
+	hideTime              bool
+	hideTracker           bool
+	hideValue             bool
+	hidePercentage        bool
+	messageWidth          int
+	numTrackersExpected   int64
+	overallTracker        *Tracker
+	renderInProgress      bool
+	renderInProgressMutex sync.RWMutex
+	showOverallTracker    bool
+	sortBy                SortBy
+	style                 *Style
+	trackerPosition       Position
+	trackersActive        []*Tracker
+	trackersActiveMutex   sync.RWMutex
+	trackersDone          []*Tracker
+	trackersDoneMutex     sync.RWMutex
+	trackersInQueue       []*Tracker
+	trackersInQueueMutex  sync.RWMutex
+	updateFrequency       time.Duration
 }
 
 // Position defines the position of the Tracker with respect to the Tracker's
@@ -67,16 +70,20 @@ func (p *Progress) AppendTracker(t *Tracker) {
 	if p.overallTracker == nil {
 		p.overallTracker = &Tracker{Total: 1}
 		if p.numTrackersExpected > 0 {
+			p.overallTracker.syncMutex.Lock()
 			p.overallTracker.Total = p.numTrackersExpected * 100
+			p.overallTracker.syncMutex.Unlock()
 		}
 		p.overallTracker.start()
 	}
 	p.trackersInQueueMutex.Lock()
 	p.trackersInQueue = append(p.trackersInQueue, t)
+	p.trackersInQueueMutex.Unlock()
+	p.overallTracker.syncMutex.Lock()
 	if p.overallTracker.Total < int64(p.Length())*100 {
 		p.overallTracker.Total = int64(p.Length()) * 100
 	}
-	p.trackersInQueueMutex.Unlock()
+	p.overallTracker.syncMutex.Unlock()
 }
 
 // AppendTrackers appends one or more Trackers for tracking.
@@ -89,17 +96,41 @@ func (p *Progress) AppendTrackers(trackers []*Tracker) {
 // IsRenderInProgress returns true if a call to Render() was made, and is still
 // in progress and has not ended yet.
 func (p *Progress) IsRenderInProgress() bool {
-	return p.renderInProgress
+	p.renderInProgressMutex.RLock()
+	progress := p.renderInProgress
+	p.renderInProgressMutex.RUnlock()
+	return progress
+}
+
+func (p *Progress) trackersInQueueLength() int {
+	p.trackersInQueueMutex.RLock()
+	count := len(p.trackersInQueue)
+	p.trackersInQueueMutex.RUnlock()
+	return count
+}
+
+func (p *Progress) trackersActiveLength() int {
+	p.trackersActiveMutex.RLock()
+	count := len(p.trackersActive)
+	p.trackersActiveMutex.RUnlock()
+	return count
+}
+
+func (p *Progress) trackersDoneLength() int {
+	p.trackersDoneMutex.RLock()
+	count := len(p.trackersDone)
+	p.trackersDoneMutex.RUnlock()
+	return count
 }
 
 // Length returns the number of Trackers tracked overall.
 func (p *Progress) Length() int {
-	return len(p.trackersInQueue) + len(p.trackersActive) + len(p.trackersDone)
+	return p.trackersInQueueLength() + p.trackersActiveLength() + p.trackersDoneLength()
 }
 
 // LengthActive returns the number of Trackers actively tracked (not done yet).
 func (p *Progress) LengthActive() int {
-	return len(p.trackersInQueue) + len(p.trackersActive)
+	return p.trackersInQueueLength() + p.trackersActiveLength()
 }
 
 // SetAutoStop toggles the auto-stop functionality. Auto-stop set to true would

@@ -1,6 +1,7 @@
 package progress
 
 import (
+	"sync"
 	"time"
 )
 
@@ -24,6 +25,7 @@ type Tracker struct {
 	timeStart time.Time
 	timeStop  time.Time
 	value     int64
+	syncMutex sync.RWMutex
 }
 
 // ETA returns the expected time of "arrival" or completion of this tracker. It
@@ -43,10 +45,14 @@ func (t *Tracker) ETA() time.Duration {
 
 // Increment updates the current value of the task being tracked.
 func (t *Tracker) Increment(value int64) {
+	t.syncMutex.Lock()
 	if !t.done {
 		t.value += value
 		if t.Total > 0 && t.value >= t.Total {
+			t.syncMutex.Unlock()
 			t.stop()
+		} else {
+			t.syncMutex.Unlock()
 		}
 	}
 }
@@ -54,50 +60,67 @@ func (t *Tracker) Increment(value int64) {
 // IsDone returns true if the tracker is done (value has reached the expected
 // Total set during initialization).
 func (t *Tracker) IsDone() bool {
-	return t.done
+	t.syncMutex.RLock()
+	isDone := t.done
+	t.syncMutex.RUnlock()
+	return isDone
 }
 
 // MarkAsDone forces completion of the tracker by updating the current value as
 // the expected Total value.
 func (t *Tracker) MarkAsDone() {
+	t.syncMutex.Lock()
 	t.Total = t.value
+	t.syncMutex.Unlock()
 	t.stop()
 }
 
 // PercentDone returns the currently completed percentage value.
 func (t *Tracker) PercentDone() float64 {
+	t.syncMutex.RLock()
 	if t.Total == 0 {
+		t.syncMutex.RUnlock()
 		return 0
 	}
-	return float64(t.value) * 100.0 / float64(t.Total)
+	percent := float64(t.value) * 100.0 / float64(t.Total)
+	t.syncMutex.RUnlock()
+	return percent
 }
 
 // Reset resets the tracker to its initial state.
 func (t *Tracker) Reset() {
+	t.syncMutex.Lock()
 	t.done = false
 	t.timeStart = time.Time{}
 	t.timeStop = time.Time{}
 	t.value = 0
+	t.syncMutex.Unlock()
 }
 
 // SetValue sets the value of the tracker and re-calculates if the tracker is
 // "done".
 func (t *Tracker) SetValue(value int64) {
+	t.syncMutex.Lock()
 	t.done = false
 	t.timeStop = time.Time{}
 	t.value = 0
+	t.syncMutex.Unlock()
 	t.Increment(value)
 }
 
 func (t *Tracker) start() {
+	t.syncMutex.Lock()
 	t.done = false
 	t.timeStart = time.Now()
+	t.syncMutex.Unlock()
 }
 
 func (t *Tracker) stop() {
+	t.syncMutex.Lock()
 	t.done = true
 	t.timeStop = time.Now()
 	if t.value > t.Total {
 		t.Total = t.value
 	}
+	t.syncMutex.Unlock()
 }
