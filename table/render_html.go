@@ -134,7 +134,8 @@ func (t *Table) htmlRenderRows(out *strings.Builder, rows []rowStr, hint renderH
 		}
 
 		var renderedTagOpen, shouldRenderTagClose bool
-		for _, row := range rows {
+		for idx, row := range rows {
+			hint.rowNumber = idx + 1
 			if len(row) > 0 {
 				if !renderedTagOpen {
 					out.WriteString("  <")
