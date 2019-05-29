@@ -32,6 +32,22 @@ func TestColor_EscapeSeq(t *testing.T) {
 	assert.Equal(t, "\x1b[40m", BgBlack.EscapeSeq())
 }
 
+func ExampleColor_HTMLProperty() {
+	fmt.Printf("Bold: %#v\n", Bold.HTMLProperty())
+	fmt.Printf("Black Background: %#v\n", BgBlack.HTMLProperty())
+	fmt.Printf("Black Foreground: %#v\n", FgBlack.HTMLProperty())
+
+	// Output: Bold: "class=\"bold\""
+	// Black Background: "class=\"bg-black\""
+	// Black Foreground: "class=\"fg-black\""
+}
+
+func TestColor_HTMLProperty(t *testing.T) {
+	assert.Equal(t, "class=\"bold\"", Bold.HTMLProperty())
+	assert.Equal(t, "class=\"bg-black\"", BgBlack.HTMLProperty())
+	assert.Equal(t, "class=\"fg-black\"", FgBlack.HTMLProperty())
+}
+
 func ExampleColor_Sprint() {
 	fmt.Printf("%#v\n", BgBlack.Sprint("Black Background"))
 	fmt.Printf("%#v\n", FgBlack.Sprint("Black Foreground"))
@@ -76,6 +92,26 @@ func ExampleColors_EscapeSeq() {
 func TestColors_EscapeSeq(t *testing.T) {
 	assert.Equal(t, "", Colors{}.EscapeSeq())
 	assert.Equal(t, "\x1b[40;37m", Colors{BgBlack, FgWhite}.EscapeSeq())
+}
+
+func ExampleColors_HTMLProperty() {
+	fmt.Printf("Black Background: %#v\n", Colors{BgBlack}.HTMLProperty())
+	fmt.Printf("Black Foreground: %#v\n", Colors{FgBlack}.HTMLProperty())
+	fmt.Printf("Black Background, White Foreground: %#v\n", Colors{BgBlack, FgWhite}.HTMLProperty())
+	fmt.Printf("Black Foreground, White Background: %#v\n", Colors{FgBlack, BgWhite}.HTMLProperty())
+	fmt.Printf("Bold Italic Underline Red Text: %#v\n", Colors{Bold, Italic, Underline, FgRed}.HTMLProperty())
+
+	// Output: Black Background: "class=\"bg-black\""
+	// Black Foreground: "class=\"fg-black\""
+	// Black Background, White Foreground: "class=\"bg-black fg-white\""
+	// Black Foreground, White Background: "class=\"bg-white fg-black\""
+	// Bold Italic Underline Red Text: "class=\"bold fg-red italic underline\""
+}
+
+func TestColors_HTMLProperty(t *testing.T) {
+	assert.Equal(t, "", Colors{}.HTMLProperty())
+	assert.Equal(t, "class=\"bg-black fg-white\"", Colors{BgBlack, FgWhite}.HTMLProperty())
+	assert.Equal(t, "class=\"bold fg-red\"", Colors{Bold, FgRed}.HTMLProperty())
 }
 
 func ExampleColors_Sprint() {

@@ -92,6 +92,8 @@ func (t *Table) htmlRenderRow(out *strings.Builder, row rowStr, hint renderHint)
 		// determine the HTML "align"/"valign" property values
 		align := t.getAlign(colIdx, hint).HTMLProperty()
 		vAlign := t.getVAlign(colIdx, hint).HTMLProperty()
+		// determine the HTML "class" property values for the colors
+		class := t.getColumnColors(colIdx, hint).HTMLProperty()
 
 		// write the row
 		out.WriteString("    <")
@@ -99,6 +101,10 @@ func (t *Table) htmlRenderRow(out *strings.Builder, row rowStr, hint renderHint)
 		if align != "" {
 			out.WriteRune(' ')
 			out.WriteString(align)
+		}
+		if class != "" {
+			out.WriteRune(' ')
+			out.WriteString(class)
 		}
 		if vAlign != "" {
 			out.WriteRune(' ')

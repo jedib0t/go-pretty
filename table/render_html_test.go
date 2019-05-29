@@ -1,6 +1,7 @@
 package table
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/jedib0t/go-pretty/text"
@@ -74,6 +75,80 @@ func TestTable_RenderHTML(t *testing.T) {
 </table>`
 
 	assert.Equal(t, expectedOut, tw.RenderHTML())
+}
+
+func TestTable_RenderHTML_Colored(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendRow(testRowMultiLine)
+	tw.AppendFooter(testFooter)
+	colorBOnW := text.Colors{text.BgWhite, text.FgBlack}
+	tw.SetColorsHeader([]text.Colors{colorBOnW, colorBOnW, colorBOnW, colorBOnW, colorBOnW})
+	tw.SetColors([]text.Colors{{text.Bold}, {text.FgCyan}, {text.FgMagenta}, {text.FgYellow}, {text.FgBlack}})
+	tw.SetColorsFooter([]text.Colors{{}, {}, colorBOnW, colorBOnW, {}})
+	tw.SetVAlign([]text.VAlign{
+		text.VAlignDefault, text.VAlignDefault, text.VAlignDefault, text.VAlignBottom, text.VAlignBottom,
+	})
+	headerFooterAlign := []text.VAlign{
+		text.VAlignDefault, text.VAlignDefault, text.VAlignDefault, text.VAlignDefault, text.VAlignDefault,
+	}
+	tw.SetVAlignFooter(headerFooterAlign)
+	tw.SetVAlignHeader(headerFooterAlign)
+
+	expectedOut := `<table class="go-pretty-table">
+  <thead>
+  <tr>
+    <th align="right" class="bg-white fg-black">#</th>
+    <th class="bg-white fg-black">First Name</th>
+    <th class="bg-white fg-black">Last Name</th>
+    <th align="right" class="bg-white fg-black">Salary</th>
+    <th class="bg-white fg-black">&nbsp;</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td align="right" class="bold">1</td>
+    <td class="fg-cyan">Arya</td>
+    <td class="fg-magenta">Stark</td>
+    <td align="right" class="fg-yellow" valign="bottom">3000</td>
+    <td class="fg-black" valign="bottom">&nbsp;</td>
+  </tr>
+  <tr>
+    <td align="right" class="bold">20</td>
+    <td class="fg-cyan">Jon</td>
+    <td class="fg-magenta">Snow</td>
+    <td align="right" class="fg-yellow" valign="bottom">2000</td>
+    <td class="fg-black" valign="bottom">You know nothing, Jon Snow!</td>
+  </tr>
+  <tr>
+    <td align="right" class="bold">300</td>
+    <td class="fg-cyan">Tyrion</td>
+    <td class="fg-magenta">Lannister</td>
+    <td align="right" class="fg-yellow" valign="bottom">5000</td>
+    <td class="fg-black" valign="bottom">&nbsp;</td>
+  </tr>
+  <tr>
+    <td align="right" class="bold">0</td>
+    <td class="fg-cyan">Winter</td>
+    <td class="fg-magenta">Is</td>
+    <td align="right" class="fg-yellow" valign="bottom">0</td>
+    <td class="fg-black" valign="bottom">Coming.<br/>The North Remembers!<br/>This is known.</td>
+  </tr>
+  </tbody>
+  <tfoot>
+  <tr>
+    <td align="right">&nbsp;</td>
+    <td>&nbsp;</td>
+    <td class="bg-white fg-black">Total</td>
+    <td align="right" class="bg-white fg-black">10000</td>
+    <td>&nbsp;</td>
+  </tr>
+  </tfoot>
+</table>`
+
+	assert.Equal(t, expectedOut, tw.RenderHTML())
+	fmt.Println(tw.RenderHTML())
 }
 
 func TestTable_RenderHTML_Empty(t *testing.T) {
