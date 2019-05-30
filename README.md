@@ -26,7 +26,7 @@ Pretty-print tables into ASCII/Unicode strings.
 
 <img src="table/images/table-StyleColoredBright.png" width="640px"/>
 
-Detailed documentation can be found here: [table/](table/)
+Detailed documentation can be found here: [table/](table)
 
 ## List
 
@@ -44,7 +44,7 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
    ■ The Gunslinger
 ```
 
-Detailed documentation can be found here: [list/](list/)
+Detailed documentation can be found here: [list/](list)
 
 # Progress
 
@@ -65,7 +65,7 @@ Downloading File    #  9 ... 32.1% (●●●●●●●○◌◌◌◌◌◌�
 Transferring Amount # 10 ... 13.0% (●●○◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌) [£32.50K in 198.84ms]
 ```
 
-Detailed documentation can be found here: [progress/](progress/)
+Detailed documentation can be found here: [progress/](progress)
 
 ## Text
 
@@ -78,10 +78,12 @@ of the functions available are used in one or more of the other packages here.
      - [text/color.go](text/color.go)
    - Cursor Movement
      - [text/cursor.go](text/cursor.go)
-   - Format text (convert case for now)
+   - Format text (convert case)
      - [text/format.go](text/format.go)
    - String Manipulation (Pad, RepeatAndTrim, RuneCount, Trim, etc.)
      - [text/string.go](text/string.go)
+   - Transform text (UnixTime to human-readable-time, pretty-JSON, etc.)
+     - [text/transformer.go](text/transformer.go)
    - Wrap text
      - [text/wrap.go](text/wrap.go)
 

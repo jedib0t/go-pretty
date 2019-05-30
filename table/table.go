@@ -233,7 +233,10 @@ func (t *Table) SetPageSize(numLines int) {
 	t.pageSize = numLines
 }
 
-// SetRowPainter sets the RowPainter override.
+// SetRowPainter sets the RowPainter function which determines the colors to use
+// on a row. Before rendering, this function is invoked on all rows and the
+// color of each row is determined. This color takes precedence over other ways
+// to set color (ColumnConfig.Color*, SetColor*()).
 func (t *Table) SetRowPainter(painter RowPainter) {
 	t.rowPainter = painter
 }
