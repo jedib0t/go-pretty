@@ -29,14 +29,14 @@ type ColumnConfig struct {
 	// ColorsHeader defines the colors to be used on the column in Header rows
 	ColorsHeader text.Colors
 
-	// Formatter is a custom-function that changes the way the value gets
-	// rendered to the console. Refer to text/formatter.go for ready-to-use
-	// Formatter functions.
-	Formatter text.Formatter
-	// FormatterFooter is like Formatter for Footer rows
-	FormatterFooter text.Formatter
-	// FormatterHeader is like Formatter for Header rows
-	FormatterHeader text.Formatter
+	// Transformer is a custom-function that changes the way the value gets
+	// rendered to the console. Refer to text/transformer.go for ready-to-use
+	// Transformer functions.
+	Transformer text.Transformer
+	// TransformerFooter is like Transformer but for Footer rows
+	TransformerFooter text.Transformer
+	// TransformerHeader is like Transformer but for Header rows
+	TransformerHeader text.Transformer
 
 	// VAlign defines the vertical alignment
 	VAlign text.VAlign

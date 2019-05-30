@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewNumberFormatter(t *testing.T) {
+func TestNewNumberTransformer(t *testing.T) {
 	signColorsMap := map[string]Colors{
 		"negative": colorsNumberNegative,
 		"positive": colorsNumberPositive,
@@ -59,12 +59,12 @@ func TestNewNumberFormatter(t *testing.T) {
 
 	for sign, valuesFormatMap := range colorValuesMap {
 		for value, format := range valuesFormatMap {
-			formatter := NewNumberFormatter(format)
+			transformer := NewNumberTransformer(format)
 			expected := signColorsMap[sign].Sprintf(format, value)
 			if sign == "negative" {
 				expected = strings.Replace(expected, "-0", "-00", 1)
 			}
-			actual := formatter(value)
+			actual := transformer(value)
 			message := fmt.Sprintf("%s.%s: expected=%v, actual=%v; format=%#v",
 				sign, reflect.TypeOf(value).Kind(), expected, actual, format)
 
@@ -73,7 +73,7 @@ func TestNewNumberFormatter(t *testing.T) {
 	}
 
 	// invalid input
-	assert.Equal(t, "foo", NewNumberFormatter("%05d")("foo"))
+	assert.Equal(t, "foo", NewNumberTransformer("%05d")("foo"))
 }
 
 type jsonTest struct {
@@ -89,8 +89,8 @@ type jsonNestTest struct {
 	C float64
 }
 
-func TestNewJSONFormatter(t *testing.T) {
-	formatter := NewJSONFormatter("", "    ")
+func TestNewJSONTransformer(t *testing.T) {
+	transformer := NewJSONTransformer("", "    ")
 
 	// instance of a struct
 	inputObj := jsonTest{
@@ -113,18 +113,18 @@ func TestNewJSONFormatter(t *testing.T) {
         "C": 3
     }
 }`
-	assert.Equal(t, expectedOutput, formatter(inputObj))
+	assert.Equal(t, expectedOutput, transformer(inputObj))
 
 	// numbers
-	assert.Equal(t, "1", formatter(int(1)))
-	assert.Equal(t, "1.2345", formatter(float32(1.2345)))
+	assert.Equal(t, "1", transformer(int(1)))
+	assert.Equal(t, "1.2345", transformer(float32(1.2345)))
 
 	// slices
-	assert.Equal(t, "[\n    1,\n    2,\n    3\n]", formatter([]uint{1, 2, 3}))
+	assert.Equal(t, "[\n    1,\n    2,\n    3\n]", transformer([]uint{1, 2, 3}))
 
 	// strings
-	assert.Equal(t, "\"foo\"", formatter("foo"))
-	assert.Equal(t, "\"{foo...\"", formatter("{foo...")) // malformed JSON
+	assert.Equal(t, "\"foo\"", transformer("foo"))
+	assert.Equal(t, "\"{foo...\"", transformer("{foo...")) // malformed JSON
 
 	// strings with valid JSON
 	input := "{\"foo\":\"bar\",\"baz\":[1,2,3]}"
@@ -136,10 +136,10 @@ func TestNewJSONFormatter(t *testing.T) {
         3
     ]
 }`
-	assert.Equal(t, expectedOutput, formatter(input))
+	assert.Equal(t, expectedOutput, transformer(input))
 }
 
-func TestNewTimeFormatter(t *testing.T) {
+func TestNewTimeTransformer(t *testing.T) {
 	inStr := "2010-11-12T13:14:15-07:00"
 	inTime, err := time.Parse(time.RFC3339, inStr)
 	assert.Nil(t, err)
@@ -147,30 +147,30 @@ func TestNewTimeFormatter(t *testing.T) {
 
 	location, err := time.LoadLocation("America/Los_Angeles")
 	assert.Nil(t, err)
-	formatter := NewTimeFormatter(time.RFC3339, location)
+	transformer := NewTimeTransformer(time.RFC3339, location)
 	expected := "2010-11-12T12:14:15-08:00"
-	assert.Equal(t, expected, formatter(inStr))
-	assert.Equal(t, expected, formatter(inTime))
-	assert.Equal(t, expected, formatter(inDateTime))
+	assert.Equal(t, expected, transformer(inStr))
+	assert.Equal(t, expected, transformer(inTime))
+	assert.Equal(t, expected, transformer(inDateTime))
 
 	location, err = time.LoadLocation("Asia/Singapore")
 	assert.Nil(t, err)
-	formatter = NewTimeFormatter(time.UnixDate, location)
+	transformer = NewTimeTransformer(time.UnixDate, location)
 	expected = "Sat Nov 13 04:14:15 +08 2010"
-	assert.Equal(t, expected, formatter(inStr))
-	assert.Equal(t, expected, formatter(inTime))
-	assert.Equal(t, expected, formatter(inDateTime))
+	assert.Equal(t, expected, transformer(inStr))
+	assert.Equal(t, expected, transformer(inTime))
+	assert.Equal(t, expected, transformer(inDateTime))
 
 	location, err = time.LoadLocation("Europe/London")
 	assert.Nil(t, err)
-	formatter = NewTimeFormatter(time.RFC3339, location)
+	transformer = NewTimeTransformer(time.RFC3339, location)
 	expected = "2010-11-12T20:14:15Z"
-	assert.Equal(t, expected, formatter(inStr))
-	assert.Equal(t, expected, formatter(inTime))
-	assert.Equal(t, expected, formatter(inDateTime))
+	assert.Equal(t, expected, transformer(inStr))
+	assert.Equal(t, expected, transformer(inTime))
+	assert.Equal(t, expected, transformer(inDateTime))
 }
 
-func TestNewUnixTimeFormatter(t *testing.T) {
+func TestNewUnixTimeTransformer(t *testing.T) {
 	inStr := "2010-11-12T13:14:15-07:00"
 	inTime, err := time.Parse(time.RFC3339, inStr)
 	assert.Nil(t, err)
@@ -178,40 +178,40 @@ func TestNewUnixTimeFormatter(t *testing.T) {
 
 	location, err := time.LoadLocation("America/Los_Angeles")
 	assert.Nil(t, err)
-	formatter := NewUnixTimeFormatter(time.RFC3339, location)
+	transformer := NewUnixTimeTransformer(time.RFC3339, location)
 	expected := "2010-11-12T12:14:15-08:00"
-	assert.Equal(t, expected, formatter(fmt.Sprint(inUnixTime)), "seconds in string")
-	assert.Equal(t, expected, formatter(inUnixTime), "seconds")
-	assert.Equal(t, expected, formatter(inUnixTime*1000), "milliseconds")
-	assert.Equal(t, expected, formatter(inUnixTime*1000000), "microseconds")
-	assert.Equal(t, expected, formatter(inUnixTime*1000000000), "nanoseconds")
+	assert.Equal(t, expected, transformer(fmt.Sprint(inUnixTime)), "seconds in string")
+	assert.Equal(t, expected, transformer(inUnixTime), "seconds")
+	assert.Equal(t, expected, transformer(inUnixTime*1000), "milliseconds")
+	assert.Equal(t, expected, transformer(inUnixTime*1000000), "microseconds")
+	assert.Equal(t, expected, transformer(inUnixTime*1000000000), "nanoseconds")
 
 	location, err = time.LoadLocation("Asia/Singapore")
 	assert.Nil(t, err)
-	formatter = NewUnixTimeFormatter(time.UnixDate, location)
+	transformer = NewUnixTimeTransformer(time.UnixDate, location)
 	expected = "Sat Nov 13 04:14:15 +08 2010"
-	assert.Equal(t, expected, formatter(fmt.Sprint(inUnixTime)), "seconds in string")
-	assert.Equal(t, expected, formatter(inUnixTime), "seconds")
-	assert.Equal(t, expected, formatter(inUnixTime*1000), "milliseconds")
-	assert.Equal(t, expected, formatter(inUnixTime*1000000), "microseconds")
-	assert.Equal(t, expected, formatter(inUnixTime*1000000000), "nanoseconds")
+	assert.Equal(t, expected, transformer(fmt.Sprint(inUnixTime)), "seconds in string")
+	assert.Equal(t, expected, transformer(inUnixTime), "seconds")
+	assert.Equal(t, expected, transformer(inUnixTime*1000), "milliseconds")
+	assert.Equal(t, expected, transformer(inUnixTime*1000000), "microseconds")
+	assert.Equal(t, expected, transformer(inUnixTime*1000000000), "nanoseconds")
 
 	location, err = time.LoadLocation("Europe/London")
 	assert.Nil(t, err)
-	formatter = NewUnixTimeFormatter(time.RFC3339, location)
+	transformer = NewUnixTimeTransformer(time.RFC3339, location)
 	expected = "2010-11-12T20:14:15Z"
-	assert.Equal(t, expected, formatter(fmt.Sprint(inUnixTime)), "seconds in string")
-	assert.Equal(t, expected, formatter(inUnixTime), "seconds")
-	assert.Equal(t, expected, formatter(inUnixTime*1000), "milliseconds")
-	assert.Equal(t, expected, formatter(inUnixTime*1000000), "microseconds")
-	assert.Equal(t, expected, formatter(inUnixTime*1000000000), "nanoseconds")
+	assert.Equal(t, expected, transformer(fmt.Sprint(inUnixTime)), "seconds in string")
+	assert.Equal(t, expected, transformer(inUnixTime), "seconds")
+	assert.Equal(t, expected, transformer(inUnixTime*1000), "milliseconds")
+	assert.Equal(t, expected, transformer(inUnixTime*1000000), "microseconds")
+	assert.Equal(t, expected, transformer(inUnixTime*1000000000), "nanoseconds")
 
-	assert.Equal(t, "0.123456", formatter(float32(0.123456)))
+	assert.Equal(t, "0.123456", transformer(float32(0.123456)))
 }
 
-func TestNewURLFormatter(t *testing.T) {
+func TestNewURLTransformer(t *testing.T) {
 	url := "https://winter.is.coming"
-	formatter := NewURLFormatter()
+	transformer := NewURLTransformer()
 
-	assert.Equal(t, colorsURL.Sprint(url), formatter(url))
+	assert.Equal(t, colorsURL.Sprint(url), transformer(url))
 }

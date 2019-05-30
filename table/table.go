@@ -303,8 +303,8 @@ func (t *Table) analyzeAndStringify(row Row, hint renderHint) rowStr {
 
 		// convert to a string and store it in the row
 		var colStr string
-		if formatter := t.getColumnFormatter(colIdx, hint); formatter != nil {
-			colStr = formatter(col)
+		if transformer := t.getColumnTransformer(colIdx, hint); transformer != nil {
+			colStr = transformer(col)
 		} else if colStrVal, ok := col.(string); ok {
 			colStr = colStrVal
 		} else {
@@ -398,18 +398,18 @@ func (t *Table) getColumnColors(colIdx int, hint renderHint) text.Colors {
 	return nil
 }
 
-func (t *Table) getColumnFormatter(colIdx int, hint renderHint) text.Formatter {
-	var formatter text.Formatter
+func (t *Table) getColumnTransformer(colIdx int, hint renderHint) text.Transformer {
+	var transformer text.Transformer
 	if cfg, ok := t.columnConfigMap[colIdx]; ok {
 		if hint.isHeaderRow {
-			formatter = cfg.FormatterHeader
+			transformer = cfg.TransformerHeader
 		} else if hint.isFooterRow {
-			formatter = cfg.FormatterFooter
+			transformer = cfg.TransformerFooter
 		} else {
-			formatter = cfg.Formatter
+			transformer = cfg.Transformer
 		}
 	}
-	return formatter
+	return transformer
 }
 
 func (t *Table) getColumnWidthMax(colIdx int) int {

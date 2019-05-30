@@ -348,17 +348,17 @@ func TestTable_Render_ColoredStyleAutoIndex(t *testing.T) {
 }
 
 func TestTable_Render_ColumnConfigs(t *testing.T) {
-	generatePrefixFormatter := func(prefix string) text.Formatter {
+	generatePrefixTransformer := func(prefix string) text.Transformer {
 		return func(val interface{}) string {
 			return fmt.Sprintf("%s%v", prefix, val)
 		}
 	}
-	generateSuffixFormatter := func(suffix string) text.Formatter {
+	generateSuffixTransformer := func(suffix string) text.Transformer {
 		return func(val interface{}) string {
 			return fmt.Sprintf("%v%s", val, suffix)
 		}
 	}
-	salaryFormatter := text.Formatter(func(val interface{}) string {
+	salaryTransformer := text.Transformer(func(val interface{}) string {
 		if valInt, ok := val.(int); ok {
 			return fmt.Sprintf("$ %.2f", float64(valInt)+0.03)
 		}
@@ -373,47 +373,47 @@ func TestTable_Render_ColumnConfigs(t *testing.T) {
 	tw.SetAutoIndex(true)
 	tw.SetColumnConfigs([]ColumnConfig{
 		{
-			Name:            fmt.Sprint(testHeaderMultiLine[1]), // First Name
-			Align:           text.AlignRight,
-			AlignFooter:     text.AlignRight,
-			AlignHeader:     text.AlignRight,
-			Colors:          text.Colors{text.BgBlack, text.FgRed},
-			ColorsHeader:    text.Colors{text.BgRed, text.FgBlack, text.Bold},
-			ColorsFooter:    text.Colors{text.BgRed, text.FgBlack},
-			Formatter:       generatePrefixFormatter("(r_"),
-			FormatterFooter: generatePrefixFormatter("(f_"),
-			FormatterHeader: generatePrefixFormatter("(h_"),
-			VAlign:          text.VAlignTop,
-			VAlignFooter:    text.VAlignTop,
-			VAlignHeader:    text.VAlignTop,
-			WidthMax:        10,
+			Name:              fmt.Sprint(testHeaderMultiLine[1]), // First Name
+			Align:             text.AlignRight,
+			AlignFooter:       text.AlignRight,
+			AlignHeader:       text.AlignRight,
+			Colors:            text.Colors{text.BgBlack, text.FgRed},
+			ColorsHeader:      text.Colors{text.BgRed, text.FgBlack, text.Bold},
+			ColorsFooter:      text.Colors{text.BgRed, text.FgBlack},
+			Transformer:       generatePrefixTransformer("(r_"),
+			TransformerFooter: generatePrefixTransformer("(f_"),
+			TransformerHeader: generatePrefixTransformer("(h_"),
+			VAlign:            text.VAlignTop,
+			VAlignFooter:      text.VAlignTop,
+			VAlignHeader:      text.VAlignTop,
+			WidthMax:          10,
 		}, {
-			Name:            fmt.Sprint(testHeaderMultiLine[2]), // Last Name
-			Align:           text.AlignLeft,
-			AlignFooter:     text.AlignLeft,
-			AlignHeader:     text.AlignLeft,
-			Colors:          text.Colors{text.BgBlack, text.FgGreen},
-			ColorsHeader:    text.Colors{text.BgGreen, text.FgBlack, text.Bold},
-			ColorsFooter:    text.Colors{text.BgGreen, text.FgBlack},
-			Formatter:       generateSuffixFormatter("_r)"),
-			FormatterFooter: generateSuffixFormatter("_f)"),
-			FormatterHeader: generateSuffixFormatter("_h)"),
-			VAlign:          text.VAlignMiddle,
-			VAlignFooter:    text.VAlignMiddle,
-			VAlignHeader:    text.VAlignMiddle,
-			WidthMax:        10,
+			Name:              fmt.Sprint(testHeaderMultiLine[2]), // Last Name
+			Align:             text.AlignLeft,
+			AlignFooter:       text.AlignLeft,
+			AlignHeader:       text.AlignLeft,
+			Colors:            text.Colors{text.BgBlack, text.FgGreen},
+			ColorsHeader:      text.Colors{text.BgGreen, text.FgBlack, text.Bold},
+			ColorsFooter:      text.Colors{text.BgGreen, text.FgBlack},
+			Transformer:       generateSuffixTransformer("_r)"),
+			TransformerFooter: generateSuffixTransformer("_f)"),
+			TransformerHeader: generateSuffixTransformer("_h)"),
+			VAlign:            text.VAlignMiddle,
+			VAlignFooter:      text.VAlignMiddle,
+			VAlignHeader:      text.VAlignMiddle,
+			WidthMax:          10,
 		}, {
-			Number:          4, // Salary
-			Colors:          text.Colors{text.BgBlack, text.FgBlue},
-			ColorsHeader:    text.Colors{text.BgBlue, text.FgBlack, text.Bold},
-			ColorsFooter:    text.Colors{text.BgBlue, text.FgBlack},
-			Formatter:       salaryFormatter,
-			FormatterFooter: salaryFormatter,
-			FormatterHeader: salaryFormatter,
-			VAlign:          text.VAlignBottom,
-			VAlignFooter:    text.VAlignBottom,
-			VAlignHeader:    text.VAlignBottom,
-			WidthMin:        16,
+			Number:            4, // Salary
+			Colors:            text.Colors{text.BgBlack, text.FgBlue},
+			ColorsHeader:      text.Colors{text.BgBlue, text.FgBlack, text.Bold},
+			ColorsFooter:      text.Colors{text.BgBlue, text.FgBlack},
+			Transformer:       salaryTransformer,
+			TransformerFooter: salaryTransformer,
+			TransformerHeader: salaryTransformer,
+			VAlign:            text.VAlignBottom,
+			VAlignFooter:      text.VAlignBottom,
+			VAlignHeader:      text.VAlignBottom,
+			WidthMin:          16,
 		}, {
 			Name:   "Non-existent Column",
 			Colors: text.Colors{text.BgYellow, text.FgHiRed},
