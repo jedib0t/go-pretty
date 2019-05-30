@@ -17,7 +17,7 @@ func (t *Table) RenderCSV() string {
 	var out strings.Builder
 	if t.numColumns > 0 {
 		t.csvRenderRows(&out, t.rowsHeader)
-		t.csvRenderRows(&out, t.getRowsSorted())
+		t.csvRenderRows(&out, t.rows)
 		t.csvRenderRows(&out, t.rowsFooter)
 	}
 	return t.render(&out)

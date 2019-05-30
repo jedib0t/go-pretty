@@ -14,6 +14,7 @@ Pretty-print tables into ASCII/Unicode strings.
     - Custom (vertical) VAlign per column (and multi-line column support)
   - Mirror output to an io.Writer object (like os.StdOut)
   - Sort by any of the Columns (by Column Name or Number)
+  - Transformers to customize individual cell rendering
   - Completely customizable styles
     - Many ready-to-use styles: [style.go](style.go)
     - Colorize Headers/Body/Footers using [../text/color.go](../text/color.go)
@@ -230,40 +231,39 @@ to get:
 +-----+------------+-----------+--------+------- ~
 ```
 
-Or restrict the maximum (text) width for a Column:
-```go
-    t.SetAllowedColumnLengths([]int{0, 6, 9, 6, 10})
-    t.SetStyle(table.StyleRounded)
-    t.Render()
-```
-to get:
-```
-╭─────┬────────┬───────────┬────────┬────────────╮
-│   # │ FIRST  │ LAST NAME │ SALARY │            │
-│     │ NAME   │           │        │            │
-├─────┼────────┼───────────┼────────┼────────────┤
-│   1 │ Arya   │ Stark     │   3000 │            │
-│  20 │ Jon    │ Snow      │   2000 │ You know n │
-│     │        │           │        │ othing, Jo │
-│     │        │           │        │ n Snow!    │
-│ 300 │ Tyrion │ Lannister │   5000 │            │
-├─────┼────────┼───────────┼────────┼────────────┤
-│     │        │ TOTAL     │  10000 │            │
-╰─────┴────────┴───────────┴────────┴────────────╯
-```
+## Column Control - Alignment, Colors, Width and more
 
-## Column Control - Alignment & Colors
-
-You can align text in columns horizontally and/or vertically. You can set up
-per-column color styles that will override the directives from the global Style
-set through `SetStyle()`.
+You can control a lot of things about individual cells/columns which overrides
+global properties/styles using the `SetColumnConfig()` interface:
+- Alignment (horizontal & vertical)
+- Colorization
+- Transform individual cells based on the content
+- Width (minimum & maximum)
 
 ```go
-    t.SetAlign([]text.Align{text.AlignDefault, text.AlignRight, text.AlignDefault, text.AlignDefault, text.AlignCenter})
-    t.SetVAlign([]text.VAlign{text.VAlignDefault, text.VAlignMiddle, text.VAlignBottom, text.VAlignMiddle})
-    t.SetColors([]text.Colors{{text.FgWhite, text.BgBlack}, {text.FgWhite, text.BgBlack}})
-    t.SetColorsFooter([]text.Colors{{text.FgRed}, {text.FgGreen}, {text.FgBlue}})
-    t.SetColorsHeader([]text.Colors{{text.FgCyan}, {text.FgMagenta}, {text.FgYellow}, {text.FgBlack, text.BgWhite}})
+    nameTransformer := text.Transformer(func(val interface{}) string {
+    	return text.Bold.Sprint(val)
+    })
+
+    t.SetColumnConfigs([]ColumnConfig{
+        {
+            Name:              "First Name",
+            Align:             text.AlignLeft,
+            AlignFooter:       text.AlignLeft,
+            AlignHeader:       text.AlignLeft,
+            Colors:            text.Colors{text.BgBlack, text.FgRed},
+            ColorsHeader:      text.Colors{text.BgRed, text.FgBlack, text.Bold},
+            ColorsFooter:      text.Colors{text.BgRed, text.FgBlack},
+            Transformer:       nameTransformer,
+            TransformerFooter: nameTransformer,
+            TransformerHeader: nameTransformer,
+            VAlign:            text.VAlignMiddle,
+            VAlignFooter:      text.VAlignTop,
+            VAlignHeader:      text.VAlignBottom,
+            WidthMin:          6,
+            WidthMax:          64,
+        }
+    })
 ```
 
 ## Render As ...
@@ -350,11 +350,3 @@ to get:
 | 300 | Tyrion | Lannister | 5000 |  |
 |  |  | Total | 10000 |  |
 ```
-
-# TODO
-
-  - Generic Cell Content Transformers (with some ready-made ones)
-    - Base64 Decoder
-    - Currency Formatter
-    - UnixTime to Date & Time
-    - Status Formatter (color "FAILED" in RED, etc.)

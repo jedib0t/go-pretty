@@ -68,7 +68,7 @@ func (t *Table) RenderHTML() string {
 		}
 		out.WriteString("\">\n")
 		t.htmlRenderRows(&out, t.rowsHeader, renderHint{isHeaderRow: true})
-		t.htmlRenderRows(&out, t.getRowsSorted(), renderHint{})
+		t.htmlRenderRows(&out, t.rows, renderHint{})
 		t.htmlRenderRows(&out, t.rowsFooter, renderHint{isFooterRow: true})
 		out.WriteString("</table>")
 	}
@@ -92,6 +92,8 @@ func (t *Table) htmlRenderRow(out *strings.Builder, row rowStr, hint renderHint)
 		// determine the HTML "align"/"valign" property values
 		align := t.getAlign(colIdx, hint).HTMLProperty()
 		vAlign := t.getVAlign(colIdx, hint).HTMLProperty()
+		// determine the HTML "class" property values for the colors
+		class := t.getColumnColors(colIdx, hint).HTMLProperty()
 
 		// write the row
 		out.WriteString("    <")
@@ -99,6 +101,10 @@ func (t *Table) htmlRenderRow(out *strings.Builder, row rowStr, hint renderHint)
 		if align != "" {
 			out.WriteRune(' ')
 			out.WriteString(align)
+		}
+		if class != "" {
+			out.WriteRune(' ')
+			out.WriteString(class)
 		}
 		if vAlign != "" {
 			out.WriteRune(' ')
@@ -128,7 +134,8 @@ func (t *Table) htmlRenderRows(out *strings.Builder, rows []rowStr, hint renderH
 		}
 
 		var renderedTagOpen, shouldRenderTagClose bool
-		for _, row := range rows {
+		for idx, row := range rows {
+			hint.rowNumber = idx + 1
 			if len(row) > 0 {
 				if !renderedTagOpen {
 					out.WriteString("  <")

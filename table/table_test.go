@@ -22,7 +22,9 @@ var (
 	testColorsHeader    = []text.Colors{testColorHiRedBold, testColorHiRedBold, testColorHiRedBold, testColorHiRedBold}
 	testCSSClass        = "test-css-class"
 	testFooter          = Row{"", "", "Total", 10000}
+	testFooterMultiLine = Row{"", "", "Total\nSalary", 10000}
 	testHeader          = Row{"#", "First Name", "Last Name", "Salary"}
+	testHeaderMultiLine = Row{"#", "First\nName", "Last\nName", "Salary"}
 	testRows            = []Row{
 		{1, "Arya", "Stark", 3000},
 		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
@@ -33,6 +35,10 @@ var (
 	testRowPipes     = Row{0, "Valar", "Morghulis", 0, "Faceless|Men"}
 	testRowTabs      = Row{0, "Valar", "Morghulis", 0, "Faceless\tMen"}
 )
+
+func init() {
+	text.EnableColors()
+}
 
 type myMockOutputMirror struct {
 	mirroredOutput string
@@ -55,32 +61,32 @@ func TestNewWriter(t *testing.T) {
 
 func TestTable_AppendFooter(t *testing.T) {
 	table := Table{}
-	assert.Equal(t, 0, len(table.rowsFooter))
+	assert.Equal(t, 0, len(table.rowsFooterRaw))
 
 	table.AppendFooter([]interface{}{})
 	assert.Equal(t, 0, table.Length())
-	assert.Equal(t, 1, len(table.rowsFooter))
-	assert.Equal(t, 0, len(table.rowsHeader))
+	assert.Equal(t, 1, len(table.rowsFooterRaw))
+	assert.Equal(t, 0, len(table.rowsHeaderRaw))
 
 	table.AppendFooter([]interface{}{})
 	assert.Equal(t, 0, table.Length())
-	assert.Equal(t, 2, len(table.rowsFooter))
-	assert.Equal(t, 0, len(table.rowsHeader))
+	assert.Equal(t, 2, len(table.rowsFooterRaw))
+	assert.Equal(t, 0, len(table.rowsHeaderRaw))
 }
 
 func TestTable_AppendHeader(t *testing.T) {
 	table := Table{}
-	assert.Equal(t, 0, len(table.rowsHeader))
+	assert.Equal(t, 0, len(table.rowsHeaderRaw))
 
 	table.AppendHeader([]interface{}{})
 	assert.Equal(t, 0, table.Length())
-	assert.Equal(t, 0, len(table.rowsFooter))
-	assert.Equal(t, 1, len(table.rowsHeader))
+	assert.Equal(t, 0, len(table.rowsFooterRaw))
+	assert.Equal(t, 1, len(table.rowsHeaderRaw))
 
 	table.AppendHeader([]interface{}{})
 	assert.Equal(t, 0, table.Length())
-	assert.Equal(t, 0, len(table.rowsFooter))
-	assert.Equal(t, 2, len(table.rowsHeader))
+	assert.Equal(t, 0, len(table.rowsFooterRaw))
+	assert.Equal(t, 2, len(table.rowsHeaderRaw))
 }
 
 func TestTable_AppendRow(t *testing.T) {
@@ -367,6 +373,15 @@ func TestTable_SetColorsHeader(t *testing.T) {
 	assert.Empty(t, table.colorsFooter)
 	assert.NotEmpty(t, table.colorsHeader)
 	assert.Equal(t, 2, len(table.colorsHeader))
+}
+
+func TestTable_SetColumnConfigs(t *testing.T) {
+	table := Table{}
+	assert.Empty(t, table.columnConfigs)
+
+	table.SetColumnConfigs([]ColumnConfig{{}, {}, {}})
+	assert.NotEmpty(t, table.columnConfigs)
+	assert.Equal(t, 3, len(table.columnConfigs))
 }
 
 func TestTable_SetHTMLCSSClass(t *testing.T) {
