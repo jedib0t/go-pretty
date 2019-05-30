@@ -20,28 +20,32 @@ var (
 
 // Progress helps track progress for one or more tasks.
 type Progress struct {
-	autoStop             bool
-	done                 chan bool
-	lengthTracker        int
-	lengthProgress       int
-	outputWriter         io.Writer
-	hideTime             bool
-	hideTracker          bool
-	hideValue            bool
-	hidePercentage       bool
-	messageWidth         int
-	numTrackersExpected  int64
-	overallTracker       *Tracker
-	renderInProgress     bool
-	showOverallTracker   bool
-	sortBy               SortBy
-	style                *Style
-	trackerPosition      Position
-	trackersActive       []*Tracker
-	trackersDone         []*Tracker
-	trackersInQueue      []*Tracker
-	trackersInQueueMutex sync.Mutex
-	updateFrequency      time.Duration
+	autoStop              bool
+	done                  chan bool
+	lengthTracker         int
+	lengthProgress        int
+	outputWriter          io.Writer
+	hideTime              bool
+	hideTracker           bool
+	hideValue             bool
+	hidePercentage        bool
+	messageWidth          int
+	numTrackersExpected   int64
+	overallTracker        *Tracker
+	overallTrackerMutex   sync.RWMutex
+	renderInProgress      bool
+	renderInProgressMutex sync.RWMutex
+	showOverallTracker    bool
+	sortBy                SortBy
+	style                 *Style
+	trackerPosition       Position
+	trackersActive        []*Tracker
+	trackersActiveMutex   sync.RWMutex
+	trackersDone          []*Tracker
+	trackersDoneMutex     sync.RWMutex
+	trackersInQueue       []*Tracker
+	trackersInQueueMutex  sync.RWMutex
+	updateFrequency       time.Duration
 }
 
 // Position defines the position of the Tracker with respect to the Tracker's
@@ -64,6 +68,7 @@ func (p *Progress) AppendTracker(t *Tracker) {
 		t.Total = math.MaxInt64
 	}
 	t.start()
+	p.overallTrackerMutex.Lock()
 	if p.overallTracker == nil {
 		p.overallTracker = &Tracker{Total: 1}
 		if p.numTrackersExpected > 0 {
@@ -73,10 +78,11 @@ func (p *Progress) AppendTracker(t *Tracker) {
 	}
 	p.trackersInQueueMutex.Lock()
 	p.trackersInQueue = append(p.trackersInQueue, t)
+	p.trackersInQueueMutex.Unlock()
 	if p.overallTracker.Total < int64(p.Length())*100 {
 		p.overallTracker.Total = int64(p.Length()) * 100
 	}
-	p.trackersInQueueMutex.Unlock()
+	p.overallTrackerMutex.Unlock()
 }
 
 // AppendTrackers appends one or more Trackers for tracking.
@@ -89,17 +95,49 @@ func (p *Progress) AppendTrackers(trackers []*Tracker) {
 // IsRenderInProgress returns true if a call to Render() was made, and is still
 // in progress and has not ended yet.
 func (p *Progress) IsRenderInProgress() bool {
+	p.renderInProgressMutex.RLock()
+	defer p.renderInProgressMutex.RUnlock()
+
 	return p.renderInProgress
 }
 
 // Length returns the number of Trackers tracked overall.
 func (p *Progress) Length() int {
+	p.trackersActiveMutex.RLock()
+	p.trackersDoneMutex.RLock()
+	p.trackersInQueueMutex.RLock()
+	defer p.trackersActiveMutex.RUnlock()
+	defer p.trackersDoneMutex.RUnlock()
+	defer p.trackersInQueueMutex.RUnlock()
+
 	return len(p.trackersInQueue) + len(p.trackersActive) + len(p.trackersDone)
 }
 
 // LengthActive returns the number of Trackers actively tracked (not done yet).
 func (p *Progress) LengthActive() int {
+	p.trackersActiveMutex.RLock()
+	p.trackersInQueueMutex.RLock()
+	defer p.trackersActiveMutex.RUnlock()
+	defer p.trackersInQueueMutex.RUnlock()
+
 	return len(p.trackersInQueue) + len(p.trackersActive)
+}
+
+// LengthDone returns the number of Trackers that are done tracking.
+func (p *Progress) LengthDone() int {
+	p.trackersDoneMutex.RLock()
+	defer p.trackersDoneMutex.RUnlock()
+
+	return len(p.trackersDone)
+}
+
+// LengthInQueue returns the number of Trackers in queue to be actively tracked
+// (not tracking yet).
+func (p *Progress) LengthInQueue() int {
+	p.trackersInQueueMutex.RLock()
+	defer p.trackersInQueueMutex.RUnlock()
+
+	return len(p.trackersInQueue)
 }
 
 // SetAutoStop toggles the auto-stop functionality. Auto-stop set to true would
@@ -186,7 +224,7 @@ func (p *Progress) ShowValue(show bool) {
 
 // Stop stops the Render() logic that is in progress.
 func (p *Progress) Stop() {
-	if p.renderInProgress {
+	if p.IsRenderInProgress() {
 		p.done <- true
 	}
 }

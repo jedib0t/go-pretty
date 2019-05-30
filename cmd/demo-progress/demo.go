@@ -42,7 +42,7 @@ func trackSomething(pw progress.Writer, idx int64) {
 
 	pw.AppendTracker(&tracker)
 
-	c := time.Tick(time.Millisecond * 250)
+	c := time.Tick(time.Millisecond * 100)
 	for !tracker.IsDone() {
 		select {
 		case <-c:

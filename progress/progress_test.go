@@ -41,8 +41,12 @@ func TestProgress_Length(t *testing.T) {
 	p := Progress{}
 	assert.Equal(t, 0, p.Length())
 
-	p.AppendTracker(&Tracker{})
+	p.trackersActive = append(p.trackersActive, &Tracker{})
 	assert.Equal(t, 1, p.Length())
+	p.trackersInQueue = append(p.trackersInQueue, &Tracker{})
+	assert.Equal(t, 2, p.Length())
+	p.trackersDone = append(p.trackersDone, &Tracker{})
+	assert.Equal(t, 3, p.Length())
 }
 
 func TestProgress_LengthActive(t *testing.T) {
@@ -50,9 +54,32 @@ func TestProgress_LengthActive(t *testing.T) {
 	assert.Equal(t, 0, p.Length())
 	assert.Equal(t, 0, p.LengthActive())
 
-	p.AppendTracker(&Tracker{})
+	p.trackersActive = append(p.trackersActive, &Tracker{})
 	assert.Equal(t, 1, p.Length())
 	assert.Equal(t, 1, p.LengthActive())
+	p.trackersInQueue = append(p.trackersInQueue, &Tracker{})
+	assert.Equal(t, 2, p.Length())
+	assert.Equal(t, 2, p.LengthActive())
+}
+
+func TestProgress_LengthDone(t *testing.T) {
+	p := Progress{}
+	assert.Equal(t, 0, p.Length())
+	assert.Equal(t, 0, p.LengthDone())
+
+	p.trackersDone = append(p.trackersDone, &Tracker{})
+	assert.Equal(t, 1, p.Length())
+	assert.Equal(t, 1, p.LengthDone())
+}
+
+func TestProgress_LengthInQueue(t *testing.T) {
+	p := Progress{}
+	assert.Equal(t, 0, p.Length())
+	assert.Equal(t, 0, p.LengthInQueue())
+
+	p.trackersInQueue = append(p.trackersInQueue, &Tracker{})
+	assert.Equal(t, 1, p.Length())
+	assert.Equal(t, 1, p.LengthInQueue())
 }
 
 func TestProgress_SetAutoStop(t *testing.T) {
