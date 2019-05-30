@@ -32,7 +32,7 @@ type Progress struct {
 	messageWidth          int
 	numTrackersExpected   int64
 	overallTracker        *Tracker
-	overallTrackerMutex   sync.Mutex
+	overallTrackerMutex   sync.RWMutex
 	renderInProgress      bool
 	renderInProgressMutex sync.RWMutex
 	showOverallTracker    bool
@@ -68,8 +68,13 @@ func (p *Progress) AppendTracker(t *Tracker) {
 		t.Total = math.MaxInt64
 	}
 	t.start()
-	if p.overallTracker == nil {
+	p.overallTrackerMutex.RLock()
+	isOverallTrackerExists := p.overallTracker != nil
+	p.overallTrackerMutex.RUnlock()
+	if isOverallTrackerExists == false {
+		p.overallTrackerMutex.Lock()
 		p.overallTracker = &Tracker{Total: 1}
+		p.overallTrackerMutex.Unlock()
 		if p.numTrackersExpected > 0 {
 			p.overallTrackerMutex.Lock()
 			p.overallTracker.Total = p.numTrackersExpected * 100
@@ -80,11 +85,11 @@ func (p *Progress) AppendTracker(t *Tracker) {
 	p.trackersInQueueMutex.Lock()
 	p.trackersInQueue = append(p.trackersInQueue, t)
 	p.trackersInQueueMutex.Unlock()
-	p.overallTrackerMutex.Lock()
+	p.overallTrackerMutex.RLock()
 	if p.overallTracker.Total < int64(p.Length())*100 {
 		p.overallTracker.Total = int64(p.Length()) * 100
 	}
-	p.overallTrackerMutex.Unlock()
+	p.overallTrackerMutex.RUnlock()
 }
 
 // AppendTrackers appends one or more Trackers for tracking.
