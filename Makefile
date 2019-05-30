@@ -39,5 +39,8 @@ profile:
 test: fmt lint vet cyclo
 	go test -cover -coverprofile=.coverprofile $(shell go list ./...)
 
+test-race:
+	go run -race ./cmd/demo-progress/demo.go
+
 vet:
 	go vet $(shell go list ./...)

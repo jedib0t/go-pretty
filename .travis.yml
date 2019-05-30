@@ -18,5 +18,5 @@ before_script:
 
 # CI Pipeline.
 script:
-  - make test bench
+  - make test test-race bench
   - $GOPATH/bin/goveralls -service=travis-pro -coverprofile=.coverprofile

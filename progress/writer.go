@@ -13,6 +13,8 @@ type Writer interface {
 	IsRenderInProgress() bool
 	Length() int
 	LengthActive() int
+	LengthDone() int
+	LengthInQueue() int
 	SetAutoStop(autoStop bool)
 	SetMessageWidth(width int)
 	SetNumTrackersExpected(numTrackers int)

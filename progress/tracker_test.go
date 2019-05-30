@@ -25,7 +25,7 @@ func TestTracker_ETA(t *testing.T) {
 
 	tracker = Tracker{Total: 100, ExpectedDuration: timeDelay}
 	tracker.start()
-	assert.True(t, tracker.ExpectedDuration > tracker.ETA())
+	assert.True(t, tracker.ETA() <= tracker.ExpectedDuration)
 	time.Sleep(timeDelay)
 	tracker.Increment(50)
 	assert.NotEqual(t, time.Duration(0), tracker.ETA())
