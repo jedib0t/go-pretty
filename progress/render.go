@@ -244,7 +244,9 @@ func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker, hint ren
 		var outStats strings.Builder
 		outStats.WriteString(" [")
 		if !hint.hideValue {
+			t.mutex.Lock()
 			outStats.WriteString(p.style.Colors.Value.Sprint(t.Units.Sprint(t.value)))
+			t.mutex.Unlock()
 		}
 		if !hint.hideValue && !hint.hideTime {
 			outStats.WriteString(" in ")
