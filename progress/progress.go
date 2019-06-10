@@ -79,9 +79,11 @@ func (p *Progress) AppendTracker(t *Tracker) {
 	p.trackersInQueueMutex.Lock()
 	p.trackersInQueue = append(p.trackersInQueue, t)
 	p.trackersInQueueMutex.Unlock()
+	p.overallTracker.mutex.Lock()
 	if p.overallTracker.Total < int64(p.Length())*100 {
 		p.overallTracker.Total = int64(p.Length()) * 100
 	}
+	p.overallTracker.mutex.Unlock()
 	p.overallTrackerMutex.Unlock()
 }
 
