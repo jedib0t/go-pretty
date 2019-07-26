@@ -19,8 +19,12 @@ func TestTable_Render(t *testing.T) {
 	tw.SetAlign(testAlign)
 	tw.SetCaption(testCaption)
 	tw.SetStyle(styleTest)
+	tw.SetTitle(testTitle2)
 
-	expectedOut := `(-----^------------^-----------^--------^-----------------------------)
+	expectedOut := `(---------------------------------------------------------------------)
+[<When you play the Game of Thrones, you win or you die. There is no >]
+[<middle ground.                                                     >]
+{-----^------------^-----------^--------^-----------------------------}
 [<  #>|<FIRST NAME>|<LAST NAME>|<SALARY>|<                           >]
 {-----+------------+-----------+--------+-----------------------------}
 [<  1>|<Arya      >|<Stark    >|<  3000>|<                           >]
@@ -32,7 +36,8 @@ func TestTable_Render(t *testing.T) {
 {-----+------------+-----------+--------+-----------------------------}
 [<   >|<          >|<TOTAL    >|< 10000>|<                           >]
 \-----v------------v-----------v--------v-----------------------------/
-test-caption`
+A Song of Ice and Fire`
+	fmt.Println(tw.Render())
 	assert.Equal(t, expectedOut, tw.Render())
 }
 
@@ -241,7 +246,7 @@ func TestTable_Render_ColoredCustom(t *testing.T) {
 		"├─────┼────────────┼───────────┼────────┼─────────────────────────────┤",
 		"│     │            │\x1b[94;1m TOTAL     \x1b[0m│\x1b[94;1m  10000 \x1b[0m│                             │",
 		"╰─────┴────────────┴───────────┴────────┴─────────────────────────────╯",
-		"test-caption",
+		"A Song of Ice and Fire",
 	}
 	assert.Equal(t, strings.Join(expectedOut, "\n"), tw.Render())
 }
@@ -326,8 +331,11 @@ func TestTable_Render_ColoredStyleAutoIndex(t *testing.T) {
 	table.AppendFooter(testFooter)
 	table.SetAutoIndex(true)
 	table.SetStyle(StyleColoredDark)
+	table.SetTitle(testTitle2)
 
 	expectedOut := strings.Join([]string{
+		"\x1b[106;30;1m When you play the Game of Thrones, you win or you die. There is no \x1b[0m",
+		"\x1b[106;30;1m middle ground.                                                     \x1b[0m",
 		"\x1b[96;100m   \x1b[0m\x1b[96;100m   # \x1b[0m\x1b[96;100m FIRST NAME \x1b[0m\x1b[96;100m LAST NAME \x1b[0m\x1b[96;100m SALARY \x1b[0m\x1b[96;100m                             \x1b[0m",
 		"\x1b[96;100m 1 \x1b[0m\x1b[97;40m   1 \x1b[0m\x1b[97;40m Arya       \x1b[0m\x1b[97;40m Stark     \x1b[0m\x1b[97;40m   3000 \x1b[0m\x1b[97;40m                             \x1b[0m",
 		"\x1b[96;100m 2 \x1b[0m\x1b[37;40m  20 \x1b[0m\x1b[37;40m Jon        \x1b[0m\x1b[37;40m Snow      \x1b[0m\x1b[37;40m   2000 \x1b[0m\x1b[37;40m You know nothing, Jon Snow! \x1b[0m",
@@ -335,6 +343,7 @@ func TestTable_Render_ColoredStyleAutoIndex(t *testing.T) {
 		"\x1b[36;100m   \x1b[0m\x1b[36;100m     \x1b[0m\x1b[36;100m            \x1b[0m\x1b[36;100m TOTAL     \x1b[0m\x1b[36;100m  10000 \x1b[0m\x1b[36;100m                             \x1b[0m",
 	}, "\n")
 	out := table.Render()
+	fmt.Println(out)
 	assert.Equal(t, expectedOut, out)
 
 	// dump it out in a easy way to update the test if things are meant to

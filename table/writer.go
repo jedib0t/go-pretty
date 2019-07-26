@@ -27,6 +27,7 @@ type Writer interface {
 	SetPageSize(numLines int)
 	SetRowPainter(painter RowPainter)
 	SetStyle(style Style)
+	SetTitle(format string, a ...interface{})
 	SortBy(sortBy []SortBy)
 	Style() *Style
 

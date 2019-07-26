@@ -23,6 +23,8 @@ func (t *Table) Render() string {
 
 	var out strings.Builder
 	if t.numColumns > 0 {
+		t.renderTitle(&out)
+
 		// top-most border
 		t.renderRowsBorderTop(&out)
 
@@ -206,7 +208,11 @@ func (t *Table) renderMarginLeft(out *strings.Builder, hint renderHint) {
 	if t.style.Options.DrawBorder {
 		border := t.style.Box.Left
 		if hint.isBorderTop {
-			border = t.style.Box.TopLeft
+			if t.title != "" {
+				border = t.style.Box.LeftSeparator
+			} else {
+				border = t.style.Box.TopLeft
+			}
 		} else if hint.isBorderBottom {
 			border = t.style.Box.BottomLeft
 		} else if hint.isSeparatorRow {
@@ -226,7 +232,11 @@ func (t *Table) renderMarginRight(out *strings.Builder, hint renderHint) {
 	if t.style.Options.DrawBorder {
 		border := t.style.Box.Right
 		if hint.isBorderTop {
-			border = t.style.Box.TopRight
+			if t.title != "" {
+				border = t.style.Box.RightSeparator
+			} else {
+				border = t.style.Box.TopRight
+			}
 		} else if hint.isBorderBottom {
 			border = t.style.Box.BottomRight
 		} else if hint.isSeparatorRow {
@@ -336,5 +346,40 @@ func (t *Table) renderRowsHeader(out *strings.Builder) {
 			t.renderRow(out, 0, t.getAutoIndexColumnIDs(), renderHint{isHeaderRow: true})
 		}
 		t.renderRowSeparator(out, renderHint{isHeaderRow: true, isSeparatorRow: true})
+	}
+}
+
+func (t *Table) renderTitle(out *strings.Builder) {
+	if t.title != "" {
+		if t.style.Options.DrawBorder {
+			lenBorder := t.maxRowLength - text.RuneCount(t.style.Box.TopLeft+t.style.Box.TopRight)
+			out.WriteString(t.style.Box.TopLeft)
+			out.WriteString(text.RepeatAndTrim(t.style.Box.MiddleHorizontal, lenBorder))
+			out.WriteString(t.style.Box.TopRight)
+		}
+
+		lenText := t.maxRowLength - text.RuneCount(t.style.Box.PaddingLeft+t.style.Box.PaddingRight)
+		if t.style.Options.DrawBorder {
+			lenText -= text.RuneCount(t.style.Box.Left + t.style.Box.Right)
+		}
+		titleText := text.WrapText(t.title, lenText)
+		for _, titleLine := range strings.Split(titleText, "\n") {
+			titleLine = strings.TrimSpace(titleLine)
+			titleLine = t.style.Title.Format.Apply(titleLine)
+			titleLine = t.style.Title.Align.Apply(titleLine, lenText)
+			titleLine = t.style.Box.PaddingLeft + titleLine + t.style.Box.PaddingRight
+			titleLine = t.style.Title.Colors.Sprint(titleLine)
+
+			if out.Len() > 0 {
+				out.WriteRune('\n')
+			}
+			if t.style.Options.DrawBorder {
+				out.WriteString(t.style.Box.Left)
+			}
+			out.WriteString(titleLine)
+			if t.style.Options.DrawBorder {
+				out.WriteString(t.style.Box.Right)
+			}
+		}
 	}
 }

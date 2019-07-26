@@ -252,7 +252,9 @@ Table with style 'StyleColoredBright'.
      ┃            ┃ TOTAL     ┃  10000 ┃                             
 Table without Borders.
 
-┏━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Divide!                                                             ┃
+┣━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
 ┃   # ┃ FIRST NAME ┃ LAST NAME ┃ SALARY ┃                             ┃
 ┣━━━━━╋━━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
 ┃   1 ┃ Arya       ┃ Stark     ┃   3000 ┃                             ┃
@@ -265,18 +267,21 @@ Table without Borders.
 ┗━━━━━┻━━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Table with Borders Everywhere!
 
+ Unite!                                                          
    #  FIRST NAME  LAST NAME  SALARY                              
    1  Arya        Stark        3000                              
   20  Jon         Snow         2000  You know nothing, Jon Snow! 
  300  Tyrion      Lannister    5000                              
                   TOTAL       10000                              
-Table without Any Borders or Separators!
+(c) No one!
 
+[CSV] Unite!
 [CSV] #,First Name,Last Name,Salary,
 [CSV] 1,Arya,Stark,3000,
 [CSV] 20,Jon,Snow,2000,"You know nothing\, Jon Snow!"
 [CSV] 300,Tyrion,Lannister,5000,
 [CSV] ,,Total,10000,
+[CSV] (c) No one!
 
 [HTML] <table class="go-pretty-table">
 [HTML]   <thead>
@@ -322,12 +327,14 @@ Table without Any Borders or Separators!
 [HTML]   </tfoot>
 [HTML] </table>
 
+[Markdown] # Unite!
 [Markdown] | # | First Name | Last Name | Salary |  |
 [Markdown] | ---:| --- | --- | ---:| --- |
 [Markdown] | 1 | Arya | Stark | 3000 |  |
 [Markdown] | 20 | Jon | Snow | 2000 | You know nothing, Jon Snow! |
 [Markdown] | 300 | Tyrion | Lannister | 5000 |  |
 [Markdown] |  |  | Total | 10000 |  |
+[Markdown] _(c) No one!_
 
 ```
 

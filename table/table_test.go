@@ -11,7 +11,7 @@ import (
 
 var (
 	testAlign           = []text.Align{text.AlignDefault, text.AlignLeft, text.AlignLeft, text.AlignRight}
-	testCaption         = "test-caption"
+	testCaption         = "A Song of Ice and Fire"
 	testColor           = text.Colors{text.FgGreen}
 	testColorBoW        = text.Colors{text.FgBlack, text.BgWhite}
 	testColorHiRedBold  = text.Colors{text.FgHiRed, text.Bold}
@@ -34,6 +34,8 @@ var (
 	testRowNewLines  = Row{0, "Valar", "Morghulis", 0, "Faceless\nMen"}
 	testRowPipes     = Row{0, "Valar", "Morghulis", 0, "Faceless|Men"}
 	testRowTabs      = Row{0, "Valar", "Morghulis", 0, "Faceless\tMen"}
+	testTitle1       = "Game of Thrones"
+	testTitle2       = "When you play the Game of Thrones, you win or you die. There is no middle ground."
 )
 
 func init() {

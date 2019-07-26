@@ -1,7 +1,6 @@
 package table
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/jedib0t/go-pretty/text"
@@ -83,6 +82,8 @@ func TestTable_RenderHTML_Colored(t *testing.T) {
 	tw.AppendRows(testRows)
 	tw.AppendRow(testRowMultiLine)
 	tw.AppendFooter(testFooter)
+	tw.SetCaption(testCaption)
+	tw.SetTitle(testTitle1)
 	colorBOnW := text.Colors{text.BgWhite, text.FgBlack}
 	tw.SetColorsHeader([]text.Colors{colorBOnW, colorBOnW, colorBOnW, colorBOnW, colorBOnW})
 	tw.SetColors([]text.Colors{{text.Bold}, {text.FgCyan}, {text.FgMagenta}, {text.FgYellow}, {text.FgBlack}})
@@ -148,7 +149,6 @@ func TestTable_RenderHTML_Colored(t *testing.T) {
 </table>`
 
 	assert.Equal(t, expectedOut, tw.RenderHTML())
-	fmt.Println(tw.RenderHTML())
 }
 
 func TestTable_RenderHTML_Empty(t *testing.T) {

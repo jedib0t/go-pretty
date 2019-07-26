@@ -13,8 +13,11 @@ func TestTable_RenderCSV(t *testing.T) {
 	tw.AppendRow(testRowMultiLine)
 	tw.AppendRow(testRowTabs)
 	tw.AppendFooter(testFooter)
+	tw.SetCaption(testCaption)
+	tw.SetTitle(testTitle1)
 
-	expectedOut := `#,First Name,Last Name,Salary,
+	expectedOut := `Game of Thrones
+#,First Name,Last Name,Salary,
 1,Arya,Stark,3000,
 20,Jon,Snow,2000,"You know nothing\, Jon Snow!"
 300,Tyrion,Lannister,5000,
@@ -22,7 +25,8 @@ func TestTable_RenderCSV(t *testing.T) {
 The North Remembers!
 This is known."
 0,Valar,Morghulis,0,Faceless    Men
-,,Total,10000,`
+,,Total,10000,
+A Song of Ice and Fire`
 
 	assert.Equal(t, expectedOut, tw.RenderCSV())
 }

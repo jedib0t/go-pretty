@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/jedib0t/go-pretty/text"
 )
@@ -95,6 +94,8 @@ type Table struct {
 	sortBy []SortBy
 	// style contains all the strings used to draw the table, and more
 	style *Style
+	// title contains the text to appear above the table
+	title string
 	// vAlign describes the vertical-align for each column
 	vAlign []text.VAlign
 	// vAlign describes the vertical-align for each column in the footer
@@ -244,6 +245,11 @@ func (t *Table) SetRowPainter(painter RowPainter) {
 // SetStyle overrides the DefaultStyle with the provided one.
 func (t *Table) SetStyle(style Style) {
 	t.style = &style
+}
+
+// SetTitle sets the title text to be rendered above the table.
+func (t *Table) SetTitle(format string, a ...interface{}) {
+	t.title = fmt.Sprintf(format, a...)
 }
 
 // SetVAlign sets the vertical-align for each column in all the rows.
@@ -621,14 +627,26 @@ func (t *Table) initForRenderRowsStringify(rows []Row, hint renderHint) []rowStr
 }
 
 func (t *Table) initForRenderRowSeparator() {
-	t.maxRowLength = (utf8.RuneCountInString(t.style.Box.MiddleSeparator) * t.numColumns) + 1
+	t.maxRowLength = 0
+	if t.autoIndex {
+		t.maxRowLength += text.RuneCount(t.style.Box.PaddingLeft)
+		t.maxRowLength += len(fmt.Sprint(len(t.rows)))
+		t.maxRowLength += text.RuneCount(t.style.Box.PaddingRight)
+		if t.style.Options.SeparateColumns {
+			t.maxRowLength += text.RuneCount(t.style.Box.MiddleSeparator)
+		}
+	}
+	if t.style.Options.SeparateColumns {
+		t.maxRowLength += text.RuneCount(t.style.Box.MiddleSeparator) * (t.numColumns - 1)
+	}
 	t.rowSeparator = make(rowStr, t.numColumns)
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
-		maxColumnLength += utf8.RuneCountInString(t.style.Box.PaddingLeft)
-		maxColumnLength += utf8.RuneCountInString(t.style.Box.PaddingRight)
-		horizontalSeparatorCol := text.RepeatAndTrim(t.style.Box.MiddleHorizontal, maxColumnLength)
+		maxColumnLength += text.RuneCount(t.style.Box.PaddingLeft + t.style.Box.PaddingRight)
 		t.maxRowLength += maxColumnLength
-		t.rowSeparator[colIdx] = horizontalSeparatorCol
+		t.rowSeparator[colIdx] = text.RepeatAndTrim(t.style.Box.MiddleHorizontal, maxColumnLength)
+	}
+	if t.style.Options.DrawBorder {
+		t.maxRowLength += text.RuneCount(t.style.Box.Left + t.style.Box.Right)
 	}
 }
 
