@@ -40,12 +40,6 @@ func demoTableColors() {
 			tw.SetCaption(style.Name)
 			tw.SetStyle(style)
 			tw.Style().Title.Align = text.AlignCenter
-			//out := tw.Render()
-			//fmt.Println(out)
-			//for _, line := range strings.Split(out, "\n") {
-			//	fmt.Printf("%03d: %#v\n", text.RuneCount(line), line)
-			//}
-			//return
 			row[idx] = tw.Render()
 		}
 		twOuter.AppendRow(row)
