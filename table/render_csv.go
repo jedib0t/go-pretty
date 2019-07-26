@@ -16,9 +16,16 @@ func (t *Table) RenderCSV() string {
 
 	var out strings.Builder
 	if t.numColumns > 0 {
+		if t.title != "" {
+			out.WriteString(t.title)
+		}
 		t.csvRenderRows(&out, t.rowsHeader)
 		t.csvRenderRows(&out, t.rows)
 		t.csvRenderRows(&out, t.rowsFooter)
+		if t.caption != "" {
+			out.WriteRune('\n')
+			out.WriteString(t.caption)
+		}
 	}
 	return t.render(&out)
 }

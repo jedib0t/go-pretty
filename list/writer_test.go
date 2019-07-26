@@ -2,6 +2,7 @@ package list
 
 import (
 	"fmt"
+
 	"github.com/jedib0t/go-pretty/text"
 )
 

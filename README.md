@@ -94,10 +94,10 @@ should also have examples for all the available functions.
 
 Partial output of `make bench`:
 ```
-BenchmarkList_Render-24             	  200000	      5073 ns/op	     872 B/op	      47 allocs/op
-BenchmarkProgress_Render-24         	       5	 300373700 ns/op	    4728 B/op	      91 allocs/op
-BenchmarkTable_Render-24            	   30000	     42402 ns/op	    5701 B/op	     193 allocs/op
-BenchmarkTable_RenderCSV-24         	  200000	     11874 ns/op	    2626 B/op	      50 allocs/op
-BenchmarkTable_RenderHTML-24        	  100000	     17338 ns/op	    4083 B/op	      49 allocs/op
-BenchmarkTable_RenderMarkdown-24    	  200000	     11924 ns/op	    2562 B/op	      48 allocs/op
+BenchmarkList_Render-8            	  200000	      5443 ns/op	     872 B/op	      47 allocs/op
+BenchmarkProgress_Render-8        	       5	 300630230 ns/op	    4060 B/op	      90 allocs/op
+BenchmarkTable_Render-8           	   20000	     73939 ns/op	    6067 B/op	     197 allocs/op
+BenchmarkTable_RenderCSV-8        	  100000	     18680 ns/op	    2977 B/op	      54 allocs/op
+BenchmarkTable_RenderHTML-8       	   50000	     27565 ns/op	    4450 B/op	      53 allocs/op
+BenchmarkTable_RenderMarkdown-8   	  100000	     20612 ns/op	    2913 B/op	      52 allocs/op
 ```

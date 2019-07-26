@@ -19,6 +19,7 @@ func demoTableColors() {
 	})
 	tw.AppendFooter(table.Row{"", "", "Total", 10000})
 	tw.SetIndexColumn(1)
+	tw.SetTitle("Game Of Thrones")
 
 	stylePairs := [][]table.Style{
 		{table.StyleColoredBright, table.StyleColoredDark},
@@ -36,14 +37,17 @@ func demoTableColors() {
 	for _, stylePair := range stylePairs {
 		row := make(table.Row, 2)
 		for idx, style := range stylePair {
+			tw.SetCaption(style.Name)
 			tw.SetStyle(style)
-			tw.SetCaption("%s", style.Name)
+			tw.Style().Title.Align = text.AlignCenter
 			row[idx] = tw.Render()
 		}
 		twOuter.AppendRow(row)
 	}
 	twOuter.SetAlign([]text.Align{text.AlignCenter, text.AlignCenter})
 	twOuter.SetStyle(table.StyleLight)
+	twOuter.Style().Title.Align = text.AlignCenter
+	twOuter.SetTitle("C O L O R S")
 	twOuter.Style().Options.SeparateRows = true
 	fmt.Println(twOuter.Render())
 }
@@ -507,6 +511,7 @@ func demoTableFeatures() {
 	t.Style().Options.DrawBorder = true
 	t.Style().Options.SeparateRows = true
 	t.SetCaption("Table with Borders Everywhere!\n")
+	t.SetTitle("Divide!")
 	fmt.Println(t.Render())
 	//┏━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 	//┃   # ┃ FIRST NAME ┃ LAST NAME ┃ SALARY ┃                             ┃
@@ -530,8 +535,10 @@ func demoTableFeatures() {
 	t.Style().Options.SeparateFooter = false
 	t.Style().Options.SeparateHeader = false
 	t.Style().Options.SeparateRows = false
-	t.SetCaption("Table without Any Borders or Separators!\n")
+	t.SetCaption("(c) No one!")
+	t.SetTitle("Unite!")
 	fmt.Println(t.Render())
+	fmt.Println()
 	//   #  FIRST NAME  LAST NAME  SALARY
 	//   1  Arya        Stark        3000
 	//  20  Jon         Snow         2000  You know nothing, Jon Snow!
@@ -543,7 +550,6 @@ func demoTableFeatures() {
 	//==========================================================================
 	// I want CSV.
 	//==========================================================================
-	t.SetCaption("")
 	for _, line := range strings.Split(t.RenderCSV(), "\n") {
 		fmt.Printf("[CSV] %s\n", line)
 	}

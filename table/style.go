@@ -12,6 +12,7 @@ type Style struct {
 	Color   ColorOptions  // colors to use for the rows and columns
 	Format  FormatOptions // formatting options for the rows and columns
 	Options Options       // misc. options for the table
+	Title   TitleOptions  // formation options for the title text
 }
 
 var (
@@ -31,6 +32,7 @@ var (
 		Color:   ColorOptionsDefault,
 		Format:  FormatOptionsDefault,
 		Options: OptionsDefault,
+		Title:   TitleOptionsDefault,
 	}
 
 	// StyleBold renders a Table like below:
@@ -49,6 +51,7 @@ var (
 		Color:   ColorOptionsDefault,
 		Format:  FormatOptionsDefault,
 		Options: OptionsDefault,
+		Title:   TitleOptionsDefault,
 	}
 
 	// StyleColoredBright renders a Table without any borders or separators,
@@ -60,6 +63,7 @@ var (
 		Color:   ColorOptionsBright,
 		Format:  FormatOptionsDefault,
 		Options: OptionsNoBordersAndSeparators,
+		Title:   TitleOptionsDark,
 	}
 
 	// StyleColoredDark renders a Table without any borders or separators, and
@@ -71,6 +75,7 @@ var (
 		Color:   ColorOptionsDark,
 		Format:  FormatOptionsDefault,
 		Options: OptionsNoBordersAndSeparators,
+		Title:   TitleOptionsBright,
 	}
 
 	// StyleColoredBlackOnBlueWhite renders a Table without any borders or
@@ -82,6 +87,7 @@ var (
 		Color:   ColorOptionsBlackOnBlueWhite,
 		Format:  FormatOptionsDefault,
 		Options: OptionsNoBordersAndSeparators,
+		Title:   TitleOptionsBlueOnBlack,
 	}
 
 	// StyleColoredBlackOnCyanWhite renders a Table without any borders or
@@ -93,6 +99,7 @@ var (
 		Color:   ColorOptionsBlackOnCyanWhite,
 		Format:  FormatOptionsDefault,
 		Options: OptionsNoBordersAndSeparators,
+		Title:   TitleOptionsCyanOnBlack,
 	}
 
 	// StyleColoredBlackOnGreenWhite renders a Table without any borders or
@@ -104,6 +111,7 @@ var (
 		Color:   ColorOptionsBlackOnGreenWhite,
 		Format:  FormatOptionsDefault,
 		Options: OptionsNoBordersAndSeparators,
+		Title:   TitleOptionsGreenOnBlack,
 	}
 
 	// StyleColoredBlackOnMagentaWhite renders a Table without any borders or
@@ -115,6 +123,7 @@ var (
 		Color:   ColorOptionsBlackOnMagentaWhite,
 		Format:  FormatOptionsDefault,
 		Options: OptionsNoBordersAndSeparators,
+		Title:   TitleOptionsMagentaOnBlack,
 	}
 
 	// StyleColoredBlackOnYellowWhite renders a Table without any borders or
@@ -126,6 +135,7 @@ var (
 		Color:   ColorOptionsBlackOnYellowWhite,
 		Format:  FormatOptionsDefault,
 		Options: OptionsNoBordersAndSeparators,
+		Title:   TitleOptionsYellowOnBlack,
 	}
 
 	// StyleColoredBlackOnRedWhite renders a Table without any borders or
@@ -137,6 +147,7 @@ var (
 		Color:   ColorOptionsBlackOnRedWhite,
 		Format:  FormatOptionsDefault,
 		Options: OptionsNoBordersAndSeparators,
+		Title:   TitleOptionsRedOnBlack,
 	}
 
 	// StyleColoredBlueWhiteOnBlack renders a Table without any borders or
@@ -148,6 +159,7 @@ var (
 		Color:   ColorOptionsBlueWhiteOnBlack,
 		Format:  FormatOptionsDefault,
 		Options: OptionsNoBordersAndSeparators,
+		Title:   TitleOptionsBlackOnBlue,
 	}
 
 	// StyleColoredCyanWhiteOnBlack renders a Table without any borders or
@@ -159,6 +171,7 @@ var (
 		Color:   ColorOptionsCyanWhiteOnBlack,
 		Format:  FormatOptionsDefault,
 		Options: OptionsNoBordersAndSeparators,
+		Title:   TitleOptionsBlackOnCyan,
 	}
 
 	// StyleColoredGreenWhiteOnBlack renders a Table without any borders or
@@ -170,6 +183,7 @@ var (
 		Color:   ColorOptionsGreenWhiteOnBlack,
 		Format:  FormatOptionsDefault,
 		Options: OptionsNoBordersAndSeparators,
+		Title:   TitleOptionsBlackOnGreen,
 	}
 
 	// StyleColoredMagentaWhiteOnBlack renders a Table without any borders or
@@ -181,6 +195,7 @@ var (
 		Color:   ColorOptionsMagentaWhiteOnBlack,
 		Format:  FormatOptionsDefault,
 		Options: OptionsNoBordersAndSeparators,
+		Title:   TitleOptionsBlackOnMagenta,
 	}
 
 	// StyleColoredRedWhiteOnBlack renders a Table without any borders or
@@ -192,6 +207,7 @@ var (
 		Color:   ColorOptionsRedWhiteOnBlack,
 		Format:  FormatOptionsDefault,
 		Options: OptionsNoBordersAndSeparators,
+		Title:   TitleOptionsBlackOnRed,
 	}
 
 	// StyleColoredYellowWhiteOnBlack renders a Table without any borders or
@@ -203,6 +219,7 @@ var (
 		Color:   ColorOptionsYellowWhiteOnBlack,
 		Format:  FormatOptionsDefault,
 		Options: OptionsNoBordersAndSeparators,
+		Title:   TitleOptionsBlackOnYellow,
 	}
 
 	// StyleDouble renders a Table like below:
@@ -221,6 +238,7 @@ var (
 		Color:   ColorOptionsDefault,
 		Format:  FormatOptionsDefault,
 		Options: OptionsDefault,
+		Title:   TitleOptionsDefault,
 	}
 
 	// StyleLight renders a Table like below:
@@ -239,6 +257,7 @@ var (
 		Color:   ColorOptionsDefault,
 		Format:  FormatOptionsDefault,
 		Options: OptionsDefault,
+		Title:   TitleOptionsDefault,
 	}
 
 	// StyleRounded renders a Table like below:
@@ -257,6 +276,7 @@ var (
 		Color:   ColorOptionsDefault,
 		Format:  FormatOptionsDefault,
 		Options: OptionsDefault,
+		Title:   TitleOptionsDefault,
 	}
 
 	// styleTest renders a Table like below:
@@ -275,6 +295,7 @@ var (
 		Color:   ColorOptionsDefault,
 		Format:  FormatOptionsDefault,
 		Options: OptionsDefault,
+		Title:   TitleOptionsDefault,
 	}
 )
 
@@ -725,5 +746,83 @@ var (
 		SeparateFooter:  false,
 		SeparateHeader:  false,
 		SeparateRows:    false,
+	}
+)
+
+// TitleOptions defines the way the title text is to be rendered.
+type TitleOptions struct {
+	Align  text.Align
+	Colors text.Colors
+	Format text.Format
+}
+
+var (
+	// TitleOptionsDefault defines sensible title options - basically NONE.
+	TitleOptionsDefault = TitleOptions{}
+
+	// TitleOptionsBright renders Bright Bold text on Dark background.
+	TitleOptionsBright = TitleOptionsBlackOnCyan
+
+	// TitleOptionsDark renders Dark Bold text on Bright background.
+	TitleOptionsDark = TitleOptionsCyanOnBlack
+
+	// TitleOptionsBlackOnBlue renders Black text on Blue background.
+	TitleOptionsBlackOnBlue = TitleOptions{
+		Colors: append(ColorOptionsBlackOnBlueWhite.Header, text.Bold),
+	}
+
+	// TitleOptionsBlackOnCyan renders Black Bold text on Cyan background.
+	TitleOptionsBlackOnCyan = TitleOptions{
+		Colors: append(ColorOptionsBlackOnCyanWhite.Header, text.Bold),
+	}
+
+	// TitleOptionsBlackOnGreen renders Black Bold text onGreen background.
+	TitleOptionsBlackOnGreen = TitleOptions{
+		Colors: append(ColorOptionsBlackOnGreenWhite.Header, text.Bold),
+	}
+
+	// TitleOptionsBlackOnMagenta renders Black Bold text on Magenta background.
+	TitleOptionsBlackOnMagenta = TitleOptions{
+		Colors: append(ColorOptionsBlackOnMagentaWhite.Header, text.Bold),
+	}
+
+	// TitleOptionsBlackOnRed renders Black Bold text on Red background.
+	TitleOptionsBlackOnRed = TitleOptions{
+		Colors: append(ColorOptionsBlackOnRedWhite.Header, text.Bold),
+	}
+
+	// TitleOptionsBlackOnYellow renders Black Bold text on Yellow background.
+	TitleOptionsBlackOnYellow = TitleOptions{
+		Colors: append(ColorOptionsBlackOnYellowWhite.Header, text.Bold),
+	}
+
+	// TitleOptionsBlueOnBlack renders Blue Bold text on Black background.
+	TitleOptionsBlueOnBlack = TitleOptions{
+		Colors: append(ColorOptionsBlueWhiteOnBlack.Header, text.Bold),
+	}
+
+	// TitleOptionsCyanOnBlack renders Cyan Bold text on Black background.
+	TitleOptionsCyanOnBlack = TitleOptions{
+		Colors: append(ColorOptionsCyanWhiteOnBlack.Header, text.Bold),
+	}
+
+	// TitleOptionsGreenOnBlack renders Green Bold text on Black background.
+	TitleOptionsGreenOnBlack = TitleOptions{
+		Colors: append(ColorOptionsGreenWhiteOnBlack.Header, text.Bold),
+	}
+
+	// TitleOptionsMagentaOnBlack renders Magenta Bold text on Black background.
+	TitleOptionsMagentaOnBlack = TitleOptions{
+		Colors: append(ColorOptionsMagentaWhiteOnBlack.Header, text.Bold),
+	}
+
+	// TitleOptionsRedOnBlack renders Red Bold text on Black background.
+	TitleOptionsRedOnBlack = TitleOptions{
+		Colors: append(ColorOptionsRedWhiteOnBlack.Header, text.Bold),
+	}
+
+	// TitleOptionsYellowOnBlack renders Yellow Bold text on Black background.
+	TitleOptionsYellowOnBlack = TitleOptions{
+		Colors: append(ColorOptionsYellowWhiteOnBlack.Header, text.Bold),
 	}
 )

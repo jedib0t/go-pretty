@@ -14,8 +14,10 @@ func TestTable_RenderMarkdown(t *testing.T) {
 	tw.AppendRow(testRowPipes)
 	tw.AppendFooter(testFooter)
 	tw.SetCaption(testCaption)
+	tw.SetTitle(testTitle1)
 
-	expectedOut := `| # | First Name | Last Name | Salary |  |
+	expectedOut := `# Game of Thrones
+| # | First Name | Last Name | Salary |  |
 | ---:| --- | --- | ---:| --- |
 | 1 | Arya | Stark | 3000 |  |
 | 20 | Jon | Snow | 2000 | You know nothing, Jon Snow! |
@@ -23,7 +25,7 @@ func TestTable_RenderMarkdown(t *testing.T) {
 | 0 | Valar | Morghulis | 0 | Faceless<br/>Men |
 | 0 | Valar | Morghulis | 0 | Faceless\|Men |
 |  |  | Total | 10000 |  |
-_test-caption_`
+_A Song of Ice and Fire_`
 
 	assert.Equal(t, expectedOut, tw.RenderMarkdown())
 }
