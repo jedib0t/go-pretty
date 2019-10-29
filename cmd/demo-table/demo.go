@@ -33,7 +33,6 @@ func demoTableColors() {
 
 	twOuter := table.NewWriter()
 	twOuter.AppendHeader(table.Row{"Bright", "Dark"})
-	twOuter.SetAlignHeader([]text.Align{text.AlignCenter, text.AlignCenter})
 	for _, stylePair := range stylePairs {
 		row := make(table.Row, 2)
 		for idx, style := range stylePair {
@@ -44,7 +43,10 @@ func demoTableColors() {
 		}
 		twOuter.AppendRow(row)
 	}
-	twOuter.SetAlign([]text.Align{text.AlignCenter, text.AlignCenter})
+	twOuter.SetColumnConfigs([]table.ColumnConfig{
+		{Name: "Bright", Align: text.AlignCenter, AlignHeader: text.AlignCenter},
+		{Name: "Dark", Align: text.AlignCenter, AlignHeader: text.AlignCenter},
+	})
 	twOuter.SetStyle(table.StyleLight)
 	twOuter.Style().Title.Align = text.AlignCenter
 	twOuter.SetTitle("C O L O R S")
@@ -148,7 +150,12 @@ func demoTableFeatures() {
 	// specify alignment, all the columns default to text.AlignDefault - numbers
 	// go right and everything else left. but what if you want the first name to
 	// go right too? and the last column to be "justified"?
-	t.SetAlign([]text.Align{text.AlignDefault, text.AlignRight, text.AlignDefault, text.AlignDefault, text.AlignJustify})
+	t.SetColumnConfigs([]table.ColumnConfig{
+		{Name: "First Name", Align: text.AlignRight},
+		// the 5th column does not have a title, so use the column number as the
+		// identifier for the column
+		{Number: 5, Align: text.AlignJustify},
+	})
 	// to show AlignJustify in action, lets add one more row
 	t.AppendRow(table.Row{4, "Faceless", "Man", 0, "Needs a\tname."})
 	// time to take a peek:
@@ -193,8 +200,14 @@ func demoTableFeatures() {
 	//+-----+------------+-----------+--------+-----------------------------+
 	//Table with a Multi-line Row.
 	//
-	// time to VAlign the columns... and ignore the last column in the process
-	t.SetVAlign([]text.VAlign{text.VAlignDefault, text.VAlignMiddle, text.VAlignBottom, text.VAlignMiddle})
+	// time to Align/VAlign the columns...
+	t.SetColumnConfigs([]table.ColumnConfig{
+		{Name: "First Name", Align: text.AlignRight, VAlign: text.VAlignMiddle},
+		{Name: "Last Name", VAlign: text.VAlignBottom},
+		{Name: "Salary", Align: text.AlignRight, VAlign: text.VAlignMiddle},
+		// the 5th column does not have a title, so use the column number
+		{Number: 5, Align: text.AlignJustify},
+	})
 	t.SetCaption("Table with a Multi-line Row with VAlign.\n")
 	fmt.Println(t.Render())
 	//+-----+------------+-----------+--------+-----------------------------+
@@ -215,7 +228,12 @@ func demoTableFeatures() {
 	//Table with a Multi-line Row with VAlign.
 	//
 	// changed your mind about AlignJustify?
-	t.SetAlign([]text.Align{text.AlignDefault, text.AlignRight, text.AlignDefault, text.AlignDefault, text.AlignCenter})
+	t.SetColumnConfigs([]table.ColumnConfig{
+		{Name: "First Name", Align: text.AlignRight, VAlign: text.VAlignMiddle},
+		{Name: "Last Name", VAlign: text.VAlignBottom},
+		{Name: "Salary", Align: text.AlignRight, VAlign: text.VAlignMiddle},
+		{Number: 5, Align: text.AlignCenter},
+	})
 	t.SetCaption("Table with a Multi-line Row with VAlign and changed Align.\n")
 	fmt.Println(t.Render())
 	//+-----+------------+-----------+--------+-----------------------------+
@@ -326,7 +344,12 @@ func demoTableFeatures() {
 	//==========================================================================
 	// But I want to see all the data!
 	//==========================================================================
-	t.SetAllowedColumnLengths([]int{0, 6, 9, 6, 10})
+	t.SetColumnConfigs([]table.ColumnConfig{
+		{Name: "First Name", WidthMax: 6},
+		{Name: "Last Name", WidthMax: 9},
+		{Name: "Salary", WidthMax: 6},
+		{Number: 5, WidthMax: 10},
+	})
 	t.SetCaption("Table on a diet.\n")
 	t.SetStyle(table.StyleRounded)
 	fmt.Println(t.Render())
@@ -344,7 +367,8 @@ func demoTableFeatures() {
 	//╰─────┴────────┴───────────┴────────┴────────────╯
 	//Table on a diet.
 	t.SetAllowedRowLength(0)
-	t.SetAllowedColumnLengths([]int{0, 0, 0, 0, 0})
+	// remove the width restrictions
+	t.SetColumnConfigs([]table.ColumnConfig{})
 	//==========================================================================
 
 	//==========================================================================
@@ -430,9 +454,14 @@ func demoTableFeatures() {
 	//==========================================================================
 	t.SetStyle(table.StyleBold)
 	colorBOnW := text.Colors{text.BgWhite, text.FgBlack}
-	t.SetColorsHeader([]text.Colors{colorBOnW, colorBOnW, colorBOnW, colorBOnW, colorBOnW})
-	t.SetColors([]text.Colors{{text.FgYellow}, {text.FgHiRed}, {text.FgHiRed}, {text.FgGreen}, {text.FgCyan}})
-	t.SetColorsFooter([]text.Colors{{}, {}, colorBOnW, colorBOnW})
+	// set colors using Colors/ColorsHeader/ColorsFooter
+	t.SetColumnConfigs([]table.ColumnConfig{
+		{Name: "#", Colors: text.Colors{text.FgYellow}, ColorsHeader: colorBOnW},
+		{Name: "First Name", Colors: text.Colors{text.FgHiRed}, ColorsHeader: colorBOnW},
+		{Name: "Last Name", Colors: text.Colors{text.FgHiRed}, ColorsHeader: colorBOnW, ColorsFooter: colorBOnW},
+		{Name: "Salary", Colors: text.Colors{text.FgGreen}, ColorsHeader: colorBOnW, ColorsFooter: colorBOnW},
+		{Number: 5, Colors: text.Colors{text.FgCyan}, ColorsHeader: colorBOnW},
+	})
 	t.SetCaption("Table with Colors.\n")
 	fmt.Println(t.Render())
 	//┏━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -468,9 +497,8 @@ func demoTableFeatures() {
 	//"┗━━━━━┻━━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
 	//"Table with Colors in Raw Mode."
 	//""
-	t.SetColorsHeader([]text.Colors{}) // disable colors on the header
-	t.SetColors([]text.Colors{})       // disable colors on the body
-	t.SetColorsFooter([]text.Colors{}) // disable colors on the footer
+	// disable colors and revert to previous version of the column configs
+	t.SetColumnConfigs([]table.ColumnConfig{})
 	//==========================================================================
 
 	//==========================================================================
