@@ -1,12 +1,11 @@
-.PHONY: all dep profile test
+.PHONY: all profile test
 
 default: test
 
-all: dep test bench
+all: test bench
 
 tools:
 	go get github.com/fzipp/gocyclo
-	go get github.com/golang/dep/cmd/dep
 	go get golang.org/x/lint/golint
 
 bench:
@@ -23,9 +22,6 @@ demo-progress:
 
 demo-table:
 	go run cmd/demo-table/demo.go
-
-dep:
-	dep ensure
 
 fmt:
 	go fmt $(shell go list ./...)
