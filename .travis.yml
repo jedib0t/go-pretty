@@ -1,7 +1,7 @@
 language: go
 
 # Use the latest version.
-go: 1.10.x
+go: 1.14.x
 
 # Skip the install step. Everything needed should be in the /vendor folder.
 install: true
