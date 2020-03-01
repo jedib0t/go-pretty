@@ -1,0 +1,27 @@
+# github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf
+github.com/asaskevich/govalidator
+# github.com/davecgh/go-spew v1.1.1
+github.com/davecgh/go-spew/spew
+# github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
+github.com/globalsign/mgo/bson
+github.com/globalsign/mgo/internal/json
+# github.com/go-openapi/errors v0.19.0
+github.com/go-openapi/errors
+# github.com/go-openapi/strfmt v0.19.0
+github.com/go-openapi/strfmt
+# github.com/mailru/easyjson v0.0.0-20190403194419-1ea4449da983
+github.com/mailru/easyjson/buffer
+github.com/mailru/easyjson/jlexer
+github.com/mailru/easyjson/jwriter
+# github.com/mattn/go-runewidth v0.0.4
+github.com/mattn/go-runewidth
+# github.com/mitchellh/mapstructure v1.1.2
+github.com/mitchellh/mapstructure
+# github.com/pkg/profile v1.2.1
+github.com/pkg/profile
+# github.com/pmezard/go-difflib v1.0.0
+github.com/pmezard/go-difflib/difflib
+# github.com/stretchr/testify v1.2.2
+github.com/stretchr/testify/assert
+# golang.org/x/sys v0.0.0-20180816055513-1c9583448a9c
+golang.org/x/sys/windows
