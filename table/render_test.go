@@ -514,6 +514,46 @@ func TestTable_Render_Paged(t *testing.T) {
 	assert.Equal(t, expectedOut, tw.Render())
 }
 
+func TestTable_Render_Reset(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendFooter(testFooter)
+	tw.SetStyle(StyleLight)
+
+	expectedOut := `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
+│   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
+├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+│   1 │ Arya       │ Stark     │   3000 │                             │
+│  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │
+│ 300 │ Tyrion     │ Lannister │   5000 │                             │
+├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+│     │            │ TOTAL     │  10000 │                             │
+└─────┴────────────┴───────────┴────────┴─────────────────────────────┘`
+	assert.Equal(t, expectedOut, tw.Render())
+
+	tw.ResetFooter()
+	expectedOut = `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
+│   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
+├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+│   1 │ Arya       │ Stark     │   3000 │                             │
+│  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │
+│ 300 │ Tyrion     │ Lannister │   5000 │                             │
+└─────┴────────────┴───────────┴────────┴─────────────────────────────┘`
+	assert.Equal(t, expectedOut, tw.Render())
+
+	tw.ResetHeader()
+	expectedOut = `┌─────┬────────┬───────────┬──────┬─────────────────────────────┐
+│   1 │ Arya   │ Stark     │ 3000 │                             │
+│  20 │ Jon    │ Snow      │ 2000 │ You know nothing, Jon Snow! │
+│ 300 │ Tyrion │ Lannister │ 5000 │                             │
+└─────┴────────┴───────────┴──────┴─────────────────────────────┘`
+	assert.Equal(t, expectedOut, tw.Render())
+
+	tw.ResetRows()
+	assert.Empty(t, tw.Render())
+}
+
 func TestTable_Render_RowPainter(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(testHeader)
