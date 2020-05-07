@@ -131,14 +131,17 @@ func (t *Table) Length() int {
 	return len(t.rowsRaw)
 }
 
+// ResetFooter resets and clears all the Footer rows appended earlier.
 func (t *Table) ResetFooter() {
 	t.rowsFooterRaw = nil
 }
 
+// ResetHeader resets and clears all the Header rows appended earlier.
 func (t *Table) ResetHeader() {
 	t.rowsHeaderRaw = nil
 }
 
+// ResetRows resets and clears all the rows appended earlier.
 func (t *Table) ResetRows() {
 	t.rowsRaw = nil
 }
