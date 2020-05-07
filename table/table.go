@@ -131,6 +131,18 @@ func (t *Table) Length() int {
 	return len(t.rowsRaw)
 }
 
+func (t *Table) ResetFooter() {
+	t.rowsFooterRaw = nil
+}
+
+func (t *Table) ResetHeader() {
+	t.rowsHeaderRaw = nil
+}
+
+func (t *Table) ResetRows() {
+	t.rowsRaw = nil
+}
+
 // SetAlign sets the horizontal-align for each column in the (data) rows.
 //
 // Deprecated: Use SetColumnConfigs instead.
@@ -510,9 +522,6 @@ func (t *Table) initForRender() {
 	// pick a default style
 	t.Style()
 
-	// auto-index: calc the index column's max length
-	t.autoIndexVIndexMaxLength = len(fmt.Sprint(len(t.rowsRaw)))
-
 	// initialize the column configs and normalize them
 	t.initForRenderColumnConfigs()
 
@@ -589,7 +598,12 @@ func (t *Table) initForRenderColumnLengths() {
 }
 
 func (t *Table) initForRenderRows() {
-	t.rowsColors = nil
+	t.reset()
+
+	// auto-index: calc the index column's max length
+	t.autoIndexVIndexMaxLength = len(fmt.Sprint(len(t.rowsRaw)))
+
+	// stringify all the rows to make it easy to render
 	if t.rowPainter != nil {
 		t.rowsColors = make([]text.Colors, len(t.rowsRaw))
 	}
@@ -661,6 +675,19 @@ func (t *Table) render(out *strings.Builder) string {
 		_, _ = t.outputMirror.Write([]byte("\n"))
 	}
 	return outStr
+}
+
+func (t *Table) reset() {
+	t.autoIndexVIndexMaxLength = 0
+	t.columnIsNonNumeric = nil
+	t.maxColumnLengths = nil
+	t.maxRowLength = 0
+	t.numColumns = 0
+	t.rowsColors = nil
+	t.rowSeparator = nil
+	t.rows = nil
+	t.rowsFooter = nil
+	t.rowsHeader = nil
 }
 
 // renderHint has hints for the Render*() logic

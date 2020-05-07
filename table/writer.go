@@ -17,6 +17,9 @@ type Writer interface {
 	RenderCSV() string
 	RenderHTML() string
 	RenderMarkdown() string
+	ResetFooter()
+	ResetHeader()
+	ResetRows()
 	SetAllowedRowLength(length int)
 	SetAutoIndex(autoIndex bool)
 	SetCaption(format string, a ...interface{})
