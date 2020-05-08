@@ -18,9 +18,9 @@ func (t *Table) RenderMarkdown() string {
 			out.WriteString("# ")
 			out.WriteString(t.title)
 		}
-		t.markdownRenderRows(&out, t.rowsHeader, true, false)
-		t.markdownRenderRows(&out, t.rows, false, false)
-		t.markdownRenderRows(&out, t.rowsFooter, false, true)
+		t.markdownRenderRows(&out, t.rowsHeader, renderHint{isHeaderRow: true})
+		t.markdownRenderRows(&out, t.rows, renderHint{})
+		t.markdownRenderRows(&out, t.rowsFooter, renderHint{isFooterRow: true})
 		if t.caption != "" {
 			out.WriteRune('\n')
 			out.WriteRune('_')
@@ -31,7 +31,7 @@ func (t *Table) RenderMarkdown() string {
 	return t.render(&out)
 }
 
-func (t *Table) markdownRenderRow(out *strings.Builder, row rowStr, isSeparator bool) {
+func (t *Table) markdownRenderRow(out *strings.Builder, row rowStr, hint renderHint) {
 	if len(row) > 0 {
 		// when working on line number 2 or more, insert a newline first
 		if out.Len() > 0 {
@@ -41,8 +41,8 @@ func (t *Table) markdownRenderRow(out *strings.Builder, row rowStr, isSeparator 
 		// render each column up to the max. columns seen in all the rows
 		out.WriteRune('|')
 		for colIdx := 0; colIdx < t.numColumns; colIdx++ {
-			if isSeparator {
-				out.WriteString(t.getAlign(colIdx, renderHint{}).MarkdownProperty())
+			if hint.isSeparatorRow {
+				out.WriteString(t.getAlign(colIdx, hint).MarkdownProperty())
 			} else {
 				var colStr string
 				if colIdx < len(row) {
@@ -63,12 +63,12 @@ func (t *Table) markdownRenderRow(out *strings.Builder, row rowStr, isSeparator 
 	}
 }
 
-func (t *Table) markdownRenderRows(out *strings.Builder, rows []rowStr, isHeader bool, isFooter bool) {
+func (t *Table) markdownRenderRows(out *strings.Builder, rows []rowStr, hint renderHint) {
 	if len(rows) > 0 {
 		for idx, row := range rows {
-			t.markdownRenderRow(out, row, false)
-			if idx == len(rows)-1 && isHeader {
-				t.markdownRenderRow(out, t.rowSeparator, true)
+			t.markdownRenderRow(out, row, renderHint{})
+			if idx == len(rows)-1 && hint.isHeaderRow {
+				t.markdownRenderRow(out, t.rowSeparator, renderHint{isSeparatorRow: true})
 			}
 		}
 	}

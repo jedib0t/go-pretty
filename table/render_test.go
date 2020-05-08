@@ -2,6 +2,7 @@ package table
 
 import (
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 	"testing"
@@ -234,6 +235,7 @@ func TestTable_Render_Colored(t *testing.T) {
 	tw.Style().Options.SeparateFooter = true
 	tw.Style().Options.SeparateHeader = true
 	tw.Style().Options.SeparateRows = true
+	tw.SetOutputMirror(os.Stdout)
 
 	expectedOut := []string{
 		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m------------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m--------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m",
@@ -781,6 +783,44 @@ func TestTable_Render_Sorted(t *testing.T) {
 │ 300 │ Tyrion     │ Lannister │   5000 │                             │
 │  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │
 │   1 │ Arya       │ Stark     │   3000 │                             │
+│  11 │ Sansa      │ Stark     │   6000 │                             │
+├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+│     │            │ TOTAL     │  10000 │                             │
+└─────┴────────────┴───────────┴────────┴─────────────────────────────┘`
+	assert.Equal(t, expectedOut, tw.Render())
+}
+
+func TestTable_Render_Separator(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendSeparator() // doesn't make any difference
+	tw.AppendRows(testRows)
+	tw.AppendSeparator()
+	tw.AppendSeparator() // doesn't make any difference
+	tw.AppendRow(testRowMultiLine)
+	tw.AppendSeparator()
+	tw.AppendSeparator() // doesn't make any difference
+	tw.AppendSeparator() // doesn't make any difference
+	tw.AppendRow(Row{11, "Sansa", "Stark", 6000})
+	tw.AppendSeparator() // doesn't make any difference
+	tw.AppendSeparator() // doesn't make any difference
+	tw.AppendSeparator() // doesn't make any difference
+	tw.AppendSeparator() // doesn't make any difference
+	tw.AppendFooter(testFooter)
+	tw.SetStyle(StyleLight)
+	tw.SetOutputMirror(os.Stdout)
+
+	expectedOut := `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
+│   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
+├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+│   1 │ Arya       │ Stark     │   3000 │                             │
+│  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │
+│ 300 │ Tyrion     │ Lannister │   5000 │                             │
+├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+│   0 │ Winter     │ Is        │      0 │ Coming.                     │
+│     │            │           │        │ The North Remembers!        │
+│     │            │           │        │ This is known.              │
+├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 │  11 │ Sansa      │ Stark     │   6000 │                             │
 ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 │     │            │ TOTAL     │  10000 │                             │

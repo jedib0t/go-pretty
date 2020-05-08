@@ -90,6 +90,9 @@ type Table struct {
 	// rowSeparator is a dummy row that contains the separator columns (dashes
 	// that make up the separator between header/body/footer
 	rowSeparator rowStr
+	// separators is used to keep track of all rowIndices after which a
+	// separator has to be rendered
+	separators map[int]bool
 	// sortBy stores a map of Column
 	sortBy []SortBy
 	// style contains all the strings used to draw the table, and more
@@ -126,6 +129,19 @@ func (t *Table) AppendRows(rows []Row) {
 	}
 }
 
+// AppendSeparator appends a separator row to the list of rows.
+//
+// Please note that this may clash with the behavior of the SetPageSize option
+// and you may see end up seeing double separators in some cases.
+func (t *Table) AppendSeparator() {
+	if t.separators == nil {
+		t.separators = make(map[int]bool)
+	}
+	if len(t.rowsRaw) > 0 {
+		t.separators[len(t.rowsRaw)-1] = true
+	}
+}
+
 // Length returns the number of rows to be rendered.
 func (t *Table) Length() int {
 	return len(t.rowsRaw)
@@ -144,6 +160,7 @@ func (t *Table) ResetHeader() {
 // ResetRows resets and clears all the rows appended earlier.
 func (t *Table) ResetRows() {
 	t.rowsRaw = nil
+	t.separators = nil
 }
 
 // SetAlign sets the horizontal-align for each column in the (data) rows.

@@ -310,13 +310,14 @@ func (t *Table) renderRows(out *strings.Builder, rows []rowStr, hint renderHint)
 	hintSeparator := hint
 	hintSeparator.isSeparatorRow = true
 
-	for idx, row := range rows {
-		hint.isFirstRow = bool(idx == 0)
-		hint.isLastRow = bool(idx == len(rows)-1)
-		hint.rowNumber = idx + 1
+	for rowIdx, row := range rows {
+		hint.isFirstRow = bool(rowIdx == 0)
+		hint.isLastRow = bool(rowIdx == len(rows)-1)
+		hint.rowNumber = rowIdx + 1
 
-		t.renderRow(out, idx+1, row, hint)
-		if t.style.Options.SeparateRows && idx < len(rows)-1 {
+		t.renderRow(out, rowIdx+1, row, hint)
+		if (t.style.Options.SeparateRows && rowIdx < len(rows)-1) || // last row before footer
+			(t.separators[rowIdx] && rowIdx != len(rows)-1) { // manually added separator and not last row
 			t.renderRowSeparator(out, hintSeparator)
 		}
 	}
