@@ -128,21 +128,21 @@ func TestTable_Length(t *testing.T) {
 	assert.Equal(t, 2, table.Length())
 }
 
-func TestTable_ResetFooter(t *testing.T) {
+func TestTable_ResetFooters(t *testing.T) {
 	table := Table{}
 	table.AppendFooter(testFooter)
 	assert.NotEmpty(t, table.rowsFooterRaw)
 
-	table.ResetFooter()
+	table.ResetFooters()
 	assert.Empty(t, table.rowsFooterRaw)
 }
 
-func TestTable_ResetHeader(t *testing.T) {
+func TestTable_ResetHeaders(t *testing.T) {
 	table := Table{}
 	table.AppendHeader(testHeader)
 	assert.NotEmpty(t, table.rowsHeaderRaw)
 
-	table.ResetHeader()
+	table.ResetHeaders()
 	assert.Empty(t, table.rowsHeaderRaw)
 }
 
