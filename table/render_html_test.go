@@ -13,14 +13,10 @@ func TestTable_RenderHTML(t *testing.T) {
 	tw.AppendRows(testRows)
 	tw.AppendRow(testRowMultiLine)
 	tw.AppendFooter(testFooter)
-	tw.SetVAlign([]text.VAlign{
-		text.VAlignDefault, text.VAlignDefault, text.VAlignDefault, text.VAlignBottom, text.VAlignBottom,
+	tw.SetColumnConfigs([]ColumnConfig{
+		{Name: "Salary", VAlign: text.VAlignBottom},
+		{Number: 5, VAlign: text.VAlignBottom},
 	})
-	headerFooterAlign := []text.VAlign{
-		text.VAlignDefault, text.VAlignDefault, text.VAlignDefault, text.VAlignDefault, text.VAlignDefault,
-	}
-	tw.SetVAlignFooter(headerFooterAlign)
-	tw.SetVAlignHeader(headerFooterAlign)
 
 	expectedOut := `<table class="go-pretty-table">
   <thead>
@@ -84,18 +80,34 @@ func TestTable_RenderHTML_Colored(t *testing.T) {
 	tw.AppendFooter(testFooter)
 	tw.SetCaption(testCaption)
 	tw.SetTitle(testTitle1)
-	colorBOnW := text.Colors{text.BgWhite, text.FgBlack}
-	tw.SetColorsHeader([]text.Colors{colorBOnW, colorBOnW, colorBOnW, colorBOnW, colorBOnW})
-	tw.SetColors([]text.Colors{{text.Bold}, {text.FgCyan}, {text.FgMagenta}, {text.FgYellow}, {text.FgBlack}})
-	tw.SetColorsFooter([]text.Colors{{}, {}, colorBOnW, colorBOnW, {}})
-	tw.SetVAlign([]text.VAlign{
-		text.VAlignDefault, text.VAlignDefault, text.VAlignDefault, text.VAlignBottom, text.VAlignBottom,
+	colorsBlackOnWhite := text.Colors{text.BgWhite, text.FgBlack}
+	tw.SetColumnConfigs([]ColumnConfig{
+		{
+			Name:         "#",
+			Colors:       text.Colors{text.Bold},
+			ColorsHeader: colorsBlackOnWhite,
+		}, {
+			Name:         "First Name",
+			Colors:       text.Colors{text.FgCyan},
+			ColorsHeader: colorsBlackOnWhite,
+		}, {
+			Name:         "Last Name",
+			Colors:       text.Colors{text.FgMagenta},
+			ColorsHeader: colorsBlackOnWhite,
+			ColorsFooter: colorsBlackOnWhite,
+		}, {
+			Name:         "Salary",
+			Colors:       text.Colors{text.FgYellow},
+			ColorsHeader: colorsBlackOnWhite,
+			ColorsFooter: colorsBlackOnWhite,
+			VAlign:       text.VAlignBottom,
+		}, {
+			Number:       5,
+			Colors:       text.Colors{text.FgBlack},
+			ColorsHeader: colorsBlackOnWhite,
+			VAlign:       text.VAlignBottom,
+		},
 	})
-	headerFooterAlign := []text.VAlign{
-		text.VAlignDefault, text.VAlignDefault, text.VAlignDefault, text.VAlignDefault, text.VAlignDefault,
-	}
-	tw.SetVAlignFooter(headerFooterAlign)
-	tw.SetVAlignHeader(headerFooterAlign)
 
 	expectedOut := `<table class="go-pretty-table">
   <thead>

@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/jedib0t/go-pretty/table"
-	"github.com/jedib0t/go-pretty/text"
 	"github.com/pkg/profile"
 )
 
@@ -15,7 +14,6 @@ var (
 		profile.CPUProfile,
 		profile.MemProfileRate(512),
 	}
-	tableRowAlign  = []text.Align{text.AlignDefault, text.AlignLeft, text.AlignCenter, text.AlignRight}
 	tableCaption   = "Profiling a Simple Table."
 	tableRowFooter = table.Row{"", "", "Total", 10000}
 	tableRowHeader = table.Row{"#", "First Name", "Last Name", "Salary"}
@@ -34,7 +32,6 @@ func profileRender(profiler func(profile2 *profile.Profile), n int) {
 		tw.AppendHeader(tableRowHeader)
 		tw.AppendRows(tableRows)
 		tw.AppendFooter(tableRowFooter)
-		tw.SetAlign(tableRowAlign)
 		tw.SetCaption(tableCaption)
 		tw.Render()
 		tw.RenderCSV()

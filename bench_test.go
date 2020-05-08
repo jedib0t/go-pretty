@@ -8,14 +8,12 @@ import (
 	"github.com/jedib0t/go-pretty/list"
 	"github.com/jedib0t/go-pretty/progress"
 	"github.com/jedib0t/go-pretty/table"
-	"github.com/jedib0t/go-pretty/text"
 )
 
 var (
 	listItem1      = "Game Of Thrones"
 	listItems2     = []interface{}{"Winter", "Is", "Coming"}
 	listItems3     = []interface{}{"This", "Is", "Known"}
-	tableRowAlign  = []text.Align{text.AlignDefault, text.AlignLeft, text.AlignCenter, text.AlignRight}
 	tableCaption   = "table-caption"
 	tableRowFooter = table.Row{"", "", "Total", 10000}
 	tableRowHeader = table.Row{"#", "First Name", "Last Name", "Salary"}
@@ -68,7 +66,6 @@ func generateBenchmarkTable() table.Writer {
 	tw.AppendHeader(tableRowHeader)
 	tw.AppendRows(tableRows)
 	tw.AppendFooter(tableRowFooter)
-	tw.SetAlign(tableRowAlign)
 	tw.SetCaption(tableCaption)
 	return tw
 }
