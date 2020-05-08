@@ -612,7 +612,8 @@ func (t *Table) initForRenderHideColumns() {
 		return
 	}
 
-	// hide columns as directed
+	colIdxMap := make(map[int]int)
+	numColumns := 0
 	_hideColumns := func(rows []rowStr) []rowStr {
 		var rsp []rowStr
 		for _, row := range rows {
@@ -621,21 +622,42 @@ func (t *Table) initForRenderHideColumns() {
 				cc := t.columnConfigMap[colIdx]
 				if !cc.Hidden {
 					rowNew = append(rowNew, col)
+					colIdxMap[colIdx] = len(rowNew) - 1
 				}
+			}
+			if len(rowNew) > numColumns {
+				numColumns = len(rowNew)
 			}
 			rsp = append(rsp, rowNew)
 		}
 		return rsp
 	}
+
+	// hide columns as directed
 	t.rows = _hideColumns(t.rows)
 	t.rowsFooter = _hideColumns(t.rowsFooter)
 	t.rowsHeader = _hideColumns(t.rowsHeader)
 
-	if len(t.rows) > 0 {
-		t.numColumns = len(t.rows[0])
-	}
+	// reset numColumns to the new number of columns
+	t.numColumns = numColumns
 
-	// reset column config map
+	// re-create columnIsNonNumeric with new column indices
+	columnIsNonNumeric := make([]bool, t.numColumns)
+	for oldColIdx, nonNumeric := range t.columnIsNonNumeric {
+		if newColIdx, ok := colIdxMap[oldColIdx]; ok {
+			columnIsNonNumeric[newColIdx] = nonNumeric
+		}
+	}
+	t.columnIsNonNumeric = columnIsNonNumeric
+
+	// re-create columnConfigMap with new column indices
+	columnConfigMap := make(map[int]ColumnConfig)
+	for oldColIdx, cc := range t.columnConfigMap {
+		if newColIdx, ok := colIdxMap[oldColIdx]; ok {
+			columnConfigMap[newColIdx] = cc
+		}
+	}
+	t.columnConfigMap = columnConfigMap
 }
 
 func (t *Table) initForRenderRows() {
