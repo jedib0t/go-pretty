@@ -567,7 +567,6 @@ func (t *Table) initForRenderColumnConfigs() {
 			t.columnConfigMap[colCfg.Number-1] = colCfg
 		}
 	}
-	fmt.Printf("")
 }
 
 func (t *Table) initForRenderColumnLengths() {
@@ -600,6 +599,67 @@ func (t *Table) initForRenderColumnLengths() {
 	}
 }
 
+func (t *Table) initForRenderHideColumns() {
+	// if there is nothing to hide, return fast
+	hasHiddenColumns := false
+	for _, cc := range t.columnConfigMap {
+		if cc.Hidden {
+			hasHiddenColumns = true
+			break
+		}
+	}
+	if !hasHiddenColumns {
+		return
+	}
+
+	colIdxMap := make(map[int]int)
+	numColumns := 0
+	_hideColumns := func(rows []rowStr) []rowStr {
+		var rsp []rowStr
+		for _, row := range rows {
+			var rowNew rowStr
+			for colIdx, col := range row {
+				cc := t.columnConfigMap[colIdx]
+				if !cc.Hidden {
+					rowNew = append(rowNew, col)
+					colIdxMap[colIdx] = len(rowNew) - 1
+				}
+			}
+			if len(rowNew) > numColumns {
+				numColumns = len(rowNew)
+			}
+			rsp = append(rsp, rowNew)
+		}
+		return rsp
+	}
+
+	// hide columns as directed
+	t.rows = _hideColumns(t.rows)
+	t.rowsFooter = _hideColumns(t.rowsFooter)
+	t.rowsHeader = _hideColumns(t.rowsHeader)
+
+	// reset numColumns to the new number of columns
+	t.numColumns = numColumns
+
+	// re-create columnIsNonNumeric with new column indices
+	columnIsNonNumeric := make([]bool, t.numColumns)
+	for oldColIdx, nonNumeric := range t.columnIsNonNumeric {
+		if newColIdx, ok := colIdxMap[oldColIdx]; ok {
+			columnIsNonNumeric[newColIdx] = nonNumeric
+		}
+	}
+	t.columnIsNonNumeric = columnIsNonNumeric
+
+	// re-create columnConfigMap with new column indices
+	columnConfigMap := make(map[int]ColumnConfig)
+	for oldColIdx, cc := range t.columnConfigMap {
+		if newColIdx, ok := colIdxMap[oldColIdx]; ok {
+			columnConfigMap[newColIdx] = cc
+		}
+	}
+	t.columnConfigMap = columnConfigMap
+}
+
 func (t *Table) initForRenderRows() {
 	t.reset()
 
@@ -614,22 +674,11 @@ func (t *Table) initForRenderRows() {
 	t.rowsFooter = t.initForRenderRowsStringify(t.rowsFooterRaw, renderHint{isFooterRow: true})
 	t.rowsHeader = t.initForRenderRowsStringify(t.rowsHeaderRaw, renderHint{isHeaderRow: true})
 
-	// sort rows and rowsColors
-	if len(t.sortBy) > 0 {
-		sortedRowIndices := t.getSortedRowIndices()
-		sortedRows := make([]rowStr, len(t.rows))
-		for idx := range t.rows {
-			sortedRows[idx] = t.rows[sortedRowIndices[idx]]
-		}
-		t.rows = sortedRows
-		if t.rowsColors != nil {
-			sortedRowsColors := make([]text.Colors, len(t.rows))
-			for idx := range t.rows {
-				sortedRowsColors[idx] = t.rowsColors[sortedRowIndices[idx]]
-			}
-			t.rowsColors = sortedRowsColors
-		}
-	}
+	// sort the rows as requested
+	t.initForRenderSortRows()
+
+	// strip out hidden columns
+	t.initForRenderHideColumns()
 }
 
 func (t *Table) initForRenderRowsStringify(rows []Row, hint renderHint) []rowStr {
@@ -664,6 +713,29 @@ func (t *Table) initForRenderRowSeparator() {
 	}
 	if t.style.Options.DrawBorder {
 		t.maxRowLength += text.RuneCount(t.style.Box.Left + t.style.Box.Right)
+	}
+}
+
+func (t *Table) initForRenderSortRows() {
+	if len(t.sortBy) == 0 {
+		return
+	}
+
+	// sort the rows
+	sortedRowIndices := t.getSortedRowIndices()
+	sortedRows := make([]rowStr, len(t.rows))
+	for idx := range t.rows {
+		sortedRows[idx] = t.rows[sortedRowIndices[idx]]
+	}
+	t.rows = sortedRows
+
+	// sort the rowsColors
+	if len(t.rowsColors) > 0 {
+		sortedRowsColors := make([]text.Colors, len(t.rows))
+		for idx := range t.rows {
+			sortedRowsColors[idx] = t.rowsColors[sortedRowIndices[idx]]
+		}
+		t.rowsColors = sortedRowsColors
 	}
 }
 

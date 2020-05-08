@@ -156,7 +156,158 @@ func TestTable_RenderHTML_Empty(t *testing.T) {
 	assert.Empty(t, tw.RenderHTML())
 }
 
-func TestTable_RendeHTML_Sorted(t *testing.T) {
+func TestTable_RenderHTML_HiddenColumns(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendFooter(testFooter)
+
+	// ensure sorting is done before hiding the columns
+	tw.SortBy([]SortBy{
+		{Name: "Salary", Mode: DscNumeric},
+	})
+
+	t.Run("every column hidden", func(t *testing.T) {
+		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{0, 1, 2, 3, 4}))
+
+		expectedOut := ``
+		assert.Equal(t, expectedOut, tw.RenderHTML())
+	})
+
+	t.Run("first column hidden", func(t *testing.T) {
+		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{0}))
+
+		expectedOut := `<table class="go-pretty-table">
+  <thead>
+  <tr>
+    <th>First Name</th>
+    <th>Last Name</th>
+    <th align="right">Salary</th>
+    <th>&nbsp;</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td>&gt;&gt;Tyrion</td>
+    <td>Lannister&lt;&lt;</td>
+    <td align="right">5013</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&gt;&gt;Arya</td>
+    <td>Stark&lt;&lt;</td>
+    <td align="right">3013</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&gt;&gt;Jon</td>
+    <td>Snow&lt;&lt;</td>
+    <td align="right">2013</td>
+    <td>~You know nothing, Jon Snow!~</td>
+  </tr>
+  </tbody>
+  <tfoot>
+  <tr>
+    <td>&nbsp;</td>
+    <td>Total</td>
+    <td align="right">10000</td>
+    <td>&nbsp;</td>
+  </tr>
+  </tfoot>
+</table>`
+		assert.Equal(t, expectedOut, tw.RenderHTML())
+	})
+
+	t.Run("column hidden in the middle", func(t *testing.T) {
+		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{1}))
+
+		expectedOut := `<table class="go-pretty-table">
+  <thead>
+  <tr>
+    <th align="right">#</th>
+    <th>Last Name</th>
+    <th align="right">Salary</th>
+    <th>&nbsp;</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td align="right">307</td>
+    <td>Lannister&lt;&lt;</td>
+    <td align="right">5013</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td align="right">8</td>
+    <td>Stark&lt;&lt;</td>
+    <td align="right">3013</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td align="right">27</td>
+    <td>Snow&lt;&lt;</td>
+    <td align="right">2013</td>
+    <td>~You know nothing, Jon Snow!~</td>
+  </tr>
+  </tbody>
+  <tfoot>
+  <tr>
+    <td align="right">&nbsp;</td>
+    <td>Total</td>
+    <td align="right">10000</td>
+    <td>&nbsp;</td>
+  </tr>
+  </tfoot>
+</table>`
+		assert.Equal(t, expectedOut, tw.RenderHTML())
+	})
+
+	t.Run("last column hidden", func(t *testing.T) {
+		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{4}))
+
+		expectedOut := `<table class="go-pretty-table">
+  <thead>
+  <tr>
+    <th align="right">#</th>
+    <th>First Name</th>
+    <th>Last Name</th>
+    <th align="right">Salary</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td align="right">307</td>
+    <td>&gt;&gt;Tyrion</td>
+    <td>Lannister&lt;&lt;</td>
+    <td align="right">5013</td>
+  </tr>
+  <tr>
+    <td align="right">8</td>
+    <td>&gt;&gt;Arya</td>
+    <td>Stark&lt;&lt;</td>
+    <td align="right">3013</td>
+  </tr>
+  <tr>
+    <td align="right">27</td>
+    <td>&gt;&gt;Jon</td>
+    <td>Snow&lt;&lt;</td>
+    <td align="right">2013</td>
+  </tr>
+  </tbody>
+  <tfoot>
+  <tr>
+    <td align="right">&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>Total</td>
+    <td align="right">10000</td>
+  </tr>
+  </tfoot>
+</table>`
+		assert.Equal(t, expectedOut, tw.RenderHTML())
+	})
+}
+
+func TestTable_RenderHTML_Sorted(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(testHeader)
 	tw.AppendRows(testRows)

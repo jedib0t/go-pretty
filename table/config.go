@@ -29,6 +29,11 @@ type ColumnConfig struct {
 	// ColorsHeader defines the colors to be used on the column in Header rows
 	ColorsHeader text.Colors
 
+	// Hidden when set to true will prevent the column from being rendered.
+	// This is useful in cases like needing a column for sorting, but not for
+	// display.
+	Hidden bool
+
 	// Transformer is a custom-function that changes the way the value gets
 	// rendered to the console. Refer to text/transformer.go for ready-to-use
 	// Transformer functions.
