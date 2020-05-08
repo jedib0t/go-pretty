@@ -92,7 +92,7 @@ should also have examples for all the available functions.
 
 ## Benchmarks
 
-Partial output of `make bench`:
+Partial output of `make bench` on CI:
 ```
 BenchmarkList_Render-2            	  372352	      3179 ns/op	     856 B/op	      38 allocs/op
 BenchmarkProgress_Render-2        	       4	 300318682 ns/op	    3438 B/op	      87 allocs/op
