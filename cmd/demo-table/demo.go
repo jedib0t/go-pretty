@@ -71,6 +71,8 @@ func demoTableFeatures() {
 	t.AppendRow(table.Row{1, "Arya", "Stark", 3000})
 	// all rows need not have the same number of columns
 	t.AppendRow(table.Row{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"})
+	// append a separator to keep the Lannisters away
+	t.AppendSeparator()
 	// table.Row is just a shorthand for []interface{}
 	t.AppendRow([]interface{}{300, "Tyrion", "Lannister", 5000})
 	// time to take a peek
@@ -79,9 +81,10 @@ func demoTableFeatures() {
 	//+-----+--------+-----------+------+-----------------------------+
 	//|   1 | Arya   | Stark     | 3000 |                             |
 	//|  20 | Jon    | Snow      | 2000 | You know nothing, Jon Snow! |
+	//+-----+--------+-----------+------+-----------------------------+
 	//| 300 | Tyrion | Lannister | 5000 |                             |
 	//+-----+--------+-----------+------+-----------------------------+
-	//Simple Table with 3 Rows.
+	//Simple Table with 3 Rows and a separator.
 	//==========================================================================
 
 	//==========================================================================
@@ -95,6 +98,7 @@ func demoTableFeatures() {
 	//+---+-----+--------+-----------+------+-----------------------------+
 	//| 1 |   1 | Arya   | Stark     | 3000 |                             |
 	//| 2 |  20 | Jon    | Snow      | 2000 | You know nothing, Jon Snow! |
+	//+---+-----+--------+-----------+------+-----------------------------+
 	//| 3 | 300 | Tyrion | Lannister | 5000 |                             |
 	//+---+-----+--------+-----------+------+-----------------------------+
 	//Table with Auto-Indexing.
@@ -107,6 +111,7 @@ func demoTableFeatures() {
 	//+---+-----+------------+-----------+--------+-----------------------------+
 	//| 1 |   1 | Arya       | Stark     |   3000 |                             |
 	//| 2 |  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
+	//+---+-----+------------+-----------+--------+-----------------------------+
 	//| 3 | 300 | Tyrion     | Lannister |   5000 |                             |
 	//+---+-----+------------+-----------+--------+-----------------------------+
 	//==========================================================================
@@ -122,6 +127,7 @@ func demoTableFeatures() {
 	//+-----+------------+-----------+--------+-----------------------------+
 	//|   1 | Arya       | Stark     |   3000 |                             |
 	//|  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
+	//+-----+------------+-----------+--------+-----------------------------+
 	//| 300 | Tyrion     | Lannister |   5000 |                             |
 	//+-----+------------+-----------+--------+-----------------------------+
 	//Table with 3 Rows & and a Header.
@@ -136,6 +142,7 @@ func demoTableFeatures() {
 	//+-----+------------+-----------+--------+-----------------------------+
 	//|   1 | Arya       | Stark     |   3000 |                             |
 	//|  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
+	//+-----+------------+-----------+--------+-----------------------------+
 	//| 300 | Tyrion     | Lannister |   5000 |                             |
 	//+-----+------------+-----------+--------+-----------------------------+
 	//|     |            | TOTAL     |  10000 |                             |
@@ -166,6 +173,7 @@ func demoTableFeatures() {
 	//+-----+------------+-----------+--------+-----------------------------+
 	//|   1 |       Arya | Stark     |   3000 |                             |
 	//|  20 |        Jon | Snow      |   2000 | You know nothing, Jon Snow! |
+	//+-----+------------+-----------+--------+-----------------------------+
 	//| 300 |     Tyrion | Lannister |   5000 |                             |
 	//|   4 |   Faceless | Man       |      0 | Needs        a        name. |
 	//+-----+------------+-----------+--------+-----------------------------+
@@ -188,6 +196,7 @@ func demoTableFeatures() {
 	//+-----+------------+-----------+--------+-----------------------------+
 	//|   1 |       Arya | Stark     |   3000 |                             |
 	//|  20 |        Jon | Snow      |   2000 | You know nothing, Jon Snow! |
+	//+-----+------------+-----------+--------+-----------------------------+
 	//| 300 |     Tyrion | Lannister |   5000 |                             |
 	//|   4 |   Faceless | Man       |      0 | Needs        a        name. |
 	//|  13 |     Winter | Valar     |      0 | You                         |
@@ -215,6 +224,7 @@ func demoTableFeatures() {
 	//+-----+------------+-----------+--------+-----------------------------+
 	//|   1 |       Arya | Stark     |   3000 |                             |
 	//|  20 |        Jon | Snow      |   2000 | You know nothing, Jon Snow! |
+	//+-----+------------+-----------+--------+-----------------------------+
 	//| 300 |     Tyrion | Lannister |   5000 |                             |
 	//|   4 |   Faceless | Man       |      0 | Needs        a        name. |
 	//|  13 |            |           |        | You                         |
@@ -241,6 +251,7 @@ func demoTableFeatures() {
 	//+-----+------------+-----------+--------+-----------------------------+
 	//|   1 |       Arya | Stark     |   3000 |                             |
 	//|  20 |        Jon | Snow      |   2000 | You know nothing, Jon Snow! |
+	//+-----+------------+-----------+--------+-----------------------------+
 	//| 300 |     Tyrion | Lannister |   5000 |                             |
 	//|   4 |   Faceless | Man       |      0 |       Needs a    name.      |
 	//|  13 |            |           |        |             You             |
@@ -257,12 +268,11 @@ func demoTableFeatures() {
 	//==========================================================================
 	// Time to begin anew. Too much on the screen for a demo!
 	//==========================================================================
-	t = table.NewWriter()
-	t.AppendHeader(table.Row{"#", "First Name", "Last Name", "Salary"})
+	t.ResetRows()
+	t.SetColumnConfigs(nil)
 	t.AppendRow(table.Row{1, "Arya", "Stark", 3000})
 	t.AppendRow(table.Row{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"})
 	t.AppendRow([]interface{}{300, "Tyrion", "Lannister", 5000})
-	t.AppendFooter(table.Row{"", "", "Total", 10000})
 	t.SetCaption("Starting afresh with a Simple Table again.\n")
 	fmt.Println(t.Render())
 	//+-----+------------+-----------+--------+-----------------------------+
