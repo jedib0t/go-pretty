@@ -90,6 +90,9 @@ type Table struct {
 	// rowSeparator is a dummy row that contains the separator columns (dashes
 	// that make up the separator between header/body/footer
 	rowSeparator rowStr
+	// separators is used to keep track of all rowIndices after which a
+	// separator has to be rendered
+	separators map[int]bool
 	// sortBy stores a map of Column
 	sortBy []SortBy
 	// style contains all the strings used to draw the table, and more
@@ -126,6 +129,29 @@ func (t *Table) AppendRows(rows []Row) {
 	}
 }
 
+// AppendSeparator helps render a separator row after the current last row. You
+// could call this function over and over, but it will be a no-op unless you
+// call AppendRow or AppendRows in between. Likewise, if the last thing you
+// append is a separator, it will not be rendered in addition to the usual table
+// separator.
+//
+//******************************************************************************
+// Please note the following caveats:
+// 1. SetPageSize(): this may end up creating consecutive separator rows near
+//    the end of a page or at the beginning of a page
+// 2. SortBy(): since SortBy could inherently alter the ordering of rows, the
+//    separators may not appear after the row it was originally intended to
+//    follow
+//******************************************************************************
+func (t *Table) AppendSeparator() {
+	if t.separators == nil {
+		t.separators = make(map[int]bool)
+	}
+	if len(t.rowsRaw) > 0 {
+		t.separators[len(t.rowsRaw)-1] = true
+	}
+}
+
 // Length returns the number of rows to be rendered.
 func (t *Table) Length() int {
 	return len(t.rowsRaw)
@@ -144,6 +170,7 @@ func (t *Table) ResetHeader() {
 // ResetRows resets and clears all the rows appended earlier.
 func (t *Table) ResetRows() {
 	t.rowsRaw = nil
+	t.separators = nil
 }
 
 // SetAlign sets the horizontal-align for each column in the (data) rows.

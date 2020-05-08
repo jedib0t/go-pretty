@@ -12,6 +12,7 @@ type Writer interface {
 	AppendHeader(row Row)
 	AppendRow(row Row)
 	AppendRows(rows []Row)
+	AppendSeparator()
 	Length() int
 	Render() string
 	RenderCSV() string
