@@ -260,7 +260,8 @@ func (t *Table) renderRow(out *strings.Builder, rowNum int, row rowStr, hint ren
 		colMaxLines := 0
 		rowWrapped := make(rowStr, len(row))
 		for colIdx, colStr := range row {
-			rowWrapped[colIdx] = text.WrapText(colStr, t.maxColumnLengths[colIdx])
+			widthEnforcer := t.columnConfigMap[colIdx].getWidthMaxEnforcer()
+			rowWrapped[colIdx] = widthEnforcer(colStr, t.maxColumnLengths[colIdx])
 			colNumLines := strings.Count(rowWrapped[colIdx], "\n") + 1
 			if colNumLines > colMaxLines {
 				colMaxLines = colNumLines
