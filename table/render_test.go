@@ -2,6 +2,7 @@ package table
 
 import (
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 	"testing"
@@ -454,6 +455,147 @@ func TestTable_Render_ColumnConfigs(t *testing.T) {
 func TestTable_Render_Empty(t *testing.T) {
 	tw := NewWriter()
 	assert.Empty(t, tw.Render())
+}
+
+func TestTable_Render_HiddenColumns(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendFooter(testFooter)
+	// ensure sorting is done before hiding columns
+	tw.SortBy([]SortBy{
+		{Name: "Salary", Mode: DscNumeric},
+	})
+	tw.SetOutputMirror(os.Stdout)
+
+	t.Run("no columns hidden", func(t *testing.T) {
+		tw.SetColumnConfigs(nil)
+		expectedOut := `+-----+------------+-----------+--------+-----------------------------+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++-----+------------+-----------+--------+-----------------------------+
+| 300 | Tyrion     | Lannister |   5000 |                             |
+|   1 | Arya       | Stark     |   3000 |                             |
+|  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
++-----+------------+-----------+--------+-----------------------------+
+|     |            | TOTAL     |  10000 |                             |
++-----+------------+-----------+--------+-----------------------------+`
+		assert.Equal(t, expectedOut, tw.Render())
+	})
+
+	t.Run("every column hidden", func(t *testing.T) {
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Name: "#", Hidden: true},
+			{Name: "First Name", Hidden: true},
+			{Name: "Last Name", Hidden: true},
+			{Name: "Salary", Hidden: true},
+			{Number: 5, Hidden: true},
+		})
+		expectedOut := ``
+		assert.Equal(t, expectedOut, tw.Render())
+	})
+
+	t.Run("some columns hidden (1)", func(t *testing.T) {
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Name: "First Name", Hidden: true},
+			{Name: "Last Name", Hidden: true},
+			{Name: "Salary", Hidden: true},
+			{Number: 5, Hidden: true},
+		})
+		expectedOut := `+-----+
+|   # |
++-----+
+| 300 |
+|   1 |
+|  20 |
++-----+
+|     |
++-----+`
+		assert.Equal(t, expectedOut, tw.Render())
+	})
+
+	t.Run("some columns hidden (2)", func(t *testing.T) {
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Name: "Last Name", Hidden: true},
+			{Name: "Salary", Hidden: true},
+			{Number: 5, Hidden: true},
+		})
+		expectedOut := `+-----+------------+
+|   # | FIRST NAME |
++-----+------------+
+| 300 | Tyrion     |
+|   1 | Arya       |
+|  20 | Jon        |
++-----+------------+
+|     |            |
++-----+------------+`
+		assert.Equal(t, expectedOut, tw.Render())
+	})
+
+	t.Run("some columns hidden (3)", func(t *testing.T) {
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Name: "Salary", Hidden: true},
+			{Number: 5, Hidden: true},
+		})
+		expectedOut := `+-----+------------+-----------+
+|   # | FIRST NAME | LAST NAME |
++-----+------------+-----------+
+| 300 | Tyrion     | Lannister |
+|   1 | Arya       | Stark     |
+|  20 | Jon        | Snow      |
++-----+------------+-----------+
+|     |            | TOTAL     |
++-----+------------+-----------+`
+		assert.Equal(t, expectedOut, tw.Render())
+	})
+
+	t.Run("columns hidden in the middle", func(t *testing.T) {
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Name: "First Name", Hidden: true},
+			{Name: "Salary", Hidden: true},
+		})
+		expectedOut := `+-----+------------+-----------+
+|   # | FIRST NAME | LAST NAME |
++-----+------------+-----------+
+| 300 | Tyrion     | Lannister |
+|   1 | Arya       | Stark     |
+|  20 | Jon        | Snow      |
++-----+------------+-----------+
+|     |            | TOTAL     |
++-----+------------+-----------+`
+		assert.Equal(t, expectedOut, tw.Render())
+	})
+
+	t.Run("first column hidden", func(t *testing.T) {
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Name: "#", Hidden: true},
+		})
+		expectedOut := `+-----+------------+-----------+--------+
+|   # | FIRST NAME | LAST NAME | SALARY |
++-----+------------+-----------+--------+
+| 300 | Tyrion     | Lannister |   5000 |
+|   1 | Arya       | Stark     |   3000 |
+|  20 | Jon        | Snow      |   2000 |
++-----+------------+-----------+--------+
+|     |            | TOTAL     |  10000 |
++-----+------------+-----------+--------+`
+		assert.Equal(t, expectedOut, tw.Render())
+	})
+
+	t.Run("last column hidden", func(t *testing.T) {
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Name: "#", Hidden: true},
+		})
+		expectedOut := `+-----+------------+-----------+--------+
+|   # | FIRST NAME | LAST NAME | SALARY |
++-----+------------+-----------+--------+
+| 300 | Tyrion     | Lannister |   5000 |
+|   1 | Arya       | Stark     |   3000 |
+|  20 | Jon        | Snow      |   2000 |
++-----+------------+-----------+--------+
+|     |            | TOTAL     |  10000 |
++-----+------------+-----------+--------+`
+		assert.Equal(t, expectedOut, tw.Render())
+	})
 }
 
 func TestTable_Render_Paged(t *testing.T) {
