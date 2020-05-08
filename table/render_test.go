@@ -52,7 +52,6 @@ func TestTable_Render(t *testing.T) {
 	tw.AppendRows(testRows)
 	tw.AppendRow(testRowMultiLine)
 	tw.AppendFooter(testFooter)
-	tw.SetAlign(testAlign)
 	tw.SetCaption(testCaption)
 	tw.SetStyle(styleTest)
 	tw.SetTitle(testTitle2)
@@ -227,7 +226,6 @@ func TestTable_Render_Colored(t *testing.T) {
 	tw.AppendRows(testRows)
 	tw.AppendRow(testRowMultiLine)
 	tw.AppendFooter(testFooter)
-	tw.SetAlign(testAlign)
 	tw.SetAutoIndex(true)
 	tw.SetStyle(StyleColoredBright)
 	tw.Style().Options.DrawBorder = true
@@ -263,11 +261,31 @@ func TestTable_Render_ColoredCustom(t *testing.T) {
 	tw.AppendRows(testRows)
 	tw.AppendRow(testRowMultiLine)
 	tw.AppendFooter(testFooter)
-	tw.SetAlign(testAlign)
 	tw.SetCaption(testCaption)
-	tw.SetColors(testColors)
-	tw.SetColorsFooter(testColorsFooter)
-	tw.SetColorsHeader(testColorsHeader)
+	tw.SetColumnConfigs([]ColumnConfig{
+		{
+			Name:         "#",
+			Colors:       testColor,
+			ColorsHeader: testColorHiRedBold,
+		}, {
+			Name:         "First Name",
+			Colors:       testColor,
+			ColorsHeader: testColorHiRedBold,
+		}, {
+			Name:         "Last Name",
+			Colors:       testColor,
+			ColorsHeader: testColorHiRedBold,
+			ColorsFooter: testColorHiBlueBold,
+		}, {
+			Name:         "Salary",
+			Colors:       testColor,
+			ColorsHeader: testColorHiRedBold,
+			ColorsFooter: testColorHiBlueBold,
+		}, {
+			Number: 5,
+			Colors: text.Colors{text.FgCyan},
+		},
+	})
 	tw.SetStyle(StyleRounded)
 
 	expectedOut := []string{
@@ -335,7 +353,7 @@ func TestTable_Render_ColoredTableWithinAColoredTable(t *testing.T) {
 	tableOuter := Table{}
 	tableOuter.AppendHeader(Row{"Colored Table within a Colored Table"})
 	tableOuter.AppendRow(Row{"\n" + table.Render() + "\n"})
-	tableOuter.SetAlignHeader([]text.Align{text.AlignCenter})
+	tableOuter.SetColumnConfigs([]ColumnConfig{{Number: 1, AlignHeader: text.AlignCenter}})
 	tableOuter.SetStyle(StyleColoredBright)
 
 	expectedOut := strings.Join([]string{
@@ -881,13 +899,12 @@ func TestTable_Render_TableWithinTable(t *testing.T) {
 	twInner.AppendHeader(testHeader)
 	twInner.AppendRows(testRows)
 	twInner.AppendFooter(testFooter)
-	twInner.SetAlignFooter([]text.Align{text.AlignDefault, text.AlignDefault, text.AlignLeft, text.AlignRight})
 	twInner.SetStyle(StyleLight)
 
 	twOuter := NewWriter()
 	twOuter.AppendHeader(Row{"Table within a Table"})
 	twOuter.AppendRow(Row{twInner.Render()})
-	twOuter.SetAlignHeader([]text.Align{text.AlignCenter})
+	twOuter.SetColumnConfigs([]ColumnConfig{{Number: 1, AlignHeader: text.AlignCenter}})
 	twOuter.SetStyle(StyleDouble)
 
 	expectedOut := `╔═════════════════════════════════════════════════════════════════════════╗

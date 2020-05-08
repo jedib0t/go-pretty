@@ -20,14 +20,6 @@ type rowStr []string
 
 // Table helps print a 2-dimensional array in a human readable pretty-table.
 type Table struct {
-	// align describes the horizontal-align for each column
-	align []text.Align
-	// alignFooter describes the horizontal-align for each column in the footer
-	alignFooter []text.Align
-	// alignHeader describes the horizontal-align for each column in the header
-	alignHeader []text.Align
-	// allowedColumnLengths contains the max allowed length for each column
-	allowedColumnLengths []int
 	// allowedRowLength is the max allowed length for a row (or line of output)
 	allowedRowLength int
 	// enable automatic indexing of the rows and columns like a spreadsheet?
@@ -37,12 +29,6 @@ type Table struct {
 	// caption stores the text to be rendered just below the table; and doesn't
 	// get used when rendered as a CSV
 	caption string
-	// colors contains Colorization options for the body
-	colors []text.Colors
-	// colorsFooter contains Colorization options for the footer
-	colorsFooter []text.Colors
-	// colorsHeader contains Colorization options for the header
-	colorsHeader []text.Colors
 	// columnIsNonNumeric stores if a column contains non-numbers in all rows
 	columnIsNonNumeric []bool
 	// columnConfigs stores the custom-configuration for 1 or more columns
@@ -99,12 +85,6 @@ type Table struct {
 	style *Style
 	// title contains the text to appear above the table
 	title string
-	// vAlign describes the vertical-align for each column
-	vAlign []text.VAlign
-	// vAlign describes the vertical-align for each column in the footer
-	vAlignFooter []text.VAlign
-	// vAlign describes the vertical-align for each column in the header
-	vAlignHeader []text.VAlign
 }
 
 // AppendFooter appends the row to the List of footers to render.
@@ -173,36 +153,6 @@ func (t *Table) ResetRows() {
 	t.separators = nil
 }
 
-// SetAlign sets the horizontal-align for each column in the (data) rows.
-//
-// Deprecated: Use SetColumnConfigs instead.
-func (t *Table) SetAlign(align []text.Align) {
-	t.align = align
-}
-
-// SetAlignFooter sets the horizontal-align for each column in the footer.
-//
-// Deprecated: Use SetColumnConfigs instead.
-func (t *Table) SetAlignFooter(align []text.Align) {
-	t.alignFooter = align
-}
-
-// SetAlignHeader sets the horizontal-align for each column in the header.
-//
-// Deprecated: Use SetColumnConfigs instead.
-func (t *Table) SetAlignHeader(align []text.Align) {
-	t.alignHeader = align
-}
-
-// SetAllowedColumnLengths sets the maximum allowed length for each column in
-// all the rows. Columns with content longer than the allowed limit will be
-// wrapped to fit the length. Length has to be a positive value to take effect.
-//
-// Deprecated: Use SetColumnConfigs instead.
-func (t *Table) SetAllowedColumnLengths(lengths []int) {
-	t.allowedColumnLengths = lengths
-}
-
 // SetAllowedRowLength sets the maximum allowed length or a row (or line of
 // output) when rendered as a table. Rows that are longer than this limit will
 // be "snipped" to the length. Length has to be a positive value to take effect.
@@ -222,27 +172,6 @@ func (t *Table) SetAutoIndex(autoIndex bool) {
 // show up when the Table is rendered as a CSV.
 func (t *Table) SetCaption(format string, a ...interface{}) {
 	t.caption = fmt.Sprintf(format, a...)
-}
-
-// SetColors sets the colors for the rows in the Body.
-//
-// Deprecated: Use SetColumnConfigs instead.
-func (t *Table) SetColors(colors []text.Colors) {
-	t.colors = colors
-}
-
-// SetColorsFooter sets the colors for the rows in the Footer.
-//
-// Deprecated: Use SetColumnConfigs instead.
-func (t *Table) SetColorsFooter(colors []text.Colors) {
-	t.colorsFooter = colors
-}
-
-// SetColorsHeader sets the colors for the rows in the Header.
-//
-// Deprecated: Use SetColumnConfigs instead.
-func (t *Table) SetColorsHeader(colors []text.Colors) {
-	t.colorsHeader = colors
 }
 
 // SetColumnConfigs sets the configs for each Column.
@@ -292,27 +221,6 @@ func (t *Table) SetStyle(style Style) {
 // SetTitle sets the title text to be rendered above the table.
 func (t *Table) SetTitle(format string, a ...interface{}) {
 	t.title = fmt.Sprintf(format, a...)
-}
-
-// SetVAlign sets the vertical-align for each column in all the rows.
-//
-// Deprecated: Use SetColumnConfigs instead.
-func (t *Table) SetVAlign(vAlign []text.VAlign) {
-	t.vAlign = vAlign
-}
-
-// SetVAlignFooter sets the horizontal-align for each column in the footer.
-//
-// Deprecated: Use SetColumnConfigs instead.
-func (t *Table) SetVAlignFooter(vAlign []text.VAlign) {
-	t.vAlignFooter = vAlign
-}
-
-// SetVAlignHeader sets the horizontal-align for each column in the header.
-//
-// Deprecated: Use SetColumnConfigs instead.
-func (t *Table) SetVAlignHeader(vAlign []text.VAlign) {
-	t.vAlignHeader = vAlign
 }
 
 // SortBy sets the rules for sorting the Rows in the order specified. i.e., the
@@ -383,27 +291,8 @@ func (t *Table) getAlign(colIdx int, hint renderHint) text.Align {
 			align = cfg.Align
 		}
 	}
-	if align == text.AlignDefault {
-		align = t.getAlignOld(colIdx, hint)
-	}
 	if align == text.AlignDefault && !t.columnIsNonNumeric[colIdx] {
 		align = text.AlignRight
-	}
-	return align
-}
-
-func (t *Table) getAlignOld(colIdx int, hint renderHint) text.Align {
-	align := text.AlignDefault
-	if hint.isHeaderRow {
-		if colIdx < len(t.alignHeader) {
-			align = t.alignHeader[colIdx]
-		}
-	} else if hint.isFooterRow {
-		if colIdx < len(t.alignFooter) {
-			align = t.alignFooter[colIdx]
-		}
-	} else if colIdx < len(t.align) {
-		align = t.align[colIdx]
 	}
 	return align
 }
@@ -442,10 +331,6 @@ func (t *Table) getColumnColors(colIdx int, hint renderHint) text.Colors {
 		}
 		return cfg.Colors
 	}
-	colors := t.getRowColors(hint)
-	if colIdx < len(colors) {
-		return colors[colIdx]
-	}
 	return nil
 }
 
@@ -467,9 +352,6 @@ func (t *Table) getColumnWidthMax(colIdx int) int {
 	if cfg, ok := t.columnConfigMap[colIdx]; ok {
 		return cfg.WidthMax
 	}
-	if colIdx < len(t.allowedColumnLengths) {
-		return t.allowedColumnLengths[colIdx]
-	}
 	return 0
 }
 
@@ -489,17 +371,6 @@ func (t *Table) getFormat(hint renderHint) text.Format {
 		return t.style.Format.Footer
 	}
 	return t.style.Format.Row
-}
-
-func (t *Table) getRowColors(hint renderHint) []text.Colors {
-	if hint.isSeparatorRow {
-		return nil
-	} else if hint.isHeaderRow {
-		return t.colorsHeader
-	} else if hint.isFooterRow {
-		return t.colorsFooter
-	}
-	return t.colors
 }
 
 func (t *Table) getSeparatorColors(hint renderHint) text.Colors {
@@ -525,25 +396,6 @@ func (t *Table) getVAlign(colIdx int, hint renderHint) text.VAlign {
 		} else {
 			vAlign = cfg.VAlign
 		}
-	}
-	if vAlign == text.VAlignDefault {
-		vAlign = t.getVAlignOld(colIdx, hint)
-	}
-	return vAlign
-}
-
-func (t *Table) getVAlignOld(colIdx int, hint renderHint) text.VAlign {
-	vAlign := text.VAlignDefault
-	if hint.isHeaderRow {
-		if colIdx < len(t.vAlignHeader) {
-			vAlign = t.vAlignHeader[colIdx]
-		}
-	} else if hint.isFooterRow {
-		if colIdx < len(t.vAlignFooter) {
-			vAlign = t.vAlignFooter[colIdx]
-		}
-	} else if colIdx < len(t.vAlign) {
-		vAlign = t.vAlign[colIdx]
 	}
 	return vAlign
 }

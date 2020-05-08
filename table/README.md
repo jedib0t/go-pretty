@@ -5,6 +5,7 @@ Pretty-print tables into ASCII/Unicode strings.
 
   - Add Rows one-by-one or as a group
   - Add Header(s) and Footer(s)
+  - Add a separator line manually after any Row
   - Auto Index Rows (1, 2, 3 ...) and Columns (A, B, C, ...)
   - Limit the length of the Rows; limit the length of individual Columns
   - Page results by a specified number of Lines
@@ -15,6 +16,9 @@ Pretty-print tables into ASCII/Unicode strings.
   - Mirror output to an io.Writer object (like os.StdOut)
   - Sort by any of the Columns (by Column Name or Number)
   - Transformers to customize individual cell rendering
+  - Hide any columns that you don't want shown on the output
+  - Reset Headers/Rows/Footers at will if you want to reuse the same object to
+    render multiple tables
   - Completely customizable styles
     - Many ready-to-use styles: [style.go](style.go)
     - Colorize Headers/Body/Footers using [../text/color.go](../text/color.go)
@@ -69,6 +73,7 @@ func main() {
         {1, "Arya", "Stark", 3000},
         {20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
     })
+    t.AppendSeparator()
     t.AppendRow([]interface{}{300, "Tyrion", "Lannister", 5000})
     t.AppendFooter(table.Row{"", "", "Total", 10000})
     t.Render()
@@ -81,6 +86,7 @@ Running the above will result in:
 +-----+------------+-----------+--------+-----------------------------+
 |   1 | Arya       | Stark     |   3000 |                             |
 |  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
++-----+------------+-----------+--------+-----------------------------+
 | 300 | Tyrion     | Lannister |   5000 |                             |
 +-----+------------+-----------+--------+-----------------------------+
 |     |            | TOTAL     |  10000 |                             |
@@ -108,6 +114,7 @@ to get:
 ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 │   1 │ Arya       │ Stark     │   3000 │                             │
 │  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │
+├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 │ 300 │ Tyrion     │ Lannister │   5000 │                             │
 ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 │     │            │ TOTAL     │  10000 │                             │
@@ -227,6 +234,7 @@ to get:
 +-----+------------+-----------+--------+------- ~
 |   1 | Arya       | Stark     |   3000 |        ~
 |  20 | Jon        | Snow      |   2000 | You kn ~
++-----+------------+-----------+--------+------- ~
 | 300 | Tyrion     | Lannister |   5000 |        ~
 +-----+------------+-----------+--------+------- ~
 |     |            | TOTAL     |  10000 |        ~
@@ -240,6 +248,7 @@ global properties/styles using the `SetColumnConfig()` interface:
 - Alignment (horizontal & vertical)
 - Colorization
 - Transform individual cells based on the content
+- Visibility
 - Width (minimum & maximum)
 
 ```go
@@ -256,6 +265,7 @@ global properties/styles using the `SetColumnConfig()` interface:
             Colors:            text.Colors{text.BgBlack, text.FgRed},
             ColorsHeader:      text.Colors{text.BgRed, text.FgBlack, text.Bold},
             ColorsFooter:      text.Colors{text.BgRed, text.FgBlack},
+            Hidden:            false,
             Transformer:       nameTransformer,
             TransformerFooter: nameTransformer,
             TransformerHeader: nameTransformer,

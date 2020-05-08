@@ -10,16 +10,10 @@ import (
 )
 
 var (
-	testAlign           = []text.Align{text.AlignDefault, text.AlignLeft, text.AlignLeft, text.AlignRight}
 	testCaption         = "A Song of Ice and Fire"
 	testColor           = text.Colors{text.FgGreen}
-	testColorBoW        = text.Colors{text.FgBlack, text.BgWhite}
 	testColorHiRedBold  = text.Colors{text.FgHiRed, text.Bold}
 	testColorHiBlueBold = text.Colors{text.FgHiBlue, text.Bold}
-	testColorWoB        = text.Colors{text.FgWhite, text.BgBlack}
-	testColors          = []text.Colors{testColor, testColor, testColor, testColor, {text.FgCyan}}
-	testColorsFooter    = []text.Colors{{}, {}, testColorHiBlueBold, testColorHiBlueBold}
-	testColorsHeader    = []text.Colors{testColorHiRedBold, testColorHiRedBold, testColorHiRedBold, testColorHiRedBold}
 	testCSSClass        = "test-css-class"
 	testFooter          = Row{"", "", "Total", 10000}
 	testFooterMultiLine = Row{"", "", "Total\nSalary", 10000}
@@ -161,99 +155,6 @@ func TestTable_ResetRows(t *testing.T) {
 	assert.Empty(t, table.rowsRaw)
 }
 
-func TestTable_SetAlign(t *testing.T) {
-	table := Table{}
-	assert.Nil(t, table.align)
-
-	table.SetAlign([]text.Align{})
-	assert.NotNil(t, table.align)
-
-	table.AppendHeader(testHeader)
-	table.SetAlignHeader([]text.Align{text.AlignRight, text.AlignRight, text.AlignLeft, text.AlignRight, text.AlignRight})
-	table.AppendRows(testRows)
-	table.AppendRow(testRowMultiLine)
-	table.SetAlign([]text.Align{text.AlignDefault, text.AlignLeft, text.AlignLeft, text.AlignRight, text.AlignRight})
-	table.AppendFooter(testFooter)
-	table.SetAlignFooter([]text.Align{text.AlignRight, text.AlignRight, text.AlignRight, text.AlignRight, text.AlignRight})
-
-	expectedOut := `+-----+------------+-----------+--------+-----------------------------+
-|   # | FIRST NAME | LAST NAME | SALARY |                             |
-+-----+------------+-----------+--------+-----------------------------+
-|   1 | Arya       | Stark     |   3000 |                             |
-|  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
-| 300 | Tyrion     | Lannister |   5000 |                             |
-|   0 | Winter     | Is        |      0 |                     Coming. |
-|     |            |           |        |        The North Remembers! |
-|     |            |           |        |              This is known. |
-+-----+------------+-----------+--------+-----------------------------+
-|     |            |     TOTAL |  10000 |                             |
-+-----+------------+-----------+--------+-----------------------------+`
-	assert.Equal(t, expectedOut, table.Render())
-}
-
-func TestTable_SetAllowedColumnLengths(t *testing.T) {
-	table := Table{}
-	table.AppendRows(testRows)
-	table.SetStyle(styleTest)
-
-	expectedOut := `(-----^--------^-----------^------^-----------------------------)
-[<  1>|<Arya  >|<Stark    >|<3000>|<                           >]
-[< 20>|<Jon   >|<Snow     >|<2000>|<You know nothing, Jon Snow!>]
-[<300>|<Tyrion>|<Lannister>|<5000>|<                           >]
-\-----v--------v-----------v------v-----------------------------/`
-	assert.Empty(t, table.allowedColumnLengths)
-	assert.Equal(t, expectedOut, table.Render())
-
-	table.SetAllowedColumnLengths([]int{0, 1, 2, 3, 7})
-	expectedOut = `(-----^---^----^-----^---------)
-[<  1>|<A>|<St>|<300>|<       >]
-[<   >|<r>|<ar>|<  0>|<       >]
-[<   >|<y>|<k >|<   >|<       >]
-[<   >|<a>|<  >|<   >|<       >]
-[< 20>|<J>|<Sn>|<200>|<You kno>]
-[<   >|<o>|<ow>|<  0>|<w nothi>]
-[<   >|<n>|<  >|<   >|<ng, Jon>]
-[<   >|< >|<  >|<   >|< Snow! >]
-[<300>|<T>|<La>|<500>|<       >]
-[<   >|<y>|<nn>|<  0>|<       >]
-[<   >|<r>|<is>|<   >|<       >]
-[<   >|<i>|<te>|<   >|<       >]
-[<   >|<o>|<r >|<   >|<       >]
-[<   >|<n>|<  >|<   >|<       >]
-\-----v---v----v-----v---------/`
-	assert.Equal(t, []int{0, 1, 2, 3, 7}, table.allowedColumnLengths)
-	assert.Equal(t, expectedOut, table.Render())
-
-	table.SetAllowedColumnLengths([]int{100, 100, 100, 100, 7})
-	expectedOut = `(-----^--------^-----------^------^---------)
-[<  1>|<Arya  >|<Stark    >|<3000>|<       >]
-[< 20>|<Jon   >|<Snow     >|<2000>|<You kno>]
-[<   >|<      >|<         >|<    >|<w nothi>]
-[<   >|<      >|<         >|<    >|<ng, Jon>]
-[<   >|<      >|<         >|<    >|< Snow! >]
-[<300>|<Tyrion>|<Lannister>|<5000>|<       >]
-\-----v--------v-----------v------v---------/`
-	assert.Equal(t, []int{100, 100, 100, 100, 7}, table.allowedColumnLengths)
-	assert.Equal(t, expectedOut, table.Render())
-
-	table.AppendRow(
-		Row{20, "Jon", "Snow", 2000, text.FgHiRed.Sprint("You know nothing, Jon Snow!")},
-	)
-	expectedOut = "(-----^--------^-----------^------^---------)\n" +
-		"[<  1>|<Arya  >|<Stark    >|<3000>|<       >]\n" +
-		"[< 20>|<Jon   >|<Snow     >|<2000>|<You kno>]\n" +
-		"[<   >|<      >|<         >|<    >|<w nothi>]\n" +
-		"[<   >|<      >|<         >|<    >|<ng, Jon>]\n" +
-		"[<   >|<      >|<         >|<    >|< Snow! >]\n" +
-		"[<300>|<Tyrion>|<Lannister>|<5000>|<       >]\n" +
-		"[< 20>|<Jon   >|<Snow     >|<2000>|<\x1b[91mYou kno\x1b[0m>]\n" +
-		"[<   >|<      >|<         >|<    >|<\x1b[91mw nothi\x1b[0m>]\n" +
-		"[<   >|<      >|<         >|<    >|<\x1b[91mng, Jon\x1b[0m>]\n" +
-		"[<   >|<      >|<         >|<    >|<\x1b[91m Snow!\x1b[0m >]\n" +
-		"\\-----v--------v-----------v------v---------/"
-	assert.Equal(t, expectedOut, table.Render())
-}
-
 func TestTable_SetAllowedRowLength(t *testing.T) {
 	table := Table{}
 	table.AppendRows(testRows)
@@ -365,45 +266,6 @@ func TestTable_SetCaption(t *testing.T) {
 	assert.Equal(t, testCaption, table.caption)
 }
 
-func TestTable_SetColors(t *testing.T) {
-	table := Table{}
-	assert.Empty(t, table.colors)
-	assert.Empty(t, table.colorsFooter)
-	assert.Empty(t, table.colorsHeader)
-
-	table.SetColors([]text.Colors{testColorWoB, testColorBoW})
-	assert.NotEmpty(t, table.colors)
-	assert.Empty(t, table.colorsFooter)
-	assert.Empty(t, table.colorsHeader)
-	assert.Equal(t, 2, len(table.colors))
-}
-
-func TestTable_SetColorsFooter(t *testing.T) {
-	table := Table{}
-	assert.Empty(t, table.colors)
-	assert.Empty(t, table.colorsFooter)
-	assert.Empty(t, table.colorsHeader)
-
-	table.SetColorsFooter([]text.Colors{testColorWoB, testColorBoW})
-	assert.Empty(t, table.colors)
-	assert.NotEmpty(t, table.colorsFooter)
-	assert.Empty(t, table.colorsHeader)
-	assert.Equal(t, 2, len(table.colorsFooter))
-}
-
-func TestTable_SetColorsHeader(t *testing.T) {
-	table := Table{}
-	assert.Empty(t, table.colors)
-	assert.Empty(t, table.colorsFooter)
-	assert.Empty(t, table.colorsHeader)
-
-	table.SetColorsHeader([]text.Colors{testColorWoB, testColorBoW})
-	assert.Empty(t, table.colors)
-	assert.Empty(t, table.colorsFooter)
-	assert.NotEmpty(t, table.colorsHeader)
-	assert.Equal(t, 2, len(table.colorsHeader))
-}
-
 func TestTable_SetColumnConfigs(t *testing.T) {
 	table := Table{}
 	assert.Empty(t, table.columnConfigs)
@@ -467,36 +329,6 @@ func TestTable_SortByColumn(t *testing.T) {
 
 	table.SortBy([]SortBy{{Name: "First Name", Mode: Dsc}, {Name: "Last Name", Mode: Asc}})
 	assert.Equal(t, 2, len(table.sortBy))
-}
-
-func TestTable_SetVAlign(t *testing.T) {
-	table := Table{}
-	assert.Nil(t, table.vAlign)
-
-	table.SetVAlign([]text.VAlign{})
-	assert.NotNil(t, table.vAlign)
-
-	table.AppendHeader(testRowMultiLine)
-	table.SetVAlignHeader([]text.VAlign{text.VAlignBottom, text.VAlignBottom, text.VAlignBottom, text.VAlignBottom})
-	table.AppendRow(testRowMultiLine)
-	table.SetVAlign([]text.VAlign{text.VAlignMiddle, text.VAlignMiddle, text.VAlignMiddle, text.VAlignMiddle})
-	table.AppendFooter(testRowMultiLine)
-	table.SetVAlignFooter([]text.VAlign{text.VAlignTop, text.VAlignTop, text.VAlignTop, text.VAlignTop})
-
-	expectedOut := `+---+--------+----+---+----------------------+
-|   |        |    |   | COMING.              |
-|   |        |    |   | THE NORTH REMEMBERS! |
-| 0 | WINTER | IS | 0 | THIS IS KNOWN.       |
-+---+--------+----+---+----------------------+
-|   |        |    |   | Coming.              |
-| 0 | Winter | Is | 0 | The North Remembers! |
-|   |        |    |   | This is known.       |
-+---+--------+----+---+----------------------+
-| 0 | WINTER | IS | 0 | COMING.              |
-|   |        |    |   | THE NORTH REMEMBERS! |
-|   |        |    |   | THIS IS KNOWN.       |
-+---+--------+----+---+----------------------+`
-	assert.Equal(t, expectedOut, table.Render())
 }
 
 func TestTable_SetStyle(t *testing.T) {
