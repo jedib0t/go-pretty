@@ -808,7 +808,6 @@ func TestTable_Render_Separator(t *testing.T) {
 	tw.AppendSeparator() // doesn't make any difference
 	tw.AppendFooter(testFooter)
 	tw.SetStyle(StyleLight)
-	tw.SetOutputMirror(os.Stdout)
 
 	expectedOut := `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
 │   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
