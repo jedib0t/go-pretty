@@ -10,16 +10,10 @@ import (
 )
 
 var (
-	testAlign           = []text.Align{text.AlignDefault, text.AlignLeft, text.AlignLeft, text.AlignRight}
 	testCaption         = "A Song of Ice and Fire"
 	testColor           = text.Colors{text.FgGreen}
-	testColorBoW        = text.Colors{text.FgBlack, text.BgWhite}
 	testColorHiRedBold  = text.Colors{text.FgHiRed, text.Bold}
 	testColorHiBlueBold = text.Colors{text.FgHiBlue, text.Bold}
-	testColorWoB        = text.Colors{text.FgWhite, text.BgBlack}
-	testColors          = []text.Colors{testColor, testColor, testColor, testColor, {text.FgCyan}}
-	testColorsFooter    = []text.Colors{{}, {}, testColorHiBlueBold, testColorHiBlueBold}
-	testColorsHeader    = []text.Colors{testColorHiRedBold, testColorHiRedBold, testColorHiRedBold, testColorHiRedBold}
 	testCSSClass        = "test-css-class"
 	testFooter          = Row{"", "", "Total", 10000}
 	testFooterMultiLine = Row{"", "", "Total\nSalary", 10000}
