@@ -711,7 +711,7 @@ func TestTable_Render_Reset(t *testing.T) {
 └─────┴────────────┴───────────┴────────┴─────────────────────────────┘`
 	assert.Equal(t, expectedOut, tw.Render())
 
-	tw.ResetFooter()
+	tw.ResetFooters()
 	expectedOut = `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
 │   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
 ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
@@ -721,7 +721,7 @@ func TestTable_Render_Reset(t *testing.T) {
 └─────┴────────────┴───────────┴────────┴─────────────────────────────┘`
 	assert.Equal(t, expectedOut, tw.Render())
 
-	tw.ResetHeader()
+	tw.ResetHeaders()
 	expectedOut = `┌─────┬────────┬───────────┬──────┬─────────────────────────────┐
 │   1 │ Arya   │ Stark     │ 3000 │                             │
 │  20 │ Jon    │ Snow      │ 2000 │ You know nothing, Jon Snow! │
