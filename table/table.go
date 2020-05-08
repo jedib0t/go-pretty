@@ -129,10 +129,20 @@ func (t *Table) AppendRows(rows []Row) {
 	}
 }
 
-// AppendSeparator appends a separator row to the list of rows.
+// AppendSeparator helps render a separator row after the current last row. You
+// could call this function over and over, but it will be a no-op unless you
+// call AppendRow or AppendRows in between. Likewise, if the last thing you
+// append is a separator, it will not be rendered in addition to the usual table
+// separator.
 //
-// Please note that this may clash with the behavior of the SetPageSize option
-// and you may see end up seeing double separators in some cases.
+//******************************************************************************
+// Please note the following caveats:
+// 1. SetPageSize(): this may end up creating consecutive separator rows near
+//    the end of a page or at the beginning of a page
+// 2. SortBy(): since SortBy could inherently alter the ordering of rows, the
+//    separators may not appear after the row it was originally intended to
+//    follow
+//******************************************************************************
 func (t *Table) AppendSeparator() {
 	if t.separators == nil {
 		t.separators = make(map[int]bool)
