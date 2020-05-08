@@ -50,8 +50,21 @@ type ColumnConfig struct {
 	// VAlignHeader defines the vertical alignment in Header rows
 	VAlignHeader text.VAlign
 
-	// WidthMin defines the minimum character length of the column
-	WidthMin int
 	// WidthMax defines the maximum character length of the column
 	WidthMax int
+	// WidthEnforcer enforces the WidthMax value on the column contents;
+	// default: text.WrapText
+	WidthMaxEnforcer WidthEnforcer
+	// WidthMin defines the minimum character length of the column
+	WidthMin int
+}
+
+func (c ColumnConfig) getWidthMaxEnforcer() WidthEnforcer {
+	if c.WidthMax == 0 {
+		return widthEnforcerNone
+	}
+	if c.WidthMaxEnforcer != nil {
+		return c.WidthMaxEnforcer
+	}
+	return text.WrapText
 }

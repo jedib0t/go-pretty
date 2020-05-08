@@ -2,7 +2,6 @@ package table
 
 import (
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 	"testing"
@@ -72,7 +71,6 @@ func TestTable_Render(t *testing.T) {
 [<   >|<          >|<TOTAL    >|< 10000>|<                           >]
 \-----v------------v-----------v--------v-----------------------------/
 A Song of Ice and Fire`
-	fmt.Println(tw.Render())
 	assert.Equal(t, expectedOut, tw.Render())
 }
 
@@ -233,7 +231,6 @@ func TestTable_Render_Colored(t *testing.T) {
 	tw.Style().Options.SeparateFooter = true
 	tw.Style().Options.SeparateHeader = true
 	tw.Style().Options.SeparateRows = true
-	tw.SetOutputMirror(os.Stdout)
 
 	expectedOut := []string{
 		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m------------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m--------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m",
@@ -398,7 +395,6 @@ func TestTable_Render_ColoredStyleAutoIndex(t *testing.T) {
 		"\x1b[36;100m   \x1b[0m\x1b[36;100m     \x1b[0m\x1b[36;100m            \x1b[0m\x1b[36;100m TOTAL     \x1b[0m\x1b[36;100m  10000 \x1b[0m\x1b[36;100m                             \x1b[0m",
 	}, "\n")
 	out := table.Render()
-	fmt.Println(out)
 	assert.Equal(t, expectedOut, out)
 
 	// dump it out in a easy way to update the test if things are meant to
