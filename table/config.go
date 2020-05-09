@@ -23,7 +23,11 @@ type ColumnConfig struct {
 	AlignHeader text.Align
 
 	// AutoMerge merges cells with similar values and prevents separators from
-	// being drawn; this does not affect VAlign at the moment. Works best when:
+	// being drawn. Caveats:
+	// * VAlign is applied on the individual cell and not on the merged cell
+	// * Auto-merge is not supported in CSV/HTML/Markdown render modes
+	//
+	// Works best when:
 	// * Style().Options.SeparateRows == true
 	// * Style().Color.Row == Style().Color.RowAlternate (or not set)
 	AutoMerge bool
