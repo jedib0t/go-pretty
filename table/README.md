@@ -3,28 +3,31 @@
 
 Pretty-print tables into ASCII/Unicode strings.
 
-  - Add Rows one-by-one or as a group
-  - Add Header(s) and Footer(s)
-  - Add a separator line manually after any Row
-  - Auto Index Rows (1, 2, 3 ...) and Columns (A, B, C, ...)
-  - Limit the length of the Rows; limit the length of individual Columns
-  - Page results by a specified number of Lines
+  - Add Rows one-by-one or as a group (`AppendRow`/`AppendRows`)
+  - Add Header(s) and Footer(s) (`AppendHeader`/`AppendFooter`)
+  - Add a Separator manually after any Row (`AppendSeparator`)
+  - Auto Index Rows (1, 2, 3 ...) and Columns (A, B, C, ...) (`SetAutoIndex`)
+  - Auto Merge Cells on Columns (`ColumnConfig.AutoMerge`)
+  - Limit the length of
+    - Rows (`SetAllowedRowLength`)
+    - Columns (`ColumnConfig.Width*`)
+  - Page results by a specified number of Lines (`SetPageSize`)
   - Alignment - Horizontal & Vertical
-    - Auto (horizontal) Align (numeric columns are aligned Right)
-    - Custom (horizontal) Align per column
-    - Custom (vertical) VAlign per column (and multi-line column support)
-  - Mirror output to an io.Writer object (like os.StdOut)
-  - Sort by any of the Columns (by Column Name or Number)
-  - Transformers to customize individual cell rendering
-  - Hide any columns that you don't want shown on the output
-  - Reset Headers/Rows/Footers at will if you want to reuse the same object to
-    render multiple tables
-  - Completely customizable styles
+    - Auto (horizontal) Align (numeric columns aligned Right)
+    - Custom (horizontal) Align per column (`ColumnConfig.Align*`)
+    - Custom (vertical) VAlign per column with multi-line cell support (`ColumnConfig.VAlign*`)
+  - Mirror output to an `io.Writer` (ex. `os.StdOut`) (`SetOutputMirror`)
+  - Sort by one or more Columns (`SortBy`)
+  - Customizable Cell rendering per Column (`ColumnConfig.Transformer*`)
+  - Hide any columns that you don't want displayed (`ColumnConfig.Hidden`)
+  - Reset Headers/Rows/Footers at will to reuse the same Table Writer (`Reset*`)
+  - Completely customizable styles (`SetStyle`/`Style`)
     - Many ready-to-use styles: [style.go](style.go)
     - Colorize Headers/Body/Footers using [../text/color.go](../text/color.go)
     - Custom text-case for Headers/Body/Footers
     - Enable separators between each row
     - Render table without a Border
+    - and a lot more...
   - Render as:
     - (ASCII/Unicode) Table
     - CSV

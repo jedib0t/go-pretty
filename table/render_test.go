@@ -2,6 +2,7 @@ package table
 
 import (
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 	"testing"
@@ -100,6 +101,90 @@ func TestTable_Render_AutoIndex(t *testing.T) {
 │  9 │ A9  │ B9  │ C9  │ D9  │ E9  │ F9  │ G9  │ H9  │ I9  │ J9  │
 │ 10 │ A10 │ B10 │ C10 │ D10 │ E10 │ F10 │ G10 │ H10 │ I10 │ J10 │
 └────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘`
+	assert.Equal(t, expectedOut, tw.Render())
+}
+
+func TestTable_Render_AutoMerge(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE\nEXE", "RCE\nRUN"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "Y", "Y"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
+	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"})
+	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "N"})
+	tw.SetAutoIndex(true)
+	tw.SetColumnConfigs([]ColumnConfig{
+		{Number: 1, AutoMerge: true},
+		{Number: 2, AutoMerge: true},
+		{Number: 3, AutoMerge: true},
+		{Number: 5, Align: text.AlignCenter},
+		{Number: 6, Align: text.AlignCenter},
+	})
+	tw.SetStyle(StyleLight)
+	tw.Style().Options.SeparateRows = true
+
+	expectedOut := `┌───┬─────────┬────────┬───────────┬───────────┬─────┬─────┐
+│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │ RCE │ RCE │
+│   │         │        │           │           │ EXE │ RUN │
+├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
+│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │  Y  │  Y  │
+├───┤         │        │           ├───────────┼─────┼─────┤
+│ 2 │         │        │           │ C 2       │  Y  │  N  │
+├───┤         │        ├───────────┼───────────┼─────┼─────┤
+│ 3 │         │        │ NS 1B     │ C 3       │  N  │  N  │
+├───┤         ├────────┼───────────┼───────────┼─────┼─────┤
+│ 4 │         │ Pod 1B │ NS 2      │ C 4       │  Y  │  Y  │
+├───┤         │        │           ├───────────┼─────┼─────┤
+│ 5 │         │        │           │ C 5       │  Y  │  N  │
+├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
+│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │  Y  │  Y  │
+├───┤         │        │           ├───────────┼─────┼─────┤
+│ 7 │         │        │           │ C 7       │  Y  │  N  │
+└───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`
+	assert.Equal(t, expectedOut, tw.Render())
+}
+
+func TestTable_Render_AutoMerge_WithHiddenRows(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE\nEXE", "RCE\nRUN"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "Y", "Y"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
+	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"})
+	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "N"})
+	//tw.SetAutoIndex(true)
+	tw.SetColumnConfigs([]ColumnConfig{
+		{Number: 1, AutoMerge: true},
+		{Number: 2, AutoMerge: true},
+		{Number: 3, AutoMerge: true},
+		{Number: 4, Hidden: true},
+		{Number: 5, Hidden: true, Align: text.AlignCenter},
+		{Number: 6, Hidden: true, Align: text.AlignCenter},
+	})
+	tw.SetStyle(StyleLight)
+	tw.Style().Options.SeparateRows = true
+
+	expectedOut := `┌─────────┬────────┬───────────┐
+│ NODE IP │ PODS   │ NAMESPACE │
+├─────────┼────────┼───────────┤
+│ 1.1.1.1 │ Pod 1A │ NS 1A     │
+│         │        │           │
+│         │        │           │
+│         │        ├───────────┤
+│         │        │ NS 1B     │
+│         ├────────┼───────────┤
+│         │ Pod 1B │ NS 2      │
+│         │        │           │
+│         │        │           │
+├─────────┼────────┼───────────┤
+│ 2.2.2.2 │ Pod 2  │ NS 3      │
+│         │        │           │
+│         │        │           │
+└─────────┴────────┴───────────┘`
 	assert.Equal(t, expectedOut, tw.Render())
 }
 
@@ -231,6 +316,7 @@ func TestTable_Render_Colored(t *testing.T) {
 	tw.Style().Options.SeparateFooter = true
 	tw.Style().Options.SeparateHeader = true
 	tw.Style().Options.SeparateRows = true
+	tw.SetOutputMirror(os.Stdout)
 
 	expectedOut := []string{
 		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m------------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m--------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m",
@@ -239,7 +325,7 @@ func TestTable_Render_Colored(t *testing.T) {
 		"\x1b[106;30m|\x1b[0m\x1b[106;30m 1 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[107;30m   1 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Arya       \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Stark     \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m   3000 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m                             \x1b[0m\x1b[106;30m|\x1b[0m",
 		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[107;30m-----\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m------------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m--------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m",
 		"\x1b[106;30m|\x1b[0m\x1b[106;30m 2 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m  20 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Jon        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Snow      \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m   2000 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m You know nothing, Jon Snow! \x1b[0m\x1b[106;30m|\x1b[0m",
-		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[107;30m-----\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m------------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m--------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m",
+		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[47;30m-----\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m------------\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m-----------\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m--------\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m",
 		"\x1b[106;30m|\x1b[0m\x1b[106;30m 3 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[107;30m 300 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Tyrion     \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Lannister \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m   5000 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m                             \x1b[0m\x1b[106;30m|\x1b[0m",
 		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[107;30m-----\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m------------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m--------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m",
 		"\x1b[106;30m|\x1b[0m\x1b[106;30m 4 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m   0 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Winter     \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Is        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m      0 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Coming.                     \x1b[0m\x1b[106;30m|\x1b[0m",
@@ -249,7 +335,13 @@ func TestTable_Render_Colored(t *testing.T) {
 		"\x1b[46;30m|\x1b[0m\x1b[46;30m   \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m     \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m            \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m TOTAL     \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m  10000 \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m                             \x1b[0m\x1b[46;30m|\x1b[0m",
 		"\x1b[46;30m+\x1b[0m\x1b[46;30m---\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m------------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m--------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----------------------------\x1b[0m\x1b[46;30m+\x1b[0m",
 	}
-	assert.Equal(t, strings.Join(expectedOut, "\n"), tw.Render())
+	out := tw.Render()
+	assert.Equal(t, strings.Join(expectedOut, "\n"), out)
+	if strings.Join(expectedOut, "\n") != out {
+		for _, line := range strings.Split(out, "\n") {
+			fmt.Printf("%#v,\n", line)
+		}
+	}
 }
 
 func TestTable_Render_ColoredCustom(t *testing.T) {

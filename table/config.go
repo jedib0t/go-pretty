@@ -22,6 +22,16 @@ type ColumnConfig struct {
 	// AlignHeader defines the horizontal alignment of Header rows
 	AlignHeader text.Align
 
+	// AutoMerge merges cells with similar values and prevents separators from
+	// being drawn. Caveats:
+	// * VAlign is applied on the individual cell and not on the merged cell
+	// * Auto-merge is not supported in CSV/HTML/Markdown render modes
+	//
+	// Works best when:
+	// * Style().Options.SeparateRows == true
+	// * Style().Color.Row == Style().Color.RowAlternate (or not set)
+	AutoMerge bool
+
 	// Colors defines the colors to be used on the column
 	Colors text.Colors
 	// ColorsFooter defines the colors to be used on the column in Footer rows
