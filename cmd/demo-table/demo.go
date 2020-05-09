@@ -671,6 +671,30 @@ func demoTableFeatures() {
 	//==========================================================================
 }
 
+func demoTableEmoji() {
+	styles := []table.Style{
+		table.StyleDefault,
+		table.StyleLight,
+		table.StyleColoredBright,
+	}
+	for _, style := range styles {
+		tw := table.NewWriter()
+		tw.AppendHeader(table.Row{"Key", "Value"})
+		tw.AppendRows([]table.Row{
+			{"Emoji 1 🥰", 1000},
+			{"Emoji 2 ⚔️", 2000},
+			{"Emoji 3 🎁", 3000},
+			{"Emoji 4 ツ", 4000},
+		})
+		tw.AppendFooter(table.Row{"Total", 10000})
+		tw.SetAutoIndex(true)
+		tw.SetStyle(style)
+
+		fmt.Println(tw.Render())
+		fmt.Println()
+	}
+}
+
 func main() {
 	demoWhat := "features"
 	if len(os.Args) > 1 {
@@ -680,6 +704,8 @@ func main() {
 	switch strings.ToLower(demoWhat) {
 	case "colors":
 		demoTableColors()
+	case "emoji":
+		demoTableEmoji()
 	default:
 		demoTableFeatures()
 	}
