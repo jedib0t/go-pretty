@@ -58,18 +58,19 @@ func (t *Table) renderColumn(out *strings.Builder, row rowStr, colIdx int, maxCo
 
 	// when working on column number 2 or more, render the column separator
 	if colIdx > 0 {
-		t.renderColumnSeparator(out, hint)
+		t.renderColumnSeparator(out, colIdx, hint)
 	}
 
 	// extract the text, convert-case if not-empty and align horizontally
+	mergeCurrCol := t.shouldMergeCellsVertically(colIdx, hint)
 	var colStr string
-	if colIdx < len(row) {
+	if colIdx < len(row) && !mergeCurrCol {
 		colStr = t.getFormat(hint).Apply(row[colIdx])
 	}
 	colStr = t.getAlign(colIdx, hint).Apply(colStr, maxColumnLength)
 
-	// pad both sides of the column (when not a separator row)
-	if !hint.isSeparatorRow {
+	// pad both sides of the column
+	if !hint.isSeparatorRow || mergeCurrCol {
 		colStr = t.style.Box.PaddingLeft + colStr + t.style.Box.PaddingRight
 	}
 
@@ -104,7 +105,7 @@ func (t *Table) renderColumnAutoIndex(out *strings.Builder, hint renderHint) {
 		out.WriteString(outAutoIndex.String())
 	}
 	hint.isAutoIndexColumn = true
-	t.renderColumnSeparator(out, hint)
+	t.renderColumnSeparator(out, 0, hint)
 }
 
 func (t *Table) renderColumnColorized(out *strings.Builder, colIdx int, colStr string, hint renderHint) {
@@ -130,7 +131,7 @@ func (t *Table) renderColumnColorized(out *strings.Builder, colIdx int, colStr s
 	}
 }
 
-func (t *Table) renderColumnSeparator(out *strings.Builder, hint renderHint) {
+func (t *Table) renderColumnSeparator(out *strings.Builder, colIdx int, hint renderHint) {
 	if t.style.Options.SeparateColumns {
 		separator := t.style.Box.MiddleVertical
 		if hint.isSeparatorRow {
@@ -139,7 +140,17 @@ func (t *Table) renderColumnSeparator(out *strings.Builder, hint renderHint) {
 			} else if hint.isBorderBottom {
 				separator = t.style.Box.BottomSeparator
 			} else {
-				separator = t.style.Box.MiddleSeparator
+				mergeCurrCol := t.shouldMergeCellsVertically(colIdx-1, hint)
+				mergeNextCol := t.shouldMergeCellsVertically(colIdx, hint)
+				if mergeCurrCol && mergeNextCol {
+					separator = t.style.Box.MiddleVertical
+				} else if mergeCurrCol {
+					separator = t.style.Box.LeftSeparator
+				} else if mergeNextCol {
+					separator = t.style.Box.RightSeparator
+				} else {
+					separator = t.style.Box.MiddleSeparator
+				}
 			}
 		}
 
@@ -169,11 +180,11 @@ func (t *Table) renderLine(out *strings.Builder, row rowStr, hint renderHint) {
 	// grow the strings.Builder to the maximum possible row length
 	outLine.Grow(t.maxRowLength)
 
-	t.renderMarginLeft(outLine, hint)
+	t.renderMarginLeft(outLine, row, hint)
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
 		t.renderColumn(outLine, row, colIdx, maxColumnLength, hint)
 	}
-	t.renderMarginRight(outLine, hint)
+	t.renderMarginRight(outLine, row, hint)
 
 	// merge the strings.Builder objects if a new one was created earlier
 	if outLine != out {
@@ -204,7 +215,7 @@ func (t *Table) renderLine(out *strings.Builder, row rowStr, hint renderHint) {
 	}
 }
 
-func (t *Table) renderMarginLeft(out *strings.Builder, hint renderHint) {
+func (t *Table) renderMarginLeft(out *strings.Builder, row rowStr, hint renderHint) {
 	if t.style.Options.DrawBorder {
 		border := t.style.Box.Left
 		if hint.isBorderTop {
@@ -216,7 +227,11 @@ func (t *Table) renderMarginLeft(out *strings.Builder, hint renderHint) {
 		} else if hint.isBorderBottom {
 			border = t.style.Box.BottomLeft
 		} else if hint.isSeparatorRow {
-			border = t.style.Box.LeftSeparator
+			if t.shouldMergeCellsVertically(0, hint) {
+				border = t.style.Box.Left
+			} else {
+				border = t.style.Box.LeftSeparator
+			}
 		}
 
 		colors := t.getBorderColors(hint)
@@ -228,7 +243,7 @@ func (t *Table) renderMarginLeft(out *strings.Builder, hint renderHint) {
 	}
 }
 
-func (t *Table) renderMarginRight(out *strings.Builder, hint renderHint) {
+func (t *Table) renderMarginRight(out *strings.Builder, row rowStr, hint renderHint) {
 	if t.style.Options.DrawBorder {
 		border := t.style.Box.Right
 		if hint.isBorderTop {
@@ -240,7 +255,11 @@ func (t *Table) renderMarginRight(out *strings.Builder, hint renderHint) {
 		} else if hint.isBorderBottom {
 			border = t.style.Box.BottomRight
 		} else if hint.isSeparatorRow {
-			border = t.style.Box.RightSeparator
+			if t.shouldMergeCellsVertically(len(row)-1, hint) {
+				border = t.style.Box.Right
+			} else {
+				border = t.style.Box.RightSeparator
+			}
 		}
 
 		colors := t.getBorderColors(hint)
@@ -303,23 +322,19 @@ func (t *Table) renderRowSeparator(out *strings.Builder, hint renderHint) {
 		return
 	}
 	hint.isSeparatorRow = true
-	hint.rowNumber = -1
 	t.renderLine(out, t.rowSeparator, hint)
 }
 
 func (t *Table) renderRows(out *strings.Builder, rows []rowStr, hint renderHint) {
-	hintSeparator := hint
-	hintSeparator.isSeparatorRow = true
-
 	for rowIdx, row := range rows {
 		hint.isFirstRow = bool(rowIdx == 0)
 		hint.isLastRow = bool(rowIdx == len(rows)-1)
 		hint.rowNumber = rowIdx + 1
-
 		t.renderRow(out, rowIdx+1, row, hint)
+
 		if (t.style.Options.SeparateRows && rowIdx < len(rows)-1) || // last row before footer
-			(t.separators[rowIdx] && rowIdx != len(rows)-1) { // manually added separator and not last row
-			t.renderRowSeparator(out, hintSeparator)
+			(t.separators[rowIdx] && rowIdx != len(rows)-1) { // manually added separator not after last row
+			t.renderRowSeparator(out, hint)
 		}
 	}
 }
@@ -384,4 +399,19 @@ func (t *Table) renderTitle(out *strings.Builder) {
 			}
 		}
 	}
+}
+
+func (t *Table) shouldMergeCellsVertically(colIdx int, hint renderHint) bool {
+	if t.columnConfigMap[colIdx].AutoMerge && colIdx < t.numColumns {
+		if hint.isSeparatorRow {
+			if hint.rowNumber > 0 && hint.rowNumber < len(t.rows) {
+				return t.rows[hint.rowNumber-1][colIdx] == t.rows[hint.rowNumber][colIdx]
+			}
+		} else {
+			if hint.rowNumber > 1 && hint.rowNumber <= len(t.rows) {
+				return t.rows[hint.rowNumber-2][colIdx] == t.rows[hint.rowNumber-1][colIdx]
+			}
+		}
+	}
+	return false
 }
