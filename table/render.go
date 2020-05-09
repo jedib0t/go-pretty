@@ -180,11 +180,11 @@ func (t *Table) renderLine(out *strings.Builder, row rowStr, hint renderHint) {
 	// grow the strings.Builder to the maximum possible row length
 	outLine.Grow(t.maxRowLength)
 
-	t.renderMarginLeft(outLine, row, hint)
+	t.renderMarginLeft(outLine, hint)
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
 		t.renderColumn(outLine, row, colIdx, maxColumnLength, hint)
 	}
-	t.renderMarginRight(outLine, row, hint)
+	t.renderMarginRight(outLine, hint)
 
 	// merge the strings.Builder objects if a new one was created earlier
 	if outLine != out {
@@ -215,7 +215,7 @@ func (t *Table) renderLine(out *strings.Builder, row rowStr, hint renderHint) {
 	}
 }
 
-func (t *Table) renderMarginLeft(out *strings.Builder, row rowStr, hint renderHint) {
+func (t *Table) renderMarginLeft(out *strings.Builder, hint renderHint) {
 	if t.style.Options.DrawBorder {
 		border := t.style.Box.Left
 		if hint.isBorderTop {
@@ -227,7 +227,7 @@ func (t *Table) renderMarginLeft(out *strings.Builder, row rowStr, hint renderHi
 		} else if hint.isBorderBottom {
 			border = t.style.Box.BottomLeft
 		} else if hint.isSeparatorRow {
-			if t.shouldMergeCellsVertically(0, hint) {
+			if !t.autoIndex && t.shouldMergeCellsVertically(0, hint) {
 				border = t.style.Box.Left
 			} else {
 				border = t.style.Box.LeftSeparator
@@ -243,7 +243,7 @@ func (t *Table) renderMarginLeft(out *strings.Builder, row rowStr, hint renderHi
 	}
 }
 
-func (t *Table) renderMarginRight(out *strings.Builder, row rowStr, hint renderHint) {
+func (t *Table) renderMarginRight(out *strings.Builder, hint renderHint) {
 	if t.style.Options.DrawBorder {
 		border := t.style.Box.Right
 		if hint.isBorderTop {
@@ -255,7 +255,7 @@ func (t *Table) renderMarginRight(out *strings.Builder, row rowStr, hint renderH
 		} else if hint.isBorderBottom {
 			border = t.style.Box.BottomRight
 		} else if hint.isSeparatorRow {
-			if t.shouldMergeCellsVertically(len(row)-1, hint) {
+			if t.shouldMergeCellsVertically(t.numColumns-1, hint) {
 				border = t.style.Box.Right
 			} else {
 				border = t.style.Box.RightSeparator
@@ -271,7 +271,7 @@ func (t *Table) renderMarginRight(out *strings.Builder, row rowStr, hint renderH
 	}
 }
 
-func (t *Table) renderRow(out *strings.Builder, rowNum int, row rowStr, hint renderHint) {
+func (t *Table) renderRow(out *strings.Builder, row rowStr, hint renderHint) {
 	if len(row) > 0 {
 		// fit every column into the allowedColumnLength/maxColumnLength limit
 		// and in the process find the max. number of lines in any column in
@@ -303,7 +303,7 @@ func (t *Table) renderRow(out *strings.Builder, rowNum int, row rowStr, hint ren
 				for colIdx, colLines := range rowLines {
 					rowLine[colIdx] = colLines[colLineIdx]
 				}
-				hint.isLastLineOfRow = bool(colLineIdx == colMaxLines-1)
+				hint.isLastLineOfRow = colLineIdx == colMaxLines-1
 				hint.rowLineNumber = colLineIdx + 1
 				t.renderLine(out, rowLine, hint)
 			}
@@ -327,10 +327,10 @@ func (t *Table) renderRowSeparator(out *strings.Builder, hint renderHint) {
 
 func (t *Table) renderRows(out *strings.Builder, rows []rowStr, hint renderHint) {
 	for rowIdx, row := range rows {
-		hint.isFirstRow = bool(rowIdx == 0)
-		hint.isLastRow = bool(rowIdx == len(rows)-1)
+		hint.isFirstRow = rowIdx == 0
+		hint.isLastRow = rowIdx == len(rows)-1
 		hint.rowNumber = rowIdx + 1
-		t.renderRow(out, rowIdx+1, row, hint)
+		t.renderRow(out, row, hint)
 
 		if (t.style.Options.SeparateRows && rowIdx < len(rows)-1) || // last row before footer
 			(t.separators[rowIdx] && rowIdx != len(rows)-1) { // manually added separator not after last row
@@ -360,7 +360,7 @@ func (t *Table) renderRowsHeader(out *strings.Builder) {
 		if len(t.rowsHeader) > 0 {
 			t.renderRows(out, t.rowsHeader, renderHint{isHeaderRow: true})
 		} else if t.autoIndex {
-			t.renderRow(out, 0, t.getAutoIndexColumnIDs(), renderHint{isHeaderRow: true})
+			t.renderRow(out, t.getAutoIndexColumnIDs(), renderHint{isHeaderRow: true})
 		}
 		t.renderRowSeparator(out, renderHint{isHeaderRow: true, isSeparatorRow: true})
 	}
