@@ -360,7 +360,7 @@ func (t *Table) renderRowsHeader(out *strings.Builder) {
 		if len(t.rowsHeader) > 0 {
 			t.renderRows(out, t.rowsHeader, renderHint{isHeaderRow: true})
 		} else if t.autoIndex {
-			t.renderRow(out, t.getAutoIndexColumnIDs(), renderHint{isHeaderRow: true})
+			t.renderRow(out, t.getAutoIndexColumnIDs(), renderHint{isAutoIndexRow: true, isHeaderRow: true})
 		}
 		t.renderRowSeparator(out, renderHint{isHeaderRow: true, isSeparatorRow: true})
 	}

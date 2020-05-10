@@ -2,7 +2,6 @@ package table
 
 import (
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 	"testing"
@@ -316,7 +315,6 @@ func TestTable_Render_Colored(t *testing.T) {
 	tw.Style().Options.SeparateFooter = true
 	tw.Style().Options.SeparateHeader = true
 	tw.Style().Options.SeparateRows = true
-	tw.SetOutputMirror(os.Stdout)
 
 	expectedOut := []string{
 		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m------------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m--------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m",

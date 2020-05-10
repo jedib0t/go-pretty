@@ -210,7 +210,7 @@ func TestTable_SetAutoIndex(t *testing.T) {
 
 	table.SetAutoIndex(true)
 	expectedOut = `(---^-----^--------^-----------^------^-----------------------------)
-[< >|< A >|<   B  >|<    C    >|<  D >|<             E             >]
+[< >|<  A>|<   B  >|<    C    >|<   D>|<             E             >]
 {---+-----+--------+-----------+------+-----------------------------}
 [<1>|<  1>|<Arya  >|<Stark    >|<3000>|<                           >]
 [<2>|< 20>|<Jon   >|<Snow     >|<2000>|<You know nothing, Jon Snow!>]

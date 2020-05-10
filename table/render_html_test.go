@@ -1,6 +1,7 @@
 package table
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/jedib0t/go-pretty/text"
@@ -17,8 +18,16 @@ func TestTable_RenderHTML(t *testing.T) {
 		{Name: "Salary", VAlign: text.VAlignBottom},
 		{Number: 5, VAlign: text.VAlignBottom},
 	})
+	tw.SetTitle(testTitle1)
+	tw.SetCaption(testCaption)
+	tw.Style().Title = TitleOptions{
+		Align:  text.AlignLeft,
+		Colors: text.Colors{text.BgBlack, text.Bold, text.FgHiBlue},
+		Format: text.FormatTitle,
+	}
 
 	expectedOut := `<table class="go-pretty-table">
+  <caption class="title" align="left" class="bg-black bold fg-hi-blue">Game Of Thrones</caption>
   <thead>
   <tr>
     <th align="right">#</th>
@@ -67,8 +76,53 @@ func TestTable_RenderHTML(t *testing.T) {
     <td>&nbsp;</td>
   </tr>
   </tfoot>
+  <caption class="caption" style="caption-side: bottom;">A Song of Ice and Fire</caption>
 </table>`
 
+	assert.Equal(t, expectedOut, tw.RenderHTML())
+}
+func TestTable_RenderHTML_AutoIndex(t *testing.T) {
+	tw := NewWriter()
+	for rowIdx := 0; rowIdx < 3; rowIdx++ {
+		row := make(Row, 3)
+		for colIdx := 0; colIdx < 3; colIdx++ {
+			row[colIdx] = fmt.Sprintf("%s%d", AutoIndexColumnID(colIdx), rowIdx+1)
+		}
+		tw.AppendRow(row)
+	}
+	tw.SetAutoIndex(true)
+	tw.SetStyle(StyleLight)
+
+	expectedOut := `<table class="go-pretty-table">
+  <thead>
+  <tr>
+    <th>&nbsp;</th>
+    <th align="center">A</th>
+    <th align="center">B</th>
+    <th align="center">C</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td>1</td>
+    <td>A1</td>
+    <td>B1</td>
+    <td>C1</td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td>A2</td>
+    <td>B2</td>
+    <td>C2</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>A3</td>
+    <td>B3</td>
+    <td>C3</td>
+  </tr>
+  </tbody>
+</table>`
 	assert.Equal(t, expectedOut, tw.RenderHTML())
 }
 
@@ -110,6 +164,7 @@ func TestTable_RenderHTML_Colored(t *testing.T) {
 	})
 
 	expectedOut := `<table class="go-pretty-table">
+  <caption class="title">Game of Thrones</caption>
   <thead>
   <tr>
     <th align="right" class="bg-white fg-black">#</th>
@@ -158,6 +213,7 @@ func TestTable_RenderHTML_Colored(t *testing.T) {
     <td>&nbsp;</td>
   </tr>
   </tfoot>
+  <caption class="caption" style="caption-side: bottom;">A Song of Ice and Fire</caption>
 </table>`
 
 	assert.Equal(t, expectedOut, tw.RenderHTML())
