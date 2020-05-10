@@ -1,6 +1,7 @@
 package table
 
 import (
+	"fmt"
 	"html"
 	"strings"
 )
@@ -67,17 +68,37 @@ func (t *Table) RenderHTML() string {
 			out.WriteString(DefaultHTMLCSSClass)
 		}
 		out.WriteString("\">\n")
-		t.htmlRenderRows(&out, t.rowsHeader, renderHint{isHeaderRow: true})
+		t.htmlRenderTitle(&out)
+		t.htmlRenderRowsHeader(&out)
 		t.htmlRenderRows(&out, t.rows, renderHint{})
-		t.htmlRenderRows(&out, t.rowsFooter, renderHint{isFooterRow: true})
+		t.htmlRenderRowsFooter(&out)
+		t.htmlRenderCaption(&out)
 		out.WriteString("</table>")
 	}
 	return t.render(&out)
 }
 
+func (t *Table) htmlRenderCaption(out *strings.Builder) {
+	if t.caption != "" {
+		out.WriteString("  <caption class=\"caption\" style=\"caption-side: bottom;\">")
+		out.WriteString(t.caption)
+		out.WriteString("</caption>\n")
+	}
+}
+
 func (t *Table) htmlRenderRow(out *strings.Builder, row rowStr, hint renderHint) {
 	out.WriteString("  <tr>\n")
 	for colIdx := 0; colIdx < t.numColumns; colIdx++ {
+		// auto-index column
+		if colIdx == 0 && t.autoIndex {
+			if hint.isHeaderRow {
+				out.WriteString("    <th>&nbsp;</th>\n")
+			} else {
+				out.WriteString(fmt.Sprintf("    <td>%d</td>\n", hint.rowNumber))
+			}
+		}
+
+		// get the column contents
 		var colStr string
 		if colIdx < len(row) {
 			colStr = row[colIdx]
@@ -152,5 +173,41 @@ func (t *Table) htmlRenderRows(out *strings.Builder, rows []rowStr, hint renderH
 			out.WriteString(rowsTag)
 			out.WriteString(">\n")
 		}
+	}
+}
+
+func (t *Table) htmlRenderRowsFooter(out *strings.Builder) {
+	if len(t.rowsFooter) > 0 {
+		t.htmlRenderRows(out, t.rowsFooter, renderHint{isFooterRow: true})
+	}
+}
+
+func (t *Table) htmlRenderRowsHeader(out *strings.Builder) {
+	if len(t.rowsHeader) > 0 {
+		t.htmlRenderRows(out, t.rowsHeader, renderHint{isHeaderRow: true})
+	} else if t.autoIndex {
+		hint := renderHint{isAutoIndexRow: true, isHeaderRow: true}
+		t.htmlRenderRows(out, []rowStr{t.getAutoIndexColumnIDs()}, hint)
+	}
+}
+
+func (t *Table) htmlRenderTitle(out *strings.Builder) {
+	if t.title != "" {
+		align := t.style.Title.Align.HTMLProperty()
+		colors := t.style.Title.Colors.HTMLProperty()
+		title := t.style.Title.Format.Apply(t.title)
+
+		out.WriteString("  <caption class=\"title\"")
+		if align != "" {
+			out.WriteRune(' ')
+			out.WriteString(align)
+		}
+		if colors != "" {
+			out.WriteRune(' ')
+			out.WriteString(colors)
+		}
+		out.WriteRune('>')
+		out.WriteString(title)
+		out.WriteString("</caption>\n")
 	}
 }

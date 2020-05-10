@@ -291,16 +291,20 @@ func (t *Table) getAlign(colIdx int, hint renderHint) text.Align {
 			align = cfg.Align
 		}
 	}
-	if align == text.AlignDefault && !t.columnIsNonNumeric[colIdx] {
-		align = text.AlignRight
+	if align == text.AlignDefault {
+		if !t.columnIsNonNumeric[colIdx] {
+			align = text.AlignRight
+		} else if hint.isAutoIndexRow {
+			align = text.AlignCenter
+		}
 	}
 	return align
 }
 
 func (t *Table) getAutoIndexColumnIDs() rowStr {
 	row := make(rowStr, t.numColumns)
-	for colIdx, maxColumnLength := range t.maxColumnLengths {
-		row[colIdx] = text.AlignCenter.Apply(AutoIndexColumnID(colIdx), maxColumnLength)
+	for colIdx := range row {
+		row[colIdx] = AutoIndexColumnID(colIdx)
 	}
 	return row
 }
@@ -647,6 +651,7 @@ func (t *Table) reset() {
 // renderHint has hints for the Render*() logic
 type renderHint struct {
 	isAutoIndexColumn bool // auto-index column?
+	isAutoIndexRow    bool // auto-index row?
 	isBorderBottom    bool // bottom-border?
 	isBorderTop       bool // top-border?
 	isFirstRow        bool // first-row of header/footer/regular-rows?
