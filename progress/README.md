@@ -14,11 +14,12 @@ parallel).
     - Colorize various parts of the Tracker using `StyleColors`
     - Customize how Trackers get rendered using `StyleOptions`
 
-Sample Progress Tracking:
-<img src="images/demo.gif" width="640px"/>
-
 A demonstration of all the capabilities can be found here:
 [../cmd/demo-progress](../cmd/demo-progress)
+
+## Sample Progress Tracking
+
+<img src="images/demo.gif" width="640px"/>
 
 # TODO
 
