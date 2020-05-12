@@ -3,7 +3,7 @@ package table
 import (
 	"fmt"
 
-	"github.com/jedib0t/go-pretty/text"
+	"github.com/jedib0t/go-pretty/v6/text"
 )
 
 func Example_simple() {
