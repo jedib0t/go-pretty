@@ -22,15 +22,39 @@ func (tc Format) Apply(text string) string {
 	case FormatLower:
 		return strings.ToLower(text)
 	case FormatTitle:
-		return tc.toTitle(text)
+		return toTitle(text)
 	case FormatUpper:
-		return tc.toUpper(text)
+		return toUpper(text)
 	default:
 		return text
 	}
 }
 
-func (tc Format) toUpper(text string) string {
+func toTitle(text string) string {
+	prev, inEscSeq := ' ', false
+	return strings.Map(
+		func(r rune) rune {
+			if r == EscapeStartRune {
+				inEscSeq = true
+			}
+			if !inEscSeq {
+				if isSeparator(prev) {
+					prev = r
+					r = unicode.ToUpper(r)
+				} else {
+					prev = r
+				}
+			}
+			if inEscSeq && r == EscapeStopRune {
+				inEscSeq = false
+			}
+			return r
+		},
+		text,
+	)
+}
+
+func toUpper(text string) string {
 	inEscSeq := false
 	return strings.Map(
 		func(r rune) rune {
@@ -49,31 +73,9 @@ func (tc Format) toUpper(text string) string {
 	)
 }
 
-func (tc Format) toTitle(text string) string {
-	prev, inEscSeq := ' ', false
-	return strings.Map(
-		func(r rune) rune {
-			if r == EscapeStartRune {
-				inEscSeq = true
-			}
-			if !inEscSeq {
-				if tc.isSeparator(prev) {
-					prev = r
-					r = unicode.ToUpper(r)
-				} else {
-					prev = r
-				}
-			}
-			if inEscSeq && r == EscapeStopRune {
-				inEscSeq = false
-			}
-			return r
-		},
-		text,
-	)
-}
-
-func (tc Format) isSeparator(r rune) bool {
+// isSeparator returns true if the given rune is a separator. This function is
+// lifted straight out of the standard library @ strings/strings.go.
+func isSeparator(r rune) bool {
 	// ASCII alphanumerics and underscore are not separators
 	if r <= 0x7F {
 		switch {
