@@ -8,16 +8,25 @@ import (
 )
 
 func ExampleFormat_Apply() {
-	text := "jon Snow"
-	fmt.Printf("FormatDefault: '%s'\n", FormatDefault.Apply(text))
-	fmt.Printf("FormatLower  : '%s'\n", FormatLower.Apply(text))
-	fmt.Printf("FormatTitle  : '%s'\n", FormatTitle.Apply(text))
-	fmt.Printf("FormatUpper  : '%s'\n", FormatUpper.Apply(text))
+	fmt.Printf("FormatDefault: %#v\n", FormatDefault.Apply("jon Snow"))
+	fmt.Printf("FormatLower  : %#v\n", FormatLower.Apply("jon Snow"))
+	fmt.Printf("FormatTitle  : %#v\n", FormatTitle.Apply("jon Snow"))
+	fmt.Printf("FormatUpper  : %#v\n", FormatUpper.Apply("jon Snow"))
+	fmt.Println()
+	fmt.Printf("FormatDefault (w/EscSeq): %#v\n", FormatDefault.Apply(Bold.Sprint("jon Snow")))
+	fmt.Printf("FormatLower   (w/EscSeq): %#v\n", FormatLower.Apply(Bold.Sprint("jon Snow")))
+	fmt.Printf("FormatTitle   (w/EscSeq): %#v\n", FormatTitle.Apply(Bold.Sprint("jon Snow")))
+	fmt.Printf("FormatUpper   (w/EscSeq): %#v\n", FormatUpper.Apply(Bold.Sprint("jon Snow")))
 
-	// Output: FormatDefault: 'jon Snow'
-	// FormatLower  : 'jon snow'
-	// FormatTitle  : 'Jon Snow'
-	// FormatUpper  : 'JON SNOW'
+	// Output: FormatDefault: "jon Snow"
+	// FormatLower  : "jon snow"
+	// FormatTitle  : "Jon Snow"
+	// FormatUpper  : "JON SNOW"
+	//
+	// FormatDefault (w/EscSeq): "\x1b[1mjon Snow\x1b[0m"
+	// FormatLower   (w/EscSeq): "\x1b[1mjon snow\x1b[0m"
+	// FormatTitle   (w/EscSeq): "\x1b[1mJon Snow\x1b[0m"
+	// FormatUpper   (w/EscSeq): "\x1b[1mJON SNOW\x1b[0m"
 }
 
 func TestFormat_Apply(t *testing.T) {

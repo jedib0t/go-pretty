@@ -5,7 +5,8 @@ import (
 	"unicode"
 )
 
-// Format denotes the "case" to use for text.
+// Format lets you transform the text in supported methods while keeping escape
+// sequences in the string intact and untouched.
 type Format int
 
 // Format enumerations
