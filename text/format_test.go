@@ -21,16 +21,16 @@ func ExampleFormat_Apply() {
 }
 
 func TestFormat_Apply(t *testing.T) {
-	text := "A big crocodile, Died. Empty."
+	text := "A big croc0dile; Died - Empty_fanged ツ \u2008."
 	assert.Equal(t, text, FormatDefault.Apply(text))
-	assert.Equal(t, "a big crocodile, died. empty.", FormatLower.Apply(text))
-	assert.Equal(t, "A Big Crocodile, Died. Empty.", FormatTitle.Apply(text))
-	assert.Equal(t, "A BIG CROCODILE, DIED. EMPTY.", FormatUpper.Apply(text))
+	assert.Equal(t, "a big croc0dile; died - empty_fanged ツ \u2008.", FormatLower.Apply(text))
+	assert.Equal(t, "A Big Croc0dile; Died - Empty_fanged ツ \u2008.", FormatTitle.Apply(text))
+	assert.Equal(t, "A BIG CROC0DILE; DIED - EMPTY_FANGED ツ \u2008.", FormatUpper.Apply(text))
 
 	// test with escape sequences
 	text = Colors{Bold}.Sprint(text)
-	assert.Equal(t, "\x1b[1mA big crocodile, Died. Empty.\x1b[0m", FormatDefault.Apply(text))
-	assert.Equal(t, "\x1b[1ma big crocodile, died. empty.\x1b[0m", FormatLower.Apply(text))
-	assert.Equal(t, "\x1b[1mA Big Crocodile, Died. Empty.\x1b[0m", FormatTitle.Apply(text))
-	assert.Equal(t, "\x1b[1mA BIG CROCODILE, DIED. EMPTY.\x1b[0m", FormatUpper.Apply(text))
+	assert.Equal(t, "\x1b[1mA big croc0dile; Died - Empty_fanged ツ \u2008.\x1b[0m", FormatDefault.Apply(text))
+	assert.Equal(t, "\x1b[1ma big croc0dile; died - empty_fanged ツ \u2008.\x1b[0m", FormatLower.Apply(text))
+	assert.Equal(t, "\x1b[1mA Big Croc0dile; Died - Empty_fanged ツ \u2008.\x1b[0m", FormatTitle.Apply(text))
+	assert.Equal(t, "\x1b[1mA BIG CROC0DILE; DIED - EMPTY_FANGED ツ \u2008.\x1b[0m", FormatUpper.Apply(text))
 }
