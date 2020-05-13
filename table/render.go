@@ -67,6 +67,9 @@ func (t *Table) renderColumn(out *strings.Builder, row rowStr, colIdx int, maxCo
 	if colIdx < len(row) && !mergeCurrCol {
 		colStr = t.getFormat(hint).Apply(row[colIdx])
 	}
+	if strings.Contains(colStr, "10000") {
+		fmt.Println()
+	}
 	colStr = t.getAlign(colIdx, hint).Apply(colStr, maxColumnLength)
 
 	// pad both sides of the column

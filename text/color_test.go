@@ -7,6 +7,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func init() {
+	EnableColors()
+}
+
 func TestColor_EnableAndDisable(t *testing.T) {
 	defer EnableColors()
 
