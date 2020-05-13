@@ -60,14 +60,20 @@ type Table struct {
 	// rowsColors stores the text.Colors over-rides for each row as defined by
 	// rowPainter
 	rowsColors []text.Colors
+	// rowsConfigs stores RowConfig for each row
+	rowsConfigMap map[int]RowConfig
 	// rowsRaw stores the rows that make up the body
 	rowsRaw []Row
 	// rowsFooter stores the rows that make up the footer (in string form)
 	rowsFooter []rowStr
+	// rowsFooterConfigs stores RowConfig for each footer row
+	rowsFooterConfigMap map[int]RowConfig
 	// rowsFooterRaw stores the rows that make up the footer
 	rowsFooterRaw []Row
 	// rowsHeader stores the rows that make up the header (in string form)
 	rowsHeader []rowStr
+	// rowsHeaderConfigs stores RowConfig for each header row
+	rowsHeaderConfigMap map[int]RowConfig
 	// rowsHeaderRaw stores the rows that make up the header
 	rowsHeaderRaw []Row
 	// rowPainter is a custom function that given a Row, returns the colors to
@@ -88,24 +94,50 @@ type Table struct {
 }
 
 // AppendFooter appends the row to the List of footers to render.
-func (t *Table) AppendFooter(row Row) {
+//
+// Only the first item in the "config" will be tagged against this row.
+func (t *Table) AppendFooter(row Row, config ...RowConfig) {
 	t.rowsFooterRaw = append(t.rowsFooterRaw, row)
+	if len(config) > 0 {
+		if t.rowsFooterConfigMap == nil {
+			t.rowsFooterConfigMap = make(map[int]RowConfig)
+		}
+		t.rowsFooterConfigMap[len(t.rowsFooterRaw)-1] = config[0]
+	}
 }
 
 // AppendHeader appends the row to the List of headers to render.
-func (t *Table) AppendHeader(row Row) {
+//
+// Only the first item in the "config" will be tagged against this row.
+func (t *Table) AppendHeader(row Row, config ...RowConfig) {
 	t.rowsHeaderRaw = append(t.rowsHeaderRaw, row)
+	if len(config) > 0 {
+		if t.rowsHeaderConfigMap == nil {
+			t.rowsHeaderConfigMap = make(map[int]RowConfig)
+		}
+		t.rowsHeaderConfigMap[len(t.rowsHeaderRaw)-1] = config[0]
+	}
 }
 
 // AppendRow appends the row to the List of rows to render.
-func (t *Table) AppendRow(row Row) {
+//
+// Only the first item in the "config" will be tagged against this row.
+func (t *Table) AppendRow(row Row, config ...RowConfig) {
 	t.rowsRaw = append(t.rowsRaw, row)
+	if len(config) > 0 {
+		if t.rowsConfigMap == nil {
+			t.rowsConfigMap = make(map[int]RowConfig)
+		}
+		t.rowsConfigMap[len(t.rowsRaw)-1] = config[0]
+	}
 }
 
 // AppendRows appends the rows to the List of rows to render.
-func (t *Table) AppendRows(rows []Row) {
+//
+// Only the first item in the "config" will be tagged against all the rows.
+func (t *Table) AppendRows(rows []Row, config ...RowConfig) {
 	for _, row := range rows {
-		t.AppendRow(row)
+		t.AppendRow(row, config...)
 	}
 }
 
@@ -338,6 +370,43 @@ func (t *Table) getColumnColors(colIdx int, hint renderHint) text.Colors {
 	return nil
 }
 
+func (t *Table) getColumnSeparator(colIdx int, hint renderHint) string {
+	separator := t.style.Box.MiddleVertical
+	if hint.isSeparatorRow {
+		if hint.isBorderTop {
+			separator = t.style.Box.TopSeparator
+		} else if hint.isBorderBottom {
+			separator = t.style.Box.BottomSeparator
+		} else {
+			separator = t.getColumnSeparatorNonBorder(colIdx, hint)
+		}
+	}
+	return separator
+}
+
+func (t *Table) getColumnSeparatorNonBorder(colIdx int, hint renderHint) string {
+	mergeCurrCol := t.shouldMergeCellsVertically(colIdx-1, hint)
+	mergeNextCol := t.shouldMergeCellsVertically(colIdx, hint)
+	separator := t.style.Box.MiddleSeparator
+	if hint.isAutoIndexColumn {
+		if hint.isHeaderOrFooterSeparator() {
+			separator = t.style.Box.LeftSeparator
+			if mergeNextCol {
+				separator = t.style.Box.MiddleVertical
+			}
+		} else if mergeNextCol {
+			separator = t.style.Box.RightSeparator
+		}
+	} else if mergeCurrCol && mergeNextCol {
+		separator = t.style.Box.MiddleVertical
+	} else if mergeCurrCol {
+		separator = t.style.Box.LeftSeparator
+	} else if mergeNextCol {
+		separator = t.style.Box.RightSeparator
+	}
+	return separator
+}
+
 func (t *Table) getColumnTransformer(colIdx int, hint renderHint) text.Transformer {
 	var transformer text.Transformer
 	if cfg, ok := t.columnConfigMap[colIdx]; ok {
@@ -375,6 +444,35 @@ func (t *Table) getFormat(hint renderHint) text.Format {
 		return t.style.Format.Footer
 	}
 	return t.style.Format.Row
+}
+
+func (t *Table) getRow(rowIdx int, hint renderHint) rowStr {
+	switch {
+	case hint.isHeaderRow:
+		if rowIdx >= 0 && rowIdx < len(t.rowsHeader) {
+			return t.rowsHeader[rowIdx]
+		}
+	case hint.isFooterRow:
+		if rowIdx >= 0 && rowIdx < len(t.rowsFooter) {
+			return t.rowsFooter[rowIdx]
+		}
+	default:
+		if rowIdx >= 0 && rowIdx < len(t.rows) {
+			return t.rows[rowIdx]
+		}
+	}
+	return rowStr{}
+}
+
+func (t *Table) getRowConfig(hint renderHint) RowConfig {
+	switch {
+	case hint.isHeaderRow:
+		return t.rowsHeaderConfigMap[hint.rowNumber-1]
+	case hint.isFooterRow:
+		return t.rowsFooterConfigMap[hint.rowNumber-1]
+	default:
+		return t.rowsConfigMap[hint.rowNumber-1]
+	}
 }
 
 func (t *Table) getSeparatorColors(hint renderHint) text.Colors {
@@ -648,6 +746,25 @@ func (t *Table) reset() {
 	t.rowsHeader = nil
 }
 
+func (t *Table) shouldMergeCellsVertically(colIdx int, hint renderHint) bool {
+	if t.columnConfigMap[colIdx].AutoMerge && colIdx < t.numColumns {
+		if hint.isSeparatorRow {
+			rowPrev := t.getRow(hint.rowNumber-1, hint)
+			rowNext := t.getRow(hint.rowNumber, hint)
+			if colIdx < len(rowPrev) && colIdx < len(rowNext) {
+				return rowPrev[colIdx] == rowNext[colIdx] || "" == rowNext[colIdx]
+			}
+		} else {
+			rowPrev := t.getRow(hint.rowNumber-2, hint)
+			rowCurr := t.getRow(hint.rowNumber-1, hint)
+			if colIdx < len(rowPrev) && colIdx < len(rowCurr) {
+				return rowPrev[colIdx] == rowCurr[colIdx] || "" == rowCurr[colIdx]
+			}
+		}
+	}
+	return false
+}
+
 // renderHint has hints for the Render*() logic
 type renderHint struct {
 	isAutoIndexColumn bool // auto-index column?
@@ -666,6 +783,11 @@ type renderHint struct {
 
 func (h *renderHint) isRegularRow() bool {
 	return !h.isHeaderRow && !h.isFooterRow
+}
+
+func (h *renderHint) isHeaderOrFooterSeparator() bool {
+	return h.isSeparatorRow && !h.isBorderBottom && !h.isBorderTop &&
+		((h.isHeaderRow && !h.isLastRow) || (h.isFooterRow && !h.isFirstRow))
 }
 
 func (h *renderHint) isLastLineOfLastRow() bool {
