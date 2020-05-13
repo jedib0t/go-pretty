@@ -2,7 +2,6 @@ package table
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -43,7 +42,6 @@ func TestTable_RenderMarkdown_AutoIndex(t *testing.T) {
 	}
 	tw.SetAutoIndex(true)
 	tw.SetStyle(StyleLight)
-	tw.SetOutputMirror(os.Stdout)
 
 	expectedOut := `| | A | B | C | D | E | F | G | H | I | J |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

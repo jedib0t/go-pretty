@@ -1008,3 +1008,39 @@ func TestTable_Render_TableWithinTable(t *testing.T) {
 ╚═════════════════════════════════════════════════════════════════════════╝`
 	assert.Equal(t, expectedOut, twOuter.Render())
 }
+
+func TestTable_Render_TableWithTransformers(t *testing.T) {
+	bolden := func(val interface{}) string {
+		return text.Bold.Sprint(val)
+	}
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendFooter(testFooter)
+	tw.SetColumnConfigs([]ColumnConfig{{
+		Name:              "Salary",
+		Transformer:       bolden,
+		TransformerFooter: bolden,
+		TransformerHeader: bolden,
+	}})
+	tw.SetStyle(StyleLight)
+
+	expectedOut := []string{
+		"┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐",
+		"│   # │ FIRST NAME │ LAST NAME │ \x1b[1mSALARY\x1b[0m │                             │",
+		"├─────┼────────────┼───────────┼────────┼─────────────────────────────┤",
+		"│   1 │ Arya       │ Stark     │   \x1b[1m3000\x1b[0m │                             │",
+		"│  20 │ Jon        │ Snow      │   \x1b[1m2000\x1b[0m │ You know nothing, Jon Snow! │",
+		"│ 300 │ Tyrion     │ Lannister │   \x1b[1m5000\x1b[0m │                             │",
+		"├─────┼────────────┼───────────┼────────┼─────────────────────────────┤",
+		"│     │            │ TOTAL     │  \x1b[1m10000\x1b[0m │                             │",
+		"└─────┴────────────┴───────────┴────────┴─────────────────────────────┘",
+	}
+	out := tw.Render()
+	assert.Equal(t, strings.Join(expectedOut, "\n"), out)
+	if strings.Join(expectedOut, "\n") != out {
+		for _, line := range strings.Split(out, "\n") {
+			fmt.Printf("%#v,\n", line)
+		}
+	}
+}
