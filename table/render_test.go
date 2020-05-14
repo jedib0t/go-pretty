@@ -111,45 +111,57 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, RowConfig{AutoMerge: true})
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "Y", "Y"}, RowConfig{AutoMerge: true})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, RowConfig{AutoMerge: true})
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"})
+	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, RowConfig{AutoMerge: true})
 	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true})
-	tw.AppendFooter(Row{"", "", "", 7, "", ""})
+	tw.AppendFooter(Row{"", "", "", 7, 5, 5}, RowConfig{AutoMerge: true})
+	tw.AppendFooter(Row{"", "", "", 7, 5, 3}, RowConfig{AutoMerge: true})
+	tw.AppendFooter(Row{"", "", "", 7, 5, 5}, RowConfig{AutoMerge: true})
+	tw.AppendFooter(Row{"", "", "", 7, 5, 3}, RowConfig{AutoMerge: true})
+	tw.AppendFooter(Row{"", "", "", 7, 5, 5}, RowConfig{AutoMerge: true})
 	tw.SetAutoIndex(true)
 	tw.SetColumnConfigs([]ColumnConfig{
 		{Number: 1, AutoMerge: true},
 		{Number: 2, AutoMerge: true},
 		{Number: 3, AutoMerge: true},
 		{Number: 4, AutoMerge: true},
-		{Number: 5, Align: text.AlignCenter},
-		{Number: 6, Align: text.AlignCenter},
+		{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+		{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
 	})
 	tw.SetOutputMirror(os.Stdout)
 	tw.SetStyle(StyleLight)
 	tw.Style().Options.SeparateRows = true
 
 	expectedOut := `┌───┬─────────┬────────┬───────────┬───────────┬───────────┐
-│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │ RCE       │
+│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │    RCE    │
 │   │         │        │           │           ├─────┬─────┤
 │   │         │        │           │           │ EXE │ RUN │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
-│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │  Y        │
+│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │     Y     │
 ├───┤         │        │           ├───────────┼─────┬─────┤
 │ 2 │         │        │           │ C 2       │  Y  │  N  │
 ├───┤         │        ├───────────┼───────────┼─────┼─────┤
 │ 3 │         │        │ NS 1B     │ C 3       │  N  │  N  │
 ├───┤         ├────────┼───────────┼───────────┼─────┴─────┤
-│ 4 │         │ Pod 1B │ NS 2      │ C 4       │  Y        │
+│ 4 │         │ Pod 1B │ NS 2      │ C 4       │     N     │
 ├───┤         │        │           ├───────────┼─────┬─────┤
 │ 5 │         │        │           │ C 5       │  Y  │  N  │
-├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
-│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │  Y  │  Y  │
-├───┤         │        │           ├───────────┼─────┴─────┤
-│ 7 │         │        │           │ C 7       │  Y        │
-├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
-│   │         │        │           │ 7         │     │     │
-└───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │     Y     │
+├───┤         │        │           ├───────────┼───────────┤
+│ 7 │         │        │           │ C 7       │     Y     │
+├───┼─────────┴────────┴───────────┼───────────┼───────────┤
+│   │                              │ 7         │     5     │
+│   │                              │           ├─────┬─────┤
+│   │                              │           │  5  │  3  │
+│   │                              │           ├─────┴─────┤
+│   │                              │           │     5     │
+│   │                              │           ├─────┬─────┤
+│   │                              │           │  5  │  3  │
+│   │                              │           ├─────┴─────┤
+│   │                              │           │     5     │
+└───┴──────────────────────────────┴───────────┴───────────┘`
 	assert.Equal(t, expectedOut, tw.Render())
 }
 
@@ -159,19 +171,19 @@ func TestTable_Render_AutoMerge_ColumnsOnly(t *testing.T) {
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"})
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "Y", "Y"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"})
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
 	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"})
 	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"})
-	tw.AppendFooter(Row{"", "", "", 7, "", ""})
+	tw.AppendFooter(Row{"", "", "", 7, 5, 3})
 	tw.SetAutoIndex(true)
 	tw.SetColumnConfigs([]ColumnConfig{
 		{Number: 1, AutoMerge: true},
 		{Number: 2, AutoMerge: true},
 		{Number: 3, AutoMerge: true},
 		{Number: 4, AutoMerge: true},
-		{Number: 5, Align: text.AlignCenter},
-		{Number: 6, Align: text.AlignCenter},
+		{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+		{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
 	})
 	tw.SetOutputMirror(os.Stdout)
 	tw.SetStyle(StyleLight)
@@ -187,7 +199,7 @@ func TestTable_Render_AutoMerge_ColumnsOnly(t *testing.T) {
 ├───┤         │        ├───────────┼───────────┼─────┼─────┤
 │ 3 │         │        │ NS 1B     │ C 3       │  N  │  N  │
 ├───┤         ├────────┼───────────┼───────────┼─────┼─────┤
-│ 4 │         │ Pod 1B │ NS 2      │ C 4       │  Y  │  Y  │
+│ 4 │         │ Pod 1B │ NS 2      │ C 4       │  N  │  N  │
 ├───┤         │        │           ├───────────┼─────┼─────┤
 │ 5 │         │        │           │ C 5       │  Y  │  N  │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
@@ -195,7 +207,7 @@ func TestTable_Render_AutoMerge_ColumnsOnly(t *testing.T) {
 ├───┤         │        │           ├───────────┼─────┼─────┤
 │ 7 │         │        │           │ C 7       │  Y  │  Y  │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
-│   │         │        │           │ 7         │     │     │
+│   │         │        │           │ 7         │  5  │  3  │
 └───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`
 	assert.Equal(t, expectedOut, tw.Render())
 }
@@ -207,40 +219,40 @@ func TestTable_Render_AutoMerge_RowsOnly(t *testing.T) {
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, RowConfig{AutoMerge: true})
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "Y", "Y"}, RowConfig{AutoMerge: true})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, RowConfig{AutoMerge: true})
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"})
+	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, RowConfig{AutoMerge: true})
 	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true})
-	tw.AppendFooter(Row{"", "", "", 7, "", ""})
+	tw.AppendFooter(Row{"", "", "", 7, 5, 3})
 	tw.SetAutoIndex(true)
 	tw.SetColumnConfigs([]ColumnConfig{
-		{Number: 5, Align: text.AlignCenter},
-		{Number: 6, Align: text.AlignCenter},
+		{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+		{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
 	})
 	tw.SetOutputMirror(os.Stdout)
 	tw.SetStyle(StyleLight)
 	tw.Style().Options.SeparateRows = true
 
 	expectedOut := `┌───┬─────────┬────────┬───────────┬───────────┬───────────┐
-│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │ RCE       │
+│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │    RCE    │
 │   ├─────────┼────────┼───────────┼───────────┼─────┬─────┤
 │   │         │        │           │           │ EXE │ RUN │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
-│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │  Y        │
+│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │     Y     │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
 │ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 2       │  Y  │  N  │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
 │ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B     │ C 3       │  N  │  N  │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
-│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │  Y        │
+│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │     N     │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
 │ 5 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 5       │  Y  │  N  │
-├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
-│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │  Y  │  Y  │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
-│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │  Y        │
+│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │     Y     │
+├───┼─────────┼────────┼───────────┼───────────┼───────────┤
+│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │     Y     │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
-│   │         │        │           │ 7         │     │     │
+│   │         │        │           │ 7         │  5  │  3  │
 └───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`
 	assert.Equal(t, expectedOut, tw.Render())
 }
@@ -255,7 +267,7 @@ func TestTable_Render_AutoMerge_WithHiddenRows(t *testing.T) {
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
 	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"})
 	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "N"})
-	tw.AppendFooter(Row{"", "", "", 7, "", ""})
+	tw.AppendFooter(Row{"", "", "", 7, 5, 3})
 	tw.SetColumnConfigs([]ColumnConfig{
 		{Number: 1, AutoMerge: true},
 		{Number: 2, AutoMerge: true},
