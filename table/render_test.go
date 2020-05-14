@@ -108,13 +108,13 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE"}, RowConfig{AutoMerge: true})
 	tw.AppendHeader(Row{"", "", "", "", "EXE", "RUN"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, RowConfig{AutoMerge: true})
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "Y", "Y"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "Y", "Y"}, RowConfig{AutoMerge: true})
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
 	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"})
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "N"})
+	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true})
 	tw.AppendFooter(Row{"", "", "", 7, "", ""})
 	tw.SetAutoIndex(true)
 	tw.SetColumnConfigs([]ColumnConfig{
@@ -133,21 +133,21 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 │   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │ RCE       │
 │   │         │        │           │           ├─────┬─────┤
 │   │         │        │           │           │ EXE │ RUN │
-├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
-│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │  Y  │  Y  │
-├───┤         │        │           ├───────────┼─────┼─────┤
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │  Y        │
+├───┤         │        │           ├───────────┼─────┬─────┤
 │ 2 │         │        │           │ C 2       │  Y  │  N  │
 ├───┤         │        ├───────────┼───────────┼─────┼─────┤
 │ 3 │         │        │ NS 1B     │ C 3       │  N  │  N  │
-├───┤         ├────────┼───────────┼───────────┼─────┼─────┤
-│ 4 │         │ Pod 1B │ NS 2      │ C 4       │  Y  │  Y  │
-├───┤         │        │           ├───────────┼─────┼─────┤
+├───┤         ├────────┼───────────┼───────────┼─────┴─────┤
+│ 4 │         │ Pod 1B │ NS 2      │ C 4       │  Y        │
+├───┤         │        │           ├───────────┼─────┬─────┤
 │ 5 │         │        │           │ C 5       │  Y  │  N  │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
 │ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │  Y  │  Y  │
-├───┤         │        │           ├───────────┼─────┼─────┤
-│ 7 │         │        │           │ C 7       │  Y  │  N  │
-├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
+├───┤         │        │           ├───────────┼─────┴─────┤
+│ 7 │         │        │           │ C 7       │  Y        │
+├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
 │   │         │        │           │ 7         │     │     │
 └───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`
 	assert.Equal(t, expectedOut, tw.Render())
@@ -162,7 +162,7 @@ func TestTable_Render_AutoMerge_ColumnsOnly(t *testing.T) {
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "Y", "Y"})
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
 	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"})
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "N"})
+	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"})
 	tw.AppendFooter(Row{"", "", "", 7, "", ""})
 	tw.SetAutoIndex(true)
 	tw.SetColumnConfigs([]ColumnConfig{
@@ -193,7 +193,7 @@ func TestTable_Render_AutoMerge_ColumnsOnly(t *testing.T) {
 ├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
 │ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │  Y  │  Y  │
 ├───┤         │        │           ├───────────┼─────┼─────┤
-│ 7 │         │        │           │ C 7       │  Y  │  N  │
+│ 7 │         │        │           │ C 7       │  Y  │  Y  │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
 │   │         │        │           │ 7         │     │     │
 └───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`
@@ -204,13 +204,13 @@ func TestTable_Render_AutoMerge_RowsOnly(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE"}, RowConfig{AutoMerge: true})
 	tw.AppendHeader(Row{"", "", "", "", "EXE", "RUN"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, RowConfig{AutoMerge: true})
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "Y", "Y"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "Y", "Y"}, RowConfig{AutoMerge: true})
 	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
 	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"})
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "N"})
+	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true})
 	tw.AppendFooter(Row{"", "", "", 7, "", ""})
 	tw.SetAutoIndex(true)
 	tw.SetColumnConfigs([]ColumnConfig{
@@ -225,21 +225,21 @@ func TestTable_Render_AutoMerge_RowsOnly(t *testing.T) {
 │   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │ RCE       │
 │   ├─────────┼────────┼───────────┼───────────┼─────┬─────┤
 │   │         │        │           │           │ EXE │ RUN │
-├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
-│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │  Y  │  Y  │
-├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │  Y        │
+├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
 │ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 2       │  Y  │  N  │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
 │ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B     │ C 3       │  N  │  N  │
-├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
-│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │  Y  │  Y  │
-├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │  Y        │
+├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
 │ 5 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 5       │  Y  │  N  │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
 │ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │  Y  │  Y  │
-├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
-│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │  Y  │  N  │
-├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │  Y        │
+├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
 │   │         │        │           │ 7         │     │     │
 └───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`
 	assert.Equal(t, expectedOut, tw.Render())
