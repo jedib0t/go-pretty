@@ -6,10 +6,10 @@ import (
 
 // Writer declares the interfaces that can be used to setup and render a table.
 type Writer interface {
-	AppendFooter(row Row)
-	AppendHeader(row Row)
-	AppendRow(row Row)
-	AppendRows(rows []Row)
+	AppendFooter(row Row, configs ...RowConfig)
+	AppendHeader(row Row, configs ...RowConfig)
+	AppendRow(row Row, configs ...RowConfig)
+	AppendRows(rows []Row, configs ...RowConfig)
 	AppendSeparator()
 	Length() int
 	Render() string

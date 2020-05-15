@@ -305,6 +305,7 @@ type BoxStyle struct {
 	BottomLeft       string
 	BottomRight      string
 	BottomSeparator  string
+	EmptySeparator   string
 	Left             string
 	LeftSeparator    string
 	MiddleHorizontal string
@@ -336,6 +337,7 @@ var (
 		BottomLeft:       "+",
 		BottomRight:      "+",
 		BottomSeparator:  "+",
+		EmptySeparator:   text.RepeatAndTrim(" ", text.RuneCount("+")),
 		Left:             "|",
 		LeftSeparator:    "+",
 		MiddleHorizontal: "-",
@@ -366,6 +368,7 @@ var (
 		BottomLeft:       "┗",
 		BottomRight:      "┛",
 		BottomSeparator:  "┻",
+		EmptySeparator:   text.RepeatAndTrim(" ", text.RuneCount("╋")),
 		Left:             "┃",
 		LeftSeparator:    "┣",
 		MiddleHorizontal: "━",
@@ -396,6 +399,7 @@ var (
 		BottomLeft:       "╚",
 		BottomRight:      "╝",
 		BottomSeparator:  "╩",
+		EmptySeparator:   text.RepeatAndTrim(" ", text.RuneCount("╬")),
 		Left:             "║",
 		LeftSeparator:    "╠",
 		MiddleHorizontal: "═",
@@ -426,6 +430,7 @@ var (
 		BottomLeft:       "└",
 		BottomRight:      "┘",
 		BottomSeparator:  "┴",
+		EmptySeparator:   text.RepeatAndTrim(" ", text.RuneCount("┼")),
 		Left:             "│",
 		LeftSeparator:    "├",
 		MiddleHorizontal: "─",
@@ -456,6 +461,7 @@ var (
 		BottomLeft:       "╰",
 		BottomRight:      "╯",
 		BottomSeparator:  "┴",
+		EmptySeparator:   text.RepeatAndTrim(" ", text.RuneCount("┼")),
 		Left:             "│",
 		LeftSeparator:    "├",
 		MiddleHorizontal: "─",
@@ -486,6 +492,7 @@ var (
 		BottomLeft:       "\\",
 		BottomRight:      "/",
 		BottomSeparator:  "v",
+		EmptySeparator:   text.RepeatAndTrim(" ", text.RuneCount("+")),
 		Left:             "[",
 		LeftSeparator:    "{",
 		MiddleHorizontal: "--",

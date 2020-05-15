@@ -68,6 +68,14 @@ func TestTable_AppendFooter(t *testing.T) {
 	assert.Equal(t, 0, table.Length())
 	assert.Equal(t, 2, len(table.rowsFooterRaw))
 	assert.Equal(t, 0, len(table.rowsHeaderRaw))
+
+	table.AppendFooter([]interface{}{}, RowConfig{AutoMerge: true})
+	assert.Equal(t, 0, table.Length())
+	assert.Equal(t, 3, len(table.rowsFooterRaw))
+	assert.Equal(t, 0, len(table.rowsHeaderRaw))
+	assert.False(t, table.rowsFooterConfigMap[0].AutoMerge)
+	assert.False(t, table.rowsFooterConfigMap[1].AutoMerge)
+	assert.True(t, table.rowsFooterConfigMap[2].AutoMerge)
 }
 
 func TestTable_AppendHeader(t *testing.T) {
@@ -83,6 +91,14 @@ func TestTable_AppendHeader(t *testing.T) {
 	assert.Equal(t, 0, table.Length())
 	assert.Equal(t, 0, len(table.rowsFooterRaw))
 	assert.Equal(t, 2, len(table.rowsHeaderRaw))
+
+	table.AppendHeader([]interface{}{}, RowConfig{AutoMerge: true})
+	assert.Equal(t, 0, table.Length())
+	assert.Equal(t, 0, len(table.rowsFooterRaw))
+	assert.Equal(t, 3, len(table.rowsHeaderRaw))
+	assert.False(t, table.rowsHeaderConfigMap[0].AutoMerge)
+	assert.False(t, table.rowsHeaderConfigMap[1].AutoMerge)
+	assert.True(t, table.rowsHeaderConfigMap[2].AutoMerge)
 }
 
 func TestTable_AppendRow(t *testing.T) {
@@ -98,6 +114,14 @@ func TestTable_AppendRow(t *testing.T) {
 	assert.Equal(t, 2, table.Length())
 	assert.Equal(t, 0, len(table.rowsFooter))
 	assert.Equal(t, 0, len(table.rowsHeader))
+
+	table.AppendRow([]interface{}{}, RowConfig{AutoMerge: true})
+	assert.Equal(t, 3, table.Length())
+	assert.Equal(t, 0, len(table.rowsFooterRaw))
+	assert.Equal(t, 0, len(table.rowsHeaderRaw))
+	assert.False(t, table.rowsConfigMap[0].AutoMerge)
+	assert.False(t, table.rowsConfigMap[1].AutoMerge)
+	assert.True(t, table.rowsConfigMap[2].AutoMerge)
 }
 
 func TestTable_AppendRows(t *testing.T) {
@@ -113,6 +137,15 @@ func TestTable_AppendRows(t *testing.T) {
 	assert.Equal(t, 2, table.Length())
 	assert.Equal(t, 0, len(table.rowsFooter))
 	assert.Equal(t, 0, len(table.rowsHeader))
+
+	table.AppendRows([]Row{{}, {}}, RowConfig{AutoMerge: true})
+	assert.Equal(t, 4, table.Length())
+	assert.Equal(t, 0, len(table.rowsFooterRaw))
+	assert.Equal(t, 0, len(table.rowsHeaderRaw))
+	assert.False(t, table.rowsConfigMap[0].AutoMerge)
+	assert.False(t, table.rowsConfigMap[1].AutoMerge)
+	assert.True(t, table.rowsConfigMap[2].AutoMerge)
+	assert.True(t, table.rowsConfigMap[3].AutoMerge)
 }
 
 func TestTable_Length(t *testing.T) {

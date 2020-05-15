@@ -25,7 +25,8 @@ type ColumnConfig struct {
 	// AutoMerge merges cells with similar values and prevents separators from
 	// being drawn. Caveats:
 	// * VAlign is applied on the individual cell and not on the merged cell
-	// * Auto-merge is not supported in CSV/HTML/Markdown render modes
+	// * Does not work in CSV/HTML/Markdown render modes
+	// * Does not work well with horizontal auto-merge (RowConfig.AutoMerge)
 	//
 	// Works best when:
 	// * Style().Options.SeparateRows == true
@@ -77,4 +78,15 @@ func (c ColumnConfig) getWidthMaxEnforcer() WidthEnforcer {
 		return c.WidthMaxEnforcer
 	}
 	return text.WrapText
+}
+
+// RowConfig contains configurations that determine and modify the way the
+// contents of a row get rendered.
+type RowConfig struct {
+	// AutoMerge merges cells with similar values and prevents separators from
+	// being drawn. Caveats:
+	// * Align is overridden to text.AlignCenter on the merged cell
+	// * Does not work in CSV/HTML/Markdown render modes
+	// * Does not work well with vertical auto-merge (ColumnConfig.AutoMerge)
+	AutoMerge bool
 }
