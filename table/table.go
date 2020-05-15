@@ -18,6 +18,11 @@ type RowPainter func(row Row) text.Colors
 // rowStr defines a single row in the Table comprised of just string objects.
 type rowStr []string
 
+// areEqual returns true if the contents of the 2 given columns are the same
+func (row rowStr) areEqual(colIdx1 int, colIdx2 int) bool {
+	return colIdx1 >= 0 && colIdx2 < len(row) && row[colIdx1] == row[colIdx2]
+}
+
 // Table helps print a 2-dimensional array in a human readable pretty-table.
 type Table struct {
 	// allowedRowLength is the max allowed length for a row (or line of output)
@@ -36,9 +41,6 @@ type Table struct {
 	// columnConfigMap stores the custom-configuration by column
 	// number and is generated before rendering
 	columnConfigMap map[int]ColumnConfig
-	// columnSeparatorNonBorderMap stores the column separators for every
-	// possible combination of cells being merged on all 4 sides
-	columnSeparatorNonBorderMap map[string]string
 	// htmlCSSClass stores the HTML CSS Class to use on the <table> node
 	htmlCSSClass string
 	// indexColumn stores the number of the column considered as the "index"
@@ -374,58 +376,69 @@ func (t *Table) getColumnColors(colIdx int, hint renderHint) text.Colors {
 }
 
 func (t *Table) getColumnSeparator(row rowStr, colIdx int, hint renderHint) string {
-	mergeCellsAbove := t.shouldMergeCellsHorizontallyAbove(row, colIdx, hint)
-	mergeCellsBelow := t.shouldMergeCellsHorizontallyBelow(row, colIdx, hint)
 	separator := t.style.Box.MiddleVertical
 	if hint.isSeparatorRow {
 		if hint.isBorderTop {
-			if mergeCellsBelow {
+			if t.shouldMergeCellsHorizontallyBelow(row, colIdx, hint) {
 				separator = t.style.Box.MiddleHorizontal
 			} else {
 				separator = t.style.Box.TopSeparator
 			}
 		} else if hint.isBorderBottom {
-			if mergeCellsAbove {
+			if t.shouldMergeCellsHorizontallyAbove(row, colIdx, hint) {
 				separator = t.style.Box.MiddleHorizontal
 			} else {
 				separator = t.style.Box.BottomSeparator
 			}
 		} else {
-			separator = t.getColumnSeparatorNonBorder(mergeCellsAbove, mergeCellsBelow, colIdx, hint)
+			separator = t.getColumnSeparatorNonBorder(
+				t.shouldMergeCellsHorizontallyAbove(row, colIdx, hint),
+				t.shouldMergeCellsHorizontallyBelow(row, colIdx, hint),
+				colIdx,
+				hint,
+			)
 		}
 	}
 	return separator
 }
 
 func (t *Table) getColumnSeparatorNonBorder(mergeCellsAbove bool, mergeCellsBelow bool, colIdx int, hint renderHint) string {
-	mergeCurrColWithPrev := t.shouldMergeCellsVertically(colIdx-1, hint)
-	mergeCurrColWithNext := t.shouldMergeCellsVertically(colIdx, hint)
-	separator := t.style.Box.MiddleSeparator
+	mergeNextCol := t.shouldMergeCellsVertically(colIdx, hint)
 	if hint.isAutoIndexColumn {
-		if hint.isHeaderOrFooterSeparator() {
-			separator = t.style.Box.LeftSeparator
-			if mergeCurrColWithNext {
-				separator = t.style.Box.MiddleVertical
-			}
-		} else if mergeCurrColWithNext {
-			separator = t.style.Box.RightSeparator
-		}
-	} else if mergeCellsAbove && mergeCellsBelow && mergeCurrColWithPrev && mergeCurrColWithNext {
-		separator = t.style.Box.EmptySeparator
-	} else if mergeCellsAbove && mergeCellsBelow {
-		separator = t.style.Box.MiddleHorizontal
-	} else if mergeCellsAbove {
-		separator = t.style.Box.TopSeparator
-	} else if mergeCellsBelow {
-		separator = t.style.Box.BottomSeparator
-	} else if mergeCurrColWithPrev && mergeCurrColWithNext {
-		separator = t.style.Box.MiddleVertical
-	} else if mergeCurrColWithPrev {
-		separator = t.style.Box.LeftSeparator
-	} else if mergeCurrColWithNext {
-		separator = t.style.Box.RightSeparator
+		return t.getColumnSeparatorNonBorderAutoIndex(mergeNextCol, hint)
 	}
-	return separator
+
+	mergeCurrCol := t.shouldMergeCellsVertically(colIdx-1, hint)
+	return t.getColumnSeparatorNonBorderNonAutoIndex(mergeCellsAbove, mergeCellsBelow, mergeCurrCol, mergeNextCol)
+}
+
+func (t *Table) getColumnSeparatorNonBorderAutoIndex(mergeNextCol bool, hint renderHint) string {
+	if hint.isHeaderOrFooterSeparator() {
+		if mergeNextCol {
+			return t.style.Box.MiddleVertical
+		}
+		return t.style.Box.LeftSeparator
+	} else if mergeNextCol {
+		return t.style.Box.RightSeparator
+	}
+	return t.style.Box.MiddleSeparator
+}
+
+func (t *Table) getColumnSeparatorNonBorderNonAutoIndex(mergeCellsAbove bool, mergeCellsBelow bool, mergeCurrCol bool, mergeNextCol bool) string {
+	if mergeCellsAbove && mergeCellsBelow && mergeCurrCol && mergeNextCol {
+		return t.style.Box.EmptySeparator
+	} else if mergeCellsAbove && mergeCellsBelow {
+		return t.style.Box.MiddleHorizontal
+	} else if mergeCellsAbove {
+		return t.style.Box.TopSeparator
+	} else if mergeCellsBelow {
+		return t.style.Box.BottomSeparator
+	} else if mergeCurrCol && mergeNextCol {
+		return t.style.Box.MiddleVertical
+	} else if mergeCurrCol {
+		return t.style.Box.LeftSeparator
+	}
+	return t.style.Box.MiddleSeparator
 }
 
 func (t *Table) getColumnTransformer(colIdx int, hint renderHint) text.Transformer {
@@ -762,7 +775,6 @@ func (t *Table) render(out *strings.Builder) string {
 func (t *Table) reset() {
 	t.autoIndexVIndexMaxLength = 0
 	t.columnIsNonNumeric = nil
-	t.columnSeparatorNonBorderMap = nil
 	t.maxColumnLengths = nil
 	t.maxRowLength = 0
 	t.numColumns = 0
@@ -794,7 +806,7 @@ func (t *Table) shouldMergeCellsHorizontallyAbove(row rowStr, colIdx int, hint r
 	}
 
 	if rowConfig.AutoMerge {
-		return colIdx > 0 && colIdx < len(row) && row[colIdx-1] == row[colIdx]
+		return row.areEqual(colIdx-1, colIdx)
 	}
 	return false
 }
@@ -811,11 +823,8 @@ func (t *Table) shouldMergeCellsHorizontallyBelow(row rowStr, colIdx int, hint r
 			row = t.getRow(0, hint)
 		} else if hint.isHeaderRow && hint.isLastRow {
 			rowConfig = t.getRowConfig(renderHint{rowNumber: 1})
-			row = t.getRow(0, renderHint{isHeaderRow: true})
-		} else if hint.isFooterRow && hint.rowNumber == 0 {
-			rowConfig = t.getRowConfig(renderHint{isFooterRow: true, rowNumber: 1})
-			row = t.getRow(hint.rowNumber, renderHint{isFooterRow: true})
-		} else if hint.isFooterRow && hint.rowNumber > 0 {
+			row = t.getRow(0, renderHint{})
+		} else if hint.isFooterRow && hint.rowNumber >= 0 {
 			rowConfig = t.getRowConfig(renderHint{isFooterRow: true, rowNumber: 1})
 			row = t.getRow(hint.rowNumber, renderHint{isFooterRow: true})
 		} else if hint.isRegularRow() {
@@ -825,7 +834,7 @@ func (t *Table) shouldMergeCellsHorizontallyBelow(row rowStr, colIdx int, hint r
 	}
 
 	if rowConfig.AutoMerge {
-		return colIdx > 0 && colIdx < len(row) && row[colIdx-1] == row[colIdx]
+		return row.areEqual(colIdx-1, colIdx)
 	}
 	return false
 }
