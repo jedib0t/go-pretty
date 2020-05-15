@@ -106,10 +106,10 @@ BenchmarkTable_RenderMarkdown-2   	  107420	     10991 ns/op	    2560 B/op	     
 To make `go-pretty` completely compatible with `go mod`, versions `v6.0.0` and
 above will include changes that are known to break `dep` support. As far as I
 can tell, `dep` is looking for funding right now and is not being actively
-developed or maintained and has an interoperability issues with how `go mod`
+developed or maintained and has an interoperability issue with how `go mod`
 deals with package versioning.
 
-If you want to continue to use `dep`, versions `v5.x.x` and below should
+If you want to continue to use `dep`, versions `v5.1.x` and below should
 continue to work. If `dep` maintainers can merge the code proposed in
 [PR#1963](https://github.com/golang/dep/pull/1963), it should make `v6.0.0` and
 above usable too. Given that the PR has not been merged since July 2018, I am
