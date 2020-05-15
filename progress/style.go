@@ -3,7 +3,7 @@ package progress
 import (
 	"time"
 
-	"github.com/jedib0t/go-pretty/text"
+	"github.com/jedib0t/go-pretty/v6/text"
 )
 
 // Style declares how to render the Progress/Trackers.

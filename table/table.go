@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/jedib0t/go-pretty/text"
+	"github.com/jedib0t/go-pretty/v6/text"
 )
 
 // Row defines a single row in the Table.
