@@ -26,7 +26,7 @@ Pretty-print tables into ASCII/Unicode strings.
 
 <img src="table/images/table-StyleColoredBright.png" width="640px"/>
 
-Detailed documentation can be found here: [table/](table)
+More details can be found here: [table/](table)
 
 ## List
 
@@ -44,7 +44,7 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
    ■ The Gunslinger
 ```
 
-Detailed documentation can be found here: [list/](list)
+More details can be found here: [list/](list)
 
 # Progress
 
@@ -65,7 +65,7 @@ Downloading File    #  9 ... 32.1% (●●●●●●●○◌◌◌◌◌◌�
 Transferring Amount # 10 ... 13.0% (●●○◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌◌) [£32.50K in 198.84ms]
 ```
 
-Detailed documentation can be found here: [progress/](progress)
+More details can be found here: [progress/](progress)
 
 ## Text
 

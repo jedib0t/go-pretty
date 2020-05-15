@@ -2,7 +2,6 @@ package table
 
 import (
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 	"testing"
@@ -105,6 +104,56 @@ func TestTable_Render_AutoIndex(t *testing.T) {
 }
 
 func TestTable_Render_AutoMerge(t *testing.T) {
+	rowConfigAutoMerge := RowConfig{AutoMerge: true}
+
+	tw := NewWriter()
+	tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE"}, rowConfigAutoMerge)
+	tw.AppendHeader(Row{"", "", "", "", "EXE", "RUN"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rowConfigAutoMerge)
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"}, rowConfigAutoMerge)
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"}, rowConfigAutoMerge)
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, rowConfigAutoMerge)
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"}, rowConfigAutoMerge)
+	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rowConfigAutoMerge)
+	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, rowConfigAutoMerge)
+	tw.AppendFooter(Row{"", "", "", 7, 5, 3})
+	tw.SetAutoIndex(true)
+	tw.SetColumnConfigs([]ColumnConfig{
+		{Number: 1, AutoMerge: true},
+		{Number: 2, AutoMerge: true},
+		{Number: 3, AutoMerge: true},
+		{Number: 4, AutoMerge: true},
+		{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+		{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+	})
+	tw.SetStyle(StyleLight)
+	tw.Style().Options.SeparateRows = true
+
+	expectedOut := `┌───┬─────────┬────────┬───────────┬───────────┬───────────┐
+│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │    RCE    │
+│   │         │        │           │           ├─────┬─────┤
+│   │         │        │           │           │ EXE │ RUN │
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │     Y     │
+├───┤         │        │           ├───────────┼─────┬─────┤
+│ 2 │         │        │           │ C 2       │  Y  │  N  │
+├───┤         │        ├───────────┼───────────┼─────┴─────┤
+│ 3 │         │        │ NS 1B     │ C 3       │     N     │
+├───┤         ├────────┼───────────┼───────────┼───────────┤
+│ 4 │         │ Pod 1B │ NS 2      │ C 4       │     N     │
+├───┤         │        │           ├───────────┼─────┬─────┤
+│ 5 │         │        │           │ C 5       │  Y  │  N  │
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │     Y     │
+├───┤         │        │           ├───────────┼───────────┤
+│ 7 │         │        │           │ C 7       │     Y     │
+├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
+│   │         │        │           │ 7         │  5  │  3  │
+└───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`
+	assert.Equal(t, expectedOut, tw.Render())
+}
+
+func TestTable_Render_AutoMerge_Complex(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE", "ID"}, RowConfig{AutoMerge: true})
 	tw.AppendHeader(Row{"", "", "", "", "EXE", "RUN", ""})
@@ -129,7 +178,6 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 		{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
 		{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
 	})
-	tw.SetOutputMirror(os.Stdout)
 	tw.SetStyle(StyleLight)
 	tw.Style().Options.SeparateRows = true
 
@@ -185,7 +233,6 @@ func TestTable_Render_AutoMerge_ColumnsOnly(t *testing.T) {
 		{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
 		{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
 	})
-	tw.SetOutputMirror(os.Stdout)
 	tw.SetStyle(StyleLight)
 	tw.Style().Options.SeparateRows = true
 
@@ -229,7 +276,6 @@ func TestTable_Render_AutoMerge_RowsOnly(t *testing.T) {
 		{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
 		{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
 	})
-	tw.SetOutputMirror(os.Stdout)
 	tw.SetStyle(StyleLight)
 	tw.Style().Options.SeparateRows = true
 

@@ -7,7 +7,9 @@ Pretty-print tables into ASCII/Unicode strings.
   - Add Header(s) and Footer(s) (`AppendHeader`/`AppendFooter`)
   - Add a Separator manually after any Row (`AppendSeparator`)
   - Auto Index Rows (1, 2, 3 ...) and Columns (A, B, C, ...) (`SetAutoIndex`)
-  - Auto Merge Cells on Columns (`ColumnConfig.AutoMerge`)
+  - Auto Merge
+    - Cells in a Row (`RowConfig.AutoMerge`)
+    - Columns (`ColumnConfig.AutoMerge`)
   - Limit the length of
     - Rows (`SetAllowedRowLength`)
     - Columns (`ColumnConfig.Width*`)
@@ -59,7 +61,7 @@ If you want very specific examples, read ahead.
 All the examples below are going to start with the following block, although
 nothing except a single Row is mandatory for the `Render()` function to render
 something:
-```go
+```golang
 package main
 
 import (
@@ -106,7 +108,7 @@ ready-to-use style (as in [style.go](style.go)) or customize it as you want.
 
 Table comes with a bunch of ready-to-use Styles that make the table look really
 good. Set or Change the style using:
-```go
+```golang
     t.SetStyle(table.StyleLight)
     t.Render()
 ```
@@ -125,18 +127,18 @@ to get:
 ```
 
 Or if you want to use a full-color mode, and don't care for boxes, use:
-```go
+```golang
     t.SetStyle(table.StyleColoredBright)
     t.Render()
 ```
 to get:
 
-<img src="images/table-StyleColoredBright.png" width="640px"/>
+<img src="images/table-StyleColoredBright.png" width="640px" alt="Colored Table"/>
 
 ### Roll your own Style
 
 You can also roll your own style:
-```go
+```golang
     t.SetStyle(table.Style{
         Name: "myNewStyle",
         Box: table.BoxStyle{
@@ -181,18 +183,76 @@ You can also roll your own style:
 ```
 
 Or you can use one of the ready-to-use Styles, and just make a few tweaks:
-```go
+```golang
     t.SetStyle(table.StyleLight)
     t.Style().Color.Header = text.Colors{text.BgHiCyan, text.FgBlack}
     t.Style().Format.Footer = text.FormatLower
     t.Style().Options.DrawBorder = false
 ```
 
+## Auto-Merge
+
+You can auto-merge cells horizontally and vertically, but you have request for
+it specifically for each row/column using `RowConfig` or `ColumnConfig`.
+
+```golang
+    rowConfigAutoMerge := table.RowConfig{AutoMerge: true}
+
+    t := table.NewWriter()
+    t.AppendHeader(table.Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE"}, rowConfigAutoMerge)
+    t.AppendHeader(table.Row{"", "", "", "", "EXE", "RUN"})
+    t.AppendRow(table.Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rowConfigAutoMerge)
+    t.AppendRow(table.Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"}, rowConfigAutoMerge)
+    t.AppendRow(table.Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"}, rowConfigAutoMerge)
+    t.AppendRow(table.Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, rowConfigAutoMerge)
+    t.AppendRow(table.Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"}, rowConfigAutoMerge)
+    t.AppendRow(table.Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rowConfigAutoMerge)
+    t.AppendRow(table.Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, rowConfigAutoMerge)
+    t.AppendFooter(table.Row{"", "", "", 7, 5, 3})
+    t.SetAutoIndex(true)
+    t.SetColumnConfigs([]table.ColumnConfig{
+        {Number: 1, AutoMerge: true},
+        {Number: 2, AutoMerge: true},
+        {Number: 3, AutoMerge: true},
+        {Number: 4, AutoMerge: true},
+        {Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+        {Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+    })
+    t.SetOutputMirror(os.Stdout)
+    t.SetStyle(table.StyleLight)
+    t.Style().Options.SeparateRows = true
+    fmt.Println(t.Render())
+```
+to get:
+```
+┌───┬─────────┬────────┬───────────┬───────────┬───────────┐
+│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │    RCE    │
+│   ├─────────┼────────┼───────────┼───────────┼─────┬─────┤
+│   │         │        │           │           │ EXE │ RUN │
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │     Y     │
+├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
+│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 2       │  Y  │  N  │
+├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
+│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B     │ C 3       │  N  │  N  │
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │     N     │
+├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
+│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 5       │  Y  │  N  │
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │     Y     │
+├───┼─────────┼────────┼───────────┼───────────┼───────────┤
+│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │     Y     │
+├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
+│   │         │        │           │ 7         │  5  │  3  │
+└───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘
+```
+
 ## Paging
 
 You can limit then number of lines rendered in a single "Page". This logic
 can handle rows with multiple lines too. Here is a simple example:
-```go
+```golang
     t.SetPageSize(1)
     t.Render()
 ```
@@ -226,7 +286,7 @@ to get:
 ## Wrapping (or) Row/Column Width restrictions
 
 You can restrict the maximum (text) width for a Row:
-```go
+```golang
     t.SetAllowedRowLength(50)
     t.Render()
 ```
@@ -254,9 +314,9 @@ global properties/styles using the `SetColumnConfig()` interface:
 - Visibility
 - Width (minimum & maximum)
 
-```go
+```golang
     nameTransformer := text.Transformer(func(val interface{}) string {
-    	return text.Bold.Sprint(val)
+        return text.Bold.Sprint(val)
     })
 
     t.SetColumnConfigs([]ColumnConfig{
@@ -287,7 +347,7 @@ Tables can be rendered in other common formats such as:
 
 ### ... CSV
 
-```go
+```golang
     t.RenderCSV()
 ```
 to get:
@@ -301,7 +361,7 @@ to get:
 
 ### ... HTML Table
 
-```go
+```golang
     t.RenderHTML()
 ```
 to get:
@@ -353,7 +413,7 @@ to get:
 
 ### ... Markdown Table
 
-```go
+```golang
     t.RenderMarkdown()
 ```
 to get:
