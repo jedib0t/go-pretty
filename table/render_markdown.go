@@ -48,7 +48,7 @@ func (t *Table) markdownRenderRow(out *strings.Builder, row rowStr, hint renderH
 		if colIdx == 0 && t.autoIndex {
 			out.WriteRune(' ')
 			if hint.isSeparatorRow {
-				out.WriteString("--- ")
+				out.WriteString("---:")
 			} else if hint.isRegularRow() {
 				out.WriteString(fmt.Sprintf("%d ", hint.rowNumber))
 			}

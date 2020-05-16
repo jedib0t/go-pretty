@@ -2,6 +2,7 @@ package table
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -90,6 +91,14 @@ func TestTable_RenderHTML_AutoIndex(t *testing.T) {
 		}
 		tw.AppendRow(row)
 	}
+	for rowIdx := 0; rowIdx < 1; rowIdx++ {
+		row := make(Row, 10)
+		for colIdx := 0; colIdx < 10; colIdx++ {
+			row[colIdx] = AutoIndexColumnID(colIdx) + "F"
+		}
+		tw.AppendFooter(row)
+	}
+	tw.SetOutputMirror(os.Stdout)
 	tw.SetAutoIndex(true)
 	tw.SetStyle(StyleLight)
 
@@ -122,6 +131,14 @@ func TestTable_RenderHTML_AutoIndex(t *testing.T) {
     <td>C3</td>
   </tr>
   </tbody>
+  <tfoot>
+  <tr>
+    <td>&nbsp;</td>
+    <td>AF</td>
+    <td>BF</td>
+    <td>CF</td>
+  </tr>
+  </tfoot>
 </table>`
 	assert.Equal(t, expectedOut, tw.RenderHTML())
 }

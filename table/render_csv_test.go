@@ -40,6 +40,13 @@ func TestTable_RenderCSV_AutoIndex(t *testing.T) {
 		}
 		tw.AppendRow(row)
 	}
+	for rowIdx := 0; rowIdx < 1; rowIdx++ {
+		row := make(Row, 10)
+		for colIdx := 0; colIdx < 10; colIdx++ {
+			row[colIdx] = AutoIndexColumnID(colIdx) + "F"
+		}
+		tw.AppendFooter(row)
+	}
 	tw.SetAutoIndex(true)
 	tw.SetStyle(StyleLight)
 
@@ -53,7 +60,8 @@ func TestTable_RenderCSV_AutoIndex(t *testing.T) {
 7,A7,B7,C7,D7,E7,F7,G7,H7,I7,J7
 8,A8,B8,C8,D8,E8,F8,G8,H8,I8,J8
 9,A9,B9,C9,D9,E9,F9,G9,H9,I9,J9
-10,A10,B10,C10,D10,E10,F10,G10,H10,I10,J10`
+10,A10,B10,C10,D10,E10,F10,G10,H10,I10,J10
+,AF,BF,CF,DF,EF,FF,GF,HF,IF,JF`
 	assert.Equal(t, expectedOut, tw.RenderCSV())
 }
 
