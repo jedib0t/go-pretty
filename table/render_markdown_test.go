@@ -40,11 +40,18 @@ func TestTable_RenderMarkdown_AutoIndex(t *testing.T) {
 		}
 		tw.AppendRow(row)
 	}
+	for rowIdx := 0; rowIdx < 1; rowIdx++ {
+		row := make(Row, 10)
+		for colIdx := 0; colIdx < 10; colIdx++ {
+			row[colIdx] = AutoIndexColumnID(colIdx) + "F"
+		}
+		tw.AppendFooter(row)
+	}
 	tw.SetAutoIndex(true)
 	tw.SetStyle(StyleLight)
 
 	expectedOut := `| | A | B | C | D | E | F | G | H | I | J |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ---:| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | A1 | B1 | C1 | D1 | E1 | F1 | G1 | H1 | I1 | J1 |
 | 2 | A2 | B2 | C2 | D2 | E2 | F2 | G2 | H2 | I2 | J2 |
 | 3 | A3 | B3 | C3 | D3 | E3 | F3 | G3 | H3 | I3 | J3 |
@@ -54,7 +61,8 @@ func TestTable_RenderMarkdown_AutoIndex(t *testing.T) {
 | 7 | A7 | B7 | C7 | D7 | E7 | F7 | G7 | H7 | I7 | J7 |
 | 8 | A8 | B8 | C8 | D8 | E8 | F8 | G8 | H8 | I8 | J8 |
 | 9 | A9 | B9 | C9 | D9 | E9 | F9 | G9 | H9 | I9 | J9 |
-| 10 | A10 | B10 | C10 | D10 | E10 | F10 | G10 | H10 | I10 | J10 |`
+| 10 | A10 | B10 | C10 | D10 | E10 | F10 | G10 | H10 | I10 | J10 |
+| | AF | BF | CF | DF | EF | FF | GF | HF | IF | JF |`
 	assert.Equal(t, expectedOut, tw.RenderMarkdown())
 }
 

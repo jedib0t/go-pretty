@@ -2,6 +2,7 @@ package table
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -81,6 +82,7 @@ func TestTable_RenderHTML(t *testing.T) {
 
 	assert.Equal(t, expectedOut, tw.RenderHTML())
 }
+
 func TestTable_RenderHTML_AutoIndex(t *testing.T) {
 	tw := NewWriter()
 	for rowIdx := 0; rowIdx < 3; rowIdx++ {
@@ -90,6 +92,14 @@ func TestTable_RenderHTML_AutoIndex(t *testing.T) {
 		}
 		tw.AppendRow(row)
 	}
+	for rowIdx := 0; rowIdx < 1; rowIdx++ {
+		row := make(Row, 3)
+		for colIdx := 0; colIdx < 3; colIdx++ {
+			row[colIdx] = AutoIndexColumnID(colIdx) + "F"
+		}
+		tw.AppendFooter(row)
+	}
+	tw.SetOutputMirror(os.Stdout)
 	tw.SetAutoIndex(true)
 	tw.SetStyle(StyleLight)
 
@@ -104,24 +114,32 @@ func TestTable_RenderHTML_AutoIndex(t *testing.T) {
   </thead>
   <tbody>
   <tr>
-    <td>1</td>
+    <td align="right">1</td>
     <td>A1</td>
     <td>B1</td>
     <td>C1</td>
   </tr>
   <tr>
-    <td>2</td>
+    <td align="right">2</td>
     <td>A2</td>
     <td>B2</td>
     <td>C2</td>
   </tr>
   <tr>
-    <td>3</td>
+    <td align="right">3</td>
     <td>A3</td>
     <td>B3</td>
     <td>C3</td>
   </tr>
   </tbody>
+  <tfoot>
+  <tr>
+    <td>&nbsp;</td>
+    <td>AF</td>
+    <td>BF</td>
+    <td>CF</td>
+  </tr>
+  </tfoot>
 </table>`
 	assert.Equal(t, expectedOut, tw.RenderHTML())
 }

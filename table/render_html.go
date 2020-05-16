@@ -93,8 +93,10 @@ func (t *Table) htmlRenderRow(out *strings.Builder, row rowStr, hint renderHint)
 		if colIdx == 0 && t.autoIndex {
 			if hint.isHeaderRow {
 				out.WriteString("    <th>&nbsp;</th>\n")
+			} else if hint.isFooterRow {
+				out.WriteString("    <td>&nbsp;</td>\n")
 			} else {
-				out.WriteString(fmt.Sprintf("    <td>%d</td>\n", hint.rowNumber))
+				out.WriteString(fmt.Sprintf("    <td align=\"right\">%d</td>\n", hint.rowNumber))
 			}
 		}
 
