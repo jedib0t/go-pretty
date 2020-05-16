@@ -114,19 +114,19 @@ func TestTable_RenderHTML_AutoIndex(t *testing.T) {
   </thead>
   <tbody>
   <tr>
-    <td>1</td>
+    <td align="right">1</td>
     <td>A1</td>
     <td>B1</td>
     <td>C1</td>
   </tr>
   <tr>
-    <td>2</td>
+    <td align="right">2</td>
     <td>A2</td>
     <td>B2</td>
     <td>C2</td>
   </tr>
   <tr>
-    <td>3</td>
+    <td align="right">3</td>
     <td>A3</td>
     <td>B3</td>
     <td>C3</td>

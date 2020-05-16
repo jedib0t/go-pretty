@@ -96,7 +96,7 @@ func (t *Table) htmlRenderRow(out *strings.Builder, row rowStr, hint renderHint)
 			} else if hint.isFooterRow {
 				out.WriteString("    <td>&nbsp;</td>\n")
 			} else {
-				out.WriteString(fmt.Sprintf("    <td>%d</td>\n", hint.rowNumber))
+				out.WriteString(fmt.Sprintf("    <td align=\"right\">%d</td>\n", hint.rowNumber))
 			}
 		}
 
