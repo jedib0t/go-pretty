@@ -82,6 +82,7 @@ func TestTable_RenderHTML(t *testing.T) {
 
 	assert.Equal(t, expectedOut, tw.RenderHTML())
 }
+
 func TestTable_RenderHTML_AutoIndex(t *testing.T) {
 	tw := NewWriter()
 	for rowIdx := 0; rowIdx < 3; rowIdx++ {
@@ -92,8 +93,8 @@ func TestTable_RenderHTML_AutoIndex(t *testing.T) {
 		tw.AppendRow(row)
 	}
 	for rowIdx := 0; rowIdx < 1; rowIdx++ {
-		row := make(Row, 10)
-		for colIdx := 0; colIdx < 10; colIdx++ {
+		row := make(Row, 3)
+		for colIdx := 0; colIdx < 3; colIdx++ {
 			row[colIdx] = AutoIndexColumnID(colIdx) + "F"
 		}
 		tw.AppendFooter(row)
