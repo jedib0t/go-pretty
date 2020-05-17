@@ -152,6 +152,7 @@ func TestTable_RenderHTML_Colored(t *testing.T) {
 	tw.AppendFooter(testFooter)
 	tw.SetCaption(testCaption)
 	tw.SetTitle(testTitle1)
+	tw.Style().HTML.CSSClass = "go-pretty-table-colored"
 	colorsBlackOnWhite := text.Colors{text.BgWhite, text.FgBlack}
 	tw.SetColumnConfigs([]ColumnConfig{
 		{
@@ -181,7 +182,7 @@ func TestTable_RenderHTML_Colored(t *testing.T) {
 		},
 	})
 
-	expectedOut := `<table class="go-pretty-table">
+	expectedOut := `<table class="go-pretty-table-colored">
   <caption class="title">Game of Thrones</caption>
   <thead>
   <tr>
@@ -233,7 +234,73 @@ func TestTable_RenderHTML_Colored(t *testing.T) {
   </tfoot>
   <caption class="caption" style="caption-side: bottom;">A Song of Ice and Fire</caption>
 </table>`
+	assert.Equal(t, expectedOut, tw.RenderHTML())
+}
 
+func TestTable_RenderHTML_CustomStyle(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendRow(Row{1, "Arya", "Stark", 3000, "<a href=\"https://duckduckgo.com/?q=arya+stark+not+today\">Not today.</a>"})
+	tw.AppendRow(Row{1, "Jon", "Snow", 2000, "You know\nnothing,\nJon Snow!"})
+	tw.AppendRow(Row{300, "Tyrion", "Lannister", 5000})
+	tw.AppendFooter(testFooter)
+	tw.SetAutoIndex(true)
+	tw.Style().HTML = HTMLOptions{
+		CSSClass:    "game-of-thrones",
+		EmptyColumn: "<!-- test -->&nbsp;",
+		EscapeText:  false,
+		Newline:     "<!-- newline -->",
+	}
+	tw.SetOutputMirror(os.Stdout)
+
+	expectedOut := `<table class="game-of-thrones">
+  <thead>
+  <tr>
+    <th><!-- test -->&nbsp;</th>
+    <th align="right">#</th>
+    <th>First Name</th>
+    <th>Last Name</th>
+    <th align="right">Salary</th>
+    <th><!-- test -->&nbsp;</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td align="right">1</td>
+    <td align="right">1</td>
+    <td>Arya</td>
+    <td>Stark</td>
+    <td align="right">3000</td>
+    <td><a href="https://duckduckgo.com/?q=arya+stark+not+today">Not today.</a></td>
+  </tr>
+  <tr>
+    <td align="right">2</td>
+    <td align="right">1</td>
+    <td>Jon</td>
+    <td>Snow</td>
+    <td align="right">2000</td>
+    <td>You know<!-- newline -->nothing,<!-- newline -->Jon Snow!</td>
+  </tr>
+  <tr>
+    <td align="right">3</td>
+    <td align="right">300</td>
+    <td>Tyrion</td>
+    <td>Lannister</td>
+    <td align="right">5000</td>
+    <td><!-- test -->&nbsp;</td>
+  </tr>
+  </tbody>
+  <tfoot>
+  <tr>
+    <td><!-- test -->&nbsp;</td>
+    <td align="right"><!-- test -->&nbsp;</td>
+    <td><!-- test -->&nbsp;</td>
+    <td>Total</td>
+    <td align="right">10000</td>
+    <td><!-- test -->&nbsp;</td>
+  </tr>
+  </tfoot>
+</table>`
 	assert.Equal(t, expectedOut, tw.RenderHTML())
 }
 

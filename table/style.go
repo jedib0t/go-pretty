@@ -11,6 +11,7 @@ type Style struct {
 	Box     BoxStyle      // characters to use for the boxes
 	Color   ColorOptions  // colors to use for the rows and columns
 	Format  FormatOptions // formatting options for the rows and columns
+	HTML    HTMLOptions   // rendering options for HTML mode
 	Options Options       // misc. options for the table
 	Title   TitleOptions  // formation options for the title text
 }
@@ -31,6 +32,7 @@ var (
 		Box:     StyleBoxDefault,
 		Color:   ColorOptionsDefault,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsDefault,
 		Title:   TitleOptionsDefault,
 	}
@@ -50,6 +52,7 @@ var (
 		Box:     StyleBoxBold,
 		Color:   ColorOptionsDefault,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsDefault,
 		Title:   TitleOptionsDefault,
 	}
@@ -62,6 +65,7 @@ var (
 		Box:     StyleBoxDefault,
 		Color:   ColorOptionsBright,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
 		Title:   TitleOptionsDark,
 	}
@@ -74,6 +78,7 @@ var (
 		Box:     StyleBoxDefault,
 		Color:   ColorOptionsDark,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
 		Title:   TitleOptionsBright,
 	}
@@ -86,6 +91,7 @@ var (
 		Box:     StyleBoxDefault,
 		Color:   ColorOptionsBlackOnBlueWhite,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
 		Title:   TitleOptionsBlueOnBlack,
 	}
@@ -98,6 +104,7 @@ var (
 		Box:     StyleBoxDefault,
 		Color:   ColorOptionsBlackOnCyanWhite,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
 		Title:   TitleOptionsCyanOnBlack,
 	}
@@ -110,6 +117,7 @@ var (
 		Box:     StyleBoxDefault,
 		Color:   ColorOptionsBlackOnGreenWhite,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
 		Title:   TitleOptionsGreenOnBlack,
 	}
@@ -122,6 +130,7 @@ var (
 		Box:     StyleBoxDefault,
 		Color:   ColorOptionsBlackOnMagentaWhite,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
 		Title:   TitleOptionsMagentaOnBlack,
 	}
@@ -134,6 +143,7 @@ var (
 		Box:     StyleBoxDefault,
 		Color:   ColorOptionsBlackOnYellowWhite,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
 		Title:   TitleOptionsYellowOnBlack,
 	}
@@ -146,6 +156,7 @@ var (
 		Box:     StyleBoxDefault,
 		Color:   ColorOptionsBlackOnRedWhite,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
 		Title:   TitleOptionsRedOnBlack,
 	}
@@ -158,6 +169,7 @@ var (
 		Box:     StyleBoxDefault,
 		Color:   ColorOptionsBlueWhiteOnBlack,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
 		Title:   TitleOptionsBlackOnBlue,
 	}
@@ -170,6 +182,7 @@ var (
 		Box:     StyleBoxDefault,
 		Color:   ColorOptionsCyanWhiteOnBlack,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
 		Title:   TitleOptionsBlackOnCyan,
 	}
@@ -182,6 +195,7 @@ var (
 		Box:     StyleBoxDefault,
 		Color:   ColorOptionsGreenWhiteOnBlack,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
 		Title:   TitleOptionsBlackOnGreen,
 	}
@@ -194,6 +208,7 @@ var (
 		Box:     StyleBoxDefault,
 		Color:   ColorOptionsMagentaWhiteOnBlack,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
 		Title:   TitleOptionsBlackOnMagenta,
 	}
@@ -206,6 +221,7 @@ var (
 		Box:     StyleBoxDefault,
 		Color:   ColorOptionsRedWhiteOnBlack,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
 		Title:   TitleOptionsBlackOnRed,
 	}
@@ -218,6 +234,7 @@ var (
 		Box:     StyleBoxDefault,
 		Color:   ColorOptionsYellowWhiteOnBlack,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
 		Title:   TitleOptionsBlackOnYellow,
 	}
@@ -237,6 +254,7 @@ var (
 		Box:     StyleBoxDouble,
 		Color:   ColorOptionsDefault,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsDefault,
 		Title:   TitleOptionsDefault,
 	}
@@ -256,6 +274,7 @@ var (
 		Box:     StyleBoxLight,
 		Color:   ColorOptionsDefault,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsDefault,
 		Title:   TitleOptionsDefault,
 	}
@@ -275,6 +294,7 @@ var (
 		Box:     StyleBoxRounded,
 		Color:   ColorOptionsDefault,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsDefault,
 		Title:   TitleOptionsDefault,
 	}
@@ -294,6 +314,7 @@ var (
 		Box:     styleBoxTest,
 		Color:   ColorOptionsDefault,
 		Format:  FormatOptionsDefault,
+		HTML:    DefaultHTMLOptions,
 		Options: OptionsDefault,
 		Title:   TitleOptionsDefault,
 	}
@@ -657,6 +678,24 @@ var (
 		Footer: text.FormatUpper,
 		Header: text.FormatUpper,
 		Row:    text.FormatDefault,
+	}
+)
+
+// HTMLOptions defines the global options to control HTML rendering.
+type HTMLOptions struct {
+	CSSClass    string // CSS class to set on the overall <table> tag
+	EmptyColumn string // string to replace "" columns with (entire content being "")
+	EscapeText  bool   // escape text into HTML-safe content?
+	Newline     string // string to replace "\n" characters with
+}
+
+var (
+	// DefaultHTMLOptions defines sensible HTML rendering defaults.
+	DefaultHTMLOptions = HTMLOptions{
+		CSSClass:    DefaultHTMLCSSClass,
+		EmptyColumn: "&nbsp;",
+		EscapeText:  true,
+		Newline:     "<br/>",
 	}
 )
 
