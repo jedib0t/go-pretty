@@ -218,6 +218,8 @@ func (t *Table) SetColumnConfigs(configs []ColumnConfig) {
 
 // SetHTMLCSSClass sets the the HTML CSS Class to use on the <table> node
 // when rendering the Table in HTML format.
+//
+// Deprecated: in favor of Style().HTML.CSSClass
 func (t *Table) SetHTMLCSSClass(cssClass string) {
 	t.htmlCSSClass = cssClass
 }

@@ -23,7 +23,6 @@ type Writer interface {
 	SetAutoIndex(autoIndex bool)
 	SetCaption(format string, a ...interface{})
 	SetColumnConfigs(configs []ColumnConfig)
-	SetHTMLCSSClass(cssClass string)
 	SetIndexColumn(colNum int)
 	SetOutputMirror(mirror io.Writer)
 	SetPageSize(numLines int)
@@ -32,6 +31,9 @@ type Writer interface {
 	SetTitle(format string, a ...interface{})
 	SortBy(sortBy []SortBy)
 	Style() *Style
+
+	// deprecated; in favor of Style().HTML.CSSClass
+	SetHTMLCSSClass(cssClass string)
 }
 
 // NewWriter initializes and returns a Writer.

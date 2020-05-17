@@ -362,11 +362,17 @@ to get:
 ### ... HTML Table
 
 ```golang
+    t.Style().HTML = table.HTMLOptions{
+        CSSClass:    "game-of-thrones",
+        EmptyColumn: "&nbsp;",
+        EscapeText:  true,
+        Newline:     "<br/>",
+    }
     t.RenderHTML()
 ```
 to get:
 ```html
-<table class="go-pretty-table">
+<table class="game-of-thrones">
   <thead>
   <tr>
     <th align="right">#</th>

@@ -65,7 +65,7 @@ func (t *Table) RenderHTML() string {
 		if t.htmlCSSClass != "" {
 			out.WriteString(t.htmlCSSClass)
 		} else {
-			out.WriteString(DefaultHTMLCSSClass)
+			out.WriteString(t.style.HTML.CSSClass)
 		}
 		out.WriteString("\">\n")
 		t.htmlRenderTitle(&out)
@@ -86,18 +86,49 @@ func (t *Table) htmlRenderCaption(out *strings.Builder) {
 	}
 }
 
+func (t *Table) htmlRenderColumnAttributes(out *strings.Builder, row rowStr, colIdx int, hint renderHint) {
+	// determine the HTML "align"/"valign" property values
+	align := t.getAlign(colIdx, hint).HTMLProperty()
+	vAlign := t.getVAlign(colIdx, hint).HTMLProperty()
+	// determine the HTML "class" property values for the colors
+	class := t.getColumnColors(colIdx, hint).HTMLProperty()
+
+	if align != "" {
+		out.WriteRune(' ')
+		out.WriteString(align)
+	}
+	if class != "" {
+		out.WriteRune(' ')
+		out.WriteString(class)
+	}
+	if vAlign != "" {
+		out.WriteRune(' ')
+		out.WriteString(vAlign)
+	}
+}
+
+func (t *Table) htmlRenderColumnAutoIndex(out *strings.Builder, hint renderHint) {
+	if hint.isHeaderRow {
+		out.WriteString("    <th>")
+		out.WriteString(t.style.HTML.EmptyColumn)
+		out.WriteString("</th>\n")
+	} else if hint.isFooterRow {
+		out.WriteString("    <td>")
+		out.WriteString(t.style.HTML.EmptyColumn)
+		out.WriteString("</td>\n")
+	} else {
+		out.WriteString("    <td align=\"right\">")
+		out.WriteString(fmt.Sprint(hint.rowNumber))
+		out.WriteString("</td>\n")
+	}
+}
+
 func (t *Table) htmlRenderRow(out *strings.Builder, row rowStr, hint renderHint) {
 	out.WriteString("  <tr>\n")
 	for colIdx := 0; colIdx < t.numColumns; colIdx++ {
 		// auto-index column
 		if colIdx == 0 && t.autoIndex {
-			if hint.isHeaderRow {
-				out.WriteString("    <th>&nbsp;</th>\n")
-			} else if hint.isFooterRow {
-				out.WriteString("    <td>&nbsp;</td>\n")
-			} else {
-				out.WriteString(fmt.Sprintf("    <td align=\"right\">%d</td>\n", hint.rowNumber))
-			}
+			t.htmlRenderColumnAutoIndex(out, hint)
 		}
 
 		// get the column contents
@@ -112,32 +143,21 @@ func (t *Table) htmlRenderRow(out *strings.Builder, row rowStr, hint renderHint)
 			colTagName = "th"
 		}
 
-		// determine the HTML "align"/"valign" property values
-		align := t.getAlign(colIdx, hint).HTMLProperty()
-		vAlign := t.getVAlign(colIdx, hint).HTMLProperty()
-		// determine the HTML "class" property values for the colors
-		class := t.getColumnColors(colIdx, hint).HTMLProperty()
-
 		// write the row
 		out.WriteString("    <")
 		out.WriteString(colTagName)
-		if align != "" {
-			out.WriteRune(' ')
-			out.WriteString(align)
-		}
-		if class != "" {
-			out.WriteRune(' ')
-			out.WriteString(class)
-		}
-		if vAlign != "" {
-			out.WriteRune(' ')
-			out.WriteString(vAlign)
-		}
+		t.htmlRenderColumnAttributes(out, row, colIdx, hint)
 		out.WriteString(">")
-		if len(colStr) > 0 {
-			out.WriteString(strings.Replace(html.EscapeString(colStr), "\n", "<br/>", -1))
+		if len(colStr) == 0 {
+			out.WriteString(t.style.HTML.EmptyColumn)
 		} else {
-			out.WriteString("&nbsp;")
+			if t.style.HTML.EscapeText {
+				colStr = html.EscapeString(colStr)
+			}
+			if t.style.HTML.Newline != "\n" {
+				colStr = strings.Replace(colStr, "\n", t.style.HTML.Newline, -1)
+			}
+			out.WriteString(colStr)
 		}
 		out.WriteString("</")
 		out.WriteString(colTagName)
