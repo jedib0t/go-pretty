@@ -149,6 +149,9 @@ func TestNewTimeTransformer(t *testing.T) {
 	expected := "2010-11-12T12:14:15-08:00"
 	assert.Equal(t, expected, transformer(inStr))
 	assert.Equal(t, expected, transformer(inTime))
+	for _, possibleTimeLayout := range possibleTimeLayouts {
+		assert.Equal(t, expected, transformer(inTime.Format(possibleTimeLayout)), possibleTimeLayout)
+	}
 
 	location, err = time.LoadLocation("Asia/Singapore")
 	assert.Nil(t, err)
@@ -156,6 +159,9 @@ func TestNewTimeTransformer(t *testing.T) {
 	expected = "Sat Nov 13 04:14:15 +08 2010"
 	assert.Equal(t, expected, transformer(inStr))
 	assert.Equal(t, expected, transformer(inTime))
+	for _, possibleTimeLayout := range possibleTimeLayouts {
+		assert.Equal(t, expected, transformer(inTime.Format(possibleTimeLayout)), possibleTimeLayout)
+	}
 
 	location, err = time.LoadLocation("Europe/London")
 	assert.Nil(t, err)
@@ -163,6 +169,9 @@ func TestNewTimeTransformer(t *testing.T) {
 	expected = "2010-11-12T20:14:15Z"
 	assert.Equal(t, expected, transformer(inStr))
 	assert.Equal(t, expected, transformer(inTime))
+	for _, possibleTimeLayout := range possibleTimeLayouts {
+		assert.Equal(t, expected, transformer(inTime.Format(possibleTimeLayout)), possibleTimeLayout)
+	}
 }
 
 func TestNewUnixTimeTransformer(t *testing.T) {
