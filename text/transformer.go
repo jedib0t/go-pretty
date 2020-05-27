@@ -7,8 +7,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/go-openapi/strfmt"
 )
 
 // Transformer related constants
@@ -119,8 +117,8 @@ func NewJSONTransformer(prefix string, indent string) Transformer {
 }
 
 // NewTimeTransformer returns a Transformer that can format a timestamp (a
-// time.Time or strfmt.DateTime object) into a well-defined time format defined
-// using the provided layout (ex.: time.RFC3339).
+// time.Time) into a well-defined time format defined using the provided layout
+// (ex.: time.RFC3339).
 //
 // If a non-nil location value is provided, the time will be localized to that
 // location (use time.Local to get localized timestamps).
@@ -138,9 +136,7 @@ func NewTimeTransformer(layout string, location *time.Location) Transformer {
 		}
 
 		rsp := fmt.Sprint(val)
-		if valDate, ok := val.(strfmt.DateTime); ok {
-			rsp = formatTime(time.Time(valDate))
-		} else if valTime, ok := val.(time.Time); ok {
+		if valTime, ok := val.(time.Time); ok {
 			rsp = formatTime(valTime)
 		} else if valStr, ok := val.(string); ok {
 			if valTime, err := time.Parse(time.RFC3339, valStr); err == nil {

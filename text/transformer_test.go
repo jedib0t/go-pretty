@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-openapi/strfmt"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -143,7 +142,6 @@ func TestNewTimeTransformer(t *testing.T) {
 	inStr := "2010-11-12T13:14:15-07:00"
 	inTime, err := time.Parse(time.RFC3339, inStr)
 	assert.Nil(t, err)
-	inDateTime := strfmt.DateTime(inTime)
 
 	location, err := time.LoadLocation("America/Los_Angeles")
 	assert.Nil(t, err)
@@ -151,7 +149,6 @@ func TestNewTimeTransformer(t *testing.T) {
 	expected := "2010-11-12T12:14:15-08:00"
 	assert.Equal(t, expected, transformer(inStr))
 	assert.Equal(t, expected, transformer(inTime))
-	assert.Equal(t, expected, transformer(inDateTime))
 
 	location, err = time.LoadLocation("Asia/Singapore")
 	assert.Nil(t, err)
@@ -159,7 +156,6 @@ func TestNewTimeTransformer(t *testing.T) {
 	expected = "Sat Nov 13 04:14:15 +08 2010"
 	assert.Equal(t, expected, transformer(inStr))
 	assert.Equal(t, expected, transformer(inTime))
-	assert.Equal(t, expected, transformer(inDateTime))
 
 	location, err = time.LoadLocation("Europe/London")
 	assert.Nil(t, err)
@@ -167,7 +163,6 @@ func TestNewTimeTransformer(t *testing.T) {
 	expected = "2010-11-12T20:14:15Z"
 	assert.Equal(t, expected, transformer(inStr))
 	assert.Equal(t, expected, transformer(inTime))
-	assert.Equal(t, expected, transformer(inDateTime))
 }
 
 func TestNewUnixTimeTransformer(t *testing.T) {
