@@ -1140,6 +1140,44 @@ func TestTable_Render_Styles(t *testing.T) {
 	}
 }
 
+func TestTable_Render_SuppressEmptyColumns(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendRows([]Row{
+		{1, "Arya", "", 3000},
+		{20, "Jon", "", 2000, "You know nothing, Jon Snow!"},
+		{300, "Tyrion", "", 5000},
+	})
+	tw.AppendRow(Row{11, "Sansa", "", 6000})
+	tw.AppendFooter(Row{"", "", "TOTAL", 10000})
+	tw.SetStyle(StyleLight)
+
+	expectedOut := `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
+│   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
+├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+│   1 │ Arya       │           │   3000 │                             │
+│  20 │ Jon        │           │   2000 │ You know nothing, Jon Snow! │
+│ 300 │ Tyrion     │           │   5000 │                             │
+│  11 │ Sansa      │           │   6000 │                             │
+├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+│     │            │ TOTAL     │  10000 │                             │
+└─────┴────────────┴───────────┴────────┴─────────────────────────────┘`
+	assert.Equal(t, expectedOut, tw.Render())
+
+	tw.SuppressEmptyColumns()
+	expectedOut = `┌─────┬────────────┬────────┬─────────────────────────────┐
+│   # │ FIRST NAME │ SALARY │                             │
+├─────┼────────────┼────────┼─────────────────────────────┤
+│   1 │ Arya       │   3000 │                             │
+│  20 │ Jon        │   2000 │ You know nothing, Jon Snow! │
+│ 300 │ Tyrion     │   5000 │                             │
+│  11 │ Sansa      │   6000 │                             │
+├─────┼────────────┼────────┼─────────────────────────────┤
+│     │            │  10000 │                             │
+└─────┴────────────┴────────┴─────────────────────────────┘`
+	assert.Equal(t, expectedOut, tw.Render())
+}
+
 func TestTable_Render_TableWithinTable(t *testing.T) {
 	twInner := NewWriter()
 	twInner.AppendHeader(testHeader)

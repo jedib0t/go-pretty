@@ -31,6 +31,7 @@ type Writer interface {
 	SetTitle(format string, a ...interface{})
 	SortBy(sortBy []SortBy)
 	Style() *Style
+	SuppressEmptyColumns()
 
 	// deprecated; in favor of Style().HTML.CSSClass
 	SetHTMLCSSClass(cssClass string)
