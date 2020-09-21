@@ -393,14 +393,18 @@ func (t *Table) renderRowsHeader(out *strings.Builder) {
 
 func (t *Table) renderTitle(out *strings.Builder) {
 	if t.title != "" {
+		rowLength := t.maxRowLength
+		if t.allowedRowLength != 0 && t.allowedRowLength < rowLength {
+			rowLength = t.allowedRowLength
+		}
 		if t.style.Options.DrawBorder {
-			lenBorder := t.maxRowLength - text.RuneCount(t.style.Box.TopLeft+t.style.Box.TopRight)
+			lenBorder := rowLength - text.RuneCount(t.style.Box.TopLeft+t.style.Box.TopRight)
 			out.WriteString(t.style.Box.TopLeft)
 			out.WriteString(text.RepeatAndTrim(t.style.Box.MiddleHorizontal, lenBorder))
 			out.WriteString(t.style.Box.TopRight)
 		}
 
-		lenText := t.maxRowLength - text.RuneCount(t.style.Box.PaddingLeft+t.style.Box.PaddingRight)
+		lenText := rowLength - text.RuneCount(t.style.Box.PaddingLeft+t.style.Box.PaddingRight)
 		if t.style.Options.DrawBorder {
 			lenText -= text.RuneCount(t.style.Box.Left + t.style.Box.Right)
 		}
