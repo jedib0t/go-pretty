@@ -1242,3 +1242,52 @@ func TestTable_Render_TableWithTransformers(t *testing.T) {
 		}
 	}
 }
+
+func TestTable_Render_SetWidth_Title(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendFooter(testFooter)
+	tw.SetTitle("Game Of Thrones")
+
+	t.Run("length 20", func(t *testing.T) {
+		tw.SetAllowedRowLength(20)
+
+		expectedOut := []string{
+			"+------------------+",
+			"| Game Of Thrones  |",
+			"+-----+----------- ~",
+			"|   # | FIRST NAME ~",
+			"+-----+----------- ~",
+			"|   1 | Arya       ~",
+			"|  20 | Jon        ~",
+			"| 300 | Tyrion     ~",
+			"+-----+----------- ~",
+			"|     |            ~",
+			"+-----+----------- ~",
+		}
+
+		assert.Equal(t, strings.Join(expectedOut, "\n"), tw.Render())
+	})
+
+	t.Run("length 30", func(t *testing.T) {
+		tw.SetAllowedRowLength(30)
+
+		expectedOut := []string{
+			"+----------------------------+",
+			"| Game Of Thrones            |",
+			"+-----+------------+-------- ~",
+			"|   # | FIRST NAME | LAST NA ~",
+			"+-----+------------+-------- ~",
+			"|   1 | Arya       | Stark   ~",
+			"|  20 | Jon        | Snow    ~",
+			"| 300 | Tyrion     | Lannist ~",
+			"+-----+------------+-------- ~",
+			"|     |            | TOTAL   ~",
+			"+-----+------------+-------- ~",
+		}
+
+		assert.Equal(t, strings.Join(expectedOut, "\n"), tw.Render())
+	})
+
+}
