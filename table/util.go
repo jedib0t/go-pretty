@@ -9,7 +9,7 @@ import (
 // the Column ID/Name.
 func AutoIndexColumnID(colIdx int) string {
 	charIdx := colIdx % 26
-	out := string(65 + charIdx)
+	out := string(rune(65 + charIdx))
 	colIdx = colIdx / 26
 	if colIdx > 0 {
 		return AutoIndexColumnID(colIdx-1) + out
