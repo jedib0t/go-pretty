@@ -35,6 +35,7 @@ type Progress struct {
 	overallTrackerMutex   sync.RWMutex
 	renderInProgress      bool
 	renderInProgressMutex sync.RWMutex
+	showETA               bool
 	showOverallTracker    bool
 	sortBy                SortBy
 	style                 *Style
@@ -199,12 +200,18 @@ func (p *Progress) SetUpdateFrequency(frequency time.Duration) {
 	p.updateFrequency = frequency
 }
 
+// ShowETA toggles showing the overall ETA (even when the overall tracker is
+// disabled).
+func (p *Progress) ShowETA(show bool) {
+	p.showETA = show
+}
+
 // ShowPercentage toggles showing the Percent complete for each Tracker.
 func (p *Progress) ShowPercentage(show bool) {
 	p.hidePercentage = !show
 }
 
-// ShowOverallTracker toggles showing the Overall progress tracker.
+// ShowOverallTracker toggles showing the Overall progress tracker with an ETA.
 func (p *Progress) ShowOverallTracker(show bool) {
 	p.showOverallTracker = show
 }

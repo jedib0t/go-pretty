@@ -23,6 +23,7 @@ type Writer interface {
 	SetStyle(style Style)
 	SetTrackerLength(length int)
 	SetTrackerPosition(position Position)
+	ShowETA(show bool)
 	ShowOverallTracker(show bool)
 	ShowPercentage(show bool)
 	ShowTime(show bool)

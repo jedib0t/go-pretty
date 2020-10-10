@@ -42,7 +42,7 @@ func trackSomething(pw progress.Writer, idx int64) {
 
 	pw.AppendTracker(&tracker)
 
-	c := time.Tick(time.Millisecond * 100)
+	c := time.Tick(time.Millisecond * 500)
 	for !tracker.IsDone() {
 		select {
 		case <-c:
@@ -59,7 +59,8 @@ func main() {
 	pw := progress.NewWriter()
 	pw.SetAutoStop(*autoStop)
 	pw.SetTrackerLength(25)
-	pw.ShowOverallTracker(true)
+	pw.ShowETA(true)
+	pw.ShowOverallTracker(false)
 	pw.ShowTime(true)
 	pw.ShowTracker(true)
 	pw.ShowValue(true)

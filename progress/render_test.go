@@ -193,7 +193,7 @@ func TestProgress_generateTrackerStr(t *testing.T) {
 		tr.value = value
 		//fmt.Printf(" %5d: \"%s\",\n", value, pw.generateTrackerStr(&tr, 10))
 		if expectedStr, ok := expectedTrackerStrMap[value]; ok {
-			assert.Equal(t, expectedStr, pw.generateTrackerStr(&tr, 10), "value=%d", value)
+			assert.Equal(t, expectedStr, pw.generateTrackerStr(&tr, 10, renderHint{}), "value=%d", value)
 		}
 	}
 }
@@ -370,7 +370,38 @@ func TestProgress_RenderSomeTrackers_WithOverallTracker(t *testing.T) {
 		regexp.MustCompile(`\x1b\[KCalculation Total   # 1 \.\.\. done! \[\d+\.\d+K in [\d.]+ms]`),
 		regexp.MustCompile(`\x1b\[KDownloading File    # 2 \.\.\. done! \[\d+\.\d+KB in [\d.]+ms]`),
 		regexp.MustCompile(`\x1b\[KTransferring Amount # 3 \.\.\. done! \[\$\d+\.\d+K in [\d.]+ms]`),
-		regexp.MustCompile(`\[[\d.ms]+; ~ETA: [\d.ms]+`),
+		regexp.MustCompile(`\x1b\[K\[[.#]+] \[[\d.ms]+; ~ETA: [\d.ms]+`),
+	}
+	out := renderOutput.String()
+	for _, expectedOutPattern := range expectedOutPatterns {
+		if !expectedOutPattern.MatchString(out) {
+			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
+		}
+	}
+}
+
+func TestProgress_RenderSomeTrackers_WithoutOverallTracker_WithETA(t *testing.T) {
+	renderOutput := outputWriter{}
+
+	pw := generateWriter()
+	pw.SetOutputWriter(&renderOutput)
+	pw.SetTrackerPosition(PositionRight)
+	pw.ShowETA(true)
+	pw.ShowOverallTracker(false)
+	pw.Style().Options.TimeOverallPrecision = time.Millisecond
+	go trackSomething(pw, &Tracker{Message: "Calculation Total   # 1\r", Total: 1000, Units: UnitsDefault})
+	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes})
+	go trackSomething(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
+	renderAndWait(pw, false)
+
+	expectedOutPatterns := []*regexp.Regexp{
+		regexp.MustCompile(`\x1b\[KCalculation Total   # 1 \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+ in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KDownloading File    # 2 \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+B in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KTransferring Amount # 3 \.\.\. \d+\.\d+% \[[#.]{23}] \[\$\d+ in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KCalculation Total   # 1 \.\.\. done! \[\d+\.\d+K in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KDownloading File    # 2 \.\.\. done! \[\d+\.\d+KB in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KTransferring Amount # 3 \.\.\. done! \[\$\d+\.\d+K in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[K\s+\[[\d.ms]+; ~ETA: [\d.ms]+`),
 	}
 	out := renderOutput.String()
 	for _, expectedOutPattern := range expectedOutPatterns {
