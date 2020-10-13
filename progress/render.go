@@ -64,7 +64,9 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 	p.trackersActiveMutex.Unlock()
 
 	// render the overall tracker
-	p.renderTracker(&out, p.overallTracker, renderHint{isOverallTracker: true})
+	if p.showOverallTracker {
+		p.renderTracker(&out, p.overallTracker, renderHint{isOverallTracker: true})
+	}
 
 	// write the text to the output writer
 	_, _ = p.outputWriter.Write([]byte(out.String()))
@@ -144,7 +146,7 @@ func (p *Progress) generateTrackerStr(t *Tracker, maxLen int, hint renderHint) s
 		pUnfinished = strings.Repeat(p.style.Chars.Unfinished, maxLen-pFinishedStrLen)
 	}
 
-	if hint.isOverallTracker && !p.showOverallTracker && p.showETA {
+	if hint.isOverallTracker && !p.showOverallTracker {
 		return text.RepeatAndTrim(" ", maxLen+text.RuneCount(p.style.Chars.BoxLeft)+text.RuneCount(p.style.Chars.BoxRight))
 	}
 	return p.style.Colors.Tracker.Sprintf("%s%s%s%s%s",
@@ -155,8 +157,6 @@ func (p *Progress) generateTrackerStr(t *Tracker, maxLen int, hint renderHint) s
 func (p *Progress) moveCursorToTheTop(out *strings.Builder) {
 	numLinesToMoveUp := len(p.trackersActive)
 	if p.showOverallTracker && p.overallTracker != nil && !p.overallTracker.IsDone() {
-		numLinesToMoveUp++
-	} else if p.showETA {
 		numLinesToMoveUp++
 	}
 	if numLinesToMoveUp > 0 {
@@ -271,10 +271,12 @@ func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker, hint ren
 				tp = p.style.Options.TimeInProgressPrecision
 			}
 			outStats.WriteString(p.style.Colors.Time.Sprint(td.Round(tp)))
-			if hint.isOverallTracker {
-				tpO := p.style.Options.TimeOverallPrecision
-				if eta := t.ETA().Round(tpO) + tpO; true || eta > tpO {
-					outStats.WriteString("; ~ETA: ")
+			if p.showETA || hint.isOverallTracker {
+				tpETA := p.style.Options.ETAPrecision
+				if eta := t.ETA().Round(tpETA); hint.isOverallTracker || eta > tpETA {
+					outStats.WriteString("; ")
+					outStats.WriteString(p.style.Options.ETAString)
+					outStats.WriteString(": ")
 					outStats.WriteString(p.style.Colors.Time.Sprint(eta))
 				}
 			}

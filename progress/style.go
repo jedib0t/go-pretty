@@ -123,12 +123,12 @@ var (
 	// StyleColorsExample defines a few choice color options. Use this is just as
 	// an example to customize the Tracker/text colors.
 	StyleColorsExample = StyleColors{
-		Message: text.Colors{text.FgWhite, text.BgBlack},
-		Percent: text.Colors{text.FgHiRed, text.BgBlack},
-		Stats:   text.Colors{text.FgHiBlack, text.BgBlack},
-		Time:    text.Colors{text.FgGreen, text.BgBlack},
-		Tracker: text.Colors{text.FgYellow, text.BgBlack},
-		Value:   text.Colors{text.FgCyan, text.BgBlack},
+		Message: text.Colors{text.FgWhite},
+		Percent: text.Colors{text.FgHiRed},
+		Stats:   text.Colors{text.FgHiBlack},
+		Time:    text.Colors{text.FgGreen},
+		Tracker: text.Colors{text.FgYellow},
+		Value:   text.Colors{text.FgCyan},
 	}
 )
 
@@ -136,6 +136,8 @@ var (
 // gets rendered.
 type StyleOptions struct {
 	DoneString              string        // "done!" string
+	ETAPrecision            time.Duration // precision for ETA
+	ETAString               string        // string for ETA
 	Separator               string        // text between message and tracker
 	SnipIndicator           string        // text denoting message snipping
 	PercentFormat           string        // formatting to use for percentage
@@ -149,6 +151,8 @@ var (
 	// example to customize the Tracker rendering.
 	StyleOptionsDefault = StyleOptions{
 		DoneString:              "done!",
+		ETAPrecision:            time.Second,
+		ETAString:               "~ETA",
 		PercentFormat:           "%5.2f%%",
 		Separator:               " ... ",
 		SnipIndicator:           "~",

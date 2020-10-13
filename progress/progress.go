@@ -200,8 +200,7 @@ func (p *Progress) SetUpdateFrequency(frequency time.Duration) {
 	p.updateFrequency = frequency
 }
 
-// ShowETA toggles showing the overall ETA (even when the overall tracker is
-// disabled).
+// ShowETA toggles showing the ETA for all individual trackers.
 func (p *Progress) ShowETA(show bool) {
 	p.showETA = show
 }

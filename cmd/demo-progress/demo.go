@@ -60,7 +60,7 @@ func main() {
 	pw.SetAutoStop(*autoStop)
 	pw.SetTrackerLength(25)
 	pw.ShowETA(true)
-	pw.ShowOverallTracker(false)
+	pw.ShowOverallTracker(true)
 	pw.ShowTime(true)
 	pw.ShowTracker(true)
 	pw.ShowValue(true)
@@ -68,7 +68,7 @@ func main() {
 	pw.SetNumTrackersExpected(*numTrackers)
 	pw.SetSortBy(progress.SortByPercentDsc)
 	pw.SetStyle(progress.StyleDefault)
-	pw.SetTrackerPosition(progress.PositionRight)
+	pw.SetTrackerPosition(progress.PositionLeft)
 	pw.SetUpdateFrequency(time.Millisecond * 100)
 	pw.Style().Colors = progress.StyleColorsExample
 	pw.Style().Options.PercentFormat = "%4.1f%%"
