@@ -119,7 +119,7 @@ func (p *Progress) extractDoneAndActiveTrackers() ([]*Tracker, []*Tracker) {
 	return trackersActive, trackersDone
 }
 
-func (p *Progress) generateTrackerStr(t *Tracker, maxLen int, hint renderHint) string {
+func (p *Progress) generateTrackerStr(t *Tracker, maxLen int) string {
 	t.mutex.Lock()
 	pDotValue := float64(t.Total) / float64(maxLen)
 	pFinishedDots := float64(t.value) / pDotValue
@@ -146,9 +146,6 @@ func (p *Progress) generateTrackerStr(t *Tracker, maxLen int, hint renderHint) s
 		pUnfinished = strings.Repeat(p.style.Chars.Unfinished, maxLen-pFinishedStrLen)
 	}
 
-	if hint.isOverallTracker && !p.showOverallTracker {
-		return text.RepeatAndTrim(" ", maxLen+text.RuneCount(p.style.Chars.BoxLeft)+text.RuneCount(p.style.Chars.BoxRight))
-	}
 	return p.style.Colors.Tracker.Sprintf("%s%s%s%s%s",
 		p.style.Chars.BoxLeft, pFinished, pInProgress, pUnfinished, p.style.Chars.BoxRight,
 	)
@@ -165,9 +162,6 @@ func (p *Progress) moveCursorToTheTop(out *strings.Builder) {
 }
 
 func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHint) {
-	if hint.isOverallTracker && !p.showOverallTracker && !p.showETA {
-		return
-	}
 	if strings.Contains(t.Message, "\t") {
 		t.Message = strings.Replace(t.Message, "\t", "    ", -1)
 	}
@@ -183,14 +177,14 @@ func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHi
 			trackerLen += text.RuneCount(p.style.Options.DoneString)
 			trackerLen += p.lengthProgress + 1
 			hint := renderHint{hideValue: true, isOverallTracker: true}
-			p.renderTrackerProgress(out, t, p.generateTrackerStr(t, trackerLen, hint), hint)
+			p.renderTrackerProgress(out, t, p.generateTrackerStr(t, trackerLen), hint)
 		}
 	} else {
 		if t.IsDone() {
 			p.renderTrackerDone(out, t)
 		} else {
 			hint := renderHint{hideTime: p.hideTime, hideValue: p.hideValue}
-			p.renderTrackerProgress(out, t, p.generateTrackerStr(t, p.lengthProgress, hint), hint)
+			p.renderTrackerProgress(out, t, p.generateTrackerStr(t, p.lengthProgress), hint)
 		}
 	}
 }
@@ -272,17 +266,21 @@ func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker, hint ren
 			}
 			outStats.WriteString(p.style.Colors.Time.Sprint(td.Round(tp)))
 			if p.showETA || hint.isOverallTracker {
-				tpETA := p.style.Options.ETAPrecision
-				if eta := t.ETA().Round(tpETA); hint.isOverallTracker || eta > tpETA {
-					outStats.WriteString("; ")
-					outStats.WriteString(p.style.Options.ETAString)
-					outStats.WriteString(": ")
-					outStats.WriteString(p.style.Colors.Time.Sprint(eta))
-				}
+				p.renderTrackerStatsETA(&outStats, t, hint)
 			}
 		}
 		outStats.WriteRune(']')
 
 		out.WriteString(p.style.Colors.Stats.Sprint(outStats.String()))
+	}
+}
+
+func (p *Progress) renderTrackerStatsETA(out *strings.Builder, t *Tracker, hint renderHint) {
+	tpETA := p.style.Options.ETAPrecision
+	if eta := t.ETA().Round(tpETA); hint.isOverallTracker || eta > 0 {
+		out.WriteString("; ")
+		out.WriteString(p.style.Options.ETAString)
+		out.WriteString(": ")
+		out.WriteString(p.style.Colors.Time.Sprint(eta))
 	}
 }

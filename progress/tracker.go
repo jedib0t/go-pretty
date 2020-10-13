@@ -50,12 +50,7 @@ func (t *Tracker) ETA() time.Duration {
 // Increment updates the current value of the task being tracked.
 func (t *Tracker) Increment(value int64) {
 	t.mutex.Lock()
-	if !t.done {
-		t.value += value
-		if t.Total > 0 && t.value >= t.Total {
-			t.stop()
-		}
-	}
+	t.incrementWithoutLock(value)
 	t.mutex.Unlock()
 }
 
@@ -74,7 +69,7 @@ func (t *Tracker) MarkAsDone() {
 	t.mutex.Lock()
 	t.Total = t.value
 	t.stop()
-	defer t.mutex.Unlock()
+	t.mutex.Unlock()
 }
 
 // PercentDone returns the currently completed percentage value.
@@ -105,9 +100,17 @@ func (t *Tracker) SetValue(value int64) {
 	t.done = false
 	t.timeStop = time.Time{}
 	t.value = 0
+	t.incrementWithoutLock(value)
 	t.mutex.Unlock()
+}
 
-	t.Increment(value)
+func (t *Tracker) incrementWithoutLock(value int64) {
+	if !t.done {
+		t.value += value
+		if t.Total > 0 && t.value >= t.Total {
+			t.stop()
+		}
+	}
 }
 
 func (t *Tracker) start() {
