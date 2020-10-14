@@ -277,7 +277,7 @@ func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker, hint ren
 
 func (p *Progress) renderTrackerStatsETA(out *strings.Builder, t *Tracker, hint renderHint) {
 	tpETA := p.style.Options.ETAPrecision
-	if eta := t.ETA().Round(tpETA); hint.isOverallTracker || eta > 0 {
+	if eta := t.ETA().Round(tpETA); hint.isOverallTracker || eta > tpETA {
 		out.WriteString("; ")
 		out.WriteString(p.style.Options.ETAString)
 		out.WriteString(": ")
