@@ -22,7 +22,7 @@ var (
 		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
 		{300, "Tyrion", "Lannister", 5000},
 	}
-	tracker1 = progress.Tracker{Message: "Calculation Total   # 1", Total: 1000, Units: progress.UnitsDefault}
+	tracker1 = progress.Tracker{Message: "Calculating Total   # 1", Total: 1000, Units: progress.UnitsDefault}
 	tracker2 = progress.Tracker{Message: "Downloading File    # 2", Total: 1000, Units: progress.UnitsBytes}
 	tracker3 = progress.Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: progress.UnitsCurrencyDollar}
 )

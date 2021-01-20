@@ -64,10 +64,12 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 	p.trackersActiveMutex.Unlock()
 
 	// render the overall tracker
-	p.renderTracker(&out, p.overallTracker, renderHint{isOverallTracker: true})
+	if p.showOverallTracker {
+		p.renderTracker(&out, p.overallTracker, renderHint{isOverallTracker: true})
+	}
 
 	// write the text to the output writer
-	p.outputWriter.Write([]byte(out.String()))
+	_, _ = p.outputWriter.Write([]byte(out.String()))
 
 	// stop if auto stop is enabled and there are no more active trackers
 	if p.autoStop && p.LengthActive() == 0 {
@@ -160,9 +162,6 @@ func (p *Progress) moveCursorToTheTop(out *strings.Builder) {
 }
 
 func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHint) {
-	if hint.isOverallTracker && !p.showOverallTracker {
-		return
-	}
 	if strings.Contains(t.Message, "\t") {
 		t.Message = strings.Replace(t.Message, "\t", "    ", -1)
 	}
@@ -266,16 +265,22 @@ func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker, hint ren
 				tp = p.style.Options.TimeInProgressPrecision
 			}
 			outStats.WriteString(p.style.Colors.Time.Sprint(td.Round(tp)))
-			if hint.isOverallTracker {
-				tpO := p.style.Options.TimeOverallPrecision
-				if eta := t.ETA().Round(tpO) + tpO; true || eta > tpO {
-					outStats.WriteString("; ~ETA: ")
-					outStats.WriteString(p.style.Colors.Time.Sprint(eta))
-				}
+			if p.showETA || hint.isOverallTracker {
+				p.renderTrackerStatsETA(&outStats, t, hint)
 			}
 		}
 		outStats.WriteRune(']')
 
 		out.WriteString(p.style.Colors.Stats.Sprint(outStats.String()))
+	}
+}
+
+func (p *Progress) renderTrackerStatsETA(out *strings.Builder, t *Tracker, hint renderHint) {
+	tpETA := p.style.Options.ETAPrecision
+	if eta := t.ETA().Round(tpETA); hint.isOverallTracker || eta > tpETA {
+		out.WriteString("; ")
+		out.WriteString(p.style.Options.ETAString)
+		out.WriteString(": ")
+		out.WriteString(p.style.Colors.Time.Sprint(eta))
 	}
 }
