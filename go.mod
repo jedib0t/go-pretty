@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/fzipp/gocyclo v0.3.1 // indirect
 	github.com/mattn/go-runewidth v0.0.9
 	github.com/pkg/profile v1.2.1
 	github.com/pmezard/go-difflib v1.0.0 // indirect
