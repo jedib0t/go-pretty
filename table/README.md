@@ -1,5 +1,5 @@
 # Table
-[![GoDoc](https://godoc.org/github.com/jedib0t/go-pretty/table?status.svg)](https://godoc.org/github.com/jedib0t/go-pretty/table)
+[![Go Reference](https://pkg.go.dev/badge/github.com/jedib0t/go-pretty/v6/table.svg)](https://pkg.go.dev/github.com/jedib0t/go-pretty/v6/table)
 
 Pretty-print tables into ASCII/Unicode strings.
 
