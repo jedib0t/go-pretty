@@ -39,6 +39,9 @@ func trackSomething(pw progress.Writer, idx int64) {
 		message = fmt.Sprintf("Calculating Total   #%3d", idx)
 	}
 	tracker := progress.Tracker{Message: message, Total: total, Units: *units}
+	if idx == int64(*numTrackers) {
+		tracker.Total = 0
+	}
 
 	pw.AppendTracker(&tracker)
 
@@ -47,6 +50,9 @@ func trackSomething(pw progress.Writer, idx int64) {
 		select {
 		case <-c:
 			tracker.Increment(incrementPerCycle)
+			if idx == int64(*numTrackers) && tracker.Value() >= total {
+				tracker.MarkAsDone()
+			}
 		}
 	}
 }

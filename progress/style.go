@@ -50,58 +50,63 @@ var (
 
 // StyleChars defines the characters/strings to use for rendering the Tracker.
 type StyleChars struct {
-	BoxLeft    string // left-border
-	BoxRight   string // right-border
-	Finished   string // finished block
-	Finished25 string // 25% finished block
-	Finished50 string // 50% finished block
-	Finished75 string // 75% finished block
-	Unfinished string // 0% finished block
+	BoxLeft       string // left-border
+	BoxRight      string // right-border
+	Finished      string // finished block
+	Finished25    string // 25% finished block
+	Finished50    string // 50% finished block
+	Finished75    string // 75% finished block
+	Indeterminate IndeterminateIndicatorGenerator
+	Unfinished    string // 0% finished block
 }
 
 var (
 	// StyleCharsDefault uses simple ASCII characters.
 	StyleCharsDefault = StyleChars{
-		BoxLeft:    "[",
-		BoxRight:   "]",
-		Finished:   "#",
-		Finished25: ".",
-		Finished50: ".",
-		Finished75: ".",
-		Unfinished: ".",
+		BoxLeft:       "[",
+		BoxRight:      "]",
+		Finished:      "#",
+		Finished25:    ".",
+		Finished50:    ".",
+		Finished75:    ".",
+		Indeterminate: IndeterminateIndicatorMovingBackAndForth("<#>", DefaultUpdateFrequency/2),
+		Unfinished:    ".",
 	}
 
 	// StyleCharsBlocks uses UNICODE Block Drawing characters.
 	StyleCharsBlocks = StyleChars{
-		BoxLeft:    "║",
-		BoxRight:   "║",
-		Finished:   "█",
-		Finished25: "░",
-		Finished50: "▒",
-		Finished75: "▓",
-		Unfinished: "░",
+		BoxLeft:       "║",
+		BoxRight:      "║",
+		Finished:      "█",
+		Finished25:    "░",
+		Finished50:    "▒",
+		Finished75:    "▓",
+		Indeterminate: IndeterminateIndicatorMovingBackAndForth("▒█▒", DefaultUpdateFrequency/2),
+		Unfinished:    "░",
 	}
 
 	// StyleCharsCircle uses UNICODE Circle characters.
 	StyleCharsCircle = StyleChars{
-		BoxLeft:    "(",
-		BoxRight:   ")",
-		Finished:   "●",
-		Finished25: "○",
-		Finished50: "○",
-		Finished75: "○",
-		Unfinished: "◌",
+		BoxLeft:       "(",
+		BoxRight:      ")",
+		Finished:      "●",
+		Finished25:    "○",
+		Finished50:    "○",
+		Finished75:    "○",
+		Indeterminate: IndeterminateIndicatorMovingBackAndForth("○●○", DefaultUpdateFrequency/2),
+		Unfinished:    "◌",
 	}
 
 	// StyleCharsRhombus uses UNICODE Rhombus characters.
 	StyleCharsRhombus = StyleChars{
-		BoxLeft:    "<",
-		BoxRight:   ">",
-		Finished:   "◆",
-		Finished25: "◈",
-		Finished50: "◈",
-		Finished75: "◈",
-		Unfinished: "◇",
+		BoxLeft:       "<",
+		BoxRight:      ">",
+		Finished:      "◆",
+		Finished25:    "◈",
+		Finished50:    "◈",
+		Finished75:    "◈",
+		Indeterminate: IndeterminateIndicatorMovingBackAndForth("◈◆◈", DefaultUpdateFrequency/2),
+		Unfinished:    "◇",
 	}
 )
 

@@ -115,3 +115,13 @@ func TestTracker_SetValue(t *testing.T) {
 	assert.Equal(t, tracker.Total, tracker.value)
 	assert.True(t, tracker.done)
 }
+
+func TestTracker_Value(t *testing.T) {
+	tracker := Tracker{}
+	assert.Equal(t, int64(0), tracker.value)
+	assert.Equal(t, int64(0), tracker.Value())
+
+	tracker.SetValue(5)
+	assert.Equal(t, int64(5), tracker.value)
+	assert.Equal(t, int64(5), tracker.Value())
+}

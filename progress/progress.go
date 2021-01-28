@@ -65,7 +65,7 @@ const (
 // to a queue, which gets picked up by the Render logic in the next rendering
 // cycle.
 func (p *Progress) AppendTracker(t *Tracker) {
-	if t.Total <= 0 {
+	if t.Total < 0 {
 		t.Total = math.MaxInt64
 	}
 	t.start()

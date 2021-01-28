@@ -1,6 +1,7 @@
 package progress
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"testing"
@@ -188,13 +189,150 @@ func TestProgress_generateTrackerStr(t *testing.T) {
 		100: "##########",
 	}
 
+	finalOutput := strings.Builder{}
 	tr := Tracker{Total: 100}
-	for value := int64(0); value <= tr.Total; value++ {
+	for value := int64(0); value <= 100; value++ {
 		tr.value = value
-		//fmt.Printf(" %5d: \"%s\",\n", value, pw.generateTrackerStr(&tr, 10))
+		actualStr := pw.generateTrackerStr(&tr, 10, renderHint{})
 		if expectedStr, ok := expectedTrackerStrMap[value]; ok {
-			assert.Equal(t, expectedStr, pw.generateTrackerStr(&tr, 10), "value=%d", value)
+			assert.Equal(t, expectedStr, actualStr, "value=%d", value)
 		}
+		finalOutput.WriteString(fmt.Sprintf(" %d: \"%s\",\n", value, actualStr))
+	}
+	if t.Failed() {
+		fmt.Println(finalOutput.String())
+	}
+}
+
+func TestProgress_generateTrackerStr_Indeterminate(t *testing.T) {
+	pw := Progress{}
+	pw.Style().Chars = StyleChars{
+		BoxLeft:       "",
+		BoxRight:      "",
+		Finished:      "#",
+		Finished25:    "1",
+		Finished50:    "2",
+		Finished75:    "3",
+		Indeterminate: indeterminateIndicatorMovingBackAndForth("<=>"),
+		Unfinished:    ".",
+	}
+
+	expectedTrackerStrMap := map[int64]string{
+		0:   "<=>.......",
+		1:   ".<=>......",
+		2:   "..<=>.....",
+		3:   "...<=>....",
+		4:   "....<=>...",
+		5:   ".....<=>..",
+		6:   "......<=>.",
+		7:   ".......<=>",
+		8:   "......<=>.",
+		9:   ".....<=>..",
+		10:  "....<=>...",
+		11:  "...<=>....",
+		12:  "..<=>.....",
+		13:  ".<=>......",
+		14:  "<=>.......",
+		15:  ".<=>......",
+		16:  "..<=>.....",
+		17:  "...<=>....",
+		18:  "....<=>...",
+		19:  ".....<=>..",
+		20:  "......<=>.",
+		21:  ".......<=>",
+		22:  "......<=>.",
+		23:  ".....<=>..",
+		24:  "....<=>...",
+		25:  "...<=>....",
+		26:  "..<=>.....",
+		27:  ".<=>......",
+		28:  "<=>.......",
+		29:  ".<=>......",
+		30:  "..<=>.....",
+		31:  "...<=>....",
+		32:  "....<=>...",
+		33:  ".....<=>..",
+		34:  "......<=>.",
+		35:  ".......<=>",
+		36:  "......<=>.",
+		37:  ".....<=>..",
+		38:  "....<=>...",
+		39:  "...<=>....",
+		40:  "..<=>.....",
+		41:  ".<=>......",
+		42:  "<=>.......",
+		43:  ".<=>......",
+		44:  "..<=>.....",
+		45:  "...<=>....",
+		46:  "....<=>...",
+		47:  ".....<=>..",
+		48:  "......<=>.",
+		49:  ".......<=>",
+		50:  "......<=>.",
+		51:  ".....<=>..",
+		52:  "....<=>...",
+		53:  "...<=>....",
+		54:  "..<=>.....",
+		55:  ".<=>......",
+		56:  "<=>.......",
+		57:  ".<=>......",
+		58:  "..<=>.....",
+		59:  "...<=>....",
+		60:  "....<=>...",
+		61:  ".....<=>..",
+		62:  "......<=>.",
+		63:  ".......<=>",
+		64:  "......<=>.",
+		65:  ".....<=>..",
+		66:  "....<=>...",
+		67:  "...<=>....",
+		68:  "..<=>.....",
+		69:  ".<=>......",
+		70:  "<=>.......",
+		71:  ".<=>......",
+		72:  "..<=>.....",
+		73:  "...<=>....",
+		74:  "....<=>...",
+		75:  ".....<=>..",
+		76:  "......<=>.",
+		77:  ".......<=>",
+		78:  "......<=>.",
+		79:  ".....<=>..",
+		80:  "....<=>...",
+		81:  "...<=>....",
+		82:  "..<=>.....",
+		83:  ".<=>......",
+		84:  "<=>.......",
+		85:  ".<=>......",
+		86:  "..<=>.....",
+		87:  "...<=>....",
+		88:  "....<=>...",
+		89:  ".....<=>..",
+		90:  "......<=>.",
+		91:  ".......<=>",
+		92:  "......<=>.",
+		93:  ".....<=>..",
+		94:  "....<=>...",
+		95:  "...<=>....",
+		96:  "..<=>.....",
+		97:  ".<=>......",
+		98:  "<=>.......",
+		99:  ".<=>......",
+		100: "..<=>.....",
+	}
+
+	finalOutput := strings.Builder{}
+	tr := Tracker{Total: 0}
+	for value := int64(0); value <= 100; value++ {
+		tr.value = value
+		actualStr := pw.generateTrackerStr(&tr, 10, renderHint{})
+		if expectedStr, ok := expectedTrackerStrMap[value]; ok {
+			assert.Equal(t, expectedStr, actualStr, "value=%d", value)
+		}
+		finalOutput.WriteString(fmt.Sprintf(" %d: \"%s\",\n", value, actualStr))
+	}
+	if t.Failed() {
+		fmt.Println(finalOutput.String())
 	}
 }
 
