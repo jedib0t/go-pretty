@@ -15,10 +15,15 @@ func TestProgress_AppendTracker(t *testing.T) {
 
 	tracker := &Tracker{}
 	assert.Equal(t, int64(0), tracker.Total)
-
 	p.AppendTracker(tracker)
 	assert.Equal(t, 1, len(p.trackersInQueue))
-	assert.Equal(t, int64(math.MaxInt64), tracker.Total)
+	assert.Equal(t, int64(0), tracker.Total)
+
+	tracker2 := &Tracker{Total: -1}
+	assert.Equal(t, int64(-1), tracker2.Total)
+	p.AppendTracker(tracker2)
+	assert.Equal(t, 2, len(p.trackersInQueue))
+	assert.Equal(t, int64(math.MaxInt64), tracker2.Total)
 }
 
 func TestProgress_AppendTrackers(t *testing.T) {

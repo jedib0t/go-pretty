@@ -1,6 +1,7 @@
 package progress
 
 import (
+	"fmt"
 	"math"
 	"strings"
 	"time"
@@ -119,11 +120,23 @@ func (p *Progress) extractDoneAndActiveTrackers() ([]*Tracker, []*Tracker) {
 	return trackersActive, trackersDone
 }
 
-func (p *Progress) generateTrackerStr(t *Tracker, maxLen int) string {
+func (p *Progress) generateTrackerStr(t *Tracker, maxLen int, hint renderHint) string {
+	if !hint.isOverallTracker && (t.Total == 0 || t.value > t.Total) {
+		return p.generateTrackerStrIndeterminate(t, maxLen)
+	}
+	return p.generateTrackerStrDeterminate(t, maxLen)
+}
+
+// generateTrackerStrDeterminate generates the tracker string for the case where
+// the Total value is known, and the progress percentage can be calculated.
+func (p *Progress) generateTrackerStrDeterminate(t *Tracker, maxLen int) string {
 	t.mutex.Lock()
+	pFinishedDots, pFinishedDotsFraction := 0.0, 0.0
 	pDotValue := float64(t.Total) / float64(maxLen)
-	pFinishedDots := float64(t.value) / pDotValue
-	pFinishedDotsFraction := pFinishedDots - float64(int(pFinishedDots))
+	if pDotValue > 0 {
+		pFinishedDots = float64(t.value) / pDotValue
+		pFinishedDotsFraction = pFinishedDots - float64(int(pFinishedDots))
+	}
 	pFinishedLen := int(math.Floor(pFinishedDots))
 	t.mutex.Unlock()
 
@@ -148,6 +161,25 @@ func (p *Progress) generateTrackerStr(t *Tracker, maxLen int) string {
 
 	return p.style.Colors.Tracker.Sprintf("%s%s%s%s%s",
 		p.style.Chars.BoxLeft, pFinished, pInProgress, pUnfinished, p.style.Chars.BoxRight,
+	)
+}
+
+// generateTrackerStrDeterminate generates the tracker string for the case where
+// the Total value is unknown, and the progress percentage cannot be calculated.
+func (p *Progress) generateTrackerStrIndeterminate(t *Tracker, maxLen int) string {
+	indicator := p.style.Chars.Indeterminate(maxLen)
+
+	pUnfinished := ""
+	if indicator.Position > 0 {
+		pUnfinished += strings.Repeat(p.style.Chars.Unfinished, indicator.Position)
+	}
+	pUnfinished += indicator.Text
+	if text.RuneCount(pUnfinished) < maxLen {
+		pUnfinished += strings.Repeat(p.style.Chars.Unfinished, maxLen-text.RuneCount(pUnfinished))
+	}
+
+	return p.style.Colors.Tracker.Sprintf("%s%s%s",
+		p.style.Chars.BoxLeft, string(pUnfinished), p.style.Chars.BoxRight,
 	)
 }
 
@@ -177,14 +209,14 @@ func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHi
 			trackerLen += text.RuneCount(p.style.Options.DoneString)
 			trackerLen += p.lengthProgress + 1
 			hint := renderHint{hideValue: true, isOverallTracker: true}
-			p.renderTrackerProgress(out, t, p.generateTrackerStr(t, trackerLen), hint)
+			p.renderTrackerProgress(out, t, p.generateTrackerStr(t, trackerLen, hint), hint)
 		}
 	} else {
 		if t.IsDone() {
 			p.renderTrackerDone(out, t)
 		} else {
 			hint := renderHint{hideTime: p.hideTime, hideValue: p.hideValue}
-			p.renderTrackerProgress(out, t, p.generateTrackerStr(t, p.lengthProgress), hint)
+			p.renderTrackerProgress(out, t, p.generateTrackerStr(t, p.lengthProgress, hint), hint)
 		}
 	}
 }
@@ -234,7 +266,13 @@ func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, track
 
 func (p *Progress) renderTrackerPercentage(out *strings.Builder, t *Tracker) {
 	if !p.hidePercentage {
-		out.WriteString(p.style.Colors.Percent.Sprintf(p.style.Options.PercentFormat, t.PercentDone()))
+		var percentageStr string
+		if t.IsIndeterminate() {
+			percentageStr = p.style.Options.PercentIndeterminate
+		} else {
+			percentageStr = fmt.Sprintf(p.style.Options.PercentFormat, t.PercentDone())
+		}
+		out.WriteString(p.style.Colors.Percent.Sprint(percentageStr))
 	}
 }
 

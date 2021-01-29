@@ -63,6 +63,15 @@ func (t *Tracker) IsDone() bool {
 	return t.done
 }
 
+// IsIndeterminate returns true if the tracker is indeterminate; i.e., the total
+// is unknown and it is impossible to auto-calculate if tracking is done.
+func (t *Tracker) IsIndeterminate() bool {
+	t.mutex.RLock()
+	defer t.mutex.RUnlock()
+
+	return t.Total == 0
+}
+
 // MarkAsDone forces completion of the tracker by updating the current value as
 // the expected Total value.
 func (t *Tracker) MarkAsDone() {
@@ -102,6 +111,13 @@ func (t *Tracker) SetValue(value int64) {
 	t.value = 0
 	t.incrementWithoutLock(value)
 	t.mutex.Unlock()
+}
+
+// Value returns the current value of the tracker.
+func (t *Tracker) Value() int64 {
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+	return t.value
 }
 
 func (t *Tracker) incrementWithoutLock(value int64) {

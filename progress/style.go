@@ -50,58 +50,63 @@ var (
 
 // StyleChars defines the characters/strings to use for rendering the Tracker.
 type StyleChars struct {
-	BoxLeft    string // left-border
-	BoxRight   string // right-border
-	Finished   string // finished block
-	Finished25 string // 25% finished block
-	Finished50 string // 50% finished block
-	Finished75 string // 75% finished block
-	Unfinished string // 0% finished block
+	BoxLeft       string // left-border
+	BoxRight      string // right-border
+	Finished      string // finished block
+	Finished25    string // 25% finished block
+	Finished50    string // 50% finished block
+	Finished75    string // 75% finished block
+	Indeterminate IndeterminateIndicatorGenerator
+	Unfinished    string // 0% finished block
 }
 
 var (
 	// StyleCharsDefault uses simple ASCII characters.
 	StyleCharsDefault = StyleChars{
-		BoxLeft:    "[",
-		BoxRight:   "]",
-		Finished:   "#",
-		Finished25: ".",
-		Finished50: ".",
-		Finished75: ".",
-		Unfinished: ".",
+		BoxLeft:       "[",
+		BoxRight:      "]",
+		Finished:      "#",
+		Finished25:    ".",
+		Finished50:    ".",
+		Finished75:    ".",
+		Indeterminate: IndeterminateIndicatorMovingBackAndForth("<#>", DefaultUpdateFrequency/2),
+		Unfinished:    ".",
 	}
 
 	// StyleCharsBlocks uses UNICODE Block Drawing characters.
 	StyleCharsBlocks = StyleChars{
-		BoxLeft:    "║",
-		BoxRight:   "║",
-		Finished:   "█",
-		Finished25: "░",
-		Finished50: "▒",
-		Finished75: "▓",
-		Unfinished: "░",
+		BoxLeft:       "║",
+		BoxRight:      "║",
+		Finished:      "█",
+		Finished25:    "░",
+		Finished50:    "▒",
+		Finished75:    "▓",
+		Indeterminate: IndeterminateIndicatorMovingBackAndForth("▒█▒", DefaultUpdateFrequency/2),
+		Unfinished:    "░",
 	}
 
 	// StyleCharsCircle uses UNICODE Circle characters.
 	StyleCharsCircle = StyleChars{
-		BoxLeft:    "(",
-		BoxRight:   ")",
-		Finished:   "●",
-		Finished25: "○",
-		Finished50: "○",
-		Finished75: "○",
-		Unfinished: "◌",
+		BoxLeft:       "(",
+		BoxRight:      ")",
+		Finished:      "●",
+		Finished25:    "○",
+		Finished50:    "○",
+		Finished75:    "○",
+		Indeterminate: IndeterminateIndicatorMovingBackAndForth("○●○", DefaultUpdateFrequency/2),
+		Unfinished:    "◌",
 	}
 
 	// StyleCharsRhombus uses UNICODE Rhombus characters.
 	StyleCharsRhombus = StyleChars{
-		BoxLeft:    "<",
-		BoxRight:   ">",
-		Finished:   "◆",
-		Finished25: "◈",
-		Finished50: "◈",
-		Finished75: "◈",
-		Unfinished: "◇",
+		BoxLeft:       "<",
+		BoxRight:      ">",
+		Finished:      "◆",
+		Finished25:    "◈",
+		Finished50:    "◈",
+		Finished75:    "◈",
+		Indeterminate: IndeterminateIndicatorMovingBackAndForth("◈◆◈", DefaultUpdateFrequency/2),
+		Unfinished:    "◇",
 	}
 )
 
@@ -120,8 +125,8 @@ var (
 	// StyleColorsDefault defines sane color choices - None.
 	StyleColorsDefault = StyleColors{}
 
-	// StyleColorsExample defines a few choice color options. Use this is just as
-	// an example to customize the Tracker/text colors.
+	// StyleColorsExample defines a few choice color options. Use this is just
+	// as an example to customize the Tracker/text colors.
 	StyleColorsExample = StyleColors{
 		Message: text.Colors{text.FgWhite},
 		Percent: text.Colors{text.FgHiRed},
@@ -141,6 +146,7 @@ type StyleOptions struct {
 	Separator               string        // text between message and tracker
 	SnipIndicator           string        // text denoting message snipping
 	PercentFormat           string        // formatting to use for percentage
+	PercentIndeterminate    string        // when percentage cannot be computed
 	TimeDonePrecision       time.Duration // precision for time when done
 	TimeInProgressPrecision time.Duration // precision for time when in progress
 	TimeOverallPrecision    time.Duration // precision for overall time
@@ -154,6 +160,7 @@ var (
 		ETAPrecision:            time.Second,
 		ETAString:               "~ETA",
 		PercentFormat:           "%5.2f%%",
+		PercentIndeterminate:    " ??? ",
 		Separator:               " ... ",
 		SnipIndicator:           "~",
 		TimeDonePrecision:       time.Millisecond,

@@ -57,6 +57,14 @@ func TestTracker_IsDone(t *testing.T) {
 	assert.True(t, tracker.IsDone())
 }
 
+func TestTracker_IsIndeterminate(t *testing.T) {
+	tracker := Tracker{Total: 10}
+	assert.False(t, tracker.IsIndeterminate())
+
+	tracker.Total = 0
+	assert.True(t, tracker.IsIndeterminate())
+}
+
 func TestTracker_MarkAsDone(t *testing.T) {
 	tracker := Tracker{}
 	assert.False(t, tracker.IsDone())
@@ -114,4 +122,14 @@ func TestTracker_SetValue(t *testing.T) {
 	tracker.SetValue(tracker.Total)
 	assert.Equal(t, tracker.Total, tracker.value)
 	assert.True(t, tracker.done)
+}
+
+func TestTracker_Value(t *testing.T) {
+	tracker := Tracker{}
+	assert.Equal(t, int64(0), tracker.value)
+	assert.Equal(t, int64(0), tracker.Value())
+
+	tracker.SetValue(5)
+	assert.Equal(t, int64(5), tracker.value)
+	assert.Equal(t, int64(5), tracker.Value())
 }
