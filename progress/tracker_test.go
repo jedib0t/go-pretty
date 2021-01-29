@@ -57,6 +57,14 @@ func TestTracker_IsDone(t *testing.T) {
 	assert.True(t, tracker.IsDone())
 }
 
+func TestTracker_IsIndeterminate(t *testing.T) {
+	tracker := Tracker{Total: 10}
+	assert.False(t, tracker.IsIndeterminate())
+
+	tracker.Total = 0
+	assert.True(t, tracker.IsIndeterminate())
+}
+
 func TestTracker_MarkAsDone(t *testing.T) {
 	tracker := Tracker{}
 	assert.False(t, tracker.IsDone())

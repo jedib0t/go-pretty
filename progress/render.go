@@ -267,7 +267,7 @@ func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, track
 func (p *Progress) renderTrackerPercentage(out *strings.Builder, t *Tracker) {
 	if !p.hidePercentage {
 		var percentageStr string
-		if t.Total == 0 {
+		if t.IsIndeterminate() {
 			percentageStr = p.style.Options.PercentIndeterminate
 		} else {
 			percentageStr = fmt.Sprintf(p.style.Options.PercentFormat, t.PercentDone())
