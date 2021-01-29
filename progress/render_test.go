@@ -3,6 +3,7 @@ package progress
 import (
 	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -42,9 +43,9 @@ func generateWriter() Writer {
 }
 
 func trackSomething(pw Writer, tracker *Tracker) {
-	pw.AppendTracker(tracker)
-
 	incrementPerCycle := tracker.Total / 3
+
+	pw.AppendTracker(tracker)
 
 	c := time.Tick(time.Millisecond * 100)
 	for !tracker.IsDone() {
@@ -54,6 +55,29 @@ func trackSomething(pw Writer, tracker *Tracker) {
 				tracker.Increment(tracker.Total - tracker.value)
 			} else {
 				tracker.Increment(incrementPerCycle)
+			}
+		}
+	}
+}
+
+func trackSomethingIndeterminate(pw Writer, tracker *Tracker) {
+	incrementPerCycle := tracker.Total / 3
+	total := tracker.Total
+	tracker.Total = 0
+
+	pw.AppendTracker(tracker)
+
+	c := time.Tick(time.Millisecond * 100)
+	for !tracker.IsDone() {
+		select {
+		case <-c:
+			if tracker.value+incrementPerCycle > total {
+				tracker.Increment(total - tracker.value)
+			} else {
+				tracker.Increment(incrementPerCycle)
+			}
+			if tracker.Value() >= total {
+				tracker.MarkAsDone()
 			}
 		}
 	}
@@ -70,6 +94,16 @@ func renderAndWait(pw Writer, autoStop bool) {
 	}
 	if !autoStop {
 		pw.Stop()
+	}
+}
+
+func showOutputOnFailure(t *testing.T, out string) {
+	if t.Failed() {
+		lines := strings.Split(out, "\n")
+		sort.Strings(lines)
+		for _, line := range lines {
+			fmt.Printf("%#v,\n", line)
+		}
 	}
 }
 
@@ -375,6 +409,7 @@ func TestProgress_RenderSomeTrackers_OnLeftSide(t *testing.T) {
 			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
 		}
 	}
+	showOutputOnFailure(t, out)
 }
 
 func TestProgress_RenderSomeTrackers_OnRightSide(t *testing.T) {
@@ -402,6 +437,7 @@ func TestProgress_RenderSomeTrackers_OnRightSide(t *testing.T) {
 			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
 		}
 	}
+	showOutputOnFailure(t, out)
 }
 
 func TestProgress_RenderSomeTrackers_WithAutoStop(t *testing.T) {
@@ -430,6 +466,34 @@ func TestProgress_RenderSomeTrackers_WithAutoStop(t *testing.T) {
 			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
 		}
 	}
+	showOutputOnFailure(t, out)
+}
+
+func TestProgress_RenderSomeTrackers_WithIndeterminateTracker(t *testing.T) {
+	renderOutput := outputWriter{}
+
+	pw := generateWriter()
+	pw.SetOutputWriter(&renderOutput)
+	go trackSomething(pw, &Tracker{Message: "Calculating Total   # 1\r", Total: 1000, Units: UnitsDefault})
+	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes})
+	go trackSomethingIndeterminate(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
+	renderAndWait(pw, false)
+
+	expectedOutPatterns := []*regexp.Regexp{
+		regexp.MustCompile(`\x1b\[KCalculating Total   # 1 \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+ in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KDownloading File    # 2 \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+B in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KTransferring Amount # 3 \.\.\.  \?\?\?  \[[<#>.]{23}] \[\$\d+ in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KCalculating Total   # 1 \.\.\. done! \[\d+\.\d+K in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KDownloading File    # 2 \.\.\. done! \[\d+\.\d+KB in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KTransferring Amount # 3 \.\.\. done! \[\$\d+\.\d+K in [\d.]+ms]`),
+	}
+	out := renderOutput.String()
+	for _, expectedOutPattern := range expectedOutPatterns {
+		if !expectedOutPattern.MatchString(out) {
+			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
+		}
+	}
+	showOutputOnFailure(t, out)
 }
 
 func TestProgress_RenderSomeTrackers_WithLineWidth1(t *testing.T) {
@@ -458,6 +522,7 @@ func TestProgress_RenderSomeTrackers_WithLineWidth1(t *testing.T) {
 			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
 		}
 	}
+	showOutputOnFailure(t, out)
 }
 
 func TestProgress_RenderSomeTrackers_WithLineWidth2(t *testing.T) {
@@ -486,6 +551,7 @@ func TestProgress_RenderSomeTrackers_WithLineWidth2(t *testing.T) {
 			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
 		}
 	}
+	showOutputOnFailure(t, out)
 }
 
 func TestProgress_RenderSomeTrackers_WithOverallTracker(t *testing.T) {
@@ -516,6 +582,7 @@ func TestProgress_RenderSomeTrackers_WithOverallTracker(t *testing.T) {
 			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
 		}
 	}
+	showOutputOnFailure(t, out)
 }
 
 func TestProgress_RenderSomeTrackers_WithoutOverallTracker_WithETA(t *testing.T) {
@@ -546,4 +613,5 @@ func TestProgress_RenderSomeTrackers_WithoutOverallTracker_WithETA(t *testing.T)
 			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
 		}
 	}
+	showOutputOnFailure(t, out)
 }
