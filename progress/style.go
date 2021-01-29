@@ -125,8 +125,8 @@ var (
 	// StyleColorsDefault defines sane color choices - None.
 	StyleColorsDefault = StyleColors{}
 
-	// StyleColorsExample defines a few choice color options. Use this is just as
-	// an example to customize the Tracker/text colors.
+	// StyleColorsExample defines a few choice color options. Use this is just
+	// as an example to customize the Tracker/text colors.
 	StyleColorsExample = StyleColors{
 		Message: text.Colors{text.FgWhite},
 		Percent: text.Colors{text.FgHiRed},
@@ -146,6 +146,7 @@ type StyleOptions struct {
 	Separator               string        // text between message and tracker
 	SnipIndicator           string        // text denoting message snipping
 	PercentFormat           string        // formatting to use for percentage
+	PercentIndeterminate    string        // when percentage cannot be computed
 	TimeDonePrecision       time.Duration // precision for time when done
 	TimeInProgressPrecision time.Duration // precision for time when in progress
 	TimeOverallPrecision    time.Duration // precision for overall time
@@ -159,6 +160,7 @@ var (
 		ETAPrecision:            time.Second,
 		ETAString:               "~ETA",
 		PercentFormat:           "%5.2f%%",
+		PercentIndeterminate:    " ??? ",
 		Separator:               " ... ",
 		SnipIndicator:           "~",
 		TimeDonePrecision:       time.Millisecond,

@@ -1,6 +1,7 @@
 package progress
 
 import (
+	"fmt"
 	"math"
 	"strings"
 	"time"
@@ -265,7 +266,13 @@ func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, track
 
 func (p *Progress) renderTrackerPercentage(out *strings.Builder, t *Tracker) {
 	if !p.hidePercentage {
-		out.WriteString(p.style.Colors.Percent.Sprintf(p.style.Options.PercentFormat, t.PercentDone()))
+		var percentageStr string
+		if percentage := t.PercentDone(); percentage == 0 && t.Total == 0 {
+			percentageStr = p.style.Options.PercentIndeterminate
+		} else {
+			percentageStr = fmt.Sprintf(p.style.Options.PercentFormat, t.PercentDone())
+		}
+		out.WriteString(p.style.Colors.Percent.Sprint(percentageStr))
 	}
 }
 
