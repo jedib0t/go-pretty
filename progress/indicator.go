@@ -1,6 +1,7 @@
 package progress
 
 import (
+	"strings"
 	"time"
 
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -16,6 +17,26 @@ type IndeterminateIndicator struct {
 // IndeterminateIndicatorGenerator returns an IndeterminateIndicator for cases
 // where the progress percentage cannot be calculated. Ex.: [........<=>....]
 type IndeterminateIndicatorGenerator func(maxLen int) IndeterminateIndicator
+
+// IndeterminateIndicatorDominoes returns an instance of
+// IndeterminateIndicatorGenerator function that simulates a bunch of dominoes
+// falling.
+func IndeterminateIndicatorDominoes(duration time.Duration) IndeterminateIndicatorGenerator {
+	var indeterminateIndicator *IndeterminateIndicator
+	indicatorGenerator := indeterminateIndicatorDominoes()
+	lastRenderTime := time.Now()
+
+	return func(maxLen int) IndeterminateIndicator {
+		currRenderTime := time.Now()
+		if indeterminateIndicator == nil || duration == 0 || currRenderTime.Sub(lastRenderTime) > duration {
+			tmpIndeterminateIndicator := indicatorGenerator(maxLen)
+			indeterminateIndicator = &tmpIndeterminateIndicator
+			lastRenderTime = currRenderTime
+		}
+
+		return *indeterminateIndicator
+	}
+}
 
 // IndeterminateIndicatorMovingBackAndForth returns an instance of
 // IndeterminateIndicatorGenerator function that incrementally moves from the
@@ -80,18 +101,68 @@ func IndeterminateIndicatorMovingRightToLeft(indicator string, duration time.Dur
 	}
 }
 
+// IndeterminateIndicatorPacMan returns an instance of
+// IndeterminateIndicatorGenerator function that simulates a Pac-Man character
+// chomping through the progress bar.
+func IndeterminateIndicatorPacMan(duration time.Duration) IndeterminateIndicatorGenerator {
+	var indeterminateIndicator *IndeterminateIndicator
+	indicatorGenerator := indeterminateIndicatorPacMan()
+	lastRenderTime := time.Now()
+
+	return func(maxLen int) IndeterminateIndicator {
+		currRenderTime := time.Now()
+		if indeterminateIndicator == nil || duration == 0 || currRenderTime.Sub(lastRenderTime) > duration {
+			tmpIndeterminateIndicator := indicatorGenerator(maxLen)
+			indeterminateIndicator = &tmpIndeterminateIndicator
+			lastRenderTime = currRenderTime
+		}
+
+		return *indeterminateIndicator
+	}
+}
+
+func indeterminateIndicatorDominoes() IndeterminateIndicatorGenerator {
+	direction := 1 // positive == left to right; negative == right to left
+	nextPosition := 0
+
+	out := strings.Builder{}
+	generateIndicator := func(currentPosition int, maxLen int) string {
+		out.Reset()
+		out.WriteString(strings.Repeat("/", currentPosition))
+		out.WriteString(strings.Repeat("\\", maxLen-currentPosition))
+		return out.String()
+	}
+
+	return func(maxLen int) IndeterminateIndicator {
+		currentPosition := nextPosition
+
+		if currentPosition == 0 {
+			direction = 1
+		} else if currentPosition == maxLen {
+			direction = -1
+		}
+		nextPosition += direction
+
+		return IndeterminateIndicator{
+			Position: 0,
+			Text:     generateIndicator(currentPosition, maxLen),
+		}
+	}
+}
+
 func indeterminateIndicatorMovingBackAndForth(indicator string) IndeterminateIndicatorGenerator {
-	increment := 1
+	direction := 1 // positive == left to right; negative == right to left
 	nextPosition := 0
 
 	return func(maxLen int) IndeterminateIndicator {
 		currentPosition := nextPosition
+
 		if currentPosition == 0 {
-			increment = 1
+			direction = 1
 		} else if currentPosition+text.RuneCount(indicator) == maxLen {
-			increment = -1
+			direction = -1
 		}
-		nextPosition += increment
+		nextPosition += direction
 
 		return IndeterminateIndicator{
 			Position: currentPosition,
@@ -105,6 +176,7 @@ func indeterminateIndicatorMovingLeftToRight(indicator string) IndeterminateIndi
 
 	return func(maxLen int) IndeterminateIndicator {
 		currentPosition := nextPosition
+
 		nextPosition++
 		if nextPosition+text.RuneCount(indicator) > maxLen {
 			nextPosition = 0
@@ -130,6 +202,43 @@ func indeterminateIndicatorMovingRightToLeft(indicator string) IndeterminateIndi
 		return IndeterminateIndicator{
 			Position: currentPosition,
 			Text:     indicator,
+		}
+	}
+}
+
+func indeterminateIndicatorPacMan() IndeterminateIndicatorGenerator {
+	pacManMovingRight, pacManMovingLeft := "ᗧ", "ᗤ"
+	direction := 1 // positive == left to right; negative == right to left
+	indicator := pacManMovingRight
+	nextPosition := 0
+
+	out := strings.Builder{}
+	generateIndicator := func(currentPosition int, maxLen int) string {
+		out.Reset()
+		if currentPosition > 0 {
+			out.WriteString(strings.Repeat(" ", currentPosition))
+		}
+		out.WriteString(indicator)
+		out.WriteString(strings.Repeat(" ", maxLen-currentPosition-1))
+		return out.String()
+	}
+
+	return func(maxLen int) IndeterminateIndicator {
+		currentPosition := nextPosition
+		currentText := generateIndicator(currentPosition, maxLen)
+
+		if currentPosition == 0 {
+			direction = 1
+			indicator = pacManMovingRight
+		} else if currentPosition+text.RuneCount(indicator) == maxLen {
+			direction = -1
+			indicator = pacManMovingLeft
+		}
+		nextPosition += direction
+
+		return IndeterminateIndicator{
+			Position: 0,
+			Text:     currentText,
 		}
 	}
 }
