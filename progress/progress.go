@@ -65,10 +65,13 @@ const (
 // to a queue, which gets picked up by the Render logic in the next rendering
 // cycle.
 func (p *Progress) AppendTracker(t *Tracker) {
+	t.mutex.Lock()
 	if t.Total < 0 {
 		t.Total = math.MaxInt64
 	}
+	t.mutex.Unlock()
 	t.start()
+
 	p.overallTrackerMutex.Lock()
 	if p.overallTracker == nil {
 		p.overallTracker = &Tracker{Total: 1}
@@ -109,38 +112,42 @@ func (p *Progress) Length() int {
 	p.trackersActiveMutex.RLock()
 	p.trackersDoneMutex.RLock()
 	p.trackersInQueueMutex.RLock()
-	defer p.trackersActiveMutex.RUnlock()
-	defer p.trackersDoneMutex.RUnlock()
-	defer p.trackersInQueueMutex.RUnlock()
+	out := len(p.trackersInQueue) + len(p.trackersActive) + len(p.trackersDone)
+	p.trackersInQueueMutex.RUnlock()
+	p.trackersDoneMutex.RUnlock()
+	p.trackersActiveMutex.RUnlock()
 
-	return len(p.trackersInQueue) + len(p.trackersActive) + len(p.trackersDone)
+	return out
 }
 
 // LengthActive returns the number of Trackers actively tracked (not done yet).
 func (p *Progress) LengthActive() int {
 	p.trackersActiveMutex.RLock()
 	p.trackersInQueueMutex.RLock()
-	defer p.trackersActiveMutex.RUnlock()
-	defer p.trackersInQueueMutex.RUnlock()
+	out := len(p.trackersInQueue) + len(p.trackersActive)
+	p.trackersInQueueMutex.RUnlock()
+	p.trackersActiveMutex.RUnlock()
 
-	return len(p.trackersInQueue) + len(p.trackersActive)
+	return out
 }
 
 // LengthDone returns the number of Trackers that are done tracking.
 func (p *Progress) LengthDone() int {
 	p.trackersDoneMutex.RLock()
-	defer p.trackersDoneMutex.RUnlock()
+	out := len(p.trackersDone)
+	p.trackersDoneMutex.RUnlock()
 
-	return len(p.trackersDone)
+	return out
 }
 
 // LengthInQueue returns the number of Trackers in queue to be actively tracked
 // (not tracking yet).
 func (p *Progress) LengthInQueue() int {
 	p.trackersInQueueMutex.RLock()
-	defer p.trackersInQueueMutex.RUnlock()
+	out := len(p.trackersInQueue)
+	p.trackersInQueueMutex.RUnlock()
 
-	return len(p.trackersInQueue)
+	return out
 }
 
 // SetAutoStop toggles the auto-stop functionality. Auto-stop set to true would

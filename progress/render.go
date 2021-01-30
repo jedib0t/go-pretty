@@ -86,8 +86,8 @@ func (p *Progress) consumeQueuedTrackers() {
 		p.trackersInQueueMutex.Lock()
 		p.trackersActive = append(p.trackersActive, p.trackersInQueue...)
 		p.trackersInQueue = make([]*Tracker, 0)
-		p.trackersActiveMutex.Unlock()
 		p.trackersInQueueMutex.Unlock()
+		p.trackersActiveMutex.Unlock()
 	}
 }
 
