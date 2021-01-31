@@ -24,7 +24,7 @@ jobs:
         run: |
           echo $PATH
           ls -al $GOPATH/bin/gocyclo || echo "true"
-          find $GOPATH
+          find /home/runner/go -type f | xargs ls -l
           make test
 
       - name: Test for Race Conditions
