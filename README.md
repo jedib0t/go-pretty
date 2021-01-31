@@ -1,7 +1,7 @@
 # go-pretty
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/jedib0t/go-pretty/v6.svg)](https://pkg.go.dev/github.com/jedib0t/go-pretty/v6)
-![Build Status](https://github.com/jedib0t/go-pretty/workflows/ci/badge.svg?branch=master)
+[![Build Status](https://github.com/jedib0t/go-pretty/workflows/CI/badge.svg?branch=master)](https://github.com/jedib0t/go-pretty/actions?query=workflow%3ACI+event%3Apush+branch%3Amaster)
 [![Coverage Status](https://coveralls.io/repos/github/jedib0t/go-pretty/badge.svg?branch=master)](https://coveralls.io/github/jedib0t/go-pretty?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jedib0t/go-pretty)](https://goreportcard.com/report/github.com/jedib0t/go-pretty)
 
