@@ -21,7 +21,11 @@ jobs:
           go get -u golang.org/x/lint/golint
 
       - name: Test
-        run: make test
+        run: |
+          echo $PATH
+          ls -al $GOPATH/bin/gocyclo || echo "true"
+          find $GOPATH
+          make test
 
       - name: Test for Race Conditions
         run: make test-race
