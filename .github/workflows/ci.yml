@@ -33,4 +33,4 @@ jobs:
       - name: Upload Coverage Report
         env:
           COVERALLS_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
-        run: $GOPATH/bin/goveralls -service=travis-pro -coverprofile=.coverprofile
+        run: goveralls -service=travis-pro -coverprofile=.coverprofile
