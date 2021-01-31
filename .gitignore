@@ -2,3 +2,4 @@
 /demo*
 /profile/
 .coverprofile
+*.swp
