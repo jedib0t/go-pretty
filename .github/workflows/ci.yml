@@ -16,19 +16,12 @@ jobs:
 
       - name: Set up Tools
         run: |
-          go get -u github.com/fzipp/gocyclo
+          go get -u github.com/fzipp/gocyclo/cmd/gocyclo
           go get -u github.com/mattn/goveralls
           go get -u golang.org/x/lint/golint
 
       - name: Test
         run: |
-          echo "GOPATH=$GOPATH"
-          echo "PATH=$PATH"
-          echo "HOME=$HOME"
-          ls -al $GOPATH/bin
-          ls -al $GOPATH/bin/gocyclo || echo "true"
-          ls -al $GOPATH/bin/goveralls || echo "true"
-          find /home/runner -type f | xargs ls -l
           make test
 
       - name: Test for Race Conditions
