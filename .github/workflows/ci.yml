@@ -22,9 +22,13 @@ jobs:
 
       - name: Test
         run: |
-          echo $PATH
+          echo "GOPATH=$GOPATH"
+          echo "PATH=$PATH"
+          echo "HOME=$HOME"
+          ls -al $GOPATH/bin
           ls -al $GOPATH/bin/gocyclo || echo "true"
-          find /home/runner/go -type f | xargs ls -l
+          ls -al $GOPATH/bin/goveralls || echo "true"
+          find /home/runner -type f | xargs ls -l
           make test
 
       - name: Test for Race Conditions
