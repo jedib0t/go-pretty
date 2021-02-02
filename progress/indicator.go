@@ -8,117 +8,52 @@ import (
 )
 
 // IndeterminateIndicator defines the structure for the indicator to indicate
-// indeterminate progress. Ex.: <=>
+// indeterminate progress. Ex.: {0, <=>}
 type IndeterminateIndicator struct {
 	Position int
 	Text     string
 }
 
-// IndeterminateIndicatorGenerator returns an IndeterminateIndicator for cases
-// where the progress percentage cannot be calculated. Ex.: [........<=>....]
+// IndeterminateIndicatorGenerator is a function that takes the maximum length
+// of the progress bar and returns an IndeterminateIndicator telling the
+// indicator string, and the location of the same in the progress bar.
+//
+// Technically, this could generate and return the entire progress bar string to
+// override the full display of the same - this is done by the Dominoes and
+// Pac-Man examples below.
 type IndeterminateIndicatorGenerator func(maxLen int) IndeterminateIndicator
 
-// IndeterminateIndicatorDominoes returns an instance of
-// IndeterminateIndicatorGenerator function that simulates a bunch of dominoes
-// falling.
+// IndeterminateIndicatorDominoes simulates a bunch of dominoes falling back and
+// forth.
 func IndeterminateIndicatorDominoes(duration time.Duration) IndeterminateIndicatorGenerator {
-	var indeterminateIndicator *IndeterminateIndicator
-	indicatorGenerator := indeterminateIndicatorDominoes()
-	lastRenderTime := time.Now()
-
-	return func(maxLen int) IndeterminateIndicator {
-		currRenderTime := time.Now()
-		if indeterminateIndicator == nil || duration == 0 || currRenderTime.Sub(lastRenderTime) > duration {
-			tmpIndeterminateIndicator := indicatorGenerator(maxLen)
-			indeterminateIndicator = &tmpIndeterminateIndicator
-			lastRenderTime = currRenderTime
-		}
-
-		return *indeterminateIndicator
-	}
+	return timedIndeterminateIndicatorGenerator(indeterminateIndicatorDominoes(), duration)
 }
 
-// IndeterminateIndicatorMovingBackAndForth returns an instance of
-// IndeterminateIndicatorGenerator function that incrementally moves from the
-// left to right and back for each specified duration. If duration is 0, then
-// every single invocation moves the indicator.
+// IndeterminateIndicatorMovingBackAndForth incrementally moves from the left to
+// right and back for each specified duration. If duration is 0, then every
+// single invocation moves the indicator.
 func IndeterminateIndicatorMovingBackAndForth(indicator string, duration time.Duration) IndeterminateIndicatorGenerator {
-	var indeterminateIndicator *IndeterminateIndicator
-	indicatorGenerator := indeterminateIndicatorMovingBackAndForth(indicator)
-	lastRenderTime := time.Now()
-
-	return func(maxLen int) IndeterminateIndicator {
-		currRenderTime := time.Now()
-		if indeterminateIndicator == nil || duration == 0 || currRenderTime.Sub(lastRenderTime) > duration {
-			tmpIndeterminateIndicator := indicatorGenerator(maxLen)
-			indeterminateIndicator = &tmpIndeterminateIndicator
-			lastRenderTime = currRenderTime
-		}
-
-		return *indeterminateIndicator
-	}
+	return timedIndeterminateIndicatorGenerator(indeterminateIndicatorMovingBackAndForth(indicator), duration)
 }
 
-// IndeterminateIndicatorMovingLeftToRight returns an instance of
-// IndeterminateIndicatorGenerator function that incrementally moves from the
-// left to right and starts from left again for each specified duration. If
-// duration is 0, then every single invocation moves the indicator.
+// IndeterminateIndicatorMovingLeftToRight incrementally moves from the left to
+// right and starts from left again for each specified duration. If duration is
+// 0, then every single invocation moves the indicator.
 func IndeterminateIndicatorMovingLeftToRight(indicator string, duration time.Duration) IndeterminateIndicatorGenerator {
-	var indeterminateIndicator *IndeterminateIndicator
-	indicatorGenerator := indeterminateIndicatorMovingLeftToRight(indicator)
-	lastRenderTime := time.Now()
-
-	return func(maxLen int) IndeterminateIndicator {
-		currRenderTime := time.Now()
-		if indeterminateIndicator == nil || duration == 0 || currRenderTime.Sub(lastRenderTime) > duration {
-			tmpIndeterminateIndicator := indicatorGenerator(maxLen)
-			indeterminateIndicator = &tmpIndeterminateIndicator
-			lastRenderTime = currRenderTime
-		}
-
-		return *indeterminateIndicator
-	}
+	return timedIndeterminateIndicatorGenerator(indeterminateIndicatorMovingLeftToRight(indicator), duration)
 }
 
-// IndeterminateIndicatorMovingRightToLeft returns an instance of
-// IndeterminateIndicatorGenerator function that incrementally moves from the
-// right to left and starts from right again for each specified duration. If
-// duration is 0, then every single invocation moves the indicator.
+// IndeterminateIndicatorMovingRightToLeft incrementally moves from the right to
+// left and starts from right again for each specified duration. If duration is
+// 0, then every single invocation moves the indicator.
 func IndeterminateIndicatorMovingRightToLeft(indicator string, duration time.Duration) IndeterminateIndicatorGenerator {
-	var indeterminateIndicator *IndeterminateIndicator
-	indicatorGenerator := indeterminateIndicatorMovingRightToLeft(indicator)
-	lastRenderTime := time.Now()
-
-	return func(maxLen int) IndeterminateIndicator {
-		currRenderTime := time.Now()
-		if indeterminateIndicator == nil || duration == 0 || currRenderTime.Sub(lastRenderTime) > duration {
-			tmpIndeterminateIndicator := indicatorGenerator(maxLen)
-			indeterminateIndicator = &tmpIndeterminateIndicator
-			lastRenderTime = currRenderTime
-		}
-
-		return *indeterminateIndicator
-	}
+	return timedIndeterminateIndicatorGenerator(indeterminateIndicatorMovingRightToLeft(indicator), duration)
 }
 
-// IndeterminateIndicatorPacMan returns an instance of
-// IndeterminateIndicatorGenerator function that simulates a Pac-Man character
-// chomping through the progress bar.
+// IndeterminateIndicatorPacMan simulates a Pac-Man character chomping through
+// the progress bar back and forth.
 func IndeterminateIndicatorPacMan(duration time.Duration) IndeterminateIndicatorGenerator {
-	var indeterminateIndicator *IndeterminateIndicator
-	indicatorGenerator := indeterminateIndicatorPacMan()
-	lastRenderTime := time.Now()
-
-	return func(maxLen int) IndeterminateIndicator {
-		currRenderTime := time.Now()
-		if indeterminateIndicator == nil || duration == 0 || currRenderTime.Sub(lastRenderTime) > duration {
-			tmpIndeterminateIndicator := indicatorGenerator(maxLen)
-			indeterminateIndicator = &tmpIndeterminateIndicator
-			lastRenderTime = currRenderTime
-		}
-
-		return *indeterminateIndicator
-	}
+	return timedIndeterminateIndicatorGenerator(indeterminateIndicatorPacMan(), duration)
 }
 
 func indeterminateIndicatorDominoes() IndeterminateIndicatorGenerator {
@@ -240,5 +175,23 @@ func indeterminateIndicatorPacMan() IndeterminateIndicatorGenerator {
 			Position: 0,
 			Text:     currentText,
 		}
+	}
+}
+
+// timedIndeterminateIndicatorGenerator ticks based on the given duration. If
+// duration is 0, it ticks for every invocation.
+func timedIndeterminateIndicatorGenerator(indicatorGenerator IndeterminateIndicatorGenerator, duration time.Duration) IndeterminateIndicatorGenerator {
+	var indeterminateIndicator *IndeterminateIndicator
+	lastRenderTime := time.Now()
+
+	return func(maxLen int) IndeterminateIndicator {
+		currRenderTime := time.Now()
+		if indeterminateIndicator == nil || duration == 0 || currRenderTime.Sub(lastRenderTime) > duration {
+			tmpIndeterminateIndicator := indicatorGenerator(maxLen)
+			indeterminateIndicator = &tmpIndeterminateIndicator
+			lastRenderTime = currRenderTime
+		}
+
+		return *indeterminateIndicator
 	}
 }
