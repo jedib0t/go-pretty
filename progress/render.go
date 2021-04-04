@@ -226,7 +226,11 @@ func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHi
 func (p *Progress) renderTrackerDone(out *strings.Builder, t *Tracker) {
 	out.WriteString(p.style.Colors.Message.Sprint(t.Message))
 	out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.Separator))
-	out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.DoneString))
+	if !t.IsErrored() {
+		out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.DoneString))
+	} else {
+		out.WriteString(p.style.Colors.Error.Sprint(p.style.Options.ErrorString))
+	}
 	p.renderTrackerStats(out, t, renderHint{hideTime: p.hideTime, hideValue: p.hideValue})
 	out.WriteRune('\n')
 }

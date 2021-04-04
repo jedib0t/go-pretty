@@ -68,10 +68,34 @@ func TestTracker_IsIndeterminate(t *testing.T) {
 func TestTracker_MarkAsDone(t *testing.T) {
 	tracker := Tracker{}
 	assert.False(t, tracker.IsDone())
+	assert.False(t, tracker.IsErrored())
 	assert.True(t, tracker.timeStop.IsZero())
 
 	tracker.MarkAsDone()
 	assert.True(t, tracker.IsDone())
+	assert.False(t, tracker.IsErrored())
+	assert.False(t, tracker.timeStop.IsZero())
+
+	tracker.MarkAsErrored()
+	assert.True(t, tracker.IsDone())
+	assert.False(t, tracker.IsErrored())
+	assert.False(t, tracker.timeStop.IsZero())
+}
+
+func TestTracker_MarkAsError(t *testing.T) {
+	tracker := Tracker{}
+	assert.False(t, tracker.IsDone())
+	assert.False(t, tracker.IsErrored())
+	assert.True(t, tracker.timeStop.IsZero())
+
+	tracker.MarkAsErrored()
+	assert.True(t, tracker.IsDone())
+	assert.True(t, tracker.IsErrored())
+	assert.False(t, tracker.timeStop.IsZero())
+
+	tracker.MarkAsDone()
+	assert.True(t, tracker.IsDone())
+	assert.True(t, tracker.IsErrored())
 	assert.False(t, tracker.timeStop.IsZero())
 }
 

@@ -22,6 +22,7 @@ type Tracker struct {
 	Units Units
 
 	done      bool
+	err       bool
 	mutex     sync.RWMutex
 	mutexPrv  sync.RWMutex
 	timeStart time.Time
@@ -63,6 +64,14 @@ func (t *Tracker) IsDone() bool {
 	return t.done
 }
 
+// IsErrored true if MarkAsErrored() was called before the tracker was done
+func (t *Tracker) IsErrored() bool {
+	t.mutex.RLock()
+	defer t.mutex.RUnlock()
+
+	return t.err
+}
+
 // IsIndeterminate returns true if the tracker is indeterminate; i.e., the total
 // is unknown and it is impossible to auto-calculate if tracking is done.
 func (t *Tracker) IsIndeterminate() bool {
@@ -81,6 +90,20 @@ func (t *Tracker) MarkAsDone() {
 	t.mutex.Unlock()
 }
 
+// MarkAsErrored forces completion of the tracker by updating the current value as
+// the expected Total value, and recording as error. The error state can only be
+// unset via Reset
+func (t *Tracker) MarkAsErrored() {
+	t.mutex.Lock()
+	// only update error if not done and if not previously set
+	if !t.done {
+		t.Total = t.value
+		t.err = true
+		t.stop()
+	}
+	t.mutex.Unlock()
+}
+
 // PercentDone returns the currently completed percentage value.
 func (t *Tracker) PercentDone() float64 {
 	t.mutex.RLock()
@@ -96,6 +119,7 @@ func (t *Tracker) PercentDone() float64 {
 func (t *Tracker) Reset() {
 	t.mutex.Lock()
 	t.done = false
+	t.err = false
 	t.timeStart = time.Time{}
 	t.timeStop = time.Time{}
 	t.value = 0
@@ -103,10 +127,12 @@ func (t *Tracker) Reset() {
 }
 
 // SetValue sets the value of the tracker and re-calculates if the tracker is
-// "done".
+// "done". The tracker will still be "done" if an error was previously set
 func (t *Tracker) SetValue(value int64) {
 	t.mutex.Lock()
-	t.done = false
+	if !t.err {
+		t.done = false
+	}
 	t.timeStop = time.Time{}
 	t.value = 0
 	t.incrementWithoutLock(value)
@@ -132,6 +158,7 @@ func (t *Tracker) incrementWithoutLock(value int64) {
 func (t *Tracker) start() {
 	t.mutexPrv.Lock()
 	t.done = false
+	t.err = false
 	t.timeStart = time.Now()
 	t.mutexPrv.Unlock()
 }

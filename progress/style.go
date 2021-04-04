@@ -114,6 +114,7 @@ var (
 // Tracker texts.
 type StyleColors struct {
 	Message text.Colors // message text colors
+	Error   text.Colors // error text colors
 	Percent text.Colors // percentage text colors
 	Stats   text.Colors // stats text (time, value) colors
 	Time    text.Colors // time text colors (overrides Stats)
@@ -129,6 +130,7 @@ var (
 	// as an example to customize the Tracker/text colors.
 	StyleColorsExample = StyleColors{
 		Message: text.Colors{text.FgWhite},
+		Error:   text.Colors{text.FgRed},
 		Percent: text.Colors{text.FgHiRed},
 		Stats:   text.Colors{text.FgHiBlack},
 		Time:    text.Colors{text.FgGreen},
@@ -141,6 +143,7 @@ var (
 // gets rendered.
 type StyleOptions struct {
 	DoneString              string        // "done!" string
+	ErrorString             string        // "error!" string
 	ETAPrecision            time.Duration // precision for ETA
 	ETAString               string        // string for ETA
 	Separator               string        // text between message and tracker
@@ -157,6 +160,7 @@ var (
 	// example to customize the Tracker rendering.
 	StyleOptionsDefault = StyleOptions{
 		DoneString:              "done!",
+		ErrorString:             "fail!",
 		ETAPrecision:            time.Second,
 		ETAString:               "~ETA",
 		PercentFormat:           "%5.2f%%",
