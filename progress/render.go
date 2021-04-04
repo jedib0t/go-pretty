@@ -123,24 +123,23 @@ func (p *Progress) extractDoneAndActiveTrackers() ([]*Tracker, []*Tracker) {
 }
 
 func (p *Progress) generateTrackerStr(t *Tracker, maxLen int, hint renderHint) string {
-	if !hint.isOverallTracker && (t.Total == 0 || t.value > t.Total) {
-		return p.generateTrackerStrIndeterminate(t, maxLen)
+	value, total := t.valueAndTotal()
+	if !hint.isOverallTracker && (total == 0 || value > total) {
+		return p.generateTrackerStrIndeterminate(maxLen)
 	}
-	return p.generateTrackerStrDeterminate(t, maxLen)
+	return p.generateTrackerStrDeterminate(value, total, maxLen)
 }
 
 // generateTrackerStrDeterminate generates the tracker string for the case where
 // the Total value is known, and the progress percentage can be calculated.
-func (p *Progress) generateTrackerStrDeterminate(t *Tracker, maxLen int) string {
-	t.mutex.Lock()
+func (p *Progress) generateTrackerStrDeterminate(value int64, total int64, maxLen int) string {
 	pFinishedDots, pFinishedDotsFraction := 0.0, 0.0
-	pDotValue := float64(t.Total) / float64(maxLen)
+	pDotValue := float64(total) / float64(maxLen)
 	if pDotValue > 0 {
-		pFinishedDots = float64(t.value) / pDotValue
+		pFinishedDots = float64(value) / pDotValue
 		pFinishedDotsFraction = pFinishedDots - float64(int(pFinishedDots))
 	}
 	pFinishedLen := int(math.Floor(pFinishedDots))
-	t.mutex.Unlock()
 
 	var pFinished, pInProgress, pUnfinished string
 	if pFinishedLen > 0 {
@@ -168,7 +167,7 @@ func (p *Progress) generateTrackerStrDeterminate(t *Tracker, maxLen int) string 
 
 // generateTrackerStrDeterminate generates the tracker string for the case where
 // the Total value is unknown, and the progress percentage cannot be calculated.
-func (p *Progress) generateTrackerStrIndeterminate(t *Tracker, maxLen int) string {
+func (p *Progress) generateTrackerStrIndeterminate(maxLen int) string {
 	indicator := p.style.Chars.Indeterminate(maxLen)
 
 	pUnfinished := ""
@@ -287,9 +286,7 @@ func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker, hint ren
 		var outStats strings.Builder
 		outStats.WriteString(" [")
 		if !hint.hideValue {
-			t.mutex.Lock()
-			outStats.WriteString(p.style.Colors.Value.Sprint(t.Units.Sprint(t.value)))
-			t.mutex.Unlock()
+			outStats.WriteString(p.style.Colors.Value.Sprint(t.Units.Sprint(t.Value())))
 		}
 		if !hint.hideValue && !hint.hideTime {
 			outStats.WriteString(" in ")

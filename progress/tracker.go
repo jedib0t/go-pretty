@@ -1,6 +1,7 @@
 package progress
 
 import (
+	"math"
 	"sync"
 	"time"
 )
@@ -24,7 +25,6 @@ type Tracker struct {
 	done      bool
 	err       bool
 	mutex     sync.RWMutex
-	mutexPrv  sync.RWMutex
 	timeStart time.Time
 	timeStop  time.Time
 	value     int64
@@ -146,6 +146,14 @@ func (t *Tracker) Value() int64 {
 	return t.value
 }
 
+func (t *Tracker) valueAndTotal() (int64, int64) {
+	t.mutex.RLock()
+	value := t.value
+	total := t.Total
+	t.mutex.RUnlock()
+	return value, total
+}
+
 func (t *Tracker) incrementWithoutLock(value int64) {
 	if !t.done {
 		t.value += value
@@ -156,19 +164,21 @@ func (t *Tracker) incrementWithoutLock(value int64) {
 }
 
 func (t *Tracker) start() {
-	t.mutexPrv.Lock()
+	t.mutex.Lock()
+	if t.Total < 0 {
+		t.Total = math.MaxInt64
+	}
 	t.done = false
 	t.err = false
 	t.timeStart = time.Now()
-	t.mutexPrv.Unlock()
+	t.mutex.Unlock()
 }
 
+// this must be called with the mutex held with a write lock
 func (t *Tracker) stop() {
-	t.mutexPrv.Lock()
 	t.done = true
 	t.timeStop = time.Now()
 	if t.value > t.Total {
 		t.Total = t.value
 	}
-	t.mutexPrv.Unlock()
 }
