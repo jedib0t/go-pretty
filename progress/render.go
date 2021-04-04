@@ -15,14 +15,16 @@ func (p *Progress) Render() {
 	if !p.IsRenderInProgress() {
 		p.initForRender()
 
-		c := time.Tick(p.updateFrequency)
+		ticker := time.NewTicker(p.updateFrequency)
+		defer ticker.Stop()
+
 		lastRenderLength := 0
 		p.renderInProgressMutex.Lock()
 		p.renderInProgress = true
 		p.renderInProgressMutex.Unlock()
 		for p.IsRenderInProgress() {
 			select {
-			case <-c:
+			case <-ticker.C:
 				if p.LengthActive() > 0 {
 					lastRenderLength = p.renderTrackers(lastRenderLength)
 				}
