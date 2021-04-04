@@ -141,8 +141,8 @@ func (t *Tracker) SetValue(value int64) {
 
 // Value returns the current value of the tracker.
 func (t *Tracker) Value() int64 {
-	t.mutex.Lock()
-	defer t.mutex.Unlock()
+	t.mutex.RLock()
+	defer t.mutex.RUnlock()
 	return t.value
 }
 
