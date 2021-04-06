@@ -50,6 +50,6 @@ jobs:
       # Upload all the unit-test coverage reports to Coveralls
       - name: Upload Coverage Report
         env:
-          COVERALLS_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
-        run: goveralls -service=travis-pro -coverprofile=.coverprofile
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: goveralls -service=github -coverprofile=.coverprofile
 
