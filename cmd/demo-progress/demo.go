@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/jedib0t/go-pretty/v6/progress"
@@ -10,6 +11,7 @@ import (
 
 var (
 	autoStop    = flag.Bool("auto-stop", false, "Auto-stop rendering?")
+	randomFail  = flag.Bool("rnd-fail", false, "Enable random failures")
 	numTrackers = flag.Int("num-trackers", 13, "Number of Trackers")
 )
 
@@ -52,6 +54,8 @@ func trackSomething(pw progress.Writer, idx int64) {
 			tracker.Increment(incrementPerCycle)
 			if idx == int64(*numTrackers) && tracker.Value() >= total {
 				tracker.MarkAsDone()
+			} else if *randomFail && rand.Float64() < 0.1 {
+				tracker.MarkAsErrored()
 			}
 		}
 	}
