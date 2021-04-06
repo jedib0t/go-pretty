@@ -101,22 +101,11 @@ BenchmarkTable_RenderHTML-2       	   88633	     13425 ns/op	    4080 B/op	     
 BenchmarkTable_RenderMarkdown-2   	  107420	     10991 ns/op	    2560 B/op	      44 allocs/op
 ```
 
-## A note about v6.0.0 and above ...
+## v6.0.0++
 
-To make `go-pretty` completely compatible with `go mod`, versions `v6.0.0` and
-above will include changes that are known to break `dep` support. As far as I
-can tell, `dep` is looking for funding right now and is not being actively
-developed or maintained and has an interoperability issue with how `go mod`
-deals with package versioning.
-
-If you want to continue to use `dep`, versions `v5.1.x` and below should
-continue to work. If `dep` maintainers can merge the code proposed in
-[PR#1963](https://github.com/golang/dep/pull/1963), it should make `v6.0.0` and
-above usable too. Given that the PR has not been merged since July 2018, I am
-not too hopeful. :disappointed:
-
-To use `v6.0.0` (or newer version) of this library, you'd have to modify the
-import paths from something like:
+If you are using a version of this library older than `v6.0.0` and want to move
+to a newer version of this library, you'd have to modify the import paths from
+something like:
 ```golang
     "github.com/jedib0t/go-pretty/list"
     "github.com/jedib0t/go-pretty/progress"
