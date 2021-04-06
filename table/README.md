@@ -284,6 +284,18 @@ to get:
 +-----+------------+-----------+--------+-----------------------------+
 ```
 
+## Sorting
+
+Sorting can be done on one or more columns. The following code will make the
+rows be sorted first by "First Name" and then by "Last Name" (in case of similar
+"First Name" entries).
+```golang
+    t.SortBy([]table.SortBy{
+	    {Name: "First Name", Mode: table.Asc},
+	    {Name: "Last Name", Mode: table.Asc},
+    })
+```
+
 ## Wrapping (or) Row/Column Width restrictions
 
 You can restrict the maximum (text) width for a Row:
