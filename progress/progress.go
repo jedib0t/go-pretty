@@ -2,7 +2,6 @@ package progress
 
 import (
 	"io"
-	"math"
 	"os"
 	"sync"
 	"time"
@@ -65,11 +64,6 @@ const (
 // to a queue, which gets picked up by the Render logic in the next rendering
 // cycle.
 func (p *Progress) AppendTracker(t *Tracker) {
-	t.mutex.Lock()
-	if t.Total < 0 {
-		t.Total = math.MaxInt64
-	}
-	t.mutex.Unlock()
 	t.start()
 
 	p.overallTrackerMutex.Lock()
