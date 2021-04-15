@@ -41,7 +41,7 @@ func (t *Tracker) ETA() time.Duration {
 		return t.ExpectedDuration - timeTaken
 	}
 
-	pDone := int64(t.PercentDone())
+	pDone := int64(t.percentDoneWithoutLock())
 	if pDone == 0 {
 		return time.Duration(0)
 	}
@@ -108,7 +108,10 @@ func (t *Tracker) MarkAsErrored() {
 func (t *Tracker) PercentDone() float64 {
 	t.mutex.RLock()
 	defer t.mutex.RUnlock()
+	return t.percentDoneWithoutLock()
+}
 
+func (t *Tracker) percentDoneWithoutLock() float64 {
 	if t.Total == 0 {
 		return 0
 	}
