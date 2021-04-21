@@ -49,6 +49,24 @@ func TestTracker_Increment(t *testing.T) {
 	assert.True(t, tracker.IsDone())
 }
 
+func TestTracker_IncrementWithError(t *testing.T) {
+	tracker := Tracker{Total: 100}
+	assert.Equal(t, int64(0), tracker.value)
+	assert.Equal(t, int64(100), tracker.Total)
+
+	tracker.IncrementWithError(10)
+	assert.Equal(t, int64(10), tracker.value)
+	assert.Equal(t, int64(100), tracker.Total)
+	assert.True(t, tracker.IsErrored())
+
+	tracker.IncrementWithError(100)
+	assert.Equal(t, int64(110), tracker.value)
+	assert.Equal(t, int64(110), tracker.Total)
+	assert.False(t, tracker.timeStop.IsZero())
+	assert.True(t, tracker.IsErrored())
+	assert.True(t, tracker.IsDone())
+}
+
 func TestTracker_IsDone(t *testing.T) {
 	tracker := Tracker{Total: 10}
 	assert.False(t, tracker.IsDone())

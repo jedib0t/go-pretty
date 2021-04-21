@@ -249,7 +249,11 @@ func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, track
 		p.renderTrackerStats(out, t, hint)
 		out.WriteRune('\n')
 	} else if p.trackerPosition == PositionRight {
-		out.WriteString(p.style.Colors.Message.Sprint(t.Message))
+		if !t.IsErrored() {
+			out.WriteString(p.style.Colors.Message.Sprint(t.Message))
+		} else {
+			out.WriteString(p.style.Colors.Error.Sprint(t.Message))
+		}
 		out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.Separator))
 		p.renderTrackerPercentage(out, t)
 		if !p.hideTracker {
@@ -264,7 +268,11 @@ func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, track
 		}
 		p.renderTrackerStats(out, t, hint)
 		out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.Separator))
-		out.WriteString(p.style.Colors.Message.Sprint(t.Message))
+		if !t.IsErrored() {
+			out.WriteString(p.style.Colors.Message.Sprint(t.Message))
+		} else {
+			out.WriteString(p.style.Colors.Error.Sprint(t.Message))
+		}
 		out.WriteRune('\n')
 	}
 }
