@@ -55,6 +55,15 @@ func (t *Tracker) Increment(value int64) {
 	t.mutex.Unlock()
 }
 
+// IncrementWithError updates the current value of the task being tracked and
+// marks that an error occurred.
+func (t *Tracker) IncrementWithError(value int64) {
+	t.mutex.Lock()
+	t.incrementWithoutLock(value)
+	t.err = true
+	t.mutex.Unlock()
+}
+
 // IsDone returns true if the tracker is done (value has reached the expected
 // Total set during initialization).
 func (t *Tracker) IsDone() bool {
@@ -64,7 +73,7 @@ func (t *Tracker) IsDone() bool {
 	return t.done
 }
 
-// IsErrored true if MarkAsErrored() was called before the tracker was done
+// IsErrored true if an error was set with IncrementWithError or MarkAsErrored.
 func (t *Tracker) IsErrored() bool {
 	t.mutex.RLock()
 	defer t.mutex.RUnlock()
@@ -91,8 +100,7 @@ func (t *Tracker) MarkAsDone() {
 }
 
 // MarkAsErrored forces completion of the tracker by updating the current value as
-// the expected Total value, and recording as error. The error state can only be
-// unset via Reset
+// the expected Total value, and recording as error.
 func (t *Tracker) MarkAsErrored() {
 	t.mutex.Lock()
 	// only update error if not done and if not previously set
@@ -130,12 +138,10 @@ func (t *Tracker) Reset() {
 }
 
 // SetValue sets the value of the tracker and re-calculates if the tracker is
-// "done". The tracker will still be "done" if an error was previously set
+// "done".
 func (t *Tracker) SetValue(value int64) {
 	t.mutex.Lock()
-	if !t.err {
-		t.done = false
-	}
+	t.done = false
 	t.timeStop = time.Time{}
 	t.value = 0
 	t.incrementWithoutLock(value)
