@@ -47,8 +47,11 @@ func trackSomething(pw progress.Writer, idx int64) {
 
 	pw.AppendTracker(&tracker)
 
+	i := 0
+
 	c := time.Tick(time.Millisecond * 500)
 	for !tracker.IsDone() {
+		i++
 		select {
 		case <-c:
 			tracker.Increment(incrementPerCycle)
@@ -57,6 +60,8 @@ func trackSomething(pw progress.Writer, idx int64) {
 			} else if *randomFail && rand.Float64() < 0.1 {
 				tracker.MarkAsErrored()
 			}
+
+			tracker.Message = fmt.Sprintf("%s: %d", message, i)
 		}
 	}
 }
