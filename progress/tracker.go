@@ -12,7 +12,10 @@ import (
 // Writer.AppendTracker() method. When the task that is being done has progress,
 // increment the value using the Tracker.Increment(value) method.
 type Tracker struct {
-	// Message should contain a short description of the "task"
+	// Message should contain a short description of the "task"; please note
+	// that this should NOT be updated in the middle of progress - you should
+	// instead use UpdateMessage() to do this safely without hitting any race
+	// conditions
 	Message string
 	// ExpectedDuration tells how long this task is expected to take; and will
 	// be used in calculation of the ETA value
@@ -148,11 +151,24 @@ func (t *Tracker) SetValue(value int64) {
 	t.mutex.Unlock()
 }
 
+// UpdateMessage updates the message string.
+func (t *Tracker) UpdateMessage(msg string) {
+	t.mutex.Lock()
+	t.Message = msg
+	t.mutex.Unlock()
+}
+
 // Value returns the current value of the tracker.
 func (t *Tracker) Value() int64 {
 	t.mutex.RLock()
 	defer t.mutex.RUnlock()
 	return t.value
+}
+
+func (t *Tracker) message() string {
+	t.mutex.RLock()
+	defer t.mutex.RUnlock()
+	return t.Message
 }
 
 func (t *Tracker) valueAndTotal() (int64, int64) {

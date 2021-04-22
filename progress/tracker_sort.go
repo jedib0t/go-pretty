@@ -52,13 +52,13 @@ type sortByMessage []*Tracker
 
 func (sb sortByMessage) Len() int           { return len(sb) }
 func (sb sortByMessage) Swap(i, j int)      { sb[i], sb[j] = sb[j], sb[i] }
-func (sb sortByMessage) Less(i, j int) bool { return sb[i].Message < sb[j].Message }
+func (sb sortByMessage) Less(i, j int) bool { return sb[i].message() < sb[j].message() }
 
 type sortByMessageDsc []*Tracker
 
 func (sb sortByMessageDsc) Len() int           { return len(sb) }
 func (sb sortByMessageDsc) Swap(i, j int)      { sb[i], sb[j] = sb[j], sb[i] }
-func (sb sortByMessageDsc) Less(i, j int) bool { return sb[i].Message > sb[j].Message }
+func (sb sortByMessageDsc) Less(i, j int) bool { return sb[i].message() > sb[j].message() }
 
 type sortByPercent []*Tracker
 
