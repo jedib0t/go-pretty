@@ -7,15 +7,26 @@ import (
 	"time"
 
 	"github.com/jedib0t/go-pretty/v6/progress"
+	"github.com/jedib0t/go-pretty/v6/text"
 )
 
 var (
 	autoStop    = flag.Bool("auto-stop", false, "Auto-stop rendering?")
 	randomFail  = flag.Bool("rnd-fail", false, "Enable random failures")
 	numTrackers = flag.Int("num-trackers", 13, "Number of Trackers")
+
+	messageColors = []text.Color{
+		text.FgRed,
+		text.FgGreen,
+		text.FgYellow,
+		text.FgBlue,
+		text.FgMagenta,
+		text.FgCyan,
+		text.FgWhite,
+	}
 )
 
-func trackSomething(pw progress.Writer, idx int64) {
+func trackSomething(pw progress.Writer, idx int64, updateMessage bool) {
 	total := idx * idx * idx * 250
 	incrementPerCycle := idx * int64(*numTrackers) * 250
 
@@ -47,15 +58,24 @@ func trackSomething(pw progress.Writer, idx int64) {
 
 	pw.AppendTracker(&tracker)
 
-	c := time.Tick(time.Millisecond * 500)
+	ticker := time.Tick(time.Millisecond * 500)
+	updateTicker := time.Tick(time.Millisecond * 250)
 	for !tracker.IsDone() {
 		select {
-		case <-c:
+		case <-ticker:
 			tracker.Increment(incrementPerCycle)
 			if idx == int64(*numTrackers) && tracker.Value() >= total {
 				tracker.MarkAsDone()
 			} else if *randomFail && rand.Float64() < 0.1 {
 				tracker.MarkAsErrored()
+			}
+		case <-updateTicker:
+			if updateMessage {
+				rndIdx := rand.Intn(len(messageColors))
+				if rndIdx == len(messageColors) {
+					rndIdx--
+				}
+				tracker.UpdateMessage(messageColors[rndIdx].Sprint(message))
 			}
 		}
 	}
@@ -90,7 +110,7 @@ func main() {
 	// features available; do this in async too like a client might do (for ex.
 	// when downloading a bunch of files in parallel)
 	for idx := int64(1); idx <= int64(*numTrackers); idx++ {
-		go trackSomething(pw, idx)
+		go trackSomething(pw, idx, idx == int64(*numTrackers))
 
 		// in auto-stop mode, the Render logic terminates the moment it detects
 		// zero active trackers; but in a manual-stop mode, it keeps waiting and
