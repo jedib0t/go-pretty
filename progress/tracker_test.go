@@ -53,6 +53,7 @@ func TestTracker_IncrementWithError(t *testing.T) {
 	tracker := Tracker{Total: 100}
 	assert.Equal(t, int64(0), tracker.value)
 	assert.Equal(t, int64(100), tracker.Total)
+	assert.False(t, tracker.IsErrored())
 
 	tracker.IncrementWithError(10)
 	assert.Equal(t, int64(10), tracker.value)
@@ -174,4 +175,12 @@ func TestTracker_Value(t *testing.T) {
 	tracker.SetValue(5)
 	assert.Equal(t, int64(5), tracker.value)
 	assert.Equal(t, int64(5), tracker.Value())
+}
+
+func TestTracker_UpdateMessage(t *testing.T) {
+	tracker := Tracker{Message: "foo"}
+	assert.Equal(t, "foo", tracker.message())
+
+	tracker.UpdateMessage("bar")
+	assert.Equal(t, "bar", tracker.message())
 }

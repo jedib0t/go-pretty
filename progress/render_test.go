@@ -74,10 +74,7 @@ func trackSomethingErrored(pw Writer, tracker *Tracker) {
 			if tracker.value+incrementPerCycle > total {
 				tracker.MarkAsErrored()
 			} else {
-				tracker.Increment(incrementPerCycle)
-			}
-			if tracker.Value() >= total {
-				tracker.MarkAsErrored()
+				tracker.IncrementWithError(incrementPerCycle)
 			}
 		}
 	}

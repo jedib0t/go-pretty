@@ -195,11 +195,12 @@ func (p *Progress) moveCursorToTheTop(out *strings.Builder) {
 }
 
 func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHint) {
-	if strings.Contains(t.Message, "\t") {
-		t.Message = strings.Replace(t.Message, "\t", "    ", -1)
+	message := t.message()
+	if strings.Contains(message, "\t") {
+		t.Message = strings.Replace(message, "\t", "    ", -1)
 	}
-	if strings.Contains(t.Message, "\r") {
-		t.Message = strings.Replace(t.Message, "\r", "", -1)
+	if strings.Contains(message, "\r") {
+		t.Message = strings.Replace(message, "\r", "", -1)
 	}
 
 	out.WriteString(text.EraseLine.Sprint())
@@ -223,7 +224,7 @@ func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHi
 }
 
 func (p *Progress) renderTrackerDone(out *strings.Builder, t *Tracker) {
-	out.WriteString(p.style.Colors.Message.Sprint(t.Message))
+	out.WriteString(p.style.Colors.Message.Sprint(t.message()))
 	out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.Separator))
 	if !t.IsErrored() {
 		out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.DoneString))
@@ -236,11 +237,12 @@ func (p *Progress) renderTrackerDone(out *strings.Builder, t *Tracker) {
 
 func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, trackerStr string, hint renderHint) {
 	if p.messageWidth > 0 {
-		messageLen := text.RuneCount(t.Message)
+		message := t.message()
+		messageLen := text.RuneCount(message)
 		if messageLen < p.messageWidth {
-			t.Message = text.Pad(t.Message, p.messageWidth, ' ')
+			t.UpdateMessage(text.Pad(message, p.messageWidth, ' '))
 		} else {
-			t.Message = text.Snip(t.Message, p.messageWidth, p.style.Options.SnipIndicator)
+			t.UpdateMessage(text.Snip(message, p.messageWidth, p.style.Options.SnipIndicator))
 		}
 	}
 
@@ -249,11 +251,7 @@ func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, track
 		p.renderTrackerStats(out, t, hint)
 		out.WriteRune('\n')
 	} else if p.trackerPosition == PositionRight {
-		if !t.IsErrored() {
-			out.WriteString(p.style.Colors.Message.Sprint(t.Message))
-		} else {
-			out.WriteString(p.style.Colors.Error.Sprint(t.Message))
-		}
+		p.renderTrackerMessage(out, t)
 		out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.Separator))
 		p.renderTrackerPercentage(out, t)
 		if !p.hideTracker {
@@ -268,12 +266,16 @@ func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, track
 		}
 		p.renderTrackerStats(out, t, hint)
 		out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.Separator))
-		if !t.IsErrored() {
-			out.WriteString(p.style.Colors.Message.Sprint(t.Message))
-		} else {
-			out.WriteString(p.style.Colors.Error.Sprint(t.Message))
-		}
+		p.renderTrackerMessage(out, t)
 		out.WriteRune('\n')
+	}
+}
+
+func (p *Progress) renderTrackerMessage(out *strings.Builder, t *Tracker) {
+	if !t.IsErrored() {
+		out.WriteString(p.style.Colors.Message.Sprint(t.message()))
+	} else {
+		out.WriteString(p.style.Colors.Error.Sprint(t.message()))
 	}
 }
 
