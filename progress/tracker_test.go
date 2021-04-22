@@ -184,3 +184,14 @@ func TestTracker_UpdateMessage(t *testing.T) {
 	tracker.UpdateMessage("bar")
 	assert.Equal(t, "bar", tracker.message())
 }
+
+func TestTracker_EditMessage(t *testing.T) {
+	tracker := Tracker{Message: "foo"}
+	assert.Equal(t, "foo", tracker.message())
+
+	message := tracker.editMessage(func(message string) string {
+		return "bar"
+	})
+	assert.Equal(t, "bar", message)
+	assert.Equal(t, "bar", tracker.message())
+}

@@ -158,6 +158,17 @@ func (t *Tracker) UpdateMessage(msg string) {
 	t.mutex.Unlock()
 }
 
+// editMessage allows in-place updating of the message string. This is an
+// internal function because t.Message is changed by the render goroutine,
+// and external consumers might not expect that
+func (t *Tracker) editMessage(editFn func(msg string) string) string {
+	t.mutex.Lock()
+	message := editFn(t.Message)
+	t.Message = message
+	t.mutex.Unlock()
+	return message
+}
+
 // Value returns the current value of the tracker.
 func (t *Tracker) Value() int64 {
 	t.mutex.RLock()
