@@ -59,7 +59,6 @@ func trackSomething(pw progress.Writer, idx int64, updateMessage bool) {
 	pw.AppendTracker(&tracker)
 
 	ticker := time.Tick(time.Millisecond * 500)
-	updateRandomizer := rand.New(rand.NewSource(13))
 	updateTicker := time.Tick(time.Millisecond * 250)
 	for !tracker.IsDone() {
 		select {
@@ -72,7 +71,7 @@ func trackSomething(pw progress.Writer, idx int64, updateMessage bool) {
 			}
 		case <-updateTicker:
 			if updateMessage {
-				rndIdx := updateRandomizer.Intn(len(messageColors))
+				rndIdx := rand.Intn(len(messageColors))
 				if rndIdx == len(messageColors) {
 					rndIdx--
 				}
