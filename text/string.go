@@ -97,12 +97,13 @@ func Pad(str string, maxLen int, paddingChar rune) string {
 
 // RepeatAndTrim repeats the given string until it is as long as maxRunes.
 // For ex.:
+//  RepeatAndTrim("", 5) == ""
 //  RepeatAndTrim("Ghost", 0) == ""
 //  RepeatAndTrim("Ghost", 5) == "Ghost"
 //  RepeatAndTrim("Ghost", 7) == "GhostGh"
 //  RepeatAndTrim("Ghost", 10) == "GhostGhost"
 func RepeatAndTrim(str string, maxRunes int) string {
-	if maxRunes == 0 {
+	if str == "" || maxRunes == 0 {
 		return ""
 	} else if maxRunes == utf8.RuneCountInString(str) {
 		return str
