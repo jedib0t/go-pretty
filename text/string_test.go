@@ -105,13 +105,15 @@ func TestPad(t *testing.T) {
 }
 
 func ExampleRepeatAndTrim() {
+	fmt.Printf("RepeatAndTrim(\"\", 5): %#v\n", RepeatAndTrim("", 5))
 	fmt.Printf("RepeatAndTrim(\"Ghost\", 0): %#v\n", RepeatAndTrim("Ghost", 0))
 	fmt.Printf("RepeatAndTrim(\"Ghost\", 3): %#v\n", RepeatAndTrim("Ghost", 3))
 	fmt.Printf("RepeatAndTrim(\"Ghost\", 5): %#v\n", RepeatAndTrim("Ghost", 5))
 	fmt.Printf("RepeatAndTrim(\"Ghost\", 7): %#v\n", RepeatAndTrim("Ghost", 7))
 	fmt.Printf("RepeatAndTrim(\"Ghost\", 10): %#v\n", RepeatAndTrim("Ghost", 10))
 
-	// Output: RepeatAndTrim("Ghost", 0): ""
+	// Output: RepeatAndTrim("", 5): ""
+	// RepeatAndTrim("Ghost", 0): ""
 	// RepeatAndTrim("Ghost", 3): "Gho"
 	// RepeatAndTrim("Ghost", 5): "Ghost"
 	// RepeatAndTrim("Ghost", 7): "GhostGh"
@@ -119,6 +121,7 @@ func ExampleRepeatAndTrim() {
 }
 
 func TestRepeatAndTrim(t *testing.T) {
+	assert.Equal(t, "", RepeatAndTrim("", 5))
 	assert.Equal(t, "", RepeatAndTrim("Ghost", 0))
 	assert.Equal(t, "Gho", RepeatAndTrim("Ghost", 3))
 	assert.Equal(t, "Ghost", RepeatAndTrim("Ghost", 5))
