@@ -1289,5 +1289,31 @@ func TestTable_Render_SetWidth_Title(t *testing.T) {
 
 		assert.Equal(t, strings.Join(expectedOut, "\n"), tw.Render())
 	})
+}
 
+func TestTable_Render_WidthEnforcer(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendRows([]Row{
+		{"U2", "Hey", "2021-04-19 13:37", "Yuh yuh yuh"},
+		{"S12", "Uhhhh", "2021-04-19 13:37", "Some dummy data here"},
+		{"R123", "Lobsters", "2021-04-19 13:37", "I like lobsters"},
+		{"R123", "Some big name here and it's pretty big", "2021-04-19 13:37", "Abcdefghijklmnopqrstuvwxyz"},
+		{"R123", "Small name", "2021-04-19 13:37", "Abcdefghijklmnopqrstuvwxyz"},
+	})
+	tw.SetColumnConfigs([]ColumnConfig{
+		{Number: 2, WidthMax: 20, WidthMaxEnforcer: text.Trim},
+	})
+
+	expectedOut := `+------+----------------------+------------------+----------------------------+
+| U2   | Hey                  | 2021-04-19 13:37 | Yuh yuh yuh                |
+| S12  | Uhhhh                | 2021-04-19 13:37 | Some dummy data here       |
+| R123 | Lobsters             | 2021-04-19 13:37 | I like lobsters            |
+| R123 | Some big name here a | 2021-04-19 13:37 | Abcdefghijklmnopqrstuvwxyz |
+| R123 | Small name           | 2021-04-19 13:37 | Abcdefghijklmnopqrstuvwxyz |
++------+----------------------+------------------+----------------------------+`
+	actualOut := tw.Render()
+	assert.Equal(t, expectedOut, actualOut)
+	if expectedOut != actualOut {
+		fmt.Println(actualOut)
+	}
 }
