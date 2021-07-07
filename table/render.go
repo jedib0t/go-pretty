@@ -307,7 +307,7 @@ func (t *Table) renderRow(out *strings.Builder, row rowStr, hint renderHint) {
 		// split each column into individual lines and render them one-by-one
 		if colMaxLines == 1 {
 			hint.isLastLineOfRow = true
-			t.renderLine(out, row, hint)
+			t.renderLine(out, rowWrapped, hint)
 		} else {
 			// convert one row into N # of rows based on colMaxLines
 			rowLines := make([]rowStr, len(row))
