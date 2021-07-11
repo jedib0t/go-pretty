@@ -105,6 +105,7 @@ func trackSomethingIndeterminate(pw Writer, tracker *Tracker) {
 
 func renderAndWait(pw Writer, autoStop bool) {
 	go pw.Render()
+	go pw.Render() // this call should be a no-op
 	time.Sleep(time.Millisecond * 100)
 	for pw.IsRenderInProgress() {
 		if pw.LengthActive() == 0 {
