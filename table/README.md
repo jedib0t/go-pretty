@@ -186,12 +186,9 @@ Or you can use one of the ready-to-use Styles, and just make a few tweaks:
 ```golang
     t.SetStyle(table.StyleLight)
     t.Style().Color.Header = text.Colors{text.BgHiCyan, text.FgBlack}
+    t.Style().Color.IndexColumn = text.Colors{text.BgHiCyan, text.FgBlack}
     t.Style().Format.Footer = text.FormatLower
     t.Style().Options.DrawBorder = false
-    
-    // Color 1st column only
-    t.SetIndexColumn(1)
-    t.Style().Color.IndexColumn = text.Colors{text.BgHiCyan, text.FgBlack} 
 ```
 
 ## Auto-Merge
