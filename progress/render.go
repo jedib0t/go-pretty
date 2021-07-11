@@ -12,30 +12,22 @@ import (
 // Render renders the Progress tracker and handles all existing trackers and
 // those that are added dynamically while render is in progress.
 func (p *Progress) Render() {
-
 	if p.beginRender() {
 		p.initForRender()
 
+		lastRenderLength := 0
 		ticker := time.NewTicker(p.updateFrequency)
 		defer ticker.Stop()
-
-		lastRenderLength := 0
 		for {
 			select {
 			case <-ticker.C:
-				if p.LengthActive() > 0 {
-					lastRenderLength = p.renderTrackers(lastRenderLength)
-				}
+				lastRenderLength = p.renderTrackers(lastRenderLength)
 			case <-p.done:
-				// always render the current state before finishing render in case
-				// it hasn't been shown yet
-				if p.LengthActive() > 0 {
-					lastRenderLength = p.renderTrackers(lastRenderLength)
-				}
+				// always render the current state before finishing render in
+				// case it hasn't been shown yet
+				lastRenderLength = p.renderTrackers(lastRenderLength)
 
-				p.renderInProgressMutex.Lock()
-				p.renderInProgress = false
-				p.renderInProgressMutex.Unlock()
+				p.endRender()
 				return
 			}
 		}
@@ -49,54 +41,8 @@ func (p *Progress) beginRender() bool {
 	if p.renderInProgress {
 		return false
 	}
-
 	p.renderInProgress = true
 	return true
-}
-
-func (p *Progress) renderTrackers(lastRenderLength int) int {
-	// buffer all output into a strings.Builder object
-	var out strings.Builder
-	out.Grow(lastRenderLength)
-
-	// move up N times based on the number of active trackers
-	if lastRenderLength > 0 {
-		p.moveCursorToTheTop(&out)
-	}
-
-	// find the currently "active" and "done" trackers
-	trackersActive, trackersDone := p.extractDoneAndActiveTrackers()
-
-	// sort and render the done trackers
-	for _, tracker := range trackersDone {
-		p.renderTracker(&out, tracker, renderHint{})
-	}
-	p.trackersDoneMutex.Lock()
-	p.trackersDone = append(p.trackersDone, trackersDone...)
-	p.trackersDoneMutex.Unlock()
-
-	// sort and render the active trackers
-	for _, tracker := range trackersActive {
-		p.renderTracker(&out, tracker, renderHint{})
-	}
-	p.trackersActiveMutex.Lock()
-	p.trackersActive = trackersActive
-	p.trackersActiveMutex.Unlock()
-
-	// render the overall tracker
-	if p.showOverallTracker {
-		p.renderTracker(&out, p.overallTracker, renderHint{isOverallTracker: true})
-	}
-
-	// write the text to the output writer
-	_, _ = p.outputWriter.Write([]byte(out.String()))
-
-	// stop if auto stop is enabled and there are no more active trackers
-	if p.autoStop && p.LengthActive() == 0 {
-		p.done <- true
-	}
-
-	return out.Len()
 }
 
 func (p *Progress) consumeQueuedTrackers() {
@@ -108,6 +54,13 @@ func (p *Progress) consumeQueuedTrackers() {
 		p.trackersInQueueMutex.Unlock()
 		p.trackersActiveMutex.Unlock()
 	}
+}
+
+func (p *Progress) endRender() {
+	p.renderInProgressMutex.Lock()
+	defer p.renderInProgressMutex.Unlock()
+
+	p.renderInProgress = false
 }
 
 func (p *Progress) extractDoneAndActiveTrackers() ([]*Tracker, []*Tracker) {
@@ -260,6 +213,26 @@ func (p *Progress) renderTrackerDone(out *strings.Builder, t *Tracker, message s
 	out.WriteRune('\n')
 }
 
+func (p *Progress) renderTrackerMessage(out *strings.Builder, t *Tracker, message string) {
+	if !t.IsErrored() {
+		out.WriteString(p.style.Colors.Message.Sprint(message))
+	} else {
+		out.WriteString(p.style.Colors.Error.Sprint(message))
+	}
+}
+
+func (p *Progress) renderTrackerPercentage(out *strings.Builder, t *Tracker) {
+	if !p.hidePercentage {
+		var percentageStr string
+		if t.IsIndeterminate() {
+			percentageStr = p.style.Options.PercentIndeterminate
+		} else {
+			percentageStr = fmt.Sprintf(p.style.Options.PercentFormat, t.PercentDone())
+		}
+		out.WriteString(p.style.Colors.Percent.Sprint(percentageStr))
+	}
+}
+
 func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, message string, trackerStr string, hint renderHint) {
 	if hint.isOverallTracker {
 		out.WriteString(p.style.Colors.Tracker.Sprint(trackerStr))
@@ -286,24 +259,53 @@ func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, messa
 	}
 }
 
-func (p *Progress) renderTrackerMessage(out *strings.Builder, t *Tracker, message string) {
-	if !t.IsErrored() {
-		out.WriteString(p.style.Colors.Message.Sprint(message))
-	} else {
-		out.WriteString(p.style.Colors.Error.Sprint(message))
+func (p *Progress) renderTrackers(lastRenderLength int) int {
+	if p.LengthActive() == 0 {
+		return 0
 	}
-}
 
-func (p *Progress) renderTrackerPercentage(out *strings.Builder, t *Tracker) {
-	if !p.hidePercentage {
-		var percentageStr string
-		if t.IsIndeterminate() {
-			percentageStr = p.style.Options.PercentIndeterminate
-		} else {
-			percentageStr = fmt.Sprintf(p.style.Options.PercentFormat, t.PercentDone())
-		}
-		out.WriteString(p.style.Colors.Percent.Sprint(percentageStr))
+	// buffer all output into a strings.Builder object
+	var out strings.Builder
+	out.Grow(lastRenderLength)
+
+	// move up N times based on the number of active trackers
+	if lastRenderLength > 0 {
+		p.moveCursorToTheTop(&out)
 	}
+
+	// find the currently "active" and "done" trackers
+	trackersActive, trackersDone := p.extractDoneAndActiveTrackers()
+
+	// sort and render the done trackers
+	for _, tracker := range trackersDone {
+		p.renderTracker(&out, tracker, renderHint{})
+	}
+	p.trackersDoneMutex.Lock()
+	p.trackersDone = append(p.trackersDone, trackersDone...)
+	p.trackersDoneMutex.Unlock()
+
+	// sort and render the active trackers
+	for _, tracker := range trackersActive {
+		p.renderTracker(&out, tracker, renderHint{})
+	}
+	p.trackersActiveMutex.Lock()
+	p.trackersActive = trackersActive
+	p.trackersActiveMutex.Unlock()
+
+	// render the overall tracker
+	if p.showOverallTracker {
+		p.renderTracker(&out, p.overallTracker, renderHint{isOverallTracker: true})
+	}
+
+	// write the text to the output writer
+	_, _ = p.outputWriter.Write([]byte(out.String()))
+
+	// stop if auto stop is enabled and there are no more active trackers
+	if p.autoStop && p.LengthActive() == 0 {
+		p.done <- true
+	}
+
+	return out.Len()
 }
 
 func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker, hint renderHint) {
