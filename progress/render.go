@@ -29,6 +29,12 @@ func (p *Progress) Render() {
 					lastRenderLength = p.renderTrackers(lastRenderLength)
 				}
 			case <-p.done:
+				// always render the current state before finishing render in case
+				// it hasn't been shown yet
+				if p.LengthActive() > 0 {
+					lastRenderLength = p.renderTrackers(lastRenderLength)
+				}
+
 				p.renderInProgressMutex.Lock()
 				p.renderInProgress = false
 				p.renderInProgressMutex.Unlock()
