@@ -25,8 +25,7 @@ func (p *Progress) Render() {
 			case <-p.done:
 				// always render the current state before finishing render in
 				// case it hasn't been shown yet
-				lastRenderLength = p.renderTrackers(lastRenderLength)
-
+				p.renderTrackers(lastRenderLength)
 				p.endRender()
 				return
 			}

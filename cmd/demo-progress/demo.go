@@ -26,10 +26,20 @@ var (
 	}
 )
 
-func trackSomething(pw progress.Writer, idx int64, updateMessage bool) {
-	total := idx * idx * idx * 250
-	incrementPerCycle := idx * int64(*numTrackers) * 250
+func getMessage(idx int64, units *progress.Units) string {
+	var message string
+	switch units {
+	case &progress.UnitsBytes:
+		message = fmt.Sprintf("Downloading File    #%3d", idx)
+	case &progress.UnitsCurrencyDollar, &progress.UnitsCurrencyEuro, &progress.UnitsCurrencyPound:
+		message = fmt.Sprintf("Transferring Amount #%3d", idx)
+	default:
+		message = fmt.Sprintf("Calculating Total   #%3d", idx)
+	}
+	return message
+}
 
+func getUnits(idx int64) *progress.Units {
 	var units *progress.Units
 	switch {
 	case idx%5 == 0:
@@ -41,16 +51,15 @@ func trackSomething(pw progress.Writer, idx int64, updateMessage bool) {
 	default:
 		units = &progress.UnitsDefault
 	}
+	return units
+}
 
-	var message string
-	switch units {
-	case &progress.UnitsBytes:
-		message = fmt.Sprintf("Downloading File    #%3d", idx)
-	case &progress.UnitsCurrencyDollar, &progress.UnitsCurrencyEuro, &progress.UnitsCurrencyPound:
-		message = fmt.Sprintf("Transferring Amount #%3d", idx)
-	default:
-		message = fmt.Sprintf("Calculating Total   #%3d", idx)
-	}
+func trackSomething(pw progress.Writer, idx int64, updateMessage bool) {
+	total := idx * idx * idx * 250
+	incrementPerCycle := idx * int64(*numTrackers) * 250
+
+	units := getUnits(idx)
+	message := getMessage(idx, units)
 	tracker := progress.Tracker{Message: message, Total: total, Units: *units}
 	if idx == int64(*numTrackers) {
 		tracker.Total = 0
