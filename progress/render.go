@@ -12,17 +12,15 @@ import (
 // Render renders the Progress tracker and handles all existing trackers and
 // those that are added dynamically while render is in progress.
 func (p *Progress) Render() {
-	if !p.IsRenderInProgress() {
+
+	if p.beginRender() {
 		p.initForRender()
 
 		ticker := time.NewTicker(p.updateFrequency)
 		defer ticker.Stop()
 
 		lastRenderLength := 0
-		p.renderInProgressMutex.Lock()
-		p.renderInProgress = true
-		p.renderInProgressMutex.Unlock()
-		for p.IsRenderInProgress() {
+		for {
 			select {
 			case <-ticker.C:
 				if p.LengthActive() > 0 {
@@ -38,9 +36,22 @@ func (p *Progress) Render() {
 				p.renderInProgressMutex.Lock()
 				p.renderInProgress = false
 				p.renderInProgressMutex.Unlock()
+				return
 			}
 		}
 	}
+}
+
+func (p *Progress) beginRender() bool {
+	p.renderInProgressMutex.Lock()
+	defer p.renderInProgressMutex.Unlock()
+
+	if p.renderInProgress {
+		return false
+	}
+
+	p.renderInProgress = true
+	return true
 }
 
 func (p *Progress) renderTrackers(lastRenderLength int) int {
