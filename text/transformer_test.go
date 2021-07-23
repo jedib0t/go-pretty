@@ -15,6 +15,7 @@ func TestNewNumberTransformer(t *testing.T) {
 		"negative": colorsNumberNegative,
 		"positive": colorsNumberPositive,
 		"zero":     nil,
+		"nil":      nil,
 	}
 	colorValuesMap := map[string]map[interface{}]string{
 		"negative": {
@@ -54,6 +55,9 @@ func TestNewNumberTransformer(t *testing.T) {
 			float32(0.00000): "%08.2f",
 			float64(0.00000): "%08.2f",
 		},
+		"nil": {
+			nil: "%v",
+		},
 	}
 
 	for sign, valuesFormatMap := range colorValuesMap {
@@ -64,8 +68,12 @@ func TestNewNumberTransformer(t *testing.T) {
 				expected = strings.Replace(expected, "-0", "-00", 1)
 			}
 			actual := transformer(value)
+			var kind reflect.Kind
+			if value != nil {
+				kind = reflect.TypeOf(value).Kind()
+			}
 			message := fmt.Sprintf("%s.%s: expected=%v, actual=%v; format=%#v",
-				sign, reflect.TypeOf(value).Kind(), expected, actual, format)
+				sign, kind, expected, actual, format)
 
 			assert.Equal(t, expected, actual, message)
 		}

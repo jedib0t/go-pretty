@@ -49,4 +49,5 @@ func TestIsNumber(t *testing.T) {
 	assert.True(t, isNumber(float32(1)))
 	assert.True(t, isNumber(float64(1)))
 	assert.False(t, isNumber("1"))
+	assert.False(t, isNumber(nil))
 }
