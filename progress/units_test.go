@@ -36,3 +36,11 @@ func TestUnits_Sprint(t *testing.T) {
 	customUnits := Units{Notation: "#"}
 	assert.Equal(t, "#1.50K", customUnits.Sprint(1500))
 }
+
+func TestUnits_NotationPosition(t *testing.T) {
+	afterUnits := Units{Notation: " ₽", NotationPosition: UnitsNotationPositionAfter}
+	assert.Equal(t, "1.50K ₽", afterUnits.Sprint(1500))
+
+	unknownNotationPosition := Units{Notation: "* ", NotationPosition: UnitsNotationPosition(999)}
+	assert.Equal(t, "* 1.50K", unknownNotationPosition.Sprint(1500))
+}

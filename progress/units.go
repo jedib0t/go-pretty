@@ -4,10 +4,21 @@ import (
 	"fmt"
 )
 
+// UnitsNotationPosition determines units position relative of tracker value
+// Defaults is UnitsNotationPositionBefore
+type UnitsNotationPosition int
+
+// Supported unit positions relative to tracker value
+const (
+	UnitsNotationPositionBefore UnitsNotationPosition = iota
+	UnitsNotationPositionAfter
+)
+
 // Units defines the "type" of the value being tracked by the Tracker.
 type Units struct {
 	Notation  string
 	Formatter func(value int64) string
+	NotationPosition UnitsNotationPosition
 }
 
 var (
@@ -52,10 +63,23 @@ var (
 
 // Sprint prints the value as defined by the Units.
 func (tu Units) Sprint(value int64) string {
-	if tu.Formatter == nil {
-		return tu.Notation + FormatNumber(value)
+	formatter := tu.Formatter
+	if formatter == nil {
+		formatter = FormatNumber
 	}
-	return tu.Notation + tu.Formatter(value)
+
+	formattedValue := formatter(value)
+
+	switch tu.NotationPosition {
+	case UnitsNotationPositionBefore:
+		return tu.Notation + formattedValue
+
+	case UnitsNotationPositionAfter:
+		return formattedValue + tu.Notation
+
+	default:
+		return tu.Notation + formattedValue
+	}
 }
 
 // FormatBytes formats the given value as a "Byte".
