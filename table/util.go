@@ -29,7 +29,6 @@ func isNumber(x interface{}) bool {
 		reflect.Float32, reflect.Float64:
 		return true
 	}
-
 	return false
 }
 
