@@ -4,8 +4,11 @@ import (
 	"fmt"
 )
 
+// UnitsNotationPosition determines units position relative of tracker value
+// Defaults is UnitsNotationPositionBefore
 type UnitsNotationPosition int
 
+// Supported unit positions relative to tracker value
 const (
 	UnitsNotationPositionBefore UnitsNotationPosition = iota
 	UnitsNotationPositionAfter
