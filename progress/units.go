@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-// UnitsNotationPosition determines notation position relative of unit value.
+// UnitsNotationPosition determines notation position relative to unit value.
 type UnitsNotationPosition int
 
 // Supported unit positions relative to tracker value;
