@@ -9,15 +9,23 @@ import (
 	"github.com/jedib0t/go-pretty/v6/text"
 )
 
+var (
+	colTitleIndex     = "#"
+	colTitleFirstName = "First Name"
+	colTitleLastName  = "Last Name"
+	colTitleSalary    = "Salary"
+	rowHeader         = table.Row{colTitleIndex, colTitleFirstName, colTitleLastName, colTitleSalary}
+	row1              = table.Row{1, "Arya", "Stark", 3000}
+	row2              = table.Row{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"}
+	row3              = table.Row{300, "Tyrion", "Lannister", 5000}
+	rowFooter         = table.Row{"", "", "Total", 10000}
+)
+
 func demoTableColors() {
 	tw := table.NewWriter()
-	tw.AppendHeader(table.Row{"#", "First Name", "Last Name", "Salary"})
-	tw.AppendRows([]table.Row{
-		{1, "Arya", "Stark", 3000},
-		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
-		{300, "Tyrion", "Lannister", 5000},
-	})
-	tw.AppendFooter(table.Row{"", "", "Total", 10000})
+	tw.AppendHeader(rowHeader)
+	tw.AppendRows([]table.Row{row1, row2, row3})
+	tw.AppendFooter(rowFooter)
 	tw.SetIndexColumn(1)
 	tw.SetTitle("Game Of Thrones")
 
@@ -99,7 +107,7 @@ func demoTableFeatures() {
 	//+---+-----+--------+-----------+------+-----------------------------+
 	//Table with Auto-Indexing.
 	//
-	t.AppendHeader(table.Row{"#", "First Name", "Last Name", "Salary"})
+	t.AppendHeader(rowHeader)
 	t.SetCaption("Table with Auto-Indexing (columns-only).\n")
 	fmt.Println(t.Render())
 	//+---+-----+------------+-----------+--------+-----------------------------+
@@ -151,7 +159,7 @@ func demoTableFeatures() {
 	// go right and everything else left. but what if you want the first name to
 	// go right too? and the last column to be "justified"?
 	t.SetColumnConfigs([]table.ColumnConfig{
-		{Name: "First Name", Align: text.AlignRight},
+		{Name: colTitleFirstName, Align: text.AlignRight},
 		// the 5th column does not have a title, so use the column number as the
 		// identifier for the column
 		{Number: 5, Align: text.AlignJustify},
@@ -202,9 +210,9 @@ func demoTableFeatures() {
 	//
 	// time to Align/VAlign the columns...
 	t.SetColumnConfigs([]table.ColumnConfig{
-		{Name: "First Name", Align: text.AlignRight, VAlign: text.VAlignMiddle},
-		{Name: "Last Name", VAlign: text.VAlignBottom},
-		{Name: "Salary", Align: text.AlignRight, VAlign: text.VAlignMiddle},
+		{Name: colTitleFirstName, Align: text.AlignRight, VAlign: text.VAlignMiddle},
+		{Name: colTitleLastName, VAlign: text.VAlignBottom},
+		{Name: colTitleSalary, Align: text.AlignRight, VAlign: text.VAlignMiddle},
 		// the 5th column does not have a title, so use the column number
 		{Number: 5, Align: text.AlignJustify},
 	})
@@ -229,9 +237,9 @@ func demoTableFeatures() {
 	//
 	// changed your mind about AlignJustify?
 	t.SetColumnConfigs([]table.ColumnConfig{
-		{Name: "First Name", Align: text.AlignRight, VAlign: text.VAlignMiddle},
-		{Name: "Last Name", VAlign: text.VAlignBottom},
-		{Name: "Salary", Align: text.AlignRight, VAlign: text.VAlignMiddle},
+		{Name: colTitleFirstName, Align: text.AlignRight, VAlign: text.VAlignMiddle},
+		{Name: colTitleLastName, VAlign: text.VAlignBottom},
+		{Name: colTitleSalary, Align: text.AlignRight, VAlign: text.VAlignMiddle},
 		{Number: 5, Align: text.AlignCenter},
 	})
 	t.SetCaption("Table with a Multi-line Row with VAlign and changed Align.\n")
@@ -259,10 +267,10 @@ func demoTableFeatures() {
 	// custom separators?
 	//==========================================================================
 	t.ResetRows()
-	t.AppendRow(table.Row{1, "Arya", "Stark", 3000})
-	t.AppendRow(table.Row{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"})
+	t.AppendRow(row1)
+	t.AppendRow(row2)
 	t.AppendSeparator()
-	t.AppendRow([]interface{}{300, "Tyrion", "Lannister", 5000})
+	t.AppendRow(row3)
 	t.SetCaption("Simple Table with 3 Rows and a Separator in-between.\n")
 	fmt.Println(t.Render())
 	//+-----+--------+-----------+------+-----------------------------+
@@ -279,9 +287,9 @@ func demoTableFeatures() {
 	//==========================================================================
 	t.ResetRows()
 	t.SetColumnConfigs(nil)
-	t.AppendRow(table.Row{1, "Arya", "Stark", 3000})
-	t.AppendRow(table.Row{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"})
-	t.AppendRow([]interface{}{300, "Tyrion", "Lannister", 5000})
+	t.AppendRow(row1)
+	t.AppendRow(row2)
+	t.AppendRow(row3)
 	t.SetCaption("Starting afresh with a Simple Table again.\n")
 	fmt.Println(t.Render())
 	//+-----+------------+-----------+--------+-----------------------------+
@@ -364,9 +372,9 @@ func demoTableFeatures() {
 	// But I want to see all the data!
 	//==========================================================================
 	t.SetColumnConfigs([]table.ColumnConfig{
-		{Name: "First Name", WidthMax: 6},
-		{Name: "Last Name", WidthMax: 9},
-		{Name: "Salary", WidthMax: 6},
+		{Name: colTitleFirstName, WidthMax: 6},
+		{Name: colTitleLastName, WidthMax: 9},
+		{Name: colTitleSalary, WidthMax: 6},
 		{Number: 5, WidthMax: 10},
 	})
 	t.SetCaption("Table on a diet.\n")
@@ -475,10 +483,10 @@ func demoTableFeatures() {
 	colorBOnW := text.Colors{text.BgWhite, text.FgBlack}
 	// set colors using Colors/ColorsHeader/ColorsFooter
 	t.SetColumnConfigs([]table.ColumnConfig{
-		{Name: "#", Colors: text.Colors{text.FgYellow}, ColorsHeader: colorBOnW},
-		{Name: "First Name", Colors: text.Colors{text.FgHiRed}, ColorsHeader: colorBOnW},
-		{Name: "Last Name", Colors: text.Colors{text.FgHiRed}, ColorsHeader: colorBOnW, ColorsFooter: colorBOnW},
-		{Name: "Salary", Colors: text.Colors{text.FgGreen}, ColorsHeader: colorBOnW, ColorsFooter: colorBOnW},
+		{Name: colTitleIndex, Colors: text.Colors{text.FgYellow}, ColorsHeader: colorBOnW},
+		{Name: colTitleFirstName, Colors: text.Colors{text.FgHiRed}, ColorsHeader: colorBOnW},
+		{Name: colTitleLastName, Colors: text.Colors{text.FgHiRed}, ColorsHeader: colorBOnW, ColorsFooter: colorBOnW},
+		{Name: colTitleSalary, Colors: text.Colors{text.FgGreen}, ColorsHeader: colorBOnW, ColorsFooter: colorBOnW},
 		{Number: 5, Colors: text.Colors{text.FgCyan}, ColorsHeader: colorBOnW},
 	})
 	t.SetCaption("Table with Colors.\n")
