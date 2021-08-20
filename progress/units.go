@@ -16,50 +16,10 @@ const (
 
 // Units defines the "type" of the value being tracked by the Tracker.
 type Units struct {
+	Formatter        func(value int64) string // default: FormatNumber
 	Notation         string
-	NotationPosition UnitsNotationPosition
-	Formatter        func(value int64) string
+	NotationPosition UnitsNotationPosition // default: UnitsNotationPositionBefore
 }
-
-var (
-	// UnitsDefault doesn't define any units. The value will be treated as any
-	// other number.
-	UnitsDefault = Units{
-		Notation:  "",
-		Formatter: FormatNumber,
-	}
-
-	// UnitsBytes defines the value as a storage unit. Values will be converted
-	// and printed in one of these forms: B, KB, MB, GB, TB, PB
-	UnitsBytes = Units{
-		Notation:  "",
-		Formatter: FormatBytes,
-	}
-
-	// UnitsCurrencyDollar defines the value as a Dollar amount. Values will be
-	// converted and printed in one of these forms: $x.yz, $x.yzK, $x.yzM,
-	// $x.yzB, $x.yzT
-	UnitsCurrencyDollar = Units{
-		Notation:  "$",
-		Formatter: FormatNumber,
-	}
-
-	// UnitsCurrencyEuro defines the value as a Euro amount. Values will be
-	// converted and printed in one of these forms: ₠x.yz, ₠x.yzK, ₠x.yzM,
-	// ₠x.yzB, ₠x.yzT
-	UnitsCurrencyEuro = Units{
-		Notation:  "₠",
-		Formatter: FormatNumber,
-	}
-
-	// UnitsCurrencyPound defines the value as a Pound amount. Values will be
-	// converted and printed in one of these forms: £x.yz, £x.yzK, £x.yzM,
-	// £x.yzB, £x.yzT
-	UnitsCurrencyPound = Units{
-		Notation:  "£",
-		Formatter: FormatNumber,
-	}
-)
 
 // Sprint prints the value as defined by the Units.
 func (tu Units) Sprint(value int64) string {
@@ -69,7 +29,6 @@ func (tu Units) Sprint(value int64) string {
 	}
 
 	formattedValue := formatter(value)
-
 	switch tu.NotationPosition {
 	case UnitsNotationPositionAfter:
 		return formattedValue + tu.Notation
@@ -77,6 +36,51 @@ func (tu Units) Sprint(value int64) string {
 		return tu.Notation + formattedValue
 	}
 }
+
+var (
+	// UnitsDefault doesn't define any units. The value will be treated as any
+	// other number.
+	UnitsDefault = Units{
+		Notation:         "",
+		NotationPosition: UnitsNotationPositionBefore,
+		Formatter:        FormatNumber,
+	}
+
+	// UnitsBytes defines the value as a storage unit. Values will be converted
+	// and printed in one of these forms: B, KB, MB, GB, TB, PB
+	UnitsBytes = Units{
+		Notation:         "",
+		NotationPosition: UnitsNotationPositionBefore,
+		Formatter:        FormatBytes,
+	}
+
+	// UnitsCurrencyDollar defines the value as a Dollar amount. Values will be
+	// converted and printed in one of these forms: $x.yz, $x.yzK, $x.yzM,
+	// $x.yzB, $x.yzT
+	UnitsCurrencyDollar = Units{
+		Notation:         "$",
+		NotationPosition: UnitsNotationPositionBefore,
+		Formatter:        FormatNumber,
+	}
+
+	// UnitsCurrencyEuro defines the value as a Euro amount. Values will be
+	// converted and printed in one of these forms: ₠x.yz, ₠x.yzK, ₠x.yzM,
+	// ₠x.yzB, ₠x.yzT
+	UnitsCurrencyEuro = Units{
+		Notation:         "₠",
+		NotationPosition: UnitsNotationPositionBefore,
+		Formatter:        FormatNumber,
+	}
+
+	// UnitsCurrencyPound defines the value as a Pound amount. Values will be
+	// converted and printed in one of these forms: £x.yz, £x.yzK, £x.yzM,
+	// £x.yzB, £x.yzT
+	UnitsCurrencyPound = Units{
+		Notation:         "£",
+		NotationPosition: UnitsNotationPositionBefore,
+		Formatter:        FormatNumber,
+	}
+)
 
 // FormatBytes formats the given value as a "Byte".
 func FormatBytes(value int64) string {
