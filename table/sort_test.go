@@ -1,8 +1,9 @@
 package table
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTable_sortRows_WithName(t *testing.T) {
@@ -125,5 +126,20 @@ func TestTable_sortRows_WithoutName(t *testing.T) {
 	assert.Equal(t, []int{3, 0, 1, 2}, table.getSortedRowIndices())
 
 	table.SortBy(nil)
+	assert.Equal(t, []int{0, 1, 2, 3}, table.getSortedRowIndices())
+}
+
+func TestTable_sortRows_InvalidMode(t *testing.T) {
+	table := Table{}
+	table.AppendRows([]Row{
+		{1, "Arya", "Stark", 3000},
+		{11, "Sansa", "Stark", 3000},
+		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
+		{300, "Tyrion", "Lannister", 5000},
+	})
+	table.initForRenderRows()
+
+	// sort by "First Name"
+	table.SortBy([]SortBy{{Number: 2, Mode: AscNumeric}})
 	assert.Equal(t, []int{0, 1, 2, 3}, table.getSortedRowIndices())
 }

@@ -57,14 +57,14 @@ func (l *List) renderItem(out *strings.Builder, idx int, item *listItem, hint re
 
 		// render the prefix or the leading text before the actual item
 		l.renderItemBulletPrefix(out, idx, item.Level, lineIdx, hint)
-		l.renderItemBullet(out, idx, item.Level, lineIdx, hint)
+		l.renderItemBullet(out, lineIdx, hint)
 
 		// render the actual item
 		out.WriteString(lineStr)
 	}
 }
 
-func (l *List) renderItemBullet(out *strings.Builder, itemIdx int, itemLevel int, lineIdx int, hint renderHint) {
+func (l *List) renderItemBullet(out *strings.Builder, lineIdx int, hint renderHint) {
 	if lineIdx > 0 {
 		// multi-line item.Text
 		if hint.isLastItem {
@@ -73,24 +73,28 @@ func (l *List) renderItemBullet(out *strings.Builder, itemIdx int, itemLevel int
 			out.WriteString(l.style.CharItemVertical)
 		}
 	} else {
-		// single-line item.Text (or first line of a multi-line item.Text)
-		if hint.isOnlyItem {
-			if hint.isTopItem {
-				out.WriteString(l.style.CharItemSingle)
-			} else {
-				out.WriteString(l.style.CharItemBottom)
-			}
-		} else if hint.isTopItem {
-			out.WriteString(l.style.CharItemTop)
-		} else if hint.isFirstItem {
-			out.WriteString(l.style.CharItemFirst)
-		} else if hint.isBottomItem || hint.isLastItem {
-			out.WriteString(l.style.CharItemBottom)
-		} else {
-			out.WriteString(l.style.CharItemMiddle)
-		}
-		out.WriteRune(' ')
+		l.renderItemBulletSingleLine(out, lineIdx, hint)
 	}
+}
+
+func (l *List) renderItemBulletSingleLine(out *strings.Builder, lineIdx int, hint renderHint) {
+	// single-line item.Text (or first line of a multi-line item.Text)
+	if hint.isOnlyItem {
+		if hint.isTopItem {
+			out.WriteString(l.style.CharItemSingle)
+		} else {
+			out.WriteString(l.style.CharItemBottom)
+		}
+	} else if hint.isTopItem {
+		out.WriteString(l.style.CharItemTop)
+	} else if hint.isFirstItem {
+		out.WriteString(l.style.CharItemFirst)
+	} else if hint.isBottomItem || hint.isLastItem {
+		out.WriteString(l.style.CharItemBottom)
+	} else {
+		out.WriteString(l.style.CharItemMiddle)
+	}
+	out.WriteRune(' ')
 }
 
 func (l *List) renderItemBulletPrefix(out *strings.Builder, itemIdx int, itemLevel int, lineIdx int, hint renderHint) {
