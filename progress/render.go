@@ -318,27 +318,31 @@ func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker, hint ren
 			outStats.WriteString(" in ")
 		}
 		if !hint.hideTime {
-			var td, tp time.Duration
-			if t.IsDone() {
-				td = t.timeStop.Sub(t.timeStart)
-			} else {
-				td = time.Since(t.timeStart)
-			}
-			if hint.isOverallTracker {
-				tp = p.style.Options.TimeOverallPrecision
-			} else if t.IsDone() {
-				tp = p.style.Options.TimeDonePrecision
-			} else {
-				tp = p.style.Options.TimeInProgressPrecision
-			}
-			outStats.WriteString(p.style.Colors.Time.Sprint(td.Round(tp)))
-			if p.showETA || hint.isOverallTracker {
-				p.renderTrackerStatsETA(&outStats, t, hint)
-			}
+			p.renderTrackerStatsTime(&outStats, t, hint)
 		}
 		outStats.WriteRune(']')
 
 		out.WriteString(p.style.Colors.Stats.Sprint(outStats.String()))
+	}
+}
+
+func (p *Progress) renderTrackerStatsTime(outStats *strings.Builder, t *Tracker, hint renderHint) {
+	var td, tp time.Duration
+	if t.IsDone() {
+		td = t.timeStop.Sub(t.timeStart)
+	} else {
+		td = time.Since(t.timeStart)
+	}
+	if hint.isOverallTracker {
+		tp = p.style.Options.TimeOverallPrecision
+	} else if t.IsDone() {
+		tp = p.style.Options.TimeDonePrecision
+	} else {
+		tp = p.style.Options.TimeInProgressPrecision
+	}
+	outStats.WriteString(p.style.Colors.Time.Sprint(td.Round(tp)))
+	if p.showETA || hint.isOverallTracker {
+		p.renderTrackerStatsETA(outStats, t, hint)
 	}
 }
 
