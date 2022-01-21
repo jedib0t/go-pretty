@@ -1,10 +1,9 @@
 module github.com/jedib0t/go-pretty/v6
 
-go 1.13
+go 1.16
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/fzipp/gocyclo v0.3.1 // indirect
 	github.com/mattn/go-runewidth v0.0.9
 	github.com/pkg/profile v1.2.1
 	github.com/pmezard/go-difflib v1.0.0 // indirect
