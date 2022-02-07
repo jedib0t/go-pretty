@@ -86,7 +86,7 @@ func (t *Table) renderColumn(out *strings.Builder, row rowStr, colIdx int, maxCo
 			align = text.AlignCenter
 			maxColumnLength += t.maxColumnLengths[idx] +
 				text.RuneCount(t.style.Box.PaddingRight+t.style.Box.PaddingLeft) +
-				text.RuneCount(t.style.Box.PaddingRight)
+				1
 			numColumnsRenderer++
 		}
 	}

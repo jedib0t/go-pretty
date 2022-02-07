@@ -503,6 +503,8 @@ func (t *Table) getColumnSeparatorNonBorderNonAutoIndex(mergeCellsAbove bool, me
 		return t.style.Box.MiddleVertical
 	} else if mergeCurrCol {
 		return t.style.Box.LeftSeparator
+	} else if mergeNextCol {
+		return t.style.Box.RightSeparator
 	}
 	return t.style.Box.MiddleSeparator
 }

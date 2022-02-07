@@ -213,6 +213,54 @@ func TestTable_Render_AutoMerge_Complex(t *testing.T) {
 	assert.Equal(t, expectedOut, tw.Render())
 }
 
+func TestTable_Render_AutoMerge_Complex2(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendRow(Row{"1.1\n1.1", "1.2\n1.2", "1.3\n1.3", " ", "2.1\n2.1", "2.2\n2.2", "2.3\n2.3"})
+	tw.AppendRow(Row{"1.4\n1.4", "1.5\n1.5", "1.6\n1.6", " ", "2.4\n2.4", "2.5\n2.5", "2.6\n2.6"})
+	tw.AppendRow(Row{"1.7\n1.7", "1.8\n1.8", "1.9\n0.1", "0.2\n0.2", "2.7\n0.3", "2.8\n2.8", "2.9\n2.9"})
+	tw.AppendRow(Row{" ", " ", "0.4\n0.4", "0.5\n0.5", "0.6\n0.6", " ", " "}, RowConfig{AutoMerge: true})
+	tw.AppendRow(Row{"3.1\n3.1", "3.2\n3.2", "3.3\n0.7", "0.8\n0.8", "4.1\n0.9", "4.2\n4.2", "4.3\n4.3"})
+	tw.AppendRow(Row{"3.4\n3.4", "3.5\n3.5", "3.6\n3.6", " ", "4.4\n4.4", "4.5\n4.5", "4.6\n4.6"})
+	tw.AppendRow(Row{"3.7\n3.7", "3.8\n3.8", "3.9\n3.9", " ", "4.7\n4.7", "4.8\n4.8", "4.9\n4.9"})
+	tw.SetColumnConfigs([]ColumnConfig{
+		{Number: 4, AutoMerge: true},
+	})
+	tw.SetStyle(StyleLight)
+	tw.Style().Box.PaddingLeft = ""
+	tw.Style().Box.PaddingRight = ""
+	tw.Style().Options.DrawBorder = true
+	tw.Style().Options.SeparateRows = true
+	tw.Style().Options.SeparateColumns = true
+
+	expectedOut := `┌───┬───┬───┬───┬───┬───┬───┐
+│1.1│1.2│1.3│   │2.1│2.2│2.3│
+│1.1│1.2│1.3│   │2.1│2.2│2.3│
+├───┼───┼───┤   ├───┼───┼───┤
+│1.4│1.5│1.6│   │2.4│2.5│2.6│
+│1.4│1.5│1.6│   │2.4│2.5│2.6│
+├───┼───┼───┼───┼───┼───┼───┤
+│1.7│1.8│1.9│0.2│2.7│2.8│2.9│
+│1.7│1.8│0.1│0.2│0.3│2.8│2.9│
+├───┴───┼───┼───┼───┼───┴───┤
+│       │0.4│0.5│0.6│       │
+│       │0.4│0.5│0.6│       │
+├───┬───┼───┼───┼───┼───┬───┤
+│3.1│3.2│3.3│0.8│4.1│4.2│4.3│
+│3.1│3.2│0.7│0.8│0.9│4.2│4.3│
+├───┼───┼───┼───┼───┼───┼───┤
+│3.4│3.5│3.6│   │4.4│4.5│4.6│
+│3.4│3.5│3.6│   │4.4│4.5│4.6│
+├───┼───┼───┤   ├───┼───┼───┤
+│3.7│3.8│3.9│   │4.7│4.8│4.9│
+│3.7│3.8│3.9│   │4.7│4.8│4.9│
+└───┴───┴───┴───┴───┴───┴───┘`
+	out := tw.Render()
+	assert.Equal(t, expectedOut, out)
+	if expectedOut != out {
+		fmt.Println(out)
+	}
+}
+
 func TestTable_Render_AutoMerge_ColumnsOnly(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE\nEXE", "RCE\nRUN"})
