@@ -2,7 +2,6 @@ package table
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -99,7 +98,7 @@ func TestTable_RenderHTML_AutoIndex(t *testing.T) {
 		}
 		tw.AppendFooter(row)
 	}
-	tw.SetOutputMirror(os.Stdout)
+	tw.SetOutputMirror(nil)
 	tw.SetAutoIndex(true)
 	tw.SetStyle(StyleLight)
 
@@ -251,7 +250,7 @@ func TestTable_RenderHTML_CustomStyle(t *testing.T) {
 		EscapeText:  false,
 		Newline:     "<!-- newline -->",
 	}
-	tw.SetOutputMirror(os.Stdout)
+	tw.SetOutputMirror(nil)
 
 	expectedOut := `<table class="game-of-thrones">
   <thead>

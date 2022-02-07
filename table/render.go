@@ -50,7 +50,7 @@ func (t *Table) Render() string {
 }
 
 func (t *Table) renderColumn(out *strings.Builder, row rowStr, colIdx int, maxColumnLength int, hint renderHint) int {
-	numColumnsRenderer := 1
+	numColumnsRendered := 1
 
 	// when working on the first column, and autoIndex is true, insert a new
 	// column with the row number on it.
@@ -84,10 +84,8 @@ func (t *Table) renderColumn(out *strings.Builder, row rowStr, colIdx int, maxCo
 				break
 			}
 			align = text.AlignCenter
-			maxColumnLength += t.maxColumnLengths[idx] +
-				text.RuneCount(t.style.Box.PaddingRight+t.style.Box.PaddingLeft) +
-				1
-			numColumnsRenderer++
+			maxColumnLength += t.getMaxColumnLengthForMerging(idx)
+			numColumnsRendered++
 		}
 	}
 	colStr = align.Apply(colStr, maxColumnLength)
@@ -99,7 +97,7 @@ func (t *Table) renderColumn(out *strings.Builder, row rowStr, colIdx int, maxCo
 
 	t.renderColumnColorized(out, colIdx, colStr, hint)
 
-	return colIdx + numColumnsRenderer
+	return colIdx + numColumnsRendered
 }
 
 func (t *Table) renderColumnAutoIndex(out *strings.Builder, hint renderHint) {

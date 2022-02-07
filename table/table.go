@@ -548,6 +548,15 @@ func (t *Table) getFormat(hint renderHint) text.Format {
 	return t.style.Format.Row
 }
 
+func (t *Table) getMaxColumnLengthForMerging(colIdx int) int {
+	maxColumnLength := t.maxColumnLengths[colIdx]
+	maxColumnLength += text.RuneCount(t.style.Box.PaddingRight + t.style.Box.PaddingLeft)
+	if t.style.Options.SeparateColumns {
+		maxColumnLength += text.RuneCount(t.style.Box.EmptySeparator)
+	}
+	return maxColumnLength
+}
+
 func (t *Table) getRow(rowIdx int, hint renderHint) rowStr {
 	switch {
 	case hint.isHeaderRow:

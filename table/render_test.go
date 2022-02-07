@@ -210,7 +210,8 @@ func TestTable_Render_AutoMerge_Complex(t *testing.T) {
 │   │                              │           ├─────┴─────┼─────┤
 │   │                              │           │     5     │     │
 └───┴──────────────────────────────┴───────────┴───────────┴─────┘`
-	assert.Equal(t, expectedOut, tw.Render())
+	out := tw.Render()
+	assert.Equal(t, expectedOut, out)
 }
 
 func TestTable_Render_AutoMerge_Complex2(t *testing.T) {
