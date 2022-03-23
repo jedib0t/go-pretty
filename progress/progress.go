@@ -1,6 +1,7 @@
 package progress
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"sync"
@@ -28,6 +29,8 @@ type Progress struct {
 	hideTracker           bool
 	hideValue             bool
 	hidePercentage        bool
+	logsToRender          []string
+	logsToRenderMutex     sync.RWMutex
 	messageWidth          int
 	numTrackersExpected   int64
 	overallTracker        *Tracker
@@ -142,6 +145,17 @@ func (p *Progress) LengthInQueue() int {
 	p.trackersInQueueMutex.RUnlock()
 
 	return out
+}
+
+// Log appends a log to display above the active progress bars during the next
+// refresh.
+func (p *Progress) Log(msg string, a ...interface{}) {
+	if len(a) > 0 {
+		msg = fmt.Sprintf(msg, a...)
+	}
+	p.logsToRenderMutex.Lock()
+	p.logsToRender = append(p.logsToRender, msg)
+	p.logsToRenderMutex.Unlock()
 }
 
 // SetAutoStop toggles the auto-stop functionality. Auto-stop set to true would

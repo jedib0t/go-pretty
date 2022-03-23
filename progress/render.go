@@ -272,24 +272,8 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 		p.moveCursorToTheTop(&out)
 	}
 
-	// find the currently "active" and "done" trackers
-	trackersActive, trackersDone := p.extractDoneAndActiveTrackers()
-
-	// sort and render the done trackers
-	for _, tracker := range trackersDone {
-		p.renderTracker(&out, tracker, renderHint{})
-	}
-	p.trackersDoneMutex.Lock()
-	p.trackersDone = append(p.trackersDone, trackersDone...)
-	p.trackersDoneMutex.Unlock()
-
-	// sort and render the active trackers
-	for _, tracker := range trackersActive {
-		p.renderTracker(&out, tracker, renderHint{})
-	}
-	p.trackersActiveMutex.Lock()
-	p.trackersActive = trackersActive
-	p.trackersActiveMutex.Unlock()
+	// render the trackers that are done, and then the ones that are active
+	p.renderTrackersDoneAndActive(&out)
 
 	// render the overall tracker
 	if p.showOverallTracker {
@@ -305,6 +289,37 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 	}
 
 	return out.Len()
+}
+
+func (p *Progress) renderTrackersDoneAndActive(out *strings.Builder) {
+	// find the currently "active" and "done" trackers
+	trackersActive, trackersDone := p.extractDoneAndActiveTrackers()
+
+	// sort and render the done trackers
+	for _, tracker := range trackersDone {
+		p.renderTracker(out, tracker, renderHint{})
+	}
+	p.trackersDoneMutex.Lock()
+	p.trackersDone = append(p.trackersDone, trackersDone...)
+	p.trackersDoneMutex.Unlock()
+
+	// render all the logs received and flush them out
+	p.logsToRenderMutex.Lock()
+	for _, log := range p.logsToRender {
+		out.WriteString(text.EraseLine.Sprint())
+		out.WriteString(log)
+		out.WriteRune('\n')
+	}
+	p.logsToRender = nil
+	p.logsToRenderMutex.Unlock()
+
+	// sort and render the active trackers
+	for _, tracker := range trackersActive {
+		p.renderTracker(out, tracker, renderHint{})
+	}
+	p.trackersActiveMutex.Lock()
+	p.trackersActive = trackersActive
+	p.trackersActiveMutex.Unlock()
 }
 
 func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker, hint renderHint) {

@@ -87,6 +87,14 @@ func TestProgress_LengthInQueue(t *testing.T) {
 	assert.Equal(t, 1, p.LengthInQueue())
 }
 
+func TestProgress_Log(t *testing.T) {
+	p := Progress{}
+	assert.Len(t, p.logsToRender, 0)
+
+	p.Log("testing log")
+	assert.Len(t, p.logsToRender, 1)
+}
+
 func TestProgress_SetAutoStop(t *testing.T) {
 	p := Progress{}
 	assert.False(t, p.autoStop)
