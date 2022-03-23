@@ -15,6 +15,7 @@ type Writer interface {
 	LengthActive() int
 	LengthDone() int
 	LengthInQueue() int
+	Log(msg string, a ...interface{})
 	SetAutoStop(autoStop bool)
 	SetMessageWidth(width int)
 	SetNumTrackersExpected(numTrackers int)

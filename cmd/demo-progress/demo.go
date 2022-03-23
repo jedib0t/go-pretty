@@ -12,8 +12,9 @@ import (
 
 var (
 	autoStop    = flag.Bool("auto-stop", false, "Auto-stop rendering?")
-	randomFail  = flag.Bool("rnd-fail", false, "Enable random failures")
 	numTrackers = flag.Int("num-trackers", 13, "Number of Trackers")
+	randomFail  = flag.Bool("rnd-fail", false, "Enable random failures in tracking")
+	randomLogs  = flag.Bool("rnd-logs", false, "Enable random logs in the middle of tracking")
 
 	messageColors = []text.Color{
 		text.FgRed,
@@ -133,7 +134,16 @@ func main() {
 	// wait for one or more trackers to become active (just blind-wait for a
 	// second) and then keep watching until Rendering is in progress
 	time.Sleep(time.Second)
+	messagesLogged := make(map[string]bool)
 	for pw.IsRenderInProgress() {
+		if *randomLogs && pw.LengthDone()%3 == 0 {
+			logMsg := text.Faint.Sprintf("[INFO] done with %d trackers", pw.LengthDone())
+			if !messagesLogged[logMsg] {
+				pw.Log(logMsg)
+				messagesLogged[logMsg] = true
+			}
+		}
+
 		// for manual-stop mode, stop when there are no more active trackers
 		if !*autoStop && pw.LengthActive() == 0 {
 			pw.Stop()
