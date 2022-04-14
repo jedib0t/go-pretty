@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 	"unicode/utf8"
+
+	"github.com/jedib0t/go-pretty/v6/text"
 )
 
 var (
@@ -24,11 +26,8 @@ type Progress struct {
 	done                  chan bool
 	lengthTracker         int
 	lengthProgress        int
+	lengthProgressOverall int
 	outputWriter          io.Writer
-	hideTime              bool
-	hideTracker           bool
-	hideValue             bool
-	hidePercentage        bool
 	logsToRender          []string
 	logsToRenderMutex     sync.RWMutex
 	messageWidth          int
@@ -37,8 +36,6 @@ type Progress struct {
 	overallTrackerMutex   sync.RWMutex
 	renderInProgress      bool
 	renderInProgressMutex sync.RWMutex
-	showETA               bool
-	showOverallTracker    bool
 	sortBy                SortBy
 	style                 *Style
 	trackerPosition       Position
@@ -216,33 +213,39 @@ func (p *Progress) SetUpdateFrequency(frequency time.Duration) {
 }
 
 // ShowETA toggles showing the ETA for all individual trackers.
+// Deprecated: in favor of Style().Visibility.ETA
 func (p *Progress) ShowETA(show bool) {
-	p.showETA = show
+	p.Style().Visibility.ETA = show
 }
 
 // ShowPercentage toggles showing the Percent complete for each Tracker.
+// Deprecated: in favor of Style().Visibility.Percentage
 func (p *Progress) ShowPercentage(show bool) {
-	p.hidePercentage = !show
+	p.Style().Visibility.Percentage = show
 }
 
 // ShowOverallTracker toggles showing the Overall progress tracker with an ETA.
+// Deprecated: in favor of Style().Visibility.TrackerOverall
 func (p *Progress) ShowOverallTracker(show bool) {
-	p.showOverallTracker = show
+	p.Style().Visibility.TrackerOverall = show
 }
 
 // ShowTime toggles showing the Time taken by each Tracker.
+// Deprecated: in favor of Style().Visibility.Time
 func (p *Progress) ShowTime(show bool) {
-	p.hideTime = !show
+	p.Style().Visibility.Time = show
 }
 
 // ShowTracker toggles showing the Tracker (the progress bar).
+// Deprecated: in favor of Style().Visibility.Tracker
 func (p *Progress) ShowTracker(show bool) {
-	p.hideTracker = !show
+	p.Style().Visibility.Tracker = show
 }
 
 // ShowValue toggles showing the actual Value of the Tracker.
+// Deprecated: in favor of Style().Visibility.Value
 func (p *Progress) ShowValue(show bool) {
-	p.hideValue = !show
+	p.Style().Visibility.Value = show
 }
 
 // Stop stops the Render() logic that is in progress.
@@ -273,11 +276,17 @@ func (p *Progress) initForRender() {
 		p.lengthTracker = DefaultLengthTracker
 	}
 
-	// calculate length of the actual progress bar by discount the left/right
+	// calculate length of the actual progress bar by discounting the left/right
 	// border/box chars
 	p.lengthProgress = p.lengthTracker -
 		utf8.RuneCountInString(p.style.Chars.BoxLeft) -
 		utf8.RuneCountInString(p.style.Chars.BoxRight)
+	p.lengthProgressOverall = p.messageWidth +
+		text.RuneCount(p.style.Options.Separator) +
+		p.lengthProgress + 1
+	if p.style.Visibility.Percentage {
+		p.lengthProgressOverall += text.RuneCount(fmt.Sprintf(p.style.Options.PercentFormat, 0.0))
+	}
 
 	// if not output write has been set, output to STDOUT
 	if p.outputWriter == nil {

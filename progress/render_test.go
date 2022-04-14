@@ -32,13 +32,13 @@ func generateWriter() Writer {
 	pw.SetTrackerLength(25)
 	pw.SetTrackerPosition(PositionRight)
 	pw.SetUpdateFrequency(time.Millisecond * 50)
-	pw.ShowOverallTracker(false)
-	pw.ShowPercentage(true)
-	pw.ShowTime(true)
-	pw.ShowTracker(true)
-	pw.ShowValue(true)
 	pw.Style().Colors = StyleColors{}
 	pw.Style().Options = StyleOptionsDefault
+	pw.Style().Visibility.Percentage = true
+	pw.Style().Visibility.Time = true
+	pw.Style().Visibility.Tracker = true
+	pw.Style().Visibility.TrackerOverall = false
+	pw.Style().Visibility.Value = true
 	return pw
 }
 
@@ -608,8 +608,8 @@ func TestProgress_RenderSomeTrackers_WithOverallTracker(t *testing.T) {
 	pw := generateWriter()
 	pw.SetOutputWriter(&renderOutput)
 	pw.SetTrackerPosition(PositionRight)
-	pw.ShowOverallTracker(true)
 	pw.Style().Options.TimeOverallPrecision = time.Millisecond
+	pw.Style().Visibility.TrackerOverall = true
 	go trackSomething(pw, &Tracker{Message: "Calculating Total   # 1\r", Total: 1000, Units: UnitsDefault})
 	go func() {
 		pw.Log("some information about something that happened at %s", time.Now().Format(time.RFC3339))
@@ -637,14 +637,51 @@ func TestProgress_RenderSomeTrackers_WithOverallTracker(t *testing.T) {
 	showOutputOnFailure(t, out)
 }
 
+func TestProgress_RenderSomeTrackers_WithOverallTracker_WithoutETAOverall(t *testing.T) {
+	renderOutput := outputWriter{}
+
+	pw := generateWriter()
+	pw.SetOutputWriter(&renderOutput)
+	pw.SetTrackerPosition(PositionRight)
+	pw.Style().Options.TimeOverallPrecision = time.Millisecond
+	pw.Style().Visibility.ETA = true
+	pw.Style().Visibility.ETAOverall = false
+	pw.Style().Visibility.TrackerOverall = true
+	go trackSomething(pw, &Tracker{Message: "Calculating Total   # 1\r", Total: 1000, Units: UnitsDefault})
+	go func() {
+		pw.Log("some information about something that happened at %s", time.Now().Format(time.RFC3339))
+	}()
+	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes})
+	go trackSomething(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
+	renderAndWait(pw, false)
+
+	expectedOutPatterns := []*regexp.Regexp{
+		regexp.MustCompile(`\x1b\[KCalculating Total   # 1 \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+ in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KDownloading File    # 2 \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+B in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KTransferring Amount # 3 \.\.\. \d+\.\d+% \[[#.]{23}] \[\$\d+ in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KCalculating Total   # 1 \.\.\. done! \[\d+\.\d+K in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KDownloading File    # 2 \.\.\. done! \[\d+\.\d+KB in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KTransferring Amount # 3 \.\.\. done! \[\$\d+\.\d+K in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[K\[[.#]+] \[[\d.ms]+]`),
+		regexp.MustCompile(`some information about something that happened at \d\d\d\d`),
+	}
+	out := renderOutput.String()
+	for _, expectedOutPattern := range expectedOutPatterns {
+		if !expectedOutPattern.MatchString(out) {
+			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
+		}
+	}
+	showOutputOnFailure(t, out)
+}
+
 func TestProgress_RenderSomeTrackers_WithoutOverallTracker_WithETA(t *testing.T) {
 	renderOutput := outputWriter{}
 
 	pw := generateWriter()
 	pw.SetOutputWriter(&renderOutput)
 	pw.SetTrackerPosition(PositionRight)
-	pw.ShowETA(true)
-	pw.ShowOverallTracker(false)
+	pw.Style().Visibility.ETA = true
+	pw.Style().Visibility.TrackerOverall = false
 	pw.Style().Options.ETAPrecision = time.Millisecond
 	go trackSomething(pw, &Tracker{Message: "Calculating Total   # 1\r", Total: 1000, Units: UnitsDefault})
 	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes})

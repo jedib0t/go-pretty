@@ -8,43 +8,48 @@ import (
 
 // Style declares how to render the Progress/Trackers.
 type Style struct {
-	Name    string       // name of the Style
-	Chars   StyleChars   // characters to use on the progress bar
-	Colors  StyleColors  // colors to use on the progress bar
-	Options StyleOptions // misc. options for the progress bar
+	Name       string          // name of the Style
+	Chars      StyleChars      // characters to use on the progress bar
+	Colors     StyleColors     // colors to use on the progress bar
+	Options    StyleOptions    // misc. options for the progress bar
+	Visibility StyleVisibility // show/hide components of the progress bar(s)
 }
 
 var (
 	// StyleDefault uses ASCII text to render the Trackers.
 	StyleDefault = Style{
-		Name:    "StyleDefault",
-		Chars:   StyleCharsDefault,
-		Colors:  StyleColorsDefault,
-		Options: StyleOptionsDefault,
+		Name:       "StyleDefault",
+		Chars:      StyleCharsDefault,
+		Colors:     StyleColorsDefault,
+		Options:    StyleOptionsDefault,
+		Visibility: StyleVisibilityDefault,
 	}
 
 	// StyleBlocks uses UNICODE Block Drawing characters to render the Trackers.
 	StyleBlocks = Style{
-		Name:    "StyleBlocks",
-		Chars:   StyleCharsBlocks,
-		Colors:  StyleColorsDefault,
-		Options: StyleOptionsDefault,
+		Name:       "StyleBlocks",
+		Chars:      StyleCharsBlocks,
+		Colors:     StyleColorsDefault,
+		Options:    StyleOptionsDefault,
+		Visibility: StyleVisibilityDefault,
 	}
 
 	// StyleCircle uses UNICODE Circle runes to render the Trackers.
 	StyleCircle = Style{
-		Name:    "StyleCircle",
-		Chars:   StyleCharsCircle,
-		Colors:  StyleColorsDefault,
-		Options: StyleOptionsDefault,
+		Name:       "StyleCircle",
+		Chars:      StyleCharsCircle,
+		Colors:     StyleColorsDefault,
+		Options:    StyleOptionsDefault,
+		Visibility: StyleVisibilityDefault,
 	}
 
 	// StyleRhombus uses UNICODE Rhombus runes to render the Trackers.
 	StyleRhombus = Style{
-		Name:    "StyleRhombus",
-		Chars:   StyleCharsRhombus,
-		Colors:  StyleColorsDefault,
-		Options: StyleOptionsDefault,
+		Name:       "StyleRhombus",
+		Chars:      StyleCharsRhombus,
+		Colors:     StyleColorsDefault,
+		Options:    StyleOptionsDefault,
+		Visibility: StyleVisibilityDefault,
 	}
 )
 
@@ -170,5 +175,29 @@ var (
 		TimeDonePrecision:       time.Millisecond,
 		TimeInProgressPrecision: time.Microsecond,
 		TimeOverallPrecision:    time.Second,
+	}
+)
+
+// StyleVisibility controls what gets shown and what gets hidden.
+type StyleVisibility struct {
+	ETA            bool // ETA for each tracker
+	ETAOverall     bool // ETA for the overall tracker
+	Percentage     bool // tracker progress percentage value
+	Time           bool // tracker time taken
+	Tracker        bool // tracker ([===========-----------])
+	TrackerOverall bool // overall tracker
+	Value          bool // tracker value
+}
+
+var (
+	// StyleVisibilityDefault defines sane defaults for the Visibility.
+	StyleVisibilityDefault = StyleVisibility{
+		ETA:            false,
+		ETAOverall:     true,
+		Percentage:     true,
+		Time:           true,
+		Tracker:        true,
+		TrackerOverall: false,
+		Value:          true,
 	}
 )
