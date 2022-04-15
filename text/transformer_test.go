@@ -223,7 +223,11 @@ func TestNewUnixTimeTransformer(t *testing.T) {
 
 func TestNewURLTransformer(t *testing.T) {
 	url := "https://winter.is.coming"
-	transformer := NewURLTransformer()
 
+	transformer := NewURLTransformer()
+	assert.Equal(t, colorsURL.Sprint(url), transformer(url))
+
+	transformer2 := NewURLTransformer(FgRed, BgWhite, Bold)
+	assert.Equal(t, Colors{FgRed, BgWhite, Bold}.Sprint(url), transformer2(url))
 	assert.Equal(t, colorsURL.Sprint(url), transformer(url))
 }
