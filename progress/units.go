@@ -84,32 +84,43 @@ var (
 
 // FormatBytes formats the given value as a "Byte".
 func FormatBytes(value int64) string {
-	if value < 1000 {
-		return fmt.Sprintf("%dB", value)
-	} else if value < 1000000 {
-		return fmt.Sprintf("%.2fKB", float64(value)/1000.0)
-	} else if value < 1000000000 {
-		return fmt.Sprintf("%.2fMB", float64(value)/1000000.0)
-	} else if value < 1000000000000 {
-		return fmt.Sprintf("%.2fGB", float64(value)/1000000000.0)
-	} else if value < 1000000000000000 {
-		return fmt.Sprintf("%.2fTB", float64(value)/1000000000000.0)
-	}
-	return fmt.Sprintf("%.2fPB", float64(value)/1000000000000000.0)
+	return formatNumber(value, map[int64]string{
+		1000000000000000: "PB",
+		1000000000000:    "TB",
+		1000000000:       "GB",
+		1000000:          "MB",
+		1000:             "KB",
+		0:                "B",
+	})
 }
 
 // FormatNumber formats the given value as a "regular number".
 func FormatNumber(value int64) string {
-	if value < 1000 {
-		return fmt.Sprintf("%d", value)
-	} else if value < 1000000 {
-		return fmt.Sprintf("%.2fK", float64(value)/1000.0)
-	} else if value < 1000000000 {
-		return fmt.Sprintf("%.2fM", float64(value)/1000000.0)
-	} else if value < 1000000000000 {
-		return fmt.Sprintf("%.2fB", float64(value)/1000000000.0)
-	} else if value < 1000000000000000 {
-		return fmt.Sprintf("%.2fT", float64(value)/1000000000000.0)
+	return formatNumber(value, map[int64]string{
+		1000000000000000: "Q",
+		1000000000000:    "T",
+		1000000000:       "B",
+		1000000:          "M",
+		1000:             "K",
+		0:                "",
+	})
+}
+
+var (
+	unitScales = []int64{
+		1000000000000000,
+		1000000000000,
+		1000000000,
+		1000000,
+		1000,
 	}
-	return fmt.Sprintf("%.2fQ", float64(value)/1000000000000000.0)
+)
+
+func formatNumber(value int64, notations map[int64]string) string {
+	for _, unitScale := range unitScales {
+		if value >= unitScale {
+			return fmt.Sprintf("%.2f%s", float64(value)/float64(unitScale), notations[unitScale])
+		}
+	}
+	return fmt.Sprintf("%d%s", value, notations[0])
 }
