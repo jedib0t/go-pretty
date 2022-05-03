@@ -32,7 +32,6 @@ jobs:
         run: |
           go get -u github.com/fzipp/gocyclo/cmd/gocyclo
           go get -u github.com/mattn/goveralls
-          go get -u golang.org/x/lint/golint
 
       # Run all the unit-tests
       - name: Test
