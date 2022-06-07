@@ -5,7 +5,7 @@ default: test
 all: test bench
 
 tools:
-	go get github.com/fzipp/gocyclo
+	go install github.com/fzipp/gocyclo/cmd/gocyclo@v0.5.1
 
 bench:
 	go test -bench=. -benchmem
