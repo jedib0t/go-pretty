@@ -550,9 +550,9 @@ func (t *Table) getFormat(hint renderHint) text.Format {
 
 func (t *Table) getMaxColumnLengthForMerging(colIdx int) int {
 	maxColumnLength := t.maxColumnLengths[colIdx]
-	maxColumnLength += text.RuneCount(t.style.Box.PaddingRight + t.style.Box.PaddingLeft)
+	maxColumnLength += text.RuneWidthWithoutEscSequences(t.style.Box.PaddingRight + t.style.Box.PaddingLeft)
 	if t.style.Options.SeparateColumns {
-		maxColumnLength += text.RuneCount(t.style.Box.EmptySeparator)
+		maxColumnLength += text.RuneWidthWithoutEscSequences(t.style.Box.EmptySeparator)
 	}
 	return maxColumnLength
 }
@@ -781,24 +781,24 @@ func (t *Table) initForRenderRowsStringify(rows []Row, hint renderHint) []rowStr
 func (t *Table) initForRenderRowSeparator() {
 	t.maxRowLength = 0
 	if t.autoIndex {
-		t.maxRowLength += text.RuneCount(t.style.Box.PaddingLeft)
+		t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.PaddingLeft)
 		t.maxRowLength += len(fmt.Sprint(len(t.rows)))
-		t.maxRowLength += text.RuneCount(t.style.Box.PaddingRight)
+		t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.PaddingRight)
 		if t.style.Options.SeparateColumns {
-			t.maxRowLength += text.RuneCount(t.style.Box.MiddleSeparator)
+			t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.MiddleSeparator)
 		}
 	}
 	if t.style.Options.SeparateColumns {
-		t.maxRowLength += text.RuneCount(t.style.Box.MiddleSeparator) * (t.numColumns - 1)
+		t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.MiddleSeparator) * (t.numColumns - 1)
 	}
 	t.rowSeparator = make(rowStr, t.numColumns)
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
-		maxColumnLength += text.RuneCount(t.style.Box.PaddingLeft + t.style.Box.PaddingRight)
+		maxColumnLength += text.RuneWidthWithoutEscSequences(t.style.Box.PaddingLeft + t.style.Box.PaddingRight)
 		t.maxRowLength += maxColumnLength
 		t.rowSeparator[colIdx] = text.RepeatAndTrim(t.style.Box.MiddleHorizontal, maxColumnLength)
 	}
 	if t.style.Options.DrawBorder {
-		t.maxRowLength += text.RuneCount(t.style.Box.Left + t.style.Box.Right)
+		t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.Left + t.style.Box.Right)
 	}
 }
 

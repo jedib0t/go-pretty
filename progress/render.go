@@ -124,7 +124,7 @@ func (p *Progress) generateTrackerStrDeterminate(value int64, total int64, maxLe
 	} else if pFinishedDotsFraction == 0 {
 		pInProgress = ""
 	}
-	pFinishedStrLen := text.RuneCount(pFinished + pInProgress)
+	pFinishedStrLen := text.RuneWidthWithoutEscSequences(pFinished + pInProgress)
 	if pFinishedStrLen < maxLen {
 		pUnfinished = strings.Repeat(p.style.Chars.Unfinished, maxLen-pFinishedStrLen)
 	}
@@ -144,8 +144,8 @@ func (p *Progress) generateTrackerStrIndeterminate(maxLen int) string {
 		pUnfinished += strings.Repeat(p.style.Chars.Unfinished, indicator.Position)
 	}
 	pUnfinished += indicator.Text
-	if text.RuneCount(pUnfinished) < maxLen {
-		pUnfinished += strings.Repeat(p.style.Chars.Unfinished, maxLen-text.RuneCount(pUnfinished))
+	if text.RuneWidthWithoutEscSequences(pUnfinished) < maxLen {
+		pUnfinished += strings.Repeat(p.style.Chars.Unfinished, maxLen-text.RuneWidthWithoutEscSequences(pUnfinished))
 	}
 
 	return p.style.Colors.Tracker.Sprintf("%s%s%s",
@@ -172,7 +172,7 @@ func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHi
 		message = strings.Replace(message, "\r", "", -1)
 	}
 	if p.messageWidth > 0 {
-		messageLen := text.RuneCount(message)
+		messageLen := text.RuneWidthWithoutEscSequences(message)
 		if messageLen < p.messageWidth {
 			message = text.Pad(message, p.messageWidth, ' ')
 		} else {

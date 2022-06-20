@@ -201,7 +201,7 @@ func wrapHard(paragraph string, wrapLen int, out *strings.Builder) {
 			lineLen++
 		}
 
-		wordLen := RuneCount(word)
+		wordLen := RuneWidthWithoutEscSequences(word)
 		if lineLen+wordLen <= wrapLen { // word fits within the line
 			out.WriteString(word)
 			lineLen += wordLen
@@ -227,7 +227,7 @@ func wrapSoft(paragraph string, wrapLen int, out *strings.Builder) {
 		}
 
 		spacing, spacingLen := wrapSoftSpacing(lineLen)
-		wordLen := RuneCount(word)
+		wordLen := RuneWidthWithoutEscSequences(word)
 		if lineLen+spacingLen+wordLen <= wrapLen { // word fits within the line
 			out.WriteString(spacing)
 			out.WriteString(word)

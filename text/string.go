@@ -27,7 +27,7 @@ func InsertEveryN(str string, runeToInsert rune, n int) string {
 		return str
 	}
 
-	sLen := RuneCount(str)
+	sLen := RuneWidthWithoutEscSequences(str)
 	var out strings.Builder
 	out.Grow(sLen + (sLen / n))
 	outLen, isEscSeq := 0, false
@@ -88,7 +88,7 @@ func LongestLineLen(str string) int {
 //  Pad("Ghost", 7, ' ') == "Ghost  "
 //  Pad("Ghost", 10, '.') == "Ghost....."
 func Pad(str string, maxLen int, paddingChar rune) string {
-	strLen := RuneCount(str)
+	strLen := RuneWidthWithoutEscSequences(str)
 	if strLen < maxLen {
 		str += strings.Repeat(string(paddingChar), maxLen-strLen)
 	}
@@ -118,7 +118,30 @@ func RepeatAndTrim(str string, maxRunes int) string {
 //  RuneCount("Ghost") == 5
 //  RuneCount("\x1b[33mGhost\x1b[0m") == 5
 //  RuneCount("\x1b[33mGhost\x1b[0") == 5
+// Deprecated: in favor of RuneWidthWithoutEscSequences
 func RuneCount(str string) int {
+	return RuneWidthWithoutEscSequences(str)
+}
+
+// RuneWidth returns the mostly accurate character-width of the rune. This is
+// not 100% accurate as the character width is usually dependent on the
+// typeface (font) used in the console/terminal. For ex.:
+//  RuneWidth('A') == 1
+//  RuneWidth('ツ') == 2
+//  RuneWidth('⊙') == 1
+//  RuneWidth('︿') == 2
+//  RuneWidth(0x27) == 0
+func RuneWidth(r rune) int {
+	return runewidth.RuneWidth(r)
+}
+
+// RuneWidthWithoutEscSequences is similar to RuneWidth, except for the fact
+// that it ignores escape sequences while counting. For ex.:
+//  RuneWidthWithoutEscSequences("") == 0
+//  RuneWidthWithoutEscSequences("Ghost") == 5
+//  RuneWidthWithoutEscSequences("\x1b[33mGhost\x1b[0m") == 5
+//  RuneWidthWithoutEscSequences("\x1b[33mGhost\x1b[0") == 5
+func RuneWidthWithoutEscSequences(str string) int {
 	count, isEscSeq := 0, false
 	for _, c := range str {
 		if c == EscapeStartRune {
@@ -134,18 +157,6 @@ func RuneCount(str string) int {
 	return count
 }
 
-// RuneWidth returns the mostly accurate character-width of the rune. This is
-// not 100% accurate as the character width is usually dependant on the
-// typeface (font) used in the console/terminal. For ex.:
-//  RuneWidth('A') == 1
-//  RuneWidth('ツ') == 2
-//  RuneWidth('⊙') == 1
-//  RuneWidth('︿') == 2
-//  RuneWidth(0x27) == 0
-func RuneWidth(r rune) int {
-	return runewidth.RuneWidth(r)
-}
-
 // Snip returns the given string with a fixed length. For ex.:
 //  Snip("Ghost", 0, "~") == "Ghost"
 //  Snip("Ghost", 1, "~") == "~"
@@ -155,9 +166,9 @@ func RuneWidth(r rune) int {
 //  Snip("\x1b[33mGhost\x1b[0m", 7, "~") == "\x1b[33mGhost\x1b[0m  "
 func Snip(str string, length int, snipIndicator string) string {
 	if length > 0 {
-		lenStr := RuneCount(str)
+		lenStr := RuneWidthWithoutEscSequences(str)
 		if lenStr > length {
-			lenStrFinal := length - RuneCount(snipIndicator)
+			lenStrFinal := length - RuneWidthWithoutEscSequences(snipIndicator)
 			return Trim(str, lenStrFinal) + snipIndicator
 		}
 	}
