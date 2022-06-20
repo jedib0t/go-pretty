@@ -282,10 +282,10 @@ func (p *Progress) initForRender() {
 		utf8.RuneCountInString(p.style.Chars.BoxLeft) -
 		utf8.RuneCountInString(p.style.Chars.BoxRight)
 	p.lengthProgressOverall = p.messageWidth +
-		text.RuneCount(p.style.Options.Separator) +
+		text.RuneWidthWithoutEscSequences(p.style.Options.Separator) +
 		p.lengthProgress + 1
 	if p.style.Visibility.Percentage {
-		p.lengthProgressOverall += text.RuneCount(fmt.Sprintf(p.style.Options.PercentFormat, 0.0))
+		p.lengthProgressOverall += text.RuneWidthWithoutEscSequences(fmt.Sprintf(p.style.Options.PercentFormat, 0.0))
 	}
 
 	// if not output write has been set, output to STDOUT

@@ -174,6 +174,28 @@ func TestRuneWidth(t *testing.T) {
 	assert.Equal(t, 0, RuneWidth(rune(27))) // ANSI escape sequence
 }
 
+func ExampleRuneWidthWithoutEscSequences() {
+	fmt.Printf("RuneWidthWithoutEscSequences(\"\"): %d\n", RuneWidthWithoutEscSequences(""))
+	fmt.Printf("RuneWidthWithoutEscSequences(\"Ghost\"): %d\n", RuneWidthWithoutEscSequences("Ghost"))
+	fmt.Printf("RuneWidthWithoutEscSequences(\"Ghostツ\"): %d\n", RuneWidthWithoutEscSequences("Ghostツ"))
+	fmt.Printf("RuneWidthWithoutEscSequences(\"\\x1b[33mGhost\\x1b[0m\"): %d\n", RuneWidthWithoutEscSequences("\x1b[33mGhost\x1b[0m"))
+	fmt.Printf("RuneWidthWithoutEscSequences(\"\\x1b[33mGhost\\x1b[0\"): %d\n", RuneWidthWithoutEscSequences("\x1b[33mGhost\x1b[0"))
+
+	// Output: RuneWidthWithoutEscSequences(""): 0
+	// RuneWidthWithoutEscSequences("Ghost"): 5
+	// RuneWidthWithoutEscSequences("Ghostツ"): 7
+	// RuneWidthWithoutEscSequences("\x1b[33mGhost\x1b[0m"): 5
+	// RuneWidthWithoutEscSequences("\x1b[33mGhost\x1b[0"): 5
+}
+
+func TestRuneWidthWithoutEscSequences(t *testing.T) {
+	assert.Equal(t, 0, RuneWidthWithoutEscSequences(""))
+	assert.Equal(t, 5, RuneWidthWithoutEscSequences("Ghost"))
+	assert.Equal(t, 7, RuneWidthWithoutEscSequences("Ghostツ"))
+	assert.Equal(t, 5, RuneWidthWithoutEscSequences("\x1b[33mGhost\x1b[0m"))
+	assert.Equal(t, 5, RuneWidthWithoutEscSequences("\x1b[33mGhost\x1b[0"))
+}
+
 func ExampleSnip() {
 	fmt.Printf("Snip(\"Ghost\", 0, \"~\"): %#v\n", Snip("Ghost", 0, "~"))
 	fmt.Printf("Snip(\"Ghost\", 1, \"~\"): %#v\n", Snip("Ghost", 1, "~"))
