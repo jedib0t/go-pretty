@@ -58,7 +58,7 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
 
 More details can be found here: [list/](list)
 
-# Progress
+## Progress
 
 Track the Progress of one or more Tasks (like downloading multiple files in
 parallel).
