@@ -7,6 +7,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jedib0t_go-pretty&metric=alert_status)](https://sonarcloud.io/dashboard?id=jedib0t_go-pretty)
 
 Utilities to prettify console output of tables, lists, progress-bars, text, etc.
+with a heavy emphasis on customization.
 
 ## Usage
 
@@ -22,7 +23,7 @@ project, and import the packages in your code using one or more of these:
 
 ## Table
 
-Pretty-print tables into ASCII/Unicode strings.
+Pretty-print tables in a terminal with colors, nested tables and more.
 
 ```
 +-----+------------+-----------+--------+-----------------------------+
@@ -39,6 +40,15 @@ Pretty-print tables into ASCII/Unicode strings.
 <img src="table/images/table-StyleColoredBright.png" alt="Table with Colors in a Terminal"/>
 
 More details can be found here: [table/](table)
+
+## Progress
+
+Track the Progress of one or more Tasks like downloading multiple files in
+parallel.
+
+<img src="progress/images/demo.gif" alt="Progress Demo in a Terminal"/>
+
+More details can be found here: [progress/](progress)
 
 ## List
 
@@ -58,49 +68,18 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
 
 More details can be found here: [list/](list)
 
-## Progress
-
-Track the Progress of one or more Tasks (like downloading multiple files in
-parallel).
-
-Sample Progress Tracking:
-```
-Calculating Total   #  1 ... done! [3.25K in 501ms]
-Calculating Total   #  2 ... done! [6.50K in 501ms]
-Downloading File    #  3 ... done! [9.75KB in 500ms]
-Transferring Amount #  4 ... done! [$26.00K in 1s]
-Transferring Amount #  5 ... done! [£32.50K in 1.001s]
-Downloading File    #  6 ... done! [58.50KB in 1.5s]
-Calculating Total   #  7 ... done! [91.00K in 2s]
-Transferring Amount #  8 ... done! [$130.00K in 2.5s]
-Downloading File    #  9 ... 80.2% [##################.....] [146.25KB in 2.597403s]
-Transferring Amount # 10 ... 52.0% [###########............] [£130.00K in 2.49673s; ~ETA: 2s]
-Calculating Total   # 11 ... 43.0% [#########..............] [143.00K in 2.395977s; ~ETA: 3s]
-Transferring Amount # 12 ... 36.1% [########...............] [$156.00K in 2.295151s; ~ETA: 4s]
-Calculating Total   # 13 ...  ???  [..........<#>..........] [169.00K in 2.194355s]
-```
-
-More details can be found here: [progress/](progress)
-
 ## Text
 
 Utility functions to manipulate text with or without ANSI escape sequences. Most
 of the functions available are used in one or more of the other packages here.
 
-   - Align text horizontally or vertically
-     - [text/align.go](text/align.go) and [text/valign.go](text/valign.go)
-   - Colorize text
-     - [text/color.go](text/color.go)
-   - Cursor Movement
-     - [text/cursor.go](text/cursor.go)
-   - Format text (convert case)
-     - [text/format.go](text/format.go)
-   - String Manipulation (Pad, RepeatAndTrim, RuneCount, Trim, etc.)
-     - [text/string.go](text/string.go)
-   - Transform text (UnixTime to human-readable-time, pretty-JSON, etc.)
-     - [text/transformer.go](text/transformer.go)
-   - Wrap text
-     - [text/wrap.go](text/wrap.go)
+   - Align text [Horizontally](text/align.go) or [Vertically](text/valign.go)
+   - [Colorize](text/color.go) text
+   - [Cursor](text/cursor.go) Movement
+   - [Format](text/format.go) text (convert case)
+   - [String](text/string.go) Manipulation (Pad, RepeatAndTrim, RuneCount, etc.)
+   - [Transform](text/transformer.go) text (UnixTime to human-readable-time, pretty-JSON, etc.)
+   - [Wrap](text/wrap.go) text
 
 GoDoc has examples for all the available functions.
 
