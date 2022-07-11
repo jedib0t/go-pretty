@@ -75,9 +75,9 @@ of the functions available are used in one or more of the other packages here.
 
    - Align text [Horizontally](text/align.go) or [Vertically](text/valign.go)
    - [Colorize](text/color.go) text
-   - [Cursor](text/cursor.go) Movement
+   - Move [cursor](text/cursor.go)
    - [Format](text/format.go) text (convert case)
-   - [String](text/string.go) Manipulation (Pad, RepeatAndTrim, RuneCount, etc.)
+   - Manipulate [strings](text/string.go) (Pad, RepeatAndTrim, RuneCount, etc.)
    - [Transform](text/transformer.go) text (UnixTime to human-readable-time, pretty-JSON, etc.)
    - [Wrap](text/wrap.go) text
 
