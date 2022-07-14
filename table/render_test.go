@@ -10,6 +10,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func compareOutput(t *testing.T, out string, expectedOut string) {
+	assert.Equal(t, expectedOut, out)
+	if out != expectedOut {
+		fmt.Println(out)
+	}
+}
+
 func generateColumnConfigsWithHiddenColumns(colsToHide []int) []ColumnConfig {
 	cc := []ColumnConfig{
 		{
@@ -55,7 +62,7 @@ func TestTable_Render(t *testing.T) {
 	tw.SetStyle(styleTest)
 	tw.SetTitle(testTitle2)
 
-	expectedOut := `(---------------------------------------------------------------------)
+	compareOutput(t, tw.Render(), `(---------------------------------------------------------------------)
 [<When you play the Game of Thrones, you win or you die. There is no >]
 [<middle ground.                                                     >]
 {-----^------------^-----------^--------^-----------------------------}
@@ -70,8 +77,7 @@ func TestTable_Render(t *testing.T) {
 {-----+------------+-----------+--------+-----------------------------}
 [<   >|<          >|<TOTAL    >|< 10000>|<                           >]
 \-----v------------v-----------v--------v-----------------------------/
-A Song of Ice and Fire`
-	assert.Equal(t, expectedOut, tw.Render())
+A Song of Ice and Fire`)
 }
 
 func TestTable_Render_AutoIndex(t *testing.T) {
@@ -86,7 +92,7 @@ func TestTable_Render_AutoIndex(t *testing.T) {
 	tw.SetAutoIndex(true)
 	tw.SetStyle(StyleLight)
 
-	expectedOut := `┌────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐
+	compareOutput(t, tw.Render(), `┌────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐
 │    │  A  │  B  │  C  │  D  │  E  │  F  │  G  │  H  │  I  │  J  │
 ├────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┤
 │  1 │ A1  │ B1  │ C1  │ D1  │ E1  │ F1  │ G1  │ H1  │ I1  │ J1  │
@@ -99,8 +105,7 @@ func TestTable_Render_AutoIndex(t *testing.T) {
 │  8 │ A8  │ B8  │ C8  │ D8  │ E8  │ F8  │ G8  │ H8  │ I8  │ J8  │
 │  9 │ A9  │ B9  │ C9  │ D9  │ E9  │ F9  │ G9  │ H9  │ I9  │ J9  │
 │ 10 │ A10 │ B10 │ C10 │ D10 │ E10 │ F10 │ G10 │ H10 │ I10 │ J10 │
-└────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘`
-	assert.Equal(t, expectedOut, tw.Render())
+└────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘`)
 }
 
 func TestTable_Render_AutoMerge(t *testing.T) {
@@ -129,7 +134,7 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 	tw.SetStyle(StyleLight)
 	tw.Style().Options.SeparateRows = true
 
-	expectedOut := `┌───┬─────────┬────────┬───────────┬───────────┬───────────┐
+	compareOutput(t, tw.Render(), `┌───┬─────────┬────────┬───────────┬───────────┬───────────┐
 │   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │    RCE    │
 │   │         │        │           │           ├─────┬─────┤
 │   │         │        │           │           │ EXE │ RUN │
@@ -149,8 +154,7 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 │ 7 │         │        │           │ C 7       │     Y     │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
 │   │         │        │           │ 7         │  5  │  3  │
-└───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`
-	assert.Equal(t, expectedOut, tw.Render())
+└───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`)
 }
 
 func TestTable_Render_AutoMerge_Complex(t *testing.T) {
@@ -181,7 +185,7 @@ func TestTable_Render_AutoMerge_Complex(t *testing.T) {
 	tw.SetStyle(StyleLight)
 	tw.Style().Options.SeparateRows = true
 
-	expectedOut := `┌───┬─────────┬────────┬───────────┬───────────┬───────────┬─────┐
+	compareOutput(t, tw.Render(), `┌───┬─────────┬────────┬───────────┬───────────┬───────────┬─────┐
 │   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │    RCE    │  ID │
 │   │         │        │           │           ├─────┬─────┼─────┤
 │   │         │        │           │           │ EXE │ RUN │     │
@@ -209,9 +213,7 @@ func TestTable_Render_AutoMerge_Complex(t *testing.T) {
 │   │                              │           │  5  │  3  │     │
 │   │                              │           ├─────┴─────┼─────┤
 │   │                              │           │     5     │     │
-└───┴──────────────────────────────┴───────────┴───────────┴─────┘`
-	out := tw.Render()
-	assert.Equal(t, expectedOut, out)
+└───┴──────────────────────────────┴───────────┴───────────┴─────┘`)
 }
 
 func TestTable_Render_AutoMerge_Complex2(t *testing.T) {
@@ -233,7 +235,7 @@ func TestTable_Render_AutoMerge_Complex2(t *testing.T) {
 	tw.Style().Options.SeparateRows = true
 	tw.Style().Options.SeparateColumns = true
 
-	expectedOut := `┌───┬───┬───┬───┬───┬───┬───┐
+	compareOutput(t, tw.Render(), `┌───┬───┬───┬───┬───┬───┬───┐
 │1.1│1.2│1.3│   │2.1│2.2│2.3│
 │1.1│1.2│1.3│   │2.1│2.2│2.3│
 ├───┼───┼───┤   ├───┼───┼───┤
@@ -254,12 +256,7 @@ func TestTable_Render_AutoMerge_Complex2(t *testing.T) {
 ├───┼───┼───┤   ├───┼───┼───┤
 │3.7│3.8│3.9│   │4.7│4.8│4.9│
 │3.7│3.8│3.9│   │4.7│4.8│4.9│
-└───┴───┴───┴───┴───┴───┴───┘`
-	out := tw.Render()
-	assert.Equal(t, expectedOut, out)
-	if expectedOut != out {
-		fmt.Println(out)
-	}
+└───┴───┴───┴───┴───┴───┴───┘`)
 }
 
 func TestTable_Render_AutoMerge_ColumnsOnly(t *testing.T) {
@@ -285,7 +282,7 @@ func TestTable_Render_AutoMerge_ColumnsOnly(t *testing.T) {
 	tw.SetStyle(StyleLight)
 	tw.Style().Options.SeparateRows = true
 
-	expectedOut := `┌───┬─────────┬────────┬───────────┬───────────┬─────┬─────┐
+	compareOutput(t, tw.Render(), `┌───┬─────────┬────────┬───────────┬───────────┬─────┬─────┐
 │   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │ RCE │ RCE │
 │   │         │        │           │           │ EXE │ RUN │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
@@ -304,8 +301,7 @@ func TestTable_Render_AutoMerge_ColumnsOnly(t *testing.T) {
 │ 7 │         │        │           │ C 7       │  Y  │  Y  │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
 │   │         │        │           │ 7         │  5  │  3  │
-└───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`
-	assert.Equal(t, expectedOut, tw.Render())
+└───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`)
 }
 
 func TestTable_Render_AutoMerge_RowsOnly(t *testing.T) {
@@ -328,7 +324,7 @@ func TestTable_Render_AutoMerge_RowsOnly(t *testing.T) {
 	tw.SetStyle(StyleLight)
 	tw.Style().Options.SeparateRows = true
 
-	expectedOut := `┌───┬─────────┬────────┬───────────┬───────────┬───────────┐
+	compareOutput(t, tw.Render(), `┌───┬─────────┬────────┬───────────┬───────────┬───────────┐
 │   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │    RCE    │
 │   ├─────────┼────────┼───────────┼───────────┼─────┬─────┤
 │   │         │        │           │           │ EXE │ RUN │
@@ -348,8 +344,7 @@ func TestTable_Render_AutoMerge_RowsOnly(t *testing.T) {
 │ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │         Y │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
 │   │         │        │           │ 7         │  5  │  3  │
-└───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`
-	assert.Equal(t, expectedOut, tw.Render())
+└───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`)
 }
 
 func TestTable_Render_AutoMerge_WithHiddenRows(t *testing.T) {
@@ -374,7 +369,7 @@ func TestTable_Render_AutoMerge_WithHiddenRows(t *testing.T) {
 	tw.SetStyle(StyleLight)
 	tw.Style().Options.SeparateRows = true
 
-	expectedOut := `┌─────────┬────────┬───────────┐
+	compareOutput(t, tw.Render(), `┌─────────┬────────┬───────────┐
 │ NODE IP │ PODS   │ NAMESPACE │
 ├─────────┼────────┼───────────┤
 │ 1.1.1.1 │ Pod 1A │ NS 1A     │
@@ -392,8 +387,54 @@ func TestTable_Render_AutoMerge_WithHiddenRows(t *testing.T) {
 │         │        │           │
 ├─────────┼────────┼───────────┤
 │         │        │           │
-└─────────┴────────┴───────────┘`
-	assert.Equal(t, expectedOut, tw.Render())
+└─────────┴────────┴───────────┘`)
+}
+
+func TestTable_Render_AutoMerge_Wrapped(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE"}, RowConfig{AutoMerge: true})
+	tw.AppendHeader(Row{"", "", "", "", "EXE EXE EXE", "EXE EXE EXE"}, RowConfig{AutoMerge: true})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, RowConfig{AutoMerge: true})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, RowConfig{AutoMerge: true})
+	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
+	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, RowConfig{AutoMerge: true})
+	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true})
+	tw.AppendFooter(Row{"", "", "", 7, 5, 3}, RowConfig{AutoMerge: true})
+	tw.AppendFooter(Row{"", "", "", 6, 4, 4}, RowConfig{AutoMerge: true})
+	tw.SetAutoIndex(true)
+	tw.SetColumnConfigs([]ColumnConfig{
+		{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 7, WidthMaxEnforcer: text.WrapHard},
+		{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 7, WidthMaxEnforcer: text.WrapHard},
+	})
+	tw.SetStyle(StyleLight)
+	tw.Style().Options.SeparateRows = true
+
+	compareOutput(t, tw.Render(), `┌───┬─────────┬────────┬───────────┬───────────┬───────────────────┐
+│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │        RCE        │
+│   ├─────────┴────────┴───────────┴───────────┼───────────────────┤
+│   │                                          │      EXE EXE      │
+│   │                                          │        EXE        │
+├───┼─────────┬────────┬───────────┬───────────┼───────────────────┤
+│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │         Y         │
+├───┼─────────┼────────┼───────────┼───────────┼─────────┬─────────┤
+│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 2       │    Y    │    N    │
+├───┼─────────┼────────┼───────────┼───────────┼─────────┼─────────┤
+│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B     │ C 3       │    N    │    N    │
+├───┼─────────┼────────┼───────────┼───────────┼─────────┴─────────┤
+│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │         N         │
+├───┼─────────┼────────┼───────────┼───────────┼─────────┬─────────┤
+│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 5       │    Y    │    N    │
+├───┼─────────┼────────┼───────────┼───────────┼─────────┴─────────┤
+│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │         Y         │
+├───┼─────────┼────────┼───────────┼───────────┼───────────────────┤
+│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │         Y         │
+├───┼─────────┴────────┴───────────┼───────────┼─────────┬─────────┤
+│   │                              │ 7         │    5    │    3    │
+│   ├──────────────────────────────┼───────────┼─────────┴─────────┤
+│   │                              │ 6         │         4         │
+└───┴──────────────────────────────┴───────────┴───────────────────┘`)
 }
 
 func TestTable_Render_BorderAndSeparators(t *testing.T) {
@@ -401,7 +442,7 @@ func TestTable_Render_BorderAndSeparators(t *testing.T) {
 	table.AppendHeader(testHeader)
 	table.AppendRows(testRows)
 	table.AppendFooter(testFooter)
-	expectedOut := `+-----+------------+-----------+--------+-----------------------------+
+	compareOutput(t, table.Render(), `+-----+------------+-----------+--------+-----------------------------+
 |   # | FIRST NAME | LAST NAME | SALARY |                             |
 +-----+------------+-----------+--------+-----------------------------+
 |   1 | Arya       | Stark     |   3000 |                             |
@@ -409,69 +450,62 @@ func TestTable_Render_BorderAndSeparators(t *testing.T) {
 | 300 | Tyrion     | Lannister |   5000 |                             |
 +-----+------------+-----------+--------+-----------------------------+
 |     |            | TOTAL     |  10000 |                             |
-+-----+------------+-----------+--------+-----------------------------+`
-	assert.Equal(t, expectedOut, table.Render())
++-----+------------+-----------+--------+-----------------------------+`)
 
 	table.Style().Options = OptionsNoBorders
-	expectedOut = `   # | FIRST NAME | LAST NAME | SALARY |                             
+	compareOutput(t, table.Render(), `   # | FIRST NAME | LAST NAME | SALARY |                             
 -----+------------+-----------+--------+-----------------------------
    1 | Arya       | Stark     |   3000 |                             
   20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! 
  300 | Tyrion     | Lannister |   5000 |                             
 -----+------------+-----------+--------+-----------------------------
-     |            | TOTAL     |  10000 |                             `
-	assert.Equal(t, expectedOut, table.Render())
+     |            | TOTAL     |  10000 |                             `)
 
 	table.Style().Options.SeparateColumns = false
-	expectedOut = `   #  FIRST NAME  LAST NAME  SALARY                              
+	compareOutput(t, table.Render(), `   #  FIRST NAME  LAST NAME  SALARY                              
 -----------------------------------------------------------------
    1  Arya        Stark        3000                              
   20  Jon         Snow         2000  You know nothing, Jon Snow! 
  300  Tyrion      Lannister    5000                              
 -----------------------------------------------------------------
-                  TOTAL       10000                              `
-	assert.Equal(t, expectedOut, table.Render())
+                  TOTAL       10000                              `)
 
 	table.Style().Options.SeparateFooter = false
-	expectedOut = `   #  FIRST NAME  LAST NAME  SALARY                              
+	compareOutput(t, table.Render(), `   #  FIRST NAME  LAST NAME  SALARY                              
 -----------------------------------------------------------------
    1  Arya        Stark        3000                              
   20  Jon         Snow         2000  You know nothing, Jon Snow! 
  300  Tyrion      Lannister    5000                              
-                  TOTAL       10000                              `
-	assert.Equal(t, expectedOut, table.Render())
+                  TOTAL       10000                              `)
 
 	table.Style().Options = OptionsNoBordersAndSeparators
-	expectedOut = `   #  FIRST NAME  LAST NAME  SALARY                              
+	compareOutput(t, table.Render(), `   #  FIRST NAME  LAST NAME  SALARY                              
    1  Arya        Stark        3000                              
   20  Jon         Snow         2000  You know nothing, Jon Snow! 
  300  Tyrion      Lannister    5000                              
-                  TOTAL       10000                              `
-	assert.Equal(t, expectedOut, table.Render())
+                  TOTAL       10000                              `)
 
 	table.Style().Options.DrawBorder = true
-	expectedOut = `+-----------------------------------------------------------------+
+	compareOutput(t, table.Render(), `+-----------------------------------------------------------------+
 |   #  FIRST NAME  LAST NAME  SALARY                              |
 |   1  Arya        Stark        3000                              |
 |  20  Jon         Snow         2000  You know nothing, Jon Snow! |
 | 300  Tyrion      Lannister    5000                              |
 |                  TOTAL       10000                              |
-+-----------------------------------------------------------------+`
-	assert.Equal(t, expectedOut, table.Render())
++-----------------------------------------------------------------+`)
 
 	table.Style().Options.SeparateFooter = true
-	expectedOut = `+-----------------------------------------------------------------+
+	compareOutput(t, table.Render(), `+-----------------------------------------------------------------+
 |   #  FIRST NAME  LAST NAME  SALARY                              |
 |   1  Arya        Stark        3000                              |
 |  20  Jon         Snow         2000  You know nothing, Jon Snow! |
 | 300  Tyrion      Lannister    5000                              |
 +-----------------------------------------------------------------+
 |                  TOTAL       10000                              |
-+-----------------------------------------------------------------+`
-	assert.Equal(t, expectedOut, table.Render())
++-----------------------------------------------------------------+`)
 
 	table.Style().Options.SeparateHeader = true
-	expectedOut = `+-----------------------------------------------------------------+
+	compareOutput(t, table.Render(), `+-----------------------------------------------------------------+
 |   #  FIRST NAME  LAST NAME  SALARY                              |
 +-----------------------------------------------------------------+
 |   1  Arya        Stark        3000                              |
@@ -479,11 +513,10 @@ func TestTable_Render_BorderAndSeparators(t *testing.T) {
 | 300  Tyrion      Lannister    5000                              |
 +-----------------------------------------------------------------+
 |                  TOTAL       10000                              |
-+-----------------------------------------------------------------+`
-	assert.Equal(t, expectedOut, table.Render())
++-----------------------------------------------------------------+`)
 
 	table.Style().Options.SeparateRows = true
-	expectedOut = `+-----------------------------------------------------------------+
+	compareOutput(t, table.Render(), `+-----------------------------------------------------------------+
 |   #  FIRST NAME  LAST NAME  SALARY                              |
 +-----------------------------------------------------------------+
 |   1  Arya        Stark        3000                              |
@@ -493,11 +526,10 @@ func TestTable_Render_BorderAndSeparators(t *testing.T) {
 | 300  Tyrion      Lannister    5000                              |
 +-----------------------------------------------------------------+
 |                  TOTAL       10000                              |
-+-----------------------------------------------------------------+`
-	assert.Equal(t, expectedOut, table.Render())
++-----------------------------------------------------------------+`)
 
 	table.Style().Options.SeparateColumns = true
-	expectedOut = `+-----+------------+-----------+--------+-----------------------------+
+	compareOutput(t, table.Render(), `+-----+------------+-----------+--------+-----------------------------+
 |   # | FIRST NAME | LAST NAME | SALARY |                             |
 +-----+------------+-----------+--------+-----------------------------+
 |   1 | Arya       | Stark     |   3000 |                             |
@@ -507,8 +539,7 @@ func TestTable_Render_BorderAndSeparators(t *testing.T) {
 | 300 | Tyrion     | Lannister |   5000 |                             |
 +-----+------------+-----------+--------+-----------------------------+
 |     |            | TOTAL     |  10000 |                             |
-+-----+------------+-----------+--------+-----------------------------+`
-	assert.Equal(t, expectedOut, table.Render())
++-----+------------+-----------+--------+-----------------------------+`)
 }
 
 func TestTable_Render_Colored(t *testing.T) {
@@ -820,7 +851,7 @@ func TestTable_Render_HiddenColumns(t *testing.T) {
 	t.Run("no columns hidden", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns(nil))
 
-		expectedOut := `+-----+------------+-------------+--------+-------------------------------+
+		compareOutput(t, tw.Render(), `+-----+------------+-------------+--------+-------------------------------+
 |   # | FIRST NAME | LAST NAME   | SALARY |                               |
 +-----+------------+-------------+--------+-------------------------------+
 | 307 | >>Tyrion   | Lannister<< |   5013 |                               |
@@ -828,21 +859,19 @@ func TestTable_Render_HiddenColumns(t *testing.T) {
 |  27 | >>Jon      | Snow<<      |   2013 | ~You know nothing, Jon Snow!~ |
 +-----+------------+-------------+--------+-------------------------------+
 |     |            | TOTAL       |  10000 |                               |
-+-----+------------+-------------+--------+-------------------------------+`
-		assert.Equal(t, expectedOut, tw.Render())
++-----+------------+-------------+--------+-------------------------------+`)
 	})
 
 	t.Run("every column hidden", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{0, 1, 2, 3, 4}))
 
-		expectedOut := ``
-		assert.Equal(t, expectedOut, tw.Render())
+		compareOutput(t, tw.Render(), "")
 	})
 
 	t.Run("some columns hidden (1)", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{1, 2, 3, 4}))
 
-		expectedOut := `+-----+
+		compareOutput(t, tw.Render(), `+-----+
 |   # |
 +-----+
 | 307 |
@@ -850,14 +879,13 @@ func TestTable_Render_HiddenColumns(t *testing.T) {
 |  27 |
 +-----+
 |     |
-+-----+`
-		assert.Equal(t, expectedOut, tw.Render())
++-----+`)
 	})
 
 	t.Run("some columns hidden (2)", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{1, 2, 3}))
 
-		expectedOut := `+-----+-------------------------------+
+		compareOutput(t, tw.Render(), `+-----+-------------------------------+
 |   # |                               |
 +-----+-------------------------------+
 | 307 |                               |
@@ -865,14 +893,13 @@ func TestTable_Render_HiddenColumns(t *testing.T) {
 |  27 | ~You know nothing, Jon Snow!~ |
 +-----+-------------------------------+
 |     |                               |
-+-----+-------------------------------+`
-		assert.Equal(t, expectedOut, tw.Render())
++-----+-------------------------------+`)
 	})
 
 	t.Run("some columns hidden (3)", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{0, 4}))
 
-		expectedOut := `+------------+-------------+--------+
+		compareOutput(t, tw.Render(), `+------------+-------------+--------+
 | FIRST NAME | LAST NAME   | SALARY |
 +------------+-------------+--------+
 | >>Tyrion   | Lannister<< |   5013 |
@@ -880,14 +907,13 @@ func TestTable_Render_HiddenColumns(t *testing.T) {
 | >>Jon      | Snow<<      |   2013 |
 +------------+-------------+--------+
 |            | TOTAL       |  10000 |
-+------------+-------------+--------+`
-		assert.Equal(t, expectedOut, tw.Render())
++------------+-------------+--------+`)
 	})
 
 	t.Run("first column hidden", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{0}))
 
-		expectedOut := `+------------+-------------+--------+-------------------------------+
+		compareOutput(t, tw.Render(), `+------------+-------------+--------+-------------------------------+
 | FIRST NAME | LAST NAME   | SALARY |                               |
 +------------+-------------+--------+-------------------------------+
 | >>Tyrion   | Lannister<< |   5013 |                               |
@@ -895,14 +921,13 @@ func TestTable_Render_HiddenColumns(t *testing.T) {
 | >>Jon      | Snow<<      |   2013 | ~You know nothing, Jon Snow!~ |
 +------------+-------------+--------+-------------------------------+
 |            | TOTAL       |  10000 |                               |
-+------------+-------------+--------+-------------------------------+`
-		assert.Equal(t, expectedOut, tw.Render())
++------------+-------------+--------+-------------------------------+`)
 	})
 
 	t.Run("column hidden in the middle", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{1}))
 
-		expectedOut := `+-----+-------------+--------+-------------------------------+
+		compareOutput(t, tw.Render(), `+-----+-------------+--------+-------------------------------+
 |   # | LAST NAME   | SALARY |                               |
 +-----+-------------+--------+-------------------------------+
 | 307 | Lannister<< |   5013 |                               |
@@ -910,14 +935,13 @@ func TestTable_Render_HiddenColumns(t *testing.T) {
 |  27 | Snow<<      |   2013 | ~You know nothing, Jon Snow!~ |
 +-----+-------------+--------+-------------------------------+
 |     | TOTAL       |  10000 |                               |
-+-----+-------------+--------+-------------------------------+`
-		assert.Equal(t, expectedOut, tw.Render())
++-----+-------------+--------+-------------------------------+`)
 	})
 
 	t.Run("last column hidden", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{4}))
 
-		expectedOut := `+-----+------------+-------------+--------+
+		compareOutput(t, tw.Render(), `+-----+------------+-------------+--------+
 |   # | FIRST NAME | LAST NAME   | SALARY |
 +-----+------------+-------------+--------+
 | 307 | >>Tyrion   | Lannister<< |   5013 |
@@ -925,8 +949,7 @@ func TestTable_Render_HiddenColumns(t *testing.T) {
 |  27 | >>Jon      | Snow<<      |   2013 |
 +-----+------------+-------------+--------+
 |     |            | TOTAL       |  10000 |
-+-----+------------+-------------+--------+`
-		assert.Equal(t, expectedOut, tw.Render())
++-----+------------+-------------+--------+`)
 	})
 }
 
@@ -938,7 +961,7 @@ func TestTable_Render_Paged(t *testing.T) {
 	tw.AppendFooter(Row{"", "", "Total", 10000})
 	tw.SetPageSize(1)
 
-	expectedOut := `+-----+------------+-----------+--------+-----------------------------+
+	compareOutput(t, tw.Render(), `+-----+------------+-----------+--------+-----------------------------+
 |   # | FIRST NAME | LAST NAME | SALARY |                             |
 +-----+------------+-----------+--------+-----------------------------+
 |   1 | Arya       | Stark     |   3000 |                             |
@@ -984,8 +1007,7 @@ func TestTable_Render_Paged(t *testing.T) {
 |     |            |           |        | This is known.              |
 +-----+------------+-----------+--------+-----------------------------+
 |     |            | TOTAL     |  10000 |                             |
-+-----+------------+-----------+--------+-----------------------------+`
-	assert.Equal(t, expectedOut, tw.Render())
++-----+------------+-----------+--------+-----------------------------+`)
 }
 
 func TestTable_Render_Reset(t *testing.T) {
@@ -995,7 +1017,7 @@ func TestTable_Render_Reset(t *testing.T) {
 	tw.AppendFooter(testFooter)
 	tw.SetStyle(StyleLight)
 
-	expectedOut := `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
+	compareOutput(t, tw.Render(), `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
 │   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
 ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 │   1 │ Arya       │ Stark     │   3000 │                             │
@@ -1003,26 +1025,23 @@ func TestTable_Render_Reset(t *testing.T) {
 │ 300 │ Tyrion     │ Lannister │   5000 │                             │
 ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 │     │            │ TOTAL     │  10000 │                             │
-└─────┴────────────┴───────────┴────────┴─────────────────────────────┘`
-	assert.Equal(t, expectedOut, tw.Render())
+└─────┴────────────┴───────────┴────────┴─────────────────────────────┘`)
 
 	tw.ResetFooters()
-	expectedOut = `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
+	compareOutput(t, tw.Render(), `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
 │   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
 ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 │   1 │ Arya       │ Stark     │   3000 │                             │
 │  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │
 │ 300 │ Tyrion     │ Lannister │   5000 │                             │
-└─────┴────────────┴───────────┴────────┴─────────────────────────────┘`
-	assert.Equal(t, expectedOut, tw.Render())
+└─────┴────────────┴───────────┴────────┴─────────────────────────────┘`)
 
 	tw.ResetHeaders()
-	expectedOut = `┌─────┬────────┬───────────┬──────┬─────────────────────────────┐
+	compareOutput(t, tw.Render(), `┌─────┬────────┬───────────┬──────┬─────────────────────────────┐
 │   1 │ Arya   │ Stark     │ 3000 │                             │
 │  20 │ Jon    │ Snow      │ 2000 │ You know nothing, Jon Snow! │
 │ 300 │ Tyrion │ Lannister │ 5000 │                             │
-└─────┴────────┴───────────┴──────┴─────────────────────────────┘`
-	assert.Equal(t, expectedOut, tw.Render())
+└─────┴────────┴───────────┴──────┴─────────────────────────────┘`)
 
 	tw.ResetRows()
 	assert.Empty(t, tw.Render())
@@ -1090,7 +1109,7 @@ func TestTable_Render_Sorted(t *testing.T) {
 	tw.SetStyle(StyleLight)
 	tw.SortBy([]SortBy{{Name: "Last Name", Mode: Asc}, {Name: "First Name", Mode: Asc}})
 
-	expectedOut := `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
+	compareOutput(t, tw.Render(), `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
 │   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
 ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 │ 300 │ Tyrion     │ Lannister │   5000 │                             │
@@ -1099,8 +1118,7 @@ func TestTable_Render_Sorted(t *testing.T) {
 │  11 │ Sansa      │ Stark     │   6000 │                             │
 ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 │     │            │ TOTAL     │  10000 │                             │
-└─────┴────────────┴───────────┴────────┴─────────────────────────────┘`
-	assert.Equal(t, expectedOut, tw.Render())
+└─────┴────────────┴───────────┴────────┴─────────────────────────────┘`)
 }
 
 func TestTable_Render_Separator(t *testing.T) {
@@ -1122,7 +1140,7 @@ func TestTable_Render_Separator(t *testing.T) {
 	tw.AppendFooter(testFooter)
 	tw.SetStyle(StyleLight)
 
-	expectedOut := `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
+	compareOutput(t, tw.Render(), `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
 │   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
 ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 │   1 │ Arya       │ Stark     │   3000 │                             │
@@ -1136,8 +1154,7 @@ func TestTable_Render_Separator(t *testing.T) {
 │  11 │ Sansa      │ Stark     │   6000 │                             │
 ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 │     │            │ TOTAL     │  10000 │                             │
-└─────┴────────────┴───────────┴────────┴─────────────────────────────┘`
-	assert.Equal(t, expectedOut, tw.Render())
+└─────┴────────────┴───────────┴────────┴─────────────────────────────┘`)
 }
 
 func TestTable_Render_Styles(t *testing.T) {
@@ -1201,7 +1218,7 @@ func TestTable_Render_SuppressEmptyColumns(t *testing.T) {
 	tw.AppendFooter(Row{"", "", "TOTAL", 10000})
 	tw.SetStyle(StyleLight)
 
-	expectedOut := `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
+	compareOutput(t, tw.Render(), `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
 │   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
 ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 │   1 │ Arya       │           │   3000 │                             │
@@ -1210,11 +1227,10 @@ func TestTable_Render_SuppressEmptyColumns(t *testing.T) {
 │  11 │ Sansa      │           │   6000 │                             │
 ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 │     │            │ TOTAL     │  10000 │                             │
-└─────┴────────────┴───────────┴────────┴─────────────────────────────┘`
-	assert.Equal(t, expectedOut, tw.Render())
+└─────┴────────────┴───────────┴────────┴─────────────────────────────┘`)
 
 	tw.SuppressEmptyColumns()
-	expectedOut = `┌─────┬────────────┬────────┬─────────────────────────────┐
+	compareOutput(t, tw.Render(), `┌─────┬────────────┬────────┬─────────────────────────────┐
 │   # │ FIRST NAME │ SALARY │                             │
 ├─────┼────────────┼────────┼─────────────────────────────┤
 │   1 │ Arya       │   3000 │                             │
@@ -1223,8 +1239,7 @@ func TestTable_Render_SuppressEmptyColumns(t *testing.T) {
 │  11 │ Sansa      │   6000 │                             │
 ├─────┼────────────┼────────┼─────────────────────────────┤
 │     │            │  10000 │                             │
-└─────┴────────────┴────────┴─────────────────────────────┘`
-	assert.Equal(t, expectedOut, tw.Render())
+└─────┴────────────┴────────┴─────────────────────────────┘`)
 }
 
 func TestTable_Render_TableWithinTable(t *testing.T) {
@@ -1240,7 +1255,7 @@ func TestTable_Render_TableWithinTable(t *testing.T) {
 	twOuter.SetColumnConfigs([]ColumnConfig{{Number: 1, AlignHeader: text.AlignCenter}})
 	twOuter.SetStyle(StyleDouble)
 
-	expectedOut := `╔═════════════════════════════════════════════════════════════════════════╗
+	compareOutput(t, twOuter.Render(), `╔═════════════════════════════════════════════════════════════════════════╗
 ║                           TABLE WITHIN A TABLE                          ║
 ╠═════════════════════════════════════════════════════════════════════════╣
 ║ ┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐ ║
@@ -1252,8 +1267,7 @@ func TestTable_Render_TableWithinTable(t *testing.T) {
 ║ ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤ ║
 ║ │     │            │ TOTAL     │  10000 │                             │ ║
 ║ └─────┴────────────┴───────────┴────────┴─────────────────────────────┘ ║
-╚═════════════════════════════════════════════════════════════════════════╝`
-	assert.Equal(t, expectedOut, twOuter.Render())
+╚═════════════════════════════════════════════════════════════════════════╝`)
 }
 
 func TestTable_Render_TableWithTransformers(t *testing.T) {

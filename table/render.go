@@ -80,8 +80,11 @@ func (t *Table) renderColumn(out *strings.Builder, row rowStr, colIdx int, maxCo
 	// content is found; override alignment to Center in this case
 	rowConfig := t.getRowConfig(hint)
 	if rowConfig.AutoMerge && !hint.isSeparatorRow {
-		for idx := colIdx + 1; idx < len(row); idx++ {
-			if row[colIdx] != row[idx] {
+		// get the real row to consider all lines in each column instead of just
+		// looking at the current "line"
+		rowUnwrapped := t.getRow(hint.rowNumber-1, hint)
+		for idx := colIdx + 1; idx < len(rowUnwrapped); idx++ {
+			if rowUnwrapped[colIdx] != rowUnwrapped[idx] {
 				break
 			}
 			align = rowConfig.getAutoMergeAlign()
