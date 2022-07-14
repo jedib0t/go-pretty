@@ -17,7 +17,7 @@ func TestTable_RenderCSV(t *testing.T) {
 	tw.SetCaption(testCaption)
 	tw.SetTitle(testTitle1)
 
-	expectedOut := `Game of Thrones
+	compareOutput(t, tw.RenderCSV(), `Game of Thrones
 #,First Name,Last Name,Salary,
 1,Arya,Stark,3000,
 20,Jon,Snow,2000,"You know nothing\, Jon Snow!"
@@ -27,8 +27,7 @@ The North Remembers!
 This is known."
 0,Valar,Morghulis,0,Faceless    Men
 ,,Total,10000,
-A Song of Ice and Fire`
-	assert.Equal(t, expectedOut, tw.RenderCSV())
+A Song of Ice and Fire`)
 }
 
 func TestTable_RenderCSV_AutoIndex(t *testing.T) {
@@ -50,7 +49,7 @@ func TestTable_RenderCSV_AutoIndex(t *testing.T) {
 	tw.SetAutoIndex(true)
 	tw.SetStyle(StyleLight)
 
-	expectedOut := `,A,B,C,D,E,F,G,H,I,J
+	compareOutput(t, tw.RenderCSV(), `,A,B,C,D,E,F,G,H,I,J
 1,A1,B1,C1,D1,E1,F1,G1,H1,I1,J1
 2,A2,B2,C2,D2,E2,F2,G2,H2,I2,J2
 3,A3,B3,C3,D3,E3,F3,G3,H3,I3,J3
@@ -61,8 +60,7 @@ func TestTable_RenderCSV_AutoIndex(t *testing.T) {
 8,A8,B8,C8,D8,E8,F8,G8,H8,I8,J8
 9,A9,B9,C9,D9,E9,F9,G9,H9,I9,J9
 10,A10,B10,C10,D10,E10,F10,G10,H10,I10,J10
-,AF,BF,CF,DF,EF,FF,GF,HF,IF,JF`
-	assert.Equal(t, expectedOut, tw.RenderCSV())
+,AF,BF,CF,DF,EF,FF,GF,HF,IF,JF`)
 }
 
 func TestTable_RenderCSV_Empty(t *testing.T) {
@@ -84,41 +82,37 @@ func TestTable_RenderCSV_HiddenColumns(t *testing.T) {
 	t.Run("every column hidden", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{0, 1, 2, 3, 4}))
 
-		expectedOut := ``
-		assert.Equal(t, expectedOut, tw.RenderCSV())
+		compareOutput(t, tw.RenderCSV(), "")
 	})
 
 	t.Run("first column hidden", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{0}))
 
-		expectedOut := `First Name,Last Name,Salary,
+		compareOutput(t, tw.RenderCSV(), `First Name,Last Name,Salary,
 >>Tyrion,Lannister<<,5013,
 >>Arya,Stark<<,3013,
 >>Jon,Snow<<,2013,"~You know nothing\, Jon Snow!~"
-,Total,10000,`
-		assert.Equal(t, expectedOut, tw.RenderCSV())
+,Total,10000,`)
 	})
 
 	t.Run("column hidden in the middle", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{1}))
 
-		expectedOut := `#,Last Name,Salary,
+		compareOutput(t, tw.RenderCSV(), `#,Last Name,Salary,
 307,Lannister<<,5013,
 8,Stark<<,3013,
 27,Snow<<,2013,"~You know nothing\, Jon Snow!~"
-,Total,10000,`
-		assert.Equal(t, expectedOut, tw.RenderCSV())
+,Total,10000,`)
 	})
 
 	t.Run("last column hidden", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{4}))
 
-		expectedOut := `#,First Name,Last Name,Salary
+		compareOutput(t, tw.RenderCSV(), `#,First Name,Last Name,Salary
 307,>>Tyrion,Lannister<<,5013
 8,>>Arya,Stark<<,3013
 27,>>Jon,Snow<<,2013
-,,Total,10000`
-		assert.Equal(t, expectedOut, tw.RenderCSV())
+,,Total,10000`)
 	})
 }
 
@@ -130,11 +124,10 @@ func TestTable_RenderCSV_Sorted(t *testing.T) {
 	tw.AppendFooter(testFooter)
 	tw.SortBy([]SortBy{{Name: "Last Name", Mode: Asc}, {Name: "First Name", Mode: Asc}})
 
-	expectedOut := `#,First Name,Last Name,Salary,
+	compareOutput(t, tw.RenderCSV(), `#,First Name,Last Name,Salary,
 300,Tyrion,Lannister,5000,
 20,Jon,Snow,2000,"You know nothing\, Jon Snow!"
 1,Arya,Stark,3000,
 11,Sansa,Stark,6000,
-,,Total,10000,`
-	assert.Equal(t, expectedOut, tw.RenderCSV())
+,,Total,10000,`)
 }
