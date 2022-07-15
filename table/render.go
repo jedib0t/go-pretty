@@ -320,11 +320,19 @@ func (t *Table) renderRows(out *strings.Builder, rows []rowStr, hint renderHint)
 }
 
 func (t *Table) renderRowsBorderBottom(out *strings.Builder) {
-	t.renderRowSeparator(out, renderHint{isBorderBottom: true, isFooterRow: true})
+	if len(t.rowsFooter) > 0 {
+		t.renderRowSeparator(out, renderHint{isBorderBottom: true, isFooterRow: true, rowNumber: len(t.rowsFooter)})
+	} else {
+		t.renderRowSeparator(out, renderHint{isBorderBottom: true, isFooterRow: false, rowNumber: len(t.rows)})
+	}
 }
 
 func (t *Table) renderRowsBorderTop(out *strings.Builder) {
-	t.renderRowSeparator(out, renderHint{isBorderTop: true, isHeaderRow: true})
+	if len(t.rowsHeader) > 0 || t.autoIndex {
+		t.renderRowSeparator(out, renderHint{isBorderTop: true, isHeaderRow: true, rowNumber: 0})
+	} else {
+		t.renderRowSeparator(out, renderHint{isBorderTop: true, isHeaderRow: false, rowNumber: 0})
+	}
 }
 
 func (t *Table) renderRowsFooter(out *strings.Builder) {
@@ -340,17 +348,16 @@ func (t *Table) renderRowsFooter(out *strings.Builder) {
 
 func (t *Table) renderRowsHeader(out *strings.Builder) {
 	if len(t.rowsHeader) > 0 || t.autoIndex {
+		hintSeparator := renderHint{isHeaderRow: true, isLastRow: true, isSeparatorRow: true}
+
 		if len(t.rowsHeader) > 0 {
 			t.renderRows(out, t.rowsHeader, renderHint{isHeaderRow: true})
+			hintSeparator.rowNumber = len(t.rowsHeader)
 		} else if t.autoIndex {
 			t.renderRow(out, t.getAutoIndexColumnIDs(), renderHint{isAutoIndexRow: true, isHeaderRow: true})
+			hintSeparator.rowNumber = 1
 		}
-		t.renderRowSeparator(out, renderHint{
-			isHeaderRow:    true,
-			isLastRow:      true,
-			isSeparatorRow: true,
-			rowNumber:      len(t.rowsHeader),
-		})
+		t.renderRowSeparator(out, hintSeparator)
 	}
 }
 
