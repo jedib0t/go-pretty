@@ -17,6 +17,7 @@ type Writer interface {
 	SetStyle(style Style)
 	Style() *Style
 	UnIndent()
+	UnIndentAll()
 }
 
 // NewWriter initializes and returns a Writer.

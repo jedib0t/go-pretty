@@ -120,6 +120,10 @@ func (l *List) UnIndent() {
 	}
 }
 
+func (l *List) UnIndentAll() {
+	l.level = 0
+}
+
 func (l *List) initForRender() {
 	// pick a default style
 	l.Style()
