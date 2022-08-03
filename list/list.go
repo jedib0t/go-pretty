@@ -121,9 +121,7 @@ func (l *List) UnIndent() {
 }
 
 func (l *List) UnIndentAll() {
-	for l.level > 0 {
-		l.level--
-	}
+	l.level = 0
 }
 
 func (l *List) initForRender() {
