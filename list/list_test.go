@@ -149,3 +149,14 @@ func TestList_UnIndent(t *testing.T) {
 	list.UnIndent()
 	assert.Equal(t, 0, list.level)
 }
+
+func TestList_UnIndentAll(t *testing.T) {
+	list := List{level: 3}
+
+	list.UnIndentAll()
+	assert.Equal(t, 0, list.level)
+
+	// Ensure level is still 0 after 2 consecutive calls
+	list.UnIndentAll()
+	assert.Equal(t, 0, list.level)
+}

@@ -289,3 +289,47 @@ func TestList_Render_Styles(t *testing.T) {
 		fmt.Println(mismatch)
 	}
 }
+
+func TestList_Render_UnindentAll(t *testing.T) {
+	lw := NewWriter()
+	lw.AppendItem(testItem1)
+	lw.Indent()
+	lw.AppendItems(testItems2)
+	lw.Indent()
+	lw.AppendItems(testItems3)
+	lw.UnIndentAll()
+	lw.AppendItem(testItem4)
+	lw.Indent()
+	lw.AppendItem(testItem5)
+	lw.UnIndentAll()
+	lw.AppendItem("The Mandalorian")
+	lw.Indent()
+	lw.AppendItem("This")
+	lw.Indent()
+	lw.AppendItem("Is")
+	lw.Indent()
+	lw.AppendItem("The")
+	lw.Indent()
+	lw.AppendItem("Way")
+	lw.Indent()
+	lw.UnIndentAll()
+	lw.AppendItem("Right?")
+
+	expectedOut := `* Game Of Thrones
+  * Winter
+  * Is
+  * Coming
+    * This
+    * Is
+    * Known
+* The Dark Tower
+  * The Gunslinger
+* The Mandalorian
+  * This
+    * Is
+      * The
+        * Way
+* Right?`
+	assert.Equal(t, expectedOut, lw.Render())
+
+}
