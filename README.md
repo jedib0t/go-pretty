@@ -107,5 +107,6 @@ all occurrences of `jedib0t/go-pretty/` to `jedib0t/go-pretty/v6/`. If you are
 on a system with access to `find`, `grep`, `xargs` and `sed`, you could just run
 the following from within your code folder to do the same:
 ```
-find . -type f -name "*.go" | grep -v vendor | xargs sed -i 's/jedib0t\/go-pretty\//jedib0t\/go-pretty\/v6\//'g
+find . -type f -name "*.go" | grep -v vendor | xargs sed -i 's/jedib0t\/go-pretty\//jedib0t\/go-pretty\/v6\//g'
 ```
+If you are on MacOS, you'll have to use `sed -i ''` instead of `sed -i`.
