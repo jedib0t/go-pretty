@@ -422,7 +422,7 @@ func (t *Table) getBorderRight(hint renderHint) string {
 }
 
 func (t *Table) getColumnColors(colIdx int, hint renderHint) text.Colors {
-	if t.rowPainter != nil && hint.isRegularRow() && !t.isIndexColumn(colIdx, hint) {
+	if t.rowPainter != nil && hint.isRegularNonSeparatorRow() && !t.isIndexColumn(colIdx, hint) {
 		colors := t.rowsColors[hint.rowNumber-1]
 		if colors != nil {
 			return colors
@@ -991,6 +991,10 @@ type renderHint struct {
 
 func (h *renderHint) isRegularRow() bool {
 	return !h.isHeaderRow && !h.isFooterRow
+}
+
+func (h *renderHint) isRegularNonSeparatorRow() bool {
+	return !h.isHeaderRow && !h.isFooterRow && !h.isSeparatorRow
 }
 
 func (h *renderHint) isHeaderOrFooterSeparator() bool {
