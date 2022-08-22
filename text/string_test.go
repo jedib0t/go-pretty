@@ -80,6 +80,18 @@ func TestLongestLineLen(t *testing.T) {
 	assert.Equal(t, 7, LongestLineLen("\x1b[33mMother\x1b[0m\nOf\nDragons"))
 }
 
+func TestOverrideRuneWidthEastAsianWidth(t *testing.T) {
+	originalValue := rwCondition.EastAsianWidth
+	defer func() {
+		rwCondition.EastAsianWidth = originalValue
+	}()
+
+	OverrideRuneWidthEastAsianWidth(true)
+	assert.Equal(t, 2, RuneWidthWithoutEscSequences("╋"))
+	OverrideRuneWidthEastAsianWidth(false)
+	assert.Equal(t, 1, RuneWidthWithoutEscSequences("╋"))
+}
+
 func ExamplePad() {
 	fmt.Printf("%#v\n", Pad("Ghost", 0, ' '))
 	fmt.Printf("%#v\n", Pad("Ghost", 3, ' '))
