@@ -16,6 +16,11 @@ const (
 	EscapeStopRune  = 'm'
 )
 
+// RuneWidth stuff
+var (
+	rwCondition = runewidth.NewCondition()
+)
+
 // InsertEveryN inserts the rune every N characters in the string. For ex.:
 //  InsertEveryN("Ghost", '-', 1) == "G-h-o-s-t"
 //  InsertEveryN("Ghost", '-', 2) == "Gh-os-t"
@@ -79,6 +84,23 @@ func LongestLineLen(str string) int {
 	return maxLength
 }
 
+// OverrideRuneWidthEastAsianWidth can *probably* help with alignment, and
+// length calculation issues when dealing with Unicode character-set and a
+// non-English language set in the LANG variable.
+//
+// Set this to 'false' to force the "runewidth" library to pretend to deal with
+// English character-set. Be warned that if the text/content you are dealing
+// with contains East Asian character-set, this may result in unexpected
+// behavior.
+//
+// References:
+// * https://github.com/mattn/go-runewidth/issues/64#issuecomment-1221642154
+// * https://github.com/jedib0t/go-pretty/issues/220
+// * https://github.com/jedib0t/go-pretty/issues/204
+func OverrideRuneWidthEastAsianWidth(val bool) {
+	rwCondition.EastAsianWidth = val
+}
+
 // Pad pads the given string with as many characters as needed to make it as
 // long as specified (maxLen). This function does not count escape sequences
 // while calculating length of the string. Ex.:
@@ -132,7 +154,7 @@ func RuneCount(str string) int {
 //  RuneWidth('︿') == 2
 //  RuneWidth(0x27) == 0
 func RuneWidth(r rune) int {
-	return runewidth.RuneWidth(r)
+	return rwCondition.RuneWidth(r)
 }
 
 // RuneWidthWithoutEscSequences is similar to RuneWidth, except for the fact

@@ -80,6 +80,27 @@ func TestLongestLineLen(t *testing.T) {
 	assert.Equal(t, 7, LongestLineLen("\x1b[33mMother\x1b[0m\nOf\nDragons"))
 }
 
+func TestOverrideRuneWidthEastAsianWidth(t *testing.T) {
+	originalValue := rwCondition.EastAsianWidth
+	defer func() {
+		rwCondition.EastAsianWidth = originalValue
+	}()
+
+	OverrideRuneWidthEastAsianWidth(true)
+	assert.Equal(t, 2, RuneWidthWithoutEscSequences("╋"))
+	OverrideRuneWidthEastAsianWidth(false)
+	assert.Equal(t, 1, RuneWidthWithoutEscSequences("╋"))
+
+	// Note for posterity. We want the length of the box drawing character to
+	// be reported as 1. However, with an environment where LANG is set to
+	// something like 'zh_CN.UTF-8', the value being returned is 2, which breaks
+	// text alignment/padding logic in this library.
+	//
+	// If a future version of runewidth is able to address this internally and
+	// return 1 for the above, the function being tested can be marked for
+	// deprecation.
+}
+
 func ExamplePad() {
 	fmt.Printf("%#v\n", Pad("Ghost", 0, ' '))
 	fmt.Printf("%#v\n", Pad("Ghost", 3, ' '))
