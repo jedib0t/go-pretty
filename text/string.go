@@ -92,6 +92,11 @@ func LongestLineLen(str string) int {
 // English character-set. Be warned that if the text/content you are dealing
 // with contains East Asian character-set, this may result in unexpected
 // behavior.
+//
+// References:
+// * https://github.com/mattn/go-runewidth/issues/64#issuecomment-1221642154
+// * https://github.com/jedib0t/go-pretty/issues/220
+// * https://github.com/jedib0t/go-pretty/issues/204
 func OverrideRuneWidthEastAsianWidth(val bool) {
 	rwCondition.EastAsianWidth = val
 }
