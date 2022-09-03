@@ -18,9 +18,9 @@ var (
 	flagHidePercentage     = flag.Bool("hide-percentage", false, "Hide the progress percent?")
 	flagHideTime           = flag.Bool("hide-time", false, "Hide the time taken?")
 	flagHideValue          = flag.Bool("hide-value", false, "Hide the tracker value?")
-	flagHideSpeed          = flag.Bool("hide-speed", false, "Hide the tracker speed?")
-	flagHideSpeedOverall   = flag.Bool("hide-speed-overall", false, "Hide the overall tracker speed?")
 	flagNumTrackers        = flag.Int("num-trackers", 13, "Number of Trackers")
+	flagShowSpeed          = flag.Bool("show-speed", false, "Show the tracker speed?")
+	flagShowSpeedOverall   = flag.Bool("show-speed-overall", false, "Show the overall tracker speed?")
 	flagRandomFail         = flag.Bool("rnd-fail", false, "Introduce random failures in tracking")
 	flagRandomLogs         = flag.Bool("rnd-logs", false, "Output random logs in the middle of tracking")
 
@@ -115,15 +115,14 @@ func main() {
 	pw.SetUpdateFrequency(time.Millisecond * 100)
 	pw.Style().Colors = progress.StyleColorsExample
 	pw.Style().Options.PercentFormat = "%4.1f%%"
-	pw.Style().Options.SpeedOverallFormatter = progress.FormatNumber
 	pw.Style().Visibility.ETA = !*flagHideETA
 	pw.Style().Visibility.ETAOverall = !*flagHideETAOverall
 	pw.Style().Visibility.Percentage = !*flagHidePercentage
+	pw.Style().Visibility.Speed = *flagShowSpeed
+	pw.Style().Visibility.SpeedOverall = *flagShowSpeedOverall
 	pw.Style().Visibility.Time = !*flagHideTime
 	pw.Style().Visibility.TrackerOverall = !*flagHideOverallTracker
 	pw.Style().Visibility.Value = !*flagHideValue
-	pw.Style().Visibility.Speed = !*flagHideSpeed
-	pw.Style().Visibility.SpeedOverall = !*flagHideSpeedOverall
 
 	// call Render() in async mode; yes we don't have any trackers at the moment
 	go pw.Render()
