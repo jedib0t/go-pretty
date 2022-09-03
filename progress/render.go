@@ -322,6 +322,9 @@ func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker, hint ren
 	if !hint.hideValue || !hint.hideTime {
 		var outStats strings.Builder
 		outStats.WriteString(" [")
+
+		p.renderTrackerSpeed(&outStats, t, hint)
+
 		if !hint.hideValue {
 			outStats.WriteString(p.style.Colors.Value.Sprint(t.Units.Sprint(t.Value())))
 		}
@@ -370,5 +373,44 @@ func (p *Progress) renderTrackerStatsETA(out *strings.Builder, t *Tracker, hint 
 		out.WriteString(p.style.Options.ETAString)
 		out.WriteString(": ")
 		out.WriteString(p.style.Colors.Time.Sprint(eta))
+	}
+}
+
+func (p *Progress) renderTrackerSpeed(out *strings.Builder, t *Tracker, hint renderHint) {
+	if hint.isOverallTracker && !p.style.Visibility.SpeedOverall {
+		return
+	}
+	if !hint.isOverallTracker && !p.style.Visibility.Speed {
+		return
+	}
+
+	tpSpeed := p.style.Options.SpeedPrecision
+
+	write := func(speed float64, formatter func(int64) string) {
+		if formatter == nil {
+			formatter = FormatNumber
+		}
+		out.WriteString(p.style.Colors.Speed.Sprint(formatter(int64(speed))))
+		out.WriteString("/s; ")
+	}
+
+	if hint.isOverallTracker {
+		speed := float64(0)
+
+		p.trackersActiveMutex.RLock()
+		for _, tracker := range p.trackersActive {
+			speed += float64(tracker.Value()) / time.Since(tracker.timeStart).Round(tpSpeed).Seconds()
+		}
+		p.trackersActiveMutex.RUnlock()
+
+		if speed > 0 {
+			write(speed, p.style.Options.SpeedOverallFormatter)
+		}
+		return
+	}
+
+	since := time.Since(t.timeStart)
+	if eta := since.Round(tpSpeed); eta > tpSpeed {
+		write(float64(t.Value())/eta.Seconds(), t.Units.Formatter)
 	}
 }
