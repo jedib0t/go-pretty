@@ -125,6 +125,7 @@ type StyleColors struct {
 	Time    text.Colors // time text colors (overrides Stats)
 	Tracker text.Colors // tracker text colors
 	Value   text.Colors // value text colors (overrides Stats)
+	Speed   text.Colors // speed text colors
 }
 
 var (
@@ -141,23 +142,26 @@ var (
 		Time:    text.Colors{text.FgGreen},
 		Tracker: text.Colors{text.FgYellow},
 		Value:   text.Colors{text.FgCyan},
+		Speed:   text.Colors{text.FgMagenta},
 	}
 )
 
 // StyleOptions defines misc. options to control how the Tracker or its parts
 // gets rendered.
 type StyleOptions struct {
-	DoneString              string        // "done!" string
-	ErrorString             string        // "error!" string
-	ETAPrecision            time.Duration // precision for ETA
-	ETAString               string        // string for ETA
-	Separator               string        // text between message and tracker
-	SnipIndicator           string        // text denoting message snipping
-	PercentFormat           string        // formatting to use for percentage
-	PercentIndeterminate    string        // when percentage cannot be computed
-	TimeDonePrecision       time.Duration // precision for time when done
-	TimeInProgressPrecision time.Duration // precision for time when in progress
-	TimeOverallPrecision    time.Duration // precision for overall time
+	DoneString              string                   // "done!" string
+	ErrorString             string                   // "error!" string
+	ETAPrecision            time.Duration            // precision for ETA
+	ETAString               string                   // string for ETA
+	Separator               string                   // text between message and tracker
+	SnipIndicator           string                   // text denoting message snipping
+	PercentFormat           string                   // formatting to use for percentage
+	PercentIndeterminate    string                   // when percentage cannot be computed
+	TimeDonePrecision       time.Duration            // precision for time when done
+	TimeInProgressPrecision time.Duration            // precision for time when in progress
+	TimeOverallPrecision    time.Duration            // precision for overall time
+	SpeedPrecision          time.Duration            // precision for speed
+	SpeedOverallFormatter   func(value int64) string // formatter for the overall tracker speed
 }
 
 var (
@@ -175,6 +179,8 @@ var (
 		TimeDonePrecision:       time.Millisecond,
 		TimeInProgressPrecision: time.Microsecond,
 		TimeOverallPrecision:    time.Second,
+		SpeedPrecision:          time.Microsecond,
+		SpeedOverallFormatter:   FormatNumber,
 	}
 )
 
@@ -187,6 +193,8 @@ type StyleVisibility struct {
 	Tracker        bool // tracker ([===========-----------])
 	TrackerOverall bool // overall tracker
 	Value          bool // tracker value
+	Speed          bool // tracker speed
+	SpeedOverall   bool // speed for the overall tracker
 }
 
 var (
@@ -199,5 +207,7 @@ var (
 		Tracker:        true,
 		TrackerOverall: false,
 		Value:          true,
+		Speed:          true,
+		SpeedOverall:   true,
 	}
 )
