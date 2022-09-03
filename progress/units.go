@@ -14,9 +14,12 @@ const (
 	UnitsNotationPositionAfter
 )
 
+// UnitsFormatter defines a function that prints a value in a specific style.
+type UnitsFormatter func(value int64) string
+
 // Units defines the "type" of the value being tracked by the Tracker.
 type Units struct {
-	Formatter        func(value int64) string // default: FormatNumber
+	Formatter        UnitsFormatter // default: FormatNumber
 	Notation         string
 	NotationPosition UnitsNotationPosition // default: UnitsNotationPositionBefore
 }

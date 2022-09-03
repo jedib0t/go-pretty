@@ -419,10 +419,10 @@ func TestProgress_RenderSomeTrackers_OnLeftSide(t *testing.T) {
 	expectedOutPatterns := []*regexp.Regexp{
 		regexp.MustCompile(`\x1b\[K\d+\.\d+% \[[#.]{23}] \[\d+\.\d+\w+/s; \d+ in [\d.]+ms] \.\.\. Calculating Total   # 1`),
 		regexp.MustCompile(`\x1b\[K\d+\.\d+% \[[#.]{23}] \[\d+\.\d+\w+/s; \d+B in [\d.]+ms] \.\.\. Downloading File    # 2`),
-		regexp.MustCompile(`\x1b\[K\d+\.\d+% \[[#.]{23}] \[\d+\.\d+\w+/s; \$\d+ in [\d.]+ms] \.\.\. Transferring Amount # 3`),
+		regexp.MustCompile(`\x1b\[K\d+\.\d+% \[[#.]{23}] \[\$\d+\.\d+\w+/s; \$\d+ in [\d.]+ms] \.\.\. Transferring Amount # 3`),
 		regexp.MustCompile(`\x1b\[KCalculating Total   # 1 \.\.\. done! \[\d+\.\d+\w+/s; \d+\.\d+K in [\d.]+ms]`),
 		regexp.MustCompile(`\x1b\[KDownloading File    # 2 \.\.\. done! \[\d+\.\d+\w+/s; \d+\.\d+KB in [\d.]+ms]`),
-		regexp.MustCompile(`\x1b\[KTransferring Amount # 3 \.\.\. done! \[\d+\.\d+\w+/s; \$\d+\.\d+K in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KTransferring Amount # 3 \.\.\. done! \[\$\d+\.\d+\w+/s; \$\d+\.\d+K in [\d.]+ms]`),
 	}
 	out := renderOutput.String()
 	for _, expectedOutPattern := range expectedOutPatterns {
