@@ -267,6 +267,9 @@ func (p *Progress) Style() *Style {
 func (p *Progress) initForRender() {
 	// pick a default style
 	p.Style()
+	if p.style.Options.SpeedOverallFormatter == nil {
+		p.style.Options.SpeedOverallFormatter = FormatNumber
+	}
 
 	// reset the signals
 	p.done = make(chan bool, 1)
