@@ -3,6 +3,7 @@ package table
 import (
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -683,6 +684,59 @@ func (t *Table) initForRenderColumnLengths() {
 			t.maxColumnLengths[colIdx] = minWidth
 		}
 	}
+
+	// adjust column lengths if some columns are being merged in all the rows
+	//fmt.Printf("maxColumnLengths: %#v\n", t.maxColumnLengths)
+	if t.allRowsHaveAutoMerge() {
+		getMergeRange := func(rowIdx, colIdx int) string {
+			rsp := []string{fmt.Sprint(colIdx)}
+			for ; colIdx < t.numColumns-1; colIdx++ {
+				if colIdx+1 >= len(t.rows[rowIdx]) {
+					break
+				}
+				if t.rows[rowIdx][colIdx] != t.rows[rowIdx][colIdx+1] {
+					break
+				}
+				rsp = append(rsp, fmt.Sprint(colIdx+1))
+			}
+			if len(rsp) == 1 {
+				return ""
+			}
+			return strings.Join(rsp, ",")
+		}
+		mergeMap := make(map[string]int, 0)
+
+		// figure out all the columns that are getting merged
+		for colIdx := 0; colIdx < t.numColumns-1; colIdx++ {
+			for rowIdx := 0; rowIdx < len(t.rows); rowIdx++ {
+				mergeRange := getMergeRange(rowIdx, colIdx)
+				if mergeRange != "" {
+					mergeMap[mergeRange] += 1
+				}
+			}
+		}
+		//fmt.Printf("mergeMap: %#v\n", mergeMap)
+		for k, v := range mergeMap {
+			if v == len(t.rows) {
+				var mergedColIndices []int
+				for _, mergedColIdxStr := range strings.Split(k, ",") {
+					if n, err := strconv.Atoi(mergedColIdxStr); err == nil {
+						mergedColIndices = append(mergedColIndices, n)
+					}
+				}
+				//fmt.Printf("mergedColIndices: %#v\n", mergedColIndices)
+			}
+		}
+	}
+}
+
+func (t *Table) allRowsHaveAutoMerge() bool {
+	for _, v := range t.rowsConfigMap {
+		if !v.AutoMerge {
+			return false
+		}
+	}
+	return true
 }
 
 func (t *Table) hideColumns() map[int]int {

@@ -17,7 +17,8 @@ func TestTable_RenderMarkdown(t *testing.T) {
 	tw.SetCaption(testCaption)
 	tw.SetTitle(testTitle1)
 
-	compareOutput(t, tw.RenderMarkdown(), `# Game of Thrones
+	compareOutput(t, tw.RenderMarkdown(), `
+# Game of Thrones
 | # | First Name | Last Name | Salary |  |
 | ---:| --- | --- | ---:| --- |
 | 1 | Arya | Stark | 3000 |  |
@@ -48,7 +49,8 @@ func TestTable_RenderMarkdown_AutoIndex(t *testing.T) {
 	tw.SetAutoIndex(true)
 	tw.SetStyle(StyleLight)
 
-	compareOutput(t, tw.RenderMarkdown(), `| | A | B | C | D | E | F | G | H | I | J |
+	compareOutput(t, tw.RenderMarkdown(), `
+| | A | B | C | D | E | F | G | H | I | J |
 | ---:| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | A1 | B1 | C1 | D1 | E1 | F1 | G1 | H1 | I1 | J1 |
 | 2 | A2 | B2 | C2 | D2 | E2 | F2 | G2 | H2 | I2 | J2 |
@@ -88,7 +90,8 @@ func TestTable_RenderMarkdown_HiddenColumns(t *testing.T) {
 	t.Run("first column hidden", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{0}))
 
-		compareOutput(t, tw.RenderMarkdown(), `| First Name | Last Name | Salary |  |
+		compareOutput(t, tw.RenderMarkdown(), `
+| First Name | Last Name | Salary |  |
 | --- | --- | ---:| --- |
 | >>Tyrion | Lannister<< | 5013 |  |
 | >>Arya | Stark<< | 3013 |  |
@@ -99,7 +102,8 @@ func TestTable_RenderMarkdown_HiddenColumns(t *testing.T) {
 	t.Run("column hidden in the middle", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{1}))
 
-		compareOutput(t, tw.RenderMarkdown(), `| # | Last Name | Salary |  |
+		compareOutput(t, tw.RenderMarkdown(), `
+| # | Last Name | Salary |  |
 | ---:| --- | ---:| --- |
 | 307 | Lannister<< | 5013 |  |
 | 8 | Stark<< | 3013 |  |
@@ -110,7 +114,8 @@ func TestTable_RenderMarkdown_HiddenColumns(t *testing.T) {
 	t.Run("last column hidden", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{4}))
 
-		compareOutput(t, tw.RenderMarkdown(), `| # | First Name | Last Name | Salary |
+		compareOutput(t, tw.RenderMarkdown(), `
+| # | First Name | Last Name | Salary |
 | ---:| --- | --- | ---:|
 | 307 | >>Tyrion | Lannister<< | 5013 |
 | 8 | >>Arya | Stark<< | 3013 |
@@ -127,7 +132,8 @@ func TestTable_RendeMarkdown_Sorted(t *testing.T) {
 	tw.AppendFooter(testFooter)
 	tw.SortBy([]SortBy{{Name: "Last Name", Mode: Asc}, {Name: "First Name", Mode: Asc}})
 
-	compareOutput(t, tw.RenderMarkdown(), `| # | First Name | Last Name | Salary |  |
+	compareOutput(t, tw.RenderMarkdown(), `
+| # | First Name | Last Name | Salary |  |
 | ---:| --- | --- | ---:| --- |
 | 300 | Tyrion | Lannister | 5000 |  |
 | 20 | Jon | Snow | 2000 | You know nothing, Jon Snow! |
