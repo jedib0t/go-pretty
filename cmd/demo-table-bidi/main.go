@@ -8,6 +8,10 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 )
 
+var (
+	wrapped = false
+)
+
 type Tag = string
 
 type Expense struct {
@@ -22,39 +26,40 @@ func UTCDate(year int, month time.Month, day int) time.Time {
 	return time.Date(year, month, day, 0, 0, 0, 0, timeZone)
 }
 
-func displayExpenses(expenses []*Expense, wrap bool) {
+func displayExpenses(expenses []*Expense) {
 	t := table.NewWriter()
-	// if we don't wrap each header with [] they will show in reverse order
-	if wrap {
-		t.AppendHeader(table.Row{"#", "[תאריך]", "[סכום]", "[מחלקה]", "[תגים]"})
-	} else {
-		t.AppendHeader(table.Row{"#", "תגים", "מחלקה", "סכום", "תאריך"})
-	}
+	t.AppendHeader(generateHeader())
 	for i, e := range expenses {
 		dateWithoutTime := strings.Split(e.Date.String(), " ")[0]
-		// we format here to wrap with [] otherwise order will break
-		eClass := e.Class
-		if wrap {
-			eClass = fmt.Sprintf("[%s]", e.Class)
-		}
-		t.AppendRows([]table.Row{
-			{
-				i,
-				dateWithoutTime,
-				e.Amount,
-				eClass,
-				e.Tags,
-			},
-		})
+		eClass := processBiDi(e.Class)
+		eTags := processBiDi(strings.Join(e.Tags, " "))
+		t.AppendRow(table.Row{i, dateWithoutTime, e.Amount, eClass, eTags})
 	}
-	if wrap {
-		t.AppendFooter(table.Row{"", "[סהכ]", 30})
-	} else {
-		t.AppendFooter(table.Row{"", "סהכ", 30})
-	}
-	t.SetCaption("Wrapped: %v", wrap)
+	t.AppendFooter(generateFooter())
+	t.SetCaption("Wrapped: %v", wrapped)
 
 	fmt.Printf("%s\n\n", t.Render())
+}
+
+func generateFooter() table.Row {
+	row := table.Row{"", "סהכ", 30}
+	row[1] = processBiDi(fmt.Sprint(row[1]))
+	return row
+}
+
+func generateHeader() table.Row {
+	row := table.Row{"#"}
+	for _, col := range []string{"תאריך", "סכום", "מחלקה", "תגים"} {
+		row = append(row, processBiDi(col))
+	}
+	return row
+}
+
+func processBiDi(str string) string {
+	if wrapped {
+		return fmt.Sprintf("[%s]", str)
+	}
+	return str
 }
 
 func main() {
@@ -79,6 +84,8 @@ func main() {
 		},
 	}
 
-	displayExpenses(testExpenses, true)
-	displayExpenses(testExpenses, false)
+	wrapped = true
+	displayExpenses(testExpenses)
+	wrapped = false
+	displayExpenses(testExpenses)
 }
