@@ -11,10 +11,10 @@ const (
 	RightToLeft
 )
 
+// Modifier returns a character to force the given direction for the text that
+// follows the modifier.
 func (d Direction) Modifier() string {
 	switch d {
-	case Default:
-		return ""
 	case LeftToRight:
 		return "‪"
 	case RightToLeft:
