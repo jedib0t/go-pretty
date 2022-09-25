@@ -12,7 +12,7 @@ import (
 
 func compareOutput(t *testing.T, out string, expectedOut string) {
 	assert.Equal(t, expectedOut, out)
-	if out != expectedOut || true {
+	if out != expectedOut {
 		fmt.Println(out)
 	}
 }
