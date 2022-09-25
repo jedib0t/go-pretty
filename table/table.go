@@ -338,6 +338,9 @@ func (t *Table) analyzeAndStringifyColumn(colIdx int, col interface{}, hint rend
 	if strings.Contains(colStr, "\r") {
 		colStr = strings.Replace(colStr, "\r", "", -1)
 	}
+	if mod := t.style.Format.Direction.Modifier(); mod != "" {
+		colStr = mod + colStr
+	}
 	return colStr
 }
 
