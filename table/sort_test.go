@@ -15,6 +15,7 @@ func TestTable_sortRows_WithName(t *testing.T) {
 		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
 		{300, "Tyrion", "Lannister", 5000},
 	})
+	table.SetStyle(StyleDefault)
 	table.initForRenderRows()
 
 	// sort by nothing
@@ -76,6 +77,7 @@ func TestTable_sortRows_WithoutName(t *testing.T) {
 		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
 		{300, "Tyrion", "Lannister", 5000},
 	})
+	table.SetStyle(StyleDefault)
 	table.initForRenderRows()
 
 	// sort by nothing
@@ -137,6 +139,7 @@ func TestTable_sortRows_InvalidMode(t *testing.T) {
 		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
 		{300, "Tyrion", "Lannister", 5000},
 	})
+	table.SetStyle(StyleDefault)
 	table.initForRenderRows()
 
 	// sort by "First Name"
