@@ -16,9 +16,9 @@ const (
 func (d Direction) Modifier() string {
 	switch d {
 	case LeftToRight:
-		return "‪"
+		return "\u202a"
 	case RightToLeft:
-		return "‫"
+		return "\u202b"
 	}
 	return ""
 }
