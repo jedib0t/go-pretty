@@ -15,6 +15,7 @@ type Writer interface {
 	LengthActive() int
 	LengthDone() int
 	LengthInQueue() int
+	PinMessage() string
 	Log(msg string, a ...interface{})
 	SetAutoStop(autoStop bool)
 	SetMessageWidth(width int)
@@ -37,6 +38,7 @@ type Writer interface {
 	// Deprecated: in favor of Style().Visibility.Value
 	ShowValue(show bool)
 	SetUpdateFrequency(frequency time.Duration)
+	SetPinMessage(messages ...string)
 	Stop()
 	Style() *Style
 	Render()

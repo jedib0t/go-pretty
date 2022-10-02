@@ -815,3 +815,68 @@ func TestProgress_RenderSomeTrackers_WithOverallTracker_WithSpeedOverall_Without
 	}
 	showOutputOnFailure(t, out)
 }
+
+func TestProgress_RenderSomeTrackers_WithPinMessage_OneLine(t *testing.T) {
+	renderOutput := outputWriter{}
+
+	pw := generateWriter()
+	pw.SetMessageWidth(5)
+	pw.SetOutputWriter(&renderOutput)
+	pw.SetTrackerPosition(PositionRight)
+	pw.Style().Visibility.Pin = true
+	pw.SetPinMessage("PIN")
+	go trackSomething(pw, &Tracker{Message: "Calculating Total   # 1\r", Total: 1000, Units: UnitsDefault})
+	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes})
+	go trackSomething(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
+	renderAndWait(pw, false)
+
+	expectedOutPatterns := []*regexp.Regexp{
+		regexp.MustCompile(`\x1b\[KPIN`),
+		regexp.MustCompile(`\x1b\[KCalc~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+ in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KDown~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+B in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KTran~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\$\d+ in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KCalc~ \.\.\. done! \[\d+\.\d+K in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KDown~ \.\.\. done! \[\d+\.\d+KB in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KTran~ \.\.\. done! \[\$\d+\.\d+K in [\d.]+ms]`),
+	}
+	out := renderOutput.String()
+	for _, expectedOutPattern := range expectedOutPatterns {
+		if !expectedOutPattern.MatchString(out) {
+			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
+		}
+	}
+	showOutputOnFailure(t, out)
+}
+
+func TestProgress_RenderSomeTrackers_WithPinMessage_MultiLines(t *testing.T) {
+	renderOutput := outputWriter{}
+
+	pw := generateWriter()
+	pw.SetMessageWidth(5)
+	pw.SetOutputWriter(&renderOutput)
+	pw.SetTrackerPosition(PositionRight)
+	pw.Style().Visibility.Pin = true
+	pw.SetPinMessage("PIN", "PIN2")
+	go trackSomething(pw, &Tracker{Message: "Calculating Total   # 1\r", Total: 1000, Units: UnitsDefault})
+	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes})
+	go trackSomething(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
+	renderAndWait(pw, false)
+
+	expectedOutPatterns := []*regexp.Regexp{
+		regexp.MustCompile(`\x1b\[KPIN`),
+		regexp.MustCompile(`\x1b\[KPIN2`),
+		regexp.MustCompile(`\x1b\[KCalc~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+ in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KDown~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+B in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KTran~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\$\d+ in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KCalc~ \.\.\. done! \[\d+\.\d+K in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KDown~ \.\.\. done! \[\d+\.\d+KB in [\d.]+ms]`),
+		regexp.MustCompile(`\x1b\[KTran~ \.\.\. done! \[\$\d+\.\d+K in [\d.]+ms]`),
+	}
+	out := renderOutput.String()
+	for _, expectedOutPattern := range expectedOutPatterns {
+		if !expectedOutPattern.MatchString(out) {
+			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
+		}
+	}
+	showOutputOnFailure(t, out)
+}

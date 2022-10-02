@@ -158,6 +158,9 @@ func (p *Progress) moveCursorToTheTop(out *strings.Builder) {
 	if p.style.Visibility.TrackerOverall && p.overallTracker != nil && !p.overallTracker.IsDone() {
 		numLinesToMoveUp++
 	}
+	if p.style.Visibility.Pin {
+		numLinesToMoveUp += len(p.pinMessage)
+	}
 	if numLinesToMoveUp > 0 {
 		out.WriteString(text.CursorUp.Sprintn(numLinesToMoveUp))
 	}
@@ -287,6 +290,16 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 	return out.Len()
 }
 
+func (p *Progress) renderPin(out *strings.Builder) {
+	p.pinMessageMutex.RLock()
+	for _, pin := range p.pinMessage {
+		out.WriteString(text.EraseLine.Sprint())
+		out.WriteString(p.Style().Colors.Pin.Sprint(pin))
+		out.WriteRune('\n')
+	}
+	p.pinMessageMutex.RUnlock()
+}
+
 func (p *Progress) renderTrackersDoneAndActive(out *strings.Builder) {
 	// find the currently "active" and "done" trackers
 	trackersActive, trackersDone := p.extractDoneAndActiveTrackers()
@@ -308,6 +321,11 @@ func (p *Progress) renderTrackersDoneAndActive(out *strings.Builder) {
 	}
 	p.logsToRender = nil
 	p.logsToRenderMutex.Unlock()
+
+	// render pin message
+	if p.style.Visibility.Pin {
+		p.renderPin(out)
+	}
 
 	// sort and render the active trackers
 	for _, tracker := range trackersActive {
