@@ -200,7 +200,6 @@ func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHi
 		}
 	}
 
-	out.WriteString(text.EraseLine.Sprint())
 	if hint.isOverallTracker {
 		if !t.IsDone() {
 			hint := renderHint{hideValue: true, isOverallTracker: true}
