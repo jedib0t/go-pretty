@@ -230,3 +230,19 @@ func TestProgress_Style(t *testing.T) {
 	assert.NotNil(t, p.Style())
 	assert.Equal(t, StyleDefault.Name, p.Style().Name)
 }
+
+func TestProgress_SetPinMessage(t *testing.T) {
+	p := Progress{}
+	assert.Equal(t, "", p.pinMessage)
+
+	p.SetPinMessage("testing pin message")
+	assert.Equal(t, "testing pin message", p.pinMessage)
+}
+
+func TestProgress_PinMessage(t *testing.T) {
+	p := Progress{}
+	assert.Equal(t, "", p.pinMessage)
+
+	p.pinMessage = "testing pin message"
+	assert.Equal(t, "testing pin message", p.PinMessage())
+}
