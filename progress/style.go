@@ -118,10 +118,10 @@ var (
 // StyleColors defines what colors to use for various parts of the Progress and
 // Tracker texts.
 type StyleColors struct {
-	Pin     text.Colors // color of the pin message
 	Message text.Colors // message text colors
 	Error   text.Colors // error text colors
 	Percent text.Colors // percentage text colors
+	Pinned  text.Colors // color of the pin message
 	Stats   text.Colors // stats text (time, value) colors
 	Time    text.Colors // time text colors (overrides Stats)
 	Tracker text.Colors // tracker text colors
@@ -136,10 +136,10 @@ var (
 	// StyleColorsExample defines a few choice color options. Use this is just
 	// as an example to customize the Tracker/text colors.
 	StyleColorsExample = StyleColors{
-		Pin:     text.Colors{text.FgBlue},
 		Message: text.Colors{text.FgWhite},
 		Error:   text.Colors{text.FgRed},
 		Percent: text.Colors{text.FgHiRed},
+		Pinned:  text.Colors{text.BgHiBlack, text.Bold, text.Underline},
 		Stats:   text.Colors{text.FgHiBlack},
 		Time:    text.Colors{text.FgGreen},
 		Tracker: text.Colors{text.FgYellow},
@@ -192,10 +192,10 @@ var (
 
 // StyleVisibility controls what gets shown and what gets hidden.
 type StyleVisibility struct {
-	Pin            bool // pin message
 	ETA            bool // ETA for each tracker
 	ETAOverall     bool // ETA for the overall tracker
 	Percentage     bool // tracker progress percentage value
+	Pinned         bool // pin message
 	Speed          bool // tracker speed
 	SpeedOverall   bool // overall tracker speed
 	Time           bool // tracker time taken
@@ -207,10 +207,10 @@ type StyleVisibility struct {
 var (
 	// StyleVisibilityDefault defines sane defaults for the Visibility.
 	StyleVisibilityDefault = StyleVisibility{
-		Pin:            false,
 		ETA:            false,
 		ETAOverall:     true,
 		Percentage:     true,
+		Pinned:         true,
 		Speed:          false,
 		SpeedOverall:   false,
 		Time:           true,

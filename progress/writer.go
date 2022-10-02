@@ -15,12 +15,13 @@ type Writer interface {
 	LengthActive() int
 	LengthDone() int
 	LengthInQueue() int
-	PinMessage() string
 	Log(msg string, a ...interface{})
+	PinnedMessages() []string
 	SetAutoStop(autoStop bool)
 	SetMessageWidth(width int)
 	SetNumTrackersExpected(numTrackers int)
 	SetOutputWriter(output io.Writer)
+	SetPinnedMessages(messages ...string)
 	SetSortBy(sortBy SortBy)
 	SetStyle(style Style)
 	SetTrackerLength(length int)
@@ -38,7 +39,6 @@ type Writer interface {
 	// Deprecated: in favor of Style().Visibility.Value
 	ShowValue(show bool)
 	SetUpdateFrequency(frequency time.Duration)
-	SetPinMessage(messages ...string)
 	Stop()
 	Style() *Style
 	Render()

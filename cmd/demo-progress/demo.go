@@ -21,7 +21,7 @@ var (
 	flagNumTrackers        = flag.Int("num-trackers", 13, "Number of Trackers")
 	flagShowSpeed          = flag.Bool("show-speed", false, "Show the tracker speed?")
 	flagShowSpeedOverall   = flag.Bool("show-speed-overall", false, "Show the overall tracker speed?")
-	flagShowPin            = flag.Bool("show-pin", false, "Show the pin message?")
+	flagShowPinned         = flag.Bool("show-pinned", false, "Show a pinned message?")
 	flagRandomFail         = flag.Bool("rnd-fail", false, "Introduce random failures in tracking")
 	flagRandomLogs         = flag.Bool("rnd-logs", false, "Output random logs in the middle of tracking")
 
@@ -34,6 +34,7 @@ var (
 		text.FgCyan,
 		text.FgWhite,
 	}
+	timeStart = time.Now()
 )
 
 func getMessage(idx int64, units *progress.Units) string {
@@ -88,8 +89,12 @@ func trackSomething(pw progress.Writer, idx int64, updateMessage bool) {
 			} else if *flagRandomFail && rand.Float64() < 0.1 {
 				tracker.MarkAsErrored()
 			}
-			t := time.Now().Format(time.RFC3339)
-			pw.SetPinMessage(fmt.Sprintf("Current Time: %s", t), fmt.Sprintf("CURRENT TIME: %s", t))
+			pw.SetPinnedMessages(
+				fmt.Sprintf("Current Time: %s | Total Time: %s",
+					time.Now().Format(time.RFC3339),
+					time.Now().Sub(timeStart).Round(time.Second),
+				),
+			)
 		case <-updateTicker:
 			if updateMessage {
 				rndIdx := rand.Intn(len(messageColors))
@@ -126,7 +131,7 @@ func main() {
 	pw.Style().Visibility.Time = !*flagHideTime
 	pw.Style().Visibility.TrackerOverall = !*flagHideOverallTracker
 	pw.Style().Visibility.Value = !*flagHideValue
-	pw.Style().Visibility.Pin = *flagShowPin
+	pw.Style().Visibility.Pinned = *flagShowPinned
 
 	// call Render() in async mode; yes we don't have any trackers at the moment
 	go pw.Render()
