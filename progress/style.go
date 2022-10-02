@@ -139,7 +139,7 @@ var (
 		Message: text.Colors{text.FgWhite},
 		Error:   text.Colors{text.FgRed},
 		Percent: text.Colors{text.FgHiRed},
-		Pinned:  text.Colors{text.BgHiBlack, text.Bold, text.Underline},
+		Pinned:  text.Colors{text.BgHiBlack, text.FgWhite, text.Bold},
 		Stats:   text.Colors{text.FgHiBlack},
 		Time:    text.Colors{text.FgGreen},
 		Tracker: text.Colors{text.FgYellow},

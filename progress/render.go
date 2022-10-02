@@ -159,22 +159,28 @@ func (p *Progress) moveCursorToTheTop(out *strings.Builder) {
 		numLinesToMoveUp++
 	}
 	if p.style.Visibility.Pinned {
-		numLinesToMoveUp += len(p.pinnedMessages)
+		numLinesToMoveUp += p.pinnedMessageNumLines
 	}
-	if numLinesToMoveUp > 0 {
-		out.WriteString(text.CursorUp.Sprintn(numLinesToMoveUp))
+	for numLinesToMoveUp > 0 {
+		out.WriteString(text.CursorUp.Sprint())
+		out.WriteString(text.EraseLine.Sprint())
+		numLinesToMoveUp--
 	}
 }
 
 func (p *Progress) renderPinnedMessages(out *strings.Builder) {
-	p.pinnedMessagesMutex.RLock()
-	defer p.pinnedMessagesMutex.RUnlock()
+	p.pinnedMessageMutex.RLock()
+	defer p.pinnedMessageMutex.RUnlock()
 
+	numLines := len(p.pinnedMessages)
 	for _, msg := range p.pinnedMessages {
-		out.WriteString(text.EraseLine.Sprint())
-		out.WriteString(p.Style().Colors.Pinned.Sprint(msg))
+		msg = strings.TrimSpace(msg)
+		out.WriteString(p.style.Colors.Pinned.Sprint(msg))
 		out.WriteRune('\n')
+
+		numLines += strings.Count(msg, "\n")
 	}
+	p.pinnedMessageNumLines = numLines
 }
 
 func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHint) {
@@ -194,7 +200,6 @@ func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHi
 		}
 	}
 
-	out.WriteString(text.EraseLine.Sprint())
 	if hint.isOverallTracker {
 		if !t.IsDone() {
 			hint := renderHint{hideValue: true, isOverallTracker: true}

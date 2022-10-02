@@ -35,7 +35,8 @@ type Progress struct {
 	overallTracker        *Tracker
 	overallTrackerMutex   sync.RWMutex
 	pinnedMessages        []string
-	pinnedMessagesMutex   sync.RWMutex
+	pinnedMessageMutex    sync.RWMutex
+	pinnedMessageNumLines int
 	renderInProgress      bool
 	renderInProgressMutex sync.RWMutex
 	sortBy                SortBy
@@ -157,14 +158,6 @@ func (p *Progress) Log(msg string, a ...interface{}) {
 	p.logsToRenderMutex.Unlock()
 }
 
-// PinnedMessages returns the current pinned messages.
-func (p *Progress) PinnedMessages() []string {
-	p.pinnedMessagesMutex.RLock()
-	defer p.pinnedMessagesMutex.RUnlock()
-
-	return p.pinnedMessages
-}
-
 // SetAutoStop toggles the auto-stop functionality. Auto-stop set to true would
 // mean that the Render() function will automatically stop once all currently
 // active Trackers reach their final states. When set to false, the client code
@@ -197,8 +190,8 @@ func (p *Progress) SetOutputWriter(writer io.Writer) {
 // progress bar. This method can be used to overwrite all the pinned messages.
 // Call this function without arguments to "clear" the pinned messages.
 func (p *Progress) SetPinnedMessages(messages ...string) {
-	p.pinnedMessagesMutex.Lock()
-	defer p.pinnedMessagesMutex.Unlock()
+	p.pinnedMessageMutex.Lock()
+	defer p.pinnedMessageMutex.Unlock()
 
 	p.pinnedMessages = messages
 }
