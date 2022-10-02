@@ -88,7 +88,8 @@ func trackSomething(pw progress.Writer, idx int64, updateMessage bool) {
 			} else if *flagRandomFail && rand.Float64() < 0.1 {
 				tracker.MarkAsErrored()
 			}
-			pw.SetPinMessage(fmt.Sprintf("Pin Time: %s", time.Now().Format(time.RFC3339)))
+			t := time.Now().Format(time.RFC3339)
+			pw.SetPinMessage(fmt.Sprintf("Current Time: %s", t), fmt.Sprintf("CURRENT TIME: %s", t))
 		case <-updateTicker:
 			if updateMessage {
 				rndIdx := rand.Intn(len(messageColors))

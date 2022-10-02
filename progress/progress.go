@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"sync"
 	"time"
 	"unicode/utf8"
@@ -28,7 +29,7 @@ type Progress struct {
 	lengthProgress        int
 	lengthProgressOverall int
 	outputWriter          io.Writer
-	pinMessage            string
+	pinMessage            []string // split by '\n'
 	pinMessageMutex       sync.RWMutex
 	logsToRender          []string
 	logsToRenderMutex     sync.RWMutex
@@ -151,7 +152,7 @@ func (p *Progress) PinMessage() string {
 	p.pinMessageMutex.RLock()
 	defer p.pinMessageMutex.RUnlock()
 
-	return p.pinMessage
+	return strings.Join(p.pinMessage, "\n")
 }
 
 // Log appends a log to display above the active progress bars during the next
@@ -222,12 +223,12 @@ func (p *Progress) SetUpdateFrequency(frequency time.Duration) {
 	p.updateFrequency = frequency
 }
 
-// SetPinMessage sets the pin message of the progress bar. It can be modified in progress.
-func (p *Progress) SetPinMessage(pin string) {
+// SetPinMessage sets the pin message of the progress bar. It can be modified in progress. messages will be displayed per line
+func (p *Progress) SetPinMessage(messages ...string) {
 	p.pinMessageMutex.Lock()
 	defer p.pinMessageMutex.Unlock()
 
-	p.pinMessage = pin
+	p.pinMessage = messages
 }
 
 // ShowETA toggles showing the ETA for all individual trackers.

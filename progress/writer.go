@@ -38,7 +38,7 @@ type Writer interface {
 	// Deprecated: in favor of Style().Visibility.Value
 	ShowValue(show bool)
 	SetUpdateFrequency(frequency time.Duration)
-	SetPinMessage(pin string)
+	SetPinMessage(messages ...string)
 	Stop()
 	Style() *Style
 	Render()

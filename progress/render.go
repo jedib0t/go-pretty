@@ -159,7 +159,7 @@ func (p *Progress) moveCursorToTheTop(out *strings.Builder) {
 		numLinesToMoveUp++
 	}
 	if p.style.Visibility.Pin {
-		numLinesToMoveUp++
+		numLinesToMoveUp += len(p.pinMessage)
 	}
 	if numLinesToMoveUp > 0 {
 		out.WriteString(text.CursorUp.Sprintn(numLinesToMoveUp))
@@ -292,9 +292,11 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 
 func (p *Progress) renderPin(out *strings.Builder) {
 	p.pinMessageMutex.RLock()
-	out.WriteString(text.EraseLine.Sprint())
-	out.WriteString(p.Style().Colors.Pin.Sprint(p.pinMessage))
-	out.WriteRune('\n')
+	for _, pin := range p.pinMessage {
+		out.WriteString(text.EraseLine.Sprint())
+		out.WriteString(p.Style().Colors.Pin.Sprint(pin))
+		out.WriteRune('\n')
+	}
 	p.pinMessageMutex.RUnlock()
 }
 
