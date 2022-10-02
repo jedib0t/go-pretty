@@ -95,6 +95,14 @@ func TestProgress_Log(t *testing.T) {
 	assert.Len(t, p.logsToRender, 1)
 }
 
+func TestProgress_PinnedMessages(t *testing.T) {
+	p := Progress{}
+	assert.Nil(t, p.pinnedMessages)
+
+	p.pinnedMessages = []string{"pin1", "pin2"}
+	assert.Equal(t, []string{"pin1", "pin2"}, p.PinnedMessages())
+}
+
 func TestProgress_SetAutoStop(t *testing.T) {
 	p := Progress{}
 	assert.False(t, p.autoStop)
@@ -117,6 +125,14 @@ func TestProgress_SetOutputWriter(t *testing.T) {
 
 	p.SetOutputWriter(os.Stdout)
 	assert.Equal(t, os.Stdout, p.outputWriter)
+}
+
+func TestProgress_SetPinnedMessages(t *testing.T) {
+	p := Progress{}
+	assert.Nil(t, p.pinnedMessages)
+
+	p.SetPinnedMessages("pin1", "pin2")
+	assert.Equal(t, []string{"pin1", "pin2"}, p.pinnedMessages)
 }
 
 func TestProgress_SetSortBy(t *testing.T) {
@@ -229,20 +245,4 @@ func TestProgress_Style(t *testing.T) {
 
 	assert.NotNil(t, p.Style())
 	assert.Equal(t, StyleDefault.Name, p.Style().Name)
-}
-
-func TestProgress_SetPinMessage(t *testing.T) {
-	p := Progress{}
-	assert.Nil(t, p.pinMessage)
-
-	p.SetPinMessage("pin1", "pin2")
-	assert.Equal(t, []string{"pin1", "pin2"}, p.pinMessage)
-}
-
-func TestProgress_PinMessage(t *testing.T) {
-	p := Progress{}
-	assert.Nil(t, p.pinMessage)
-
-	p.pinMessage = []string{"pin1", "pin2"}
-	assert.Equal(t, "pin1\npin2", p.PinMessage())
 }

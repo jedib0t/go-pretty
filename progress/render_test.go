@@ -823,8 +823,8 @@ func TestProgress_RenderSomeTrackers_WithPinMessage_OneLine(t *testing.T) {
 	pw.SetMessageWidth(5)
 	pw.SetOutputWriter(&renderOutput)
 	pw.SetTrackerPosition(PositionRight)
-	pw.Style().Visibility.Pin = true
-	pw.SetPinMessage("PIN")
+	pw.Style().Visibility.Pinned = true
+	pw.SetPinnedMessages("PIN")
 	go trackSomething(pw, &Tracker{Message: "Calculating Total   # 1\r", Total: 1000, Units: UnitsDefault})
 	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes})
 	go trackSomething(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
@@ -855,8 +855,8 @@ func TestProgress_RenderSomeTrackers_WithPinMessage_MultiLines(t *testing.T) {
 	pw.SetMessageWidth(5)
 	pw.SetOutputWriter(&renderOutput)
 	pw.SetTrackerPosition(PositionRight)
-	pw.Style().Visibility.Pin = true
-	pw.SetPinMessage("PIN", "PIN2")
+	pw.Style().Visibility.Pinned = true
+	pw.SetPinnedMessages("PIN", "PIN2")
 	go trackSomething(pw, &Tracker{Message: "Calculating Total   # 1\r", Total: 1000, Units: UnitsDefault})
 	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes})
 	go trackSomething(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
