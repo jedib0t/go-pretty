@@ -95,14 +95,6 @@ func TestProgress_Log(t *testing.T) {
 	assert.Len(t, p.logsToRender, 1)
 }
 
-func TestProgress_PinnedMessages(t *testing.T) {
-	p := Progress{}
-	assert.Nil(t, p.pinnedMessages)
-
-	p.pinnedMessages = []string{"pin1", "pin2"}
-	assert.Equal(t, []string{"pin1", "pin2"}, p.PinnedMessages())
-}
-
 func TestProgress_SetAutoStop(t *testing.T) {
 	p := Progress{}
 	assert.False(t, p.autoStop)

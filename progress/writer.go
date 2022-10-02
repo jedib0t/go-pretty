@@ -16,7 +16,6 @@ type Writer interface {
 	LengthDone() int
 	LengthInQueue() int
 	Log(msg string, a ...interface{})
-	PinnedMessages() []string
 	SetAutoStop(autoStop bool)
 	SetMessageWidth(width int)
 	SetNumTrackersExpected(numTrackers int)

@@ -831,7 +831,7 @@ func TestProgress_RenderSomeTrackers_WithPinMessage_OneLine(t *testing.T) {
 	renderAndWait(pw, false)
 
 	expectedOutPatterns := []*regexp.Regexp{
-		regexp.MustCompile(`\x1b\[KPIN`),
+		regexp.MustCompile(`PIN`),
 		regexp.MustCompile(`\x1b\[KCalc~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+ in [\d.]+ms]`),
 		regexp.MustCompile(`\x1b\[KDown~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+B in [\d.]+ms]`),
 		regexp.MustCompile(`\x1b\[KTran~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\$\d+ in [\d.]+ms]`),
@@ -863,8 +863,8 @@ func TestProgress_RenderSomeTrackers_WithPinMessage_MultiLines(t *testing.T) {
 	renderAndWait(pw, false)
 
 	expectedOutPatterns := []*regexp.Regexp{
-		regexp.MustCompile(`\x1b\[KPIN`),
-		regexp.MustCompile(`\x1b\[KPIN2`),
+		regexp.MustCompile(`PIN`),
+		regexp.MustCompile(`PIN2`),
 		regexp.MustCompile(`\x1b\[KCalc~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+ in [\d.]+ms]`),
 		regexp.MustCompile(`\x1b\[KDown~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+B in [\d.]+ms]`),
 		regexp.MustCompile(`\x1b\[KTran~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\$\d+ in [\d.]+ms]`),
