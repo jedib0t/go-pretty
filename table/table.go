@@ -3,7 +3,6 @@ package table
 import (
 	"fmt"
 	"io"
-	"strconv"
 	"strings"
 
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -51,9 +50,6 @@ type Table struct {
 	// columnConfigMap stores the custom-configuration by column
 	// number and is generated before rendering
 	columnConfigMap map[int]ColumnConfig
-	// completelyMergedColumns is a map of colIdx to other colIdx values that
-	// are completely merged with the key colIdx
-	completelyMergedColumns map[int]map[int]bool
 	// htmlCSSClass stores the HTML CSS Class to use on the <table> node
 	htmlCSSClass string
 	// indexColumn stores the number of the column considered as the "index"
@@ -298,15 +294,6 @@ func (t *Table) Style() *Style {
 // regular rows.
 func (t *Table) SuppressEmptyColumns() {
 	t.suppressEmptyColumns = true
-}
-
-func (t *Table) allRowsHaveAutoMerge() bool {
-	for idx := range t.rows {
-		if rc, ok := t.rowsConfigMap[idx]; !ok || !rc.AutoMerge {
-			return false
-		}
-	}
-	return true
 }
 
 func (t *Table) analyzeAndStringify(row Row, hint renderHint) rowStr {
@@ -570,45 +557,6 @@ func (t *Table) getMaxColumnLengthForMerging(colIdx int) int {
 	return maxColumnLength
 }
 
-func (t *Table) getMergedColumnMaxLength(rows []rowStr, colIdx int) {
-	for _, row := range rows {
-		if colIdx < len(row) {
-			colStr := row[colIdx]
-			// check if the columns are merged in this row too (header/footer)
-			isMerged := true
-			for mergedColIdx := range t.completelyMergedColumns[colIdx] {
-				if colStr != row[mergedColIdx] {
-					isMerged = false
-				}
-			}
-			if !isMerged { // default logic
-				longestLineLen := text.LongestLineLen(colStr)
-				if longestLineLen > t.maxColumnLengths[colIdx] {
-					t.maxColumnLengths[colIdx] = longestLineLen
-				}
-			}
-		}
-	}
-}
-
-// getMergeRange returns a comma-separated list of colIdx values of all columns
-// that get merged from current rowIdx, colIdx.
-func (t *Table) getMergeRange(rowIdx, colIdx int) string {
-	rsp := []string{fmt.Sprint(colIdx)}
-	for ; colIdx < t.numColumns-1; colIdx++ {
-		if colIdx+1 < len(t.rows[rowIdx]) {
-			if t.rows[rowIdx][colIdx] != t.rows[rowIdx][colIdx+1] {
-				break
-			}
-		}
-		rsp = append(rsp, fmt.Sprint(colIdx+1))
-	}
-	if len(rsp) == 1 {
-		return ""
-	}
-	return strings.Join(rsp, ",")
-}
-
 func (t *Table) getRow(rowIdx int, hint renderHint) rowStr {
 	switch {
 	case hint.isHeaderRow:
@@ -720,68 +668,19 @@ func (t *Table) initForRenderColumnConfigs() {
 
 func (t *Table) initForRenderColumnLengths() {
 	t.maxColumnLengths = make([]int, t.numColumns)
-	t.parseRowForMaxColumnLengths(t.rowsHeader)
-	t.parseRowForMaxColumnLengths(t.rows)
-	t.parseRowForMaxColumnLengths(t.rowsFooter)
+	t.parseRowForMaxColumnLengths(t.rowsHeader, renderHint{isHeaderRow: true})
+	t.parseRowForMaxColumnLengths(t.rows, renderHint{})
+	t.parseRowForMaxColumnLengths(t.rowsFooter, renderHint{isFooterRow: true})
+	//fmt.Printf("DEBUG: initForRenderColumnLengths: t.maxColumnLengths: %v\n", t.maxColumnLengths)
 
-	// restrict the column lengths if any are over or under the limits
+	// increase the column lengths if any are under the limits
 	for colIdx := range t.maxColumnLengths {
-		maxWidth := t.getColumnWidthMax(colIdx)
-		if maxWidth > 0 && t.maxColumnLengths[colIdx] > maxWidth {
-			t.maxColumnLengths[colIdx] = maxWidth
-		}
 		minWidth := t.getColumnWidthMin(colIdx)
 		if minWidth > 0 && t.maxColumnLengths[colIdx] < minWidth {
 			t.maxColumnLengths[colIdx] = minWidth
 		}
 	}
-
-	// adjust column lengths if some columns are being merged in all the rows
-	t.completelyMergedColumns = make(map[int]map[int]bool)
-	t.initForRenderColumnLengthsMerged()
-}
-
-func (t *Table) initForRenderColumnLengthsMerged() {
-	if !t.allRowsHaveAutoMerge() {
-		return
-	}
-
-	// figure out all the columns that are getting merged
-	mergeMap := make(map[string]int, 0)
-	for colIdx := 0; colIdx < t.numColumns-1; colIdx++ {
-		for rowIdx := 0; rowIdx < len(t.rows); rowIdx++ {
-			if mergeRange := t.getMergeRange(rowIdx, colIdx); mergeRange != "" {
-				mergeMap[t.getMergeRange(rowIdx, colIdx)] += 1
-			}
-		}
-	}
-	// parse the merged columns and find out columns that are merged through the
-	// entire column
-	for k, v := range mergeMap {
-		if v == len(t.rows) {
-			var mergedColIndices []int
-			for _, mergedColIdxStr := range strings.Split(k, ",") {
-				if n, err := strconv.Atoi(mergedColIdxStr); err == nil {
-					mergedColIndices = append(mergedColIndices, n)
-				}
-			}
-			for _, colIdx := range mergedColIndices {
-				for _, otherColIdx := range mergedColIndices {
-					if t.completelyMergedColumns[colIdx] == nil {
-						t.completelyMergedColumns[colIdx] = make(map[int]bool)
-					}
-					t.completelyMergedColumns[colIdx][otherColIdx] = true
-				}
-			}
-		}
-	}
-
-	// re-calculate max column lengths for completely merged columns
-	for colIdx := range t.completelyMergedColumns {
-		t.maxColumnLengths[colIdx] = 0
-		t.getMergedColumnMaxLength(t.rowsHeader, colIdx)
-		t.getMergedColumnMaxLength(t.rowsFooter, colIdx)
-	}
+	//fmt.Printf("DEBUG: initForRenderColumnLengths: t.maxColumnLengths: %v\n", t.maxColumnLengths)
 }
 
 func (t *Table) hideColumns() map[int]int {
@@ -949,14 +848,72 @@ func (t *Table) isIndexColumn(colIdx int, hint renderHint) bool {
 	return t.indexColumn == colIdx+1 || hint.isAutoIndexColumn
 }
 
-func (t *Table) parseRowForMaxColumnLengths(rows []rowStr) {
-	for _, row := range rows {
+// getMergedColumnIndices returns a map of colIdx values to all the other colIdx
+// values (that are being merged) and their lengths.
+func (t *Table) getMergedColumnIndices(row rowStr, hint renderHint) map[int]map[int]bool {
+	if !t.getRowConfig(hint).AutoMerge {
+		return nil
+	}
+
+	rsp := make(map[int]map[int]bool)
+	appendColumnsToResponse := func(colIdx, otherColIdx int) {
+		if rsp[colIdx] == nil {
+			rsp[colIdx] = make(map[int]bool)
+		}
+		if rsp[otherColIdx] == nil {
+			rsp[otherColIdx] = make(map[int]bool)
+		}
+		rsp[colIdx][otherColIdx] = true
+		rsp[otherColIdx][colIdx] = true
+	}
+	for colIdx := 0; colIdx < t.numColumns-1; colIdx++ {
+		// look backward
+		for otherColIdx := colIdx - 1; colIdx >= 0 && otherColIdx >= 0; otherColIdx-- {
+			if row[colIdx] != row[otherColIdx] {
+				break
+			}
+			appendColumnsToResponse(colIdx, otherColIdx)
+		}
+		// look forward
+		for otherColIdx := colIdx + 1; colIdx < len(row) && otherColIdx < len(row); otherColIdx++ {
+			if row[colIdx] != row[otherColIdx] {
+				break
+			}
+			appendColumnsToResponse(colIdx, otherColIdx)
+		}
+	}
+	return rsp
+}
+
+func (t *Table) parseRowForMaxColumnLengths(rows []rowStr, hint renderHint) {
+	getMergedColumnsTotalLength := func(colIdx int, mergedColumns map[int]bool) int {
+		mergedColLength := t.maxColumnLengths[colIdx]
+		for otherColIdx := range mergedColumns {
+			mergedColLength += t.maxColumnLengths[otherColIdx]
+		}
+		return mergedColLength
+	}
+
+	for rowIdx, row := range rows {
+		hint.rowNumber = rowIdx + 1
+		mergedColumnsMap := t.getMergedColumnIndices(row, hint)
+		//fmt.Printf("DEBUG: parseRowForMaxColumnLengths: rowIdx: %d, mergedColumnsMap: %v\n", rowIdx, mergedColumnsMap)
+		//fmt.Printf("DEBUG: parseRowForMaxColumnLengths: row: %#v\n", row)
+		//fmt.Printf("DEBUG: parseRowForMaxColumnLengths: t.maxColumnLengths: %v\n", t.maxColumnLengths)
 		for colIdx, colStr := range row {
+			mergedColumnsLength := getMergedColumnsTotalLength(colIdx, mergedColumnsMap[colIdx])
 			longestLineLen := text.LongestLineLen(colStr)
-			if longestLineLen > t.maxColumnLengths[colIdx] {
+			maxColWidth := t.getColumnWidthMax(colIdx)
+			if maxColWidth > 0 && maxColWidth < longestLineLen {
+				longestLineLen = maxColWidth
+			}
+			if longestLineLen > mergedColumnsLength {
+				t.maxColumnLengths[colIdx] = longestLineLen
+			} else if maxColWidth == 0 && longestLineLen > t.maxColumnLengths[colIdx] {
 				t.maxColumnLengths[colIdx] = longestLineLen
 			}
 		}
+		//fmt.Printf("DEBUG: parseRowForMaxColumnLengths: t.maxColumnLengths: %v\n", t.maxColumnLengths)
 	}
 }
 
@@ -1058,24 +1015,16 @@ func (t *Table) shouldMergeCellsVertically(colIdx int, hint renderHint) bool {
 	return false
 }
 
-func (t *Table) wrappingMaxColumnLength(colIdx int) int {
-	maxColumnLength := t.maxColumnLengths[colIdx]
-	if mergedColIndices, ok := t.completelyMergedColumns[colIdx]; ok {
-		maxColumnLength = 0
-		for mergedColIdx, _ := range mergedColIndices {
-			maxColumnLength += t.maxColumnLengths[mergedColIdx]
-		}
-	}
-	return maxColumnLength
-}
-
 func (t *Table) wrapRow(row rowStr) (int, rowStr) {
 	colMaxLines := 0
 	rowWrapped := make(rowStr, len(row))
 	for colIdx, colStr := range row {
 		widthEnforcer := t.columnConfigMap[colIdx].getWidthMaxEnforcer()
-		maxColumnLength := t.wrappingMaxColumnLength(colIdx)
-		rowWrapped[colIdx] = widthEnforcer(colStr, maxColumnLength)
+		maxWidth := t.getColumnWidthMax(colIdx)
+		if maxWidth == 0 {
+			maxWidth = t.maxColumnLengths[colIdx]
+		}
+		rowWrapped[colIdx] = widthEnforcer(colStr, maxWidth)
 		colNumLines := strings.Count(rowWrapped[colIdx], "\n") + 1
 		if colNumLines > colMaxLines {
 			colMaxLines = colNumLines
