@@ -519,6 +519,54 @@ func TestTable_Render_AutoMerge_WithSomeColumnsCompletelyMerged(t *testing.T) {
 └───┴──────────────────────────────┴───────────┴─────────────┘`)
 	})
 
+	t.Run("with one long column merged", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE1", "RCE2"}, rcAutoMerge)
+		tw.AppendHeader(Row{"", "", "", "", "EXE", "EXE"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "YES YES YES", "YES YES YES"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, rcAutoMerge)
+		tw.AppendFooter(Row{"", "", "", 7, 5, 5}, rcAutoMerge)
+		tw.AppendFooter(Row{"", "", "", 6, 4, 4}, rcAutoMerge)
+		tw.SetAutoIndex(true)
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 7, WidthMaxEnforcer: text.WrapHard},
+			{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 7, WidthMaxEnforcer: text.WrapHard},
+		})
+		tw.SetStyle(StyleLight)
+		tw.Style().Options.SeparateRows = true
+
+		compareOutput(t, tw.Render(), `
+┌───┬─────────┬────────┬───────────┬───────────┬──────┬──────┐
+│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │ RCE1 │ RCE2 │
+│   ├─────────┴────────┴───────────┴───────────┼──────┴──────┤
+│   │                                          │     EXE     │
+├───┼─────────┬────────┬───────────┬───────────┼─────────────┤
+│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │   YES YES   │
+│   │         │        │           │           │     YES     │
+├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
+│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 2       │      Y      │
+├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
+│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B     │ C 3       │      N      │
+├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
+│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │      N      │
+├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
+│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 5       │      Y      │
+├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
+│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │      Y      │
+├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
+│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │      Y      │
+├───┼─────────┴────────┴───────────┼───────────┼─────────────┤
+│   │                              │ 7         │      5      │
+│   ├──────────────────────────────┼───────────┼─────────────┤
+│   │                              │ 6         │      4      │
+└───┴──────────────────────────────┴───────────┴─────────────┘`)
+	})
+
 	t.Run("with one long header column merged", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE1", "RCE2"}, rcAutoMerge)
@@ -593,26 +641,25 @@ func TestTable_Render_AutoMerge_WithSomeColumnsCompletelyMerged(t *testing.T) {
 ┌───┬─────────┬────────┬───────────┬───────────┬──────┬──────┬──────┐
 │   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │ RCE1 │ RCE2 │ RCE3 │
 │   ├─────────┴────────┴───────────┴───────────┼──────┴──────┴──────┤
-│   │                                          │      EXE EXE       │
-│   │                                          │        EXE         │
+│   │                                          │     EXE EXE EXE    │
 ├───┼─────────┬────────┬───────────┬───────────┼────────────────────┤
-│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │         Y          │
+│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │          Y         │
 ├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
-│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 2       │         Y          │
+│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 2       │          Y         │
 ├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
-│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B     │ C 3       │         N          │
+│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B     │ C 3       │          N         │
 ├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
-│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │         N          │
+│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │          N         │
 ├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
-│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 5       │         Y          │
+│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 5       │          Y         │
 ├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
-│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │         Y          │
+│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │          Y         │
 ├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
-│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │         Y          │
+│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │          Y         │
 ├───┼─────────┴────────┴───────────┼───────────┼────────────────────┤
-│   │                              │ 7         │         5          │
+│   │                              │ 7         │          5         │
 │   ├──────────────────────────────┼───────────┼─────────────┬──────┤
-│   │                              │ 6         │      4      │  3   │
+│   │                              │ 6         │      4      │   3  │
 └───┴──────────────────────────────┴───────────┴─────────────┴──────┘`)
 	})
 }
