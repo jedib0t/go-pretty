@@ -558,20 +558,20 @@ func TestTable_Render_AutoMerge_WithSomeColumnsCompletelyMergedCustom(t *testing
 		tw.Style().Options.SeparateRows = true
 
 		compareOutput(t, tw.Render(), `
-┌───┬──────────┬──────────┬──────────┬──────────┬──────────────────────────┬──────────┬──────────────────────────┬──────────┐
-│   │ COLUMN 1 │ COLUMN 2 │ COLUMN 3 │ COLUMN 4 │         COLUMN 5         │ COLUMN 6 │         COLUMN 7         │ COLUMN 8 │
-├───┼──────────┼──────────┼──────────┼──────────┼──────────────────────────┴──────────┼──────────────────────────┴──────────┤
-│ 1 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 1      │       4F8F5CB531E3D49A61CF417C      │       4F8F5CB531E3D49A61CF417C      │
-│   │          │          │          │          │       D133792CCFA501FD8DA53EE3      │       D133792CCFA501FD8DA53EE3      │
-│   │          │          │          │          │       68FED20E5FE0248C3A0B64F9      │       68FED20E5FE0248C3A0B64F9      │
-│   │          │          │          │          │       8A6533CEE1DA614C3A8DDEC7      │       8A6533CEE1DA614C3A8DDEC7      │
-│   │          │          │          │          │       91FF05FEE6D971D57C134832      │       91FF05FEE6D971D57C134832      │
-│   │          │          │          │          │              0F4EB42DR              │              0F4EB42DRR             │
-├───┼──────────┼──────────┼──────────┼──────────┼─────────────────────────────────────┴─────────────────────────────────────┤
-│ 2 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 2      │                                     Y                                     │
-├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────────────────────────────────────┤
-│ 3 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 2      │                                     Y                                     │
-└───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────────────────────────────────────┘`)
+┌───┬──────────┬──────────┬──────────┬──────────┬──────────────┬──────────────┬──────────────┬──────────────┐
+│   │ COLUMN 1 │ COLUMN 2 │ COLUMN 3 │ COLUMN 4 │   COLUMN 5   │   COLUMN 6   │   COLUMN 7   │   COLUMN 8   │
+├───┼──────────┼──────────┼──────────┼──────────┼──────────────┴──────────────┼──────────────┴──────────────┤
+│ 1 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 1      │   4F8F5CB531E3D49A61CF417C  │   4F8F5CB531E3D49A61CF417C  │
+│   │          │          │          │          │   D133792CCFA501FD8DA53EE3  │   D133792CCFA501FD8DA53EE3  │
+│   │          │          │          │          │   68FED20E5FE0248C3A0B64F9  │   68FED20E5FE0248C3A0B64F9  │
+│   │          │          │          │          │   8A6533CEE1DA614C3A8DDEC7  │   8A6533CEE1DA614C3A8DDEC7  │
+│   │          │          │          │          │   91FF05FEE6D971D57C134832  │   91FF05FEE6D971D57C134832  │
+│   │          │          │          │          │          0F4EB42DR          │          0F4EB42DRR         │
+├───┼──────────┼──────────┼──────────┼──────────┼─────────────────────────────┴─────────────────────────────┤
+│ 2 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 2      │                             Y                             │
+├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────────────────────┤
+│ 3 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 2      │                             Y                             │
+└───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────────────────────┘`)
 	})
 
 	t.Run("Column 5-7 with equal String, column 8 other", func(t *testing.T) {
@@ -605,6 +605,151 @@ func TestTable_Render_AutoMerge_WithSomeColumnsCompletelyMergedCustom(t *testing
 ├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────────────────────┤
 │ 3 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 2      │                             Y                             │
 └───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────────────────────┘`)
+	})
+
+	t.Run("with all header columns merged", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE"}, RowConfig{AutoMerge: true})
+		tw.AppendHeader(Row{"", "", "", "", "EXE EXE EXE", "EXE EXE EXE"}, RowConfig{AutoMerge: true})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, RowConfig{AutoMerge: true})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, RowConfig{AutoMerge: true})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, RowConfig{AutoMerge: true})
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true})
+		tw.AppendFooter(Row{"", "", "", 7, 5, 3}, RowConfig{AutoMerge: true})
+		tw.AppendFooter(Row{"", "", "", 6, 4, 4}, RowConfig{AutoMerge: true})
+		tw.SetAutoIndex(true)
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 7, WidthMaxEnforcer: text.WrapHard},
+			{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 7, WidthMaxEnforcer: text.WrapHard},
+		})
+		tw.SetStyle(StyleLight)
+		tw.Style().Options.SeparateRows = true
+
+		compareOutput(t, tw.Render(), `
+┌───┬─────────┬────────┬───────────┬───────────┬───────────┐
+│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │    RCE    │
+│   ├─────────┴────────┴───────────┴───────────┼───────────┤
+│   │                                          │  EXE EXE  │
+│   │                                          │    EXE    │
+├───┼─────────┬────────┬───────────┬───────────┼───────────┤
+│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │     Y     │
+├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
+│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 2       │  Y  │  N  │
+├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
+│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B     │ C 3       │  N  │  N  │
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │     N     │
+├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
+│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 5       │  Y  │  N  │
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │     Y     │
+├───┼─────────┼────────┼───────────┼───────────┼───────────┤
+│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │     Y     │
+├───┼─────────┴────────┴───────────┼───────────┼─────┬─────┤
+│   │                              │ 7         │  5  │  3  │
+│   ├──────────────────────────────┼───────────┼─────┴─────┤
+│   │                              │ 6         │     4     │
+└───┴──────────────────────────────┴───────────┴───────────┘`)
+	})
+
+	t.Run("with one long header column merged", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE1", "RCE2"}, rcAutoMerge)
+		tw.AppendHeader(Row{"", "", "", "", "EXE EXE EXE", "EXE EXE EXE"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, rcAutoMerge)
+		tw.AppendFooter(Row{"", "", "", 7, 5, 5}, rcAutoMerge)
+		tw.AppendFooter(Row{"", "", "", 6, 4, 4}, rcAutoMerge)
+		tw.SetAutoIndex(true)
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 7, WidthMaxEnforcer: text.WrapHard},
+			{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 7, WidthMaxEnforcer: text.WrapHard},
+		})
+		tw.SetStyle(StyleLight)
+		tw.Style().Options.SeparateRows = true
+
+		compareOutput(t, tw.Render(), `
+┌───┬─────────┬────────┬───────────┬───────────┬──────┬──────┐
+│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │ RCE1 │ RCE2 │
+│   ├─────────┴────────┴───────────┴───────────┼──────┴──────┤
+│   │                                          │   EXE EXE   │
+│   │                                          │     EXE     │
+├───┼─────────┬────────┬───────────┬───────────┼─────────────┤
+│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │      Y      │
+├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
+│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 2       │      Y      │
+├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
+│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B     │ C 3       │      N      │
+├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
+│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │      N      │
+├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
+│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 5       │      Y      │
+├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
+│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │      Y      │
+├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
+│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │      Y      │
+├───┼─────────┴────────┴───────────┼───────────┼─────────────┤
+│   │                              │ 7         │      5      │
+│   ├──────────────────────────────┼───────────┼─────────────┤
+│   │                              │ 6         │      4      │
+└───┴──────────────────────────────┴───────────┴─────────────┘`)
+	})
+
+	t.Run("with one long header column and one footer row merged", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE1", "RCE2", "RCE3"}, rcAutoMerge)
+		tw.AppendHeader(Row{"", "", "", "", "EXE EXE EXE", "EXE EXE EXE", "EXE EXE EXE"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendFooter(Row{"", "", "", 7, 5, 5, 5}, rcAutoMerge)
+		tw.AppendFooter(Row{"", "", "", 6, 4, 4, 3}, rcAutoMerge)
+		tw.SetAutoIndex(true)
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 7, WidthMaxEnforcer: text.WrapHard},
+			{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 7, WidthMaxEnforcer: text.WrapHard},
+			{Number: 7, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 7, WidthMaxEnforcer: text.WrapHard},
+		})
+		tw.SetStyle(StyleLight)
+		tw.Style().Options.SeparateRows = true
+
+		compareOutput(t, tw.Render(), `
+┌───┬─────────┬────────┬───────────┬───────────┬──────┬──────┬──────┐
+│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │ RCE1 │ RCE2 │ RCE3 │
+│   ├─────────┴────────┴───────────┴───────────┼──────┴──────┴──────┤
+│   │                                          │       EXE EXE      │
+│   │                                          │         EXE        │
+├───┼─────────┬────────┬───────────┬───────────┼────────────────────┤
+│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │          Y         │
+├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
+│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 2       │          Y         │
+├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
+│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B     │ C 3       │          N         │
+├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
+│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │          N         │
+├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
+│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 5       │          Y         │
+├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
+│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │          Y         │
+├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
+│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │          Y         │
+├───┼─────────┴────────┴───────────┼───────────┼────────────────────┤
+│   │                              │ 7         │          5         │
+│   ├──────────────────────────────┼───────────┼─────────────┬──────┤
+│   │                              │ 6         │      4      │   3  │
+└───┴──────────────────────────────┴───────────┴─────────────┴──────┘`)
 	})
 }
 
