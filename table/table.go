@@ -891,6 +891,7 @@ func (t *Table) parseRowForMaxColumnLengths(rows []rowStr, hint renderHint) {
 		}
 		return mergedColLength
 	}
+	separatorLength := text.RuneWidthWithoutEscSequences(t.style.Box.MiddleSeparator)
 
 	for rowIdx, row := range rows {
 		hint.rowNumber = rowIdx + 1
@@ -906,6 +907,7 @@ func (t *Table) parseRowForMaxColumnLengths(rows []rowStr, hint renderHint) {
 			if longestLineLen > mergedColumnsLength {
 				if mergedColumnsLength > 0 {
 					numMergedColumns := len(mergedColumnsForCol) + 1
+					longestLineLen -= (numMergedColumns - 1) * separatorLength
 					maxLengthSplitAcrossColumns := longestLineLen / numMergedColumns
 					if maxLengthSplitAcrossColumns > t.maxColumnLengths[colIdx] {
 						t.maxColumnLengths[colIdx] = maxLengthSplitAcrossColumns
