@@ -17,7 +17,8 @@ func TestTable_RenderCSV(t *testing.T) {
 	tw.SetCaption(testCaption)
 	tw.SetTitle(testTitle1)
 
-	compareOutput(t, tw.RenderCSV(), `Game of Thrones
+	compareOutput(t, tw.RenderCSV(), `
+Game of Thrones
 #,First Name,Last Name,Salary,
 1,Arya,Stark,3000,
 20,Jon,Snow,2000,"You know nothing\, Jon Snow!"
@@ -49,7 +50,8 @@ func TestTable_RenderCSV_AutoIndex(t *testing.T) {
 	tw.SetAutoIndex(true)
 	tw.SetStyle(StyleLight)
 
-	compareOutput(t, tw.RenderCSV(), `,A,B,C,D,E,F,G,H,I,J
+	compareOutput(t, tw.RenderCSV(), `
+,A,B,C,D,E,F,G,H,I,J
 1,A1,B1,C1,D1,E1,F1,G1,H1,I1,J1
 2,A2,B2,C2,D2,E2,F2,G2,H2,I2,J2
 3,A3,B3,C3,D3,E3,F3,G3,H3,I3,J3
@@ -88,7 +90,8 @@ func TestTable_RenderCSV_HiddenColumns(t *testing.T) {
 	t.Run("first column hidden", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{0}))
 
-		compareOutput(t, tw.RenderCSV(), `First Name,Last Name,Salary,
+		compareOutput(t, tw.RenderCSV(), `
+First Name,Last Name,Salary,
 >>Tyrion,Lannister<<,5013,
 >>Arya,Stark<<,3013,
 >>Jon,Snow<<,2013,"~You know nothing\, Jon Snow!~"
@@ -98,7 +101,8 @@ func TestTable_RenderCSV_HiddenColumns(t *testing.T) {
 	t.Run("column hidden in the middle", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{1}))
 
-		compareOutput(t, tw.RenderCSV(), `#,Last Name,Salary,
+		compareOutput(t, tw.RenderCSV(), `
+#,Last Name,Salary,
 307,Lannister<<,5013,
 8,Stark<<,3013,
 27,Snow<<,2013,"~You know nothing\, Jon Snow!~"
@@ -108,7 +112,8 @@ func TestTable_RenderCSV_HiddenColumns(t *testing.T) {
 	t.Run("last column hidden", func(t *testing.T) {
 		tw.SetColumnConfigs(generateColumnConfigsWithHiddenColumns([]int{4}))
 
-		compareOutput(t, tw.RenderCSV(), `#,First Name,Last Name,Salary
+		compareOutput(t, tw.RenderCSV(), `
+#,First Name,Last Name,Salary
 307,>>Tyrion,Lannister<<,5013
 8,>>Arya,Stark<<,3013
 27,>>Jon,Snow<<,2013
@@ -124,7 +129,8 @@ func TestTable_RenderCSV_Sorted(t *testing.T) {
 	tw.AppendFooter(testFooter)
 	tw.SortBy([]SortBy{{Name: "Last Name", Mode: Asc}, {Name: "First Name", Mode: Asc}})
 
-	compareOutput(t, tw.RenderCSV(), `#,First Name,Last Name,Salary,
+	compareOutput(t, tw.RenderCSV(), `
+#,First Name,Last Name,Salary,
 300,Tyrion,Lannister,5000,
 20,Jon,Snow,2000,"You know nothing\, Jon Snow!"
 1,Arya,Stark,3000,
