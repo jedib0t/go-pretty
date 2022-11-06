@@ -20,6 +20,26 @@ func compareOutput(t *testing.T, out string, expectedOut string) {
 	}
 }
 
+func compareOutputColored(t *testing.T, out string, expectedOut string) {
+	if strings.HasPrefix(expectedOut, "\n") {
+		expectedOut = strings.Replace(expectedOut, "\n", "", 1)
+	}
+	assert.Equal(t, expectedOut, out)
+	if out != expectedOut {
+		outLines := strings.Split(out, "\n")
+		fmt.Printf("\"\" +\n")
+		for idx, line := range outLines {
+			if idx < len(outLines)-1 {
+				fmt.Printf("%#v +", line+"\n")
+			} else {
+				fmt.Printf("%#v,", line)
+			}
+			fmt.Printf("\n")
+		}
+		fmt.Printf("Expected:\n%s\nActual:\n%s\n", expectedOut, out)
+	}
+}
+
 func generateColumnConfigsWithHiddenColumns(colsToHide []int) []ColumnConfig {
 	cc := []ColumnConfig{
 		{
@@ -976,30 +996,56 @@ func TestTable_Render_Colored(t *testing.T) {
 	tw.Style().Options.SeparateHeader = true
 	tw.Style().Options.SeparateRows = true
 
-	expectedOut := []string{
-		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m------------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m--------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m",
-		"\x1b[106;30m|\x1b[0m\x1b[106;30m   \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m   # \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m FIRST NAME \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m LAST NAME \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m SALARY \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m                             \x1b[0m\x1b[106;30m|\x1b[0m",
-		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m------------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m--------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m",
-		"\x1b[106;30m|\x1b[0m\x1b[106;30m 1 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[107;30m   1 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Arya       \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Stark     \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m   3000 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m                             \x1b[0m\x1b[106;30m|\x1b[0m",
-		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[107;30m-----\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m------------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m--------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m",
-		"\x1b[106;30m|\x1b[0m\x1b[106;30m 2 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m  20 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Jon        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Snow      \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m   2000 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m You know nothing, Jon Snow! \x1b[0m\x1b[106;30m|\x1b[0m",
-		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[47;30m-----\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m------------\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m-----------\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m--------\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m",
-		"\x1b[106;30m|\x1b[0m\x1b[106;30m 3 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[107;30m 300 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Tyrion     \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Lannister \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m   5000 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m                             \x1b[0m\x1b[106;30m|\x1b[0m",
-		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[107;30m-----\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m------------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m--------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m",
-		"\x1b[106;30m|\x1b[0m\x1b[106;30m 4 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m   0 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Winter     \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Is        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m      0 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Coming.                     \x1b[0m\x1b[106;30m|\x1b[0m",
-		"\x1b[106;30m|\x1b[0m\x1b[106;30m   \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m     \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m            \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m           \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m The North Remembers!        \x1b[0m\x1b[106;30m|\x1b[0m",
-		"\x1b[106;30m|\x1b[0m\x1b[106;30m   \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m     \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m            \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m           \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m This is known.              \x1b[0m\x1b[106;30m|\x1b[0m",
+	compareOutputColored(t, tw.Render(), ""+
+		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m------------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m--------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m\n"+
+		"\x1b[106;30m|\x1b[0m\x1b[106;30m   \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m   # \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m FIRST NAME \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m LAST NAME \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m SALARY \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m                             \x1b[0m\x1b[106;30m|\x1b[0m\n"+
+		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m------------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m--------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m\n"+
+		"\x1b[106;30m|\x1b[0m\x1b[106;30m 1 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[107;30m   1 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Arya       \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Stark     \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m   3000 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m                             \x1b[0m\x1b[106;30m|\x1b[0m\n"+
+		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[107;30m-----\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m------------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m--------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m\n"+
+		"\x1b[106;30m|\x1b[0m\x1b[106;30m 2 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m  20 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Jon        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Snow      \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m   2000 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m You know nothing, Jon Snow! \x1b[0m\x1b[106;30m|\x1b[0m\n"+
+		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[47;30m-----\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m------------\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m-----------\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m--------\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m\n"+
+		"\x1b[106;30m|\x1b[0m\x1b[106;30m 3 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[107;30m 300 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Tyrion     \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Lannister \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m   5000 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m                             \x1b[0m\x1b[106;30m|\x1b[0m\n"+
+		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[107;30m-----\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m------------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m--------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m\n"+
+		"\x1b[106;30m|\x1b[0m\x1b[106;30m 4 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m   0 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Winter     \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Is        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m      0 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Coming.                     \x1b[0m\x1b[106;30m|\x1b[0m\n"+
+		"\x1b[106;30m|\x1b[0m\x1b[106;30m   \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m     \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m            \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m           \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m The North Remembers!        \x1b[0m\x1b[106;30m|\x1b[0m\n"+
+		"\x1b[106;30m|\x1b[0m\x1b[106;30m   \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m     \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m            \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m           \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m This is known.              \x1b[0m\x1b[106;30m|\x1b[0m\n"+
+		"\x1b[46;30m+\x1b[0m\x1b[46;30m---\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m------------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m--------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----------------------------\x1b[0m\x1b[46;30m+\x1b[0m\n"+
+		"\x1b[46;30m|\x1b[0m\x1b[46;30m   \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m     \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m            \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m TOTAL     \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m  10000 \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m                             \x1b[0m\x1b[46;30m|\x1b[0m\n"+
 		"\x1b[46;30m+\x1b[0m\x1b[46;30m---\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m------------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m--------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----------------------------\x1b[0m\x1b[46;30m+\x1b[0m",
-		"\x1b[46;30m|\x1b[0m\x1b[46;30m   \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m     \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m            \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m TOTAL     \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m  10000 \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m                             \x1b[0m\x1b[46;30m|\x1b[0m",
-		"\x1b[46;30m+\x1b[0m\x1b[46;30m---\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m------------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m--------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----------------------------\x1b[0m\x1b[46;30m+\x1b[0m",
+	)
+}
+
+func TestTable_Render_ColoredBorders(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendRow(testRowMultiLine)
+	tw.AppendFooter(testFooter)
+	tw.SetTitle(testTitle1)
+	tw.Style().Title.Colors = text.Colors{text.FgYellow}
+	tw.Style().Color = ColorOptions{
+		Header:       text.Colors{text.FgRed},
+		Row:          text.Colors{text.FgGreen},
+		RowAlternate: text.Colors{text.FgHiGreen},
+		Footer:       text.Colors{text.FgBlue},
 	}
-	out := tw.Render()
-	assert.Equal(t, strings.Join(expectedOut, "\n"), out)
-	if strings.Join(expectedOut, "\n") != out {
-		for _, line := range strings.Split(out, "\n") {
-			fmt.Printf("%#v,\n", line)
-		}
-	}
+
+	compareOutputColored(t, tw.Render(), ""+
+		"\x1b[33m+\x1b[0m\x1b[33m---------------------------------------------------------------------\x1b[0m\x1b[33m+\x1b[0m\n"+
+		"\x1b[33m|\x1b[0m\x1b[33m Game of Thrones                                                     \x1b[0m\x1b[33m|\x1b[0m\n"+
+		"\x1b[31m+\x1b[0m\x1b[31m-----\x1b[0m\x1b[31m+\x1b[0m\x1b[31m------------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m-----------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m--------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m-----------------------------\x1b[0m\x1b[31m+\x1b[0m\n"+
+		"\x1b[31m|\x1b[0m\x1b[31m   # \x1b[0m\x1b[31m|\x1b[0m\x1b[31m FIRST NAME \x1b[0m\x1b[31m|\x1b[0m\x1b[31m LAST NAME \x1b[0m\x1b[31m|\x1b[0m\x1b[31m SALARY \x1b[0m\x1b[31m|\x1b[0m\x1b[31m                             \x1b[0m\x1b[31m|\x1b[0m\n"+
+		"\x1b[31m+\x1b[0m\x1b[31m-----\x1b[0m\x1b[31m+\x1b[0m\x1b[31m------------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m-----------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m--------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m-----------------------------\x1b[0m\x1b[31m+\x1b[0m\n"+
+		"\x1b[32m|\x1b[0m\x1b[32m   1 \x1b[0m\x1b[32m|\x1b[0m\x1b[32m Arya       \x1b[0m\x1b[32m|\x1b[0m\x1b[32m Stark     \x1b[0m\x1b[32m|\x1b[0m\x1b[32m   3000 \x1b[0m\x1b[32m|\x1b[0m\x1b[32m                             \x1b[0m\x1b[32m|\x1b[0m\n"+
+		"\x1b[32m|\x1b[0m\x1b[92m  20 \x1b[0m\x1b[92m|\x1b[0m\x1b[92m Jon        \x1b[0m\x1b[92m|\x1b[0m\x1b[92m Snow      \x1b[0m\x1b[92m|\x1b[0m\x1b[92m   2000 \x1b[0m\x1b[92m|\x1b[0m\x1b[92m You know nothing, Jon Snow! \x1b[0m\x1b[32m|\x1b[0m\n"+
+		"\x1b[32m|\x1b[0m\x1b[32m 300 \x1b[0m\x1b[32m|\x1b[0m\x1b[32m Tyrion     \x1b[0m\x1b[32m|\x1b[0m\x1b[32m Lannister \x1b[0m\x1b[32m|\x1b[0m\x1b[32m   5000 \x1b[0m\x1b[32m|\x1b[0m\x1b[32m                             \x1b[0m\x1b[32m|\x1b[0m\n"+
+		"\x1b[32m|\x1b[0m\x1b[92m   0 \x1b[0m\x1b[92m|\x1b[0m\x1b[92m Winter     \x1b[0m\x1b[92m|\x1b[0m\x1b[92m Is        \x1b[0m\x1b[92m|\x1b[0m\x1b[92m      0 \x1b[0m\x1b[92m|\x1b[0m\x1b[92m Coming.                     \x1b[0m\x1b[32m|\x1b[0m\n"+
+		"\x1b[32m|\x1b[0m\x1b[92m     \x1b[0m\x1b[92m|\x1b[0m\x1b[92m            \x1b[0m\x1b[92m|\x1b[0m\x1b[92m           \x1b[0m\x1b[92m|\x1b[0m\x1b[92m        \x1b[0m\x1b[92m|\x1b[0m\x1b[92m The North Remembers!        \x1b[0m\x1b[32m|\x1b[0m\n"+
+		"\x1b[32m|\x1b[0m\x1b[92m     \x1b[0m\x1b[92m|\x1b[0m\x1b[92m            \x1b[0m\x1b[92m|\x1b[0m\x1b[92m           \x1b[0m\x1b[92m|\x1b[0m\x1b[92m        \x1b[0m\x1b[92m|\x1b[0m\x1b[92m This is known.              \x1b[0m\x1b[32m|\x1b[0m\n"+
+		"\x1b[34m+\x1b[0m\x1b[34m-----\x1b[0m\x1b[34m+\x1b[0m\x1b[34m------------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m-----------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m--------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m-----------------------------\x1b[0m\x1b[34m+\x1b[0m\n"+
+		"\x1b[34m|\x1b[0m\x1b[34m     \x1b[0m\x1b[34m|\x1b[0m\x1b[34m            \x1b[0m\x1b[34m|\x1b[0m\x1b[34m TOTAL     \x1b[0m\x1b[34m|\x1b[0m\x1b[34m  10000 \x1b[0m\x1b[34m|\x1b[0m\x1b[34m                             \x1b[0m\x1b[34m|\x1b[0m\n"+
+		"\x1b[34m+\x1b[0m\x1b[34m-----\x1b[0m\x1b[34m+\x1b[0m\x1b[34m------------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m-----------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m--------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m-----------------------------\x1b[0m\x1b[34m+\x1b[0m",
+	)
 }
 
 func TestTable_Render_ColoredCustom(t *testing.T) {
@@ -1035,22 +1081,21 @@ func TestTable_Render_ColoredCustom(t *testing.T) {
 	})
 	tw.SetStyle(StyleRounded)
 
-	expectedOut := []string{
-		"╭─────┬────────────┬───────────┬────────┬─────────────────────────────╮",
-		"│\x1b[91;1m   # \x1b[0m│\x1b[91;1m FIRST NAME \x1b[0m│\x1b[91;1m LAST NAME \x1b[0m│\x1b[91;1m SALARY \x1b[0m│                             │",
-		"├─────┼────────────┼───────────┼────────┼─────────────────────────────┤",
-		"│\x1b[32m   1 \x1b[0m│\x1b[32m Arya       \x1b[0m│\x1b[32m Stark     \x1b[0m│\x1b[32m   3000 \x1b[0m│\x1b[36m                             \x1b[0m│",
-		"│\x1b[32m  20 \x1b[0m│\x1b[32m Jon        \x1b[0m│\x1b[32m Snow      \x1b[0m│\x1b[32m   2000 \x1b[0m│\x1b[36m You know nothing, Jon Snow! \x1b[0m│",
-		"│\x1b[32m 300 \x1b[0m│\x1b[32m Tyrion     \x1b[0m│\x1b[32m Lannister \x1b[0m│\x1b[32m   5000 \x1b[0m│\x1b[36m                             \x1b[0m│",
-		"│\x1b[32m   0 \x1b[0m│\x1b[32m Winter     \x1b[0m│\x1b[32m Is        \x1b[0m│\x1b[32m      0 \x1b[0m│\x1b[36m Coming.                     \x1b[0m│",
-		"│\x1b[32m     \x1b[0m│\x1b[32m            \x1b[0m│\x1b[32m           \x1b[0m│\x1b[32m        \x1b[0m│\x1b[36m The North Remembers!        \x1b[0m│",
-		"│\x1b[32m     \x1b[0m│\x1b[32m            \x1b[0m│\x1b[32m           \x1b[0m│\x1b[32m        \x1b[0m│\x1b[36m This is known.              \x1b[0m│",
-		"├─────┼────────────┼───────────┼────────┼─────────────────────────────┤",
-		"│     │            │\x1b[94;1m TOTAL     \x1b[0m│\x1b[94;1m  10000 \x1b[0m│                             │",
-		"╰─────┴────────────┴───────────┴────────┴─────────────────────────────╯",
+	compareOutputColored(t, tw.Render(), ""+
+		"╭─────┬────────────┬───────────┬────────┬─────────────────────────────╮\n"+
+		"│\x1b[91;1m   # \x1b[0m│\x1b[91;1m FIRST NAME \x1b[0m│\x1b[91;1m LAST NAME \x1b[0m│\x1b[91;1m SALARY \x1b[0m│                             │\n"+
+		"├─────┼────────────┼───────────┼────────┼─────────────────────────────┤\n"+
+		"│\x1b[32m   1 \x1b[0m│\x1b[32m Arya       \x1b[0m│\x1b[32m Stark     \x1b[0m│\x1b[32m   3000 \x1b[0m│\x1b[36m                             \x1b[0m│\n"+
+		"│\x1b[32m  20 \x1b[0m│\x1b[32m Jon        \x1b[0m│\x1b[32m Snow      \x1b[0m│\x1b[32m   2000 \x1b[0m│\x1b[36m You know nothing, Jon Snow! \x1b[0m│\n"+
+		"│\x1b[32m 300 \x1b[0m│\x1b[32m Tyrion     \x1b[0m│\x1b[32m Lannister \x1b[0m│\x1b[32m   5000 \x1b[0m│\x1b[36m                             \x1b[0m│\n"+
+		"│\x1b[32m   0 \x1b[0m│\x1b[32m Winter     \x1b[0m│\x1b[32m Is        \x1b[0m│\x1b[32m      0 \x1b[0m│\x1b[36m Coming.                     \x1b[0m│\n"+
+		"│\x1b[32m     \x1b[0m│\x1b[32m            \x1b[0m│\x1b[32m           \x1b[0m│\x1b[32m        \x1b[0m│\x1b[36m The North Remembers!        \x1b[0m│\n"+
+		"│\x1b[32m     \x1b[0m│\x1b[32m            \x1b[0m│\x1b[32m           \x1b[0m│\x1b[32m        \x1b[0m│\x1b[36m This is known.              \x1b[0m│\n"+
+		"├─────┼────────────┼───────────┼────────┼─────────────────────────────┤\n"+
+		"│     │            │\x1b[94;1m TOTAL     \x1b[0m│\x1b[94;1m  10000 \x1b[0m│                             │\n"+
+		"╰─────┴────────────┴───────────┴────────┴─────────────────────────────╯\n"+
 		"A Song of Ice and Fire",
-	}
-	assert.Equal(t, strings.Join(expectedOut, "\n"), tw.Render())
+	)
 }
 
 func TestTable_Render_ColoredTableWithinATable(t *testing.T) {
@@ -1066,26 +1111,15 @@ func TestTable_Render_ColoredTableWithinATable(t *testing.T) {
 	tableOuter.AppendRow(Row{table.Render()})
 	tableOuter.SetStyle(StyleRounded)
 
-	expectedOut := strings.Join([]string{
-		"╭───────────────────────────────────────────────────────────────────╮",
-		"│ \x1b[106;30m   # \x1b[0m\x1b[106;30m FIRST NAME \x1b[0m\x1b[106;30m LAST NAME \x1b[0m\x1b[106;30m SALARY \x1b[0m\x1b[106;30m                             \x1b[0m │",
-		"│ \x1b[106;30m   1 \x1b[0m\x1b[107;30m Arya       \x1b[0m\x1b[107;30m Stark     \x1b[0m\x1b[107;30m   3000 \x1b[0m\x1b[107;30m                             \x1b[0m │",
-		"│ \x1b[106;30m  20 \x1b[0m\x1b[47;30m Jon        \x1b[0m\x1b[47;30m Snow      \x1b[0m\x1b[47;30m   2000 \x1b[0m\x1b[47;30m You know nothing, Jon Snow! \x1b[0m │",
-		"│ \x1b[106;30m 300 \x1b[0m\x1b[107;30m Tyrion     \x1b[0m\x1b[107;30m Lannister \x1b[0m\x1b[107;30m   5000 \x1b[0m\x1b[107;30m                             \x1b[0m │",
-		"│ \x1b[46;30m     \x1b[0m\x1b[46;30m            \x1b[0m\x1b[46;30m TOTAL     \x1b[0m\x1b[46;30m  10000 \x1b[0m\x1b[46;30m                             \x1b[0m │",
+	compareOutputColored(t, tableOuter.Render(), ""+
+		"╭───────────────────────────────────────────────────────────────────╮\n"+
+		"│ \x1b[106;30m   # \x1b[0m\x1b[106;30m FIRST NAME \x1b[0m\x1b[106;30m LAST NAME \x1b[0m\x1b[106;30m SALARY \x1b[0m\x1b[106;30m                             \x1b[0m │\n"+
+		"│ \x1b[106;30m   1 \x1b[0m\x1b[107;30m Arya       \x1b[0m\x1b[107;30m Stark     \x1b[0m\x1b[107;30m   3000 \x1b[0m\x1b[107;30m                             \x1b[0m │\n"+
+		"│ \x1b[106;30m  20 \x1b[0m\x1b[47;30m Jon        \x1b[0m\x1b[47;30m Snow      \x1b[0m\x1b[47;30m   2000 \x1b[0m\x1b[47;30m You know nothing, Jon Snow! \x1b[0m │\n"+
+		"│ \x1b[106;30m 300 \x1b[0m\x1b[107;30m Tyrion     \x1b[0m\x1b[107;30m Lannister \x1b[0m\x1b[107;30m   5000 \x1b[0m\x1b[107;30m                             \x1b[0m │\n"+
+		"│ \x1b[46;30m     \x1b[0m\x1b[46;30m            \x1b[0m\x1b[46;30m TOTAL     \x1b[0m\x1b[46;30m  10000 \x1b[0m\x1b[46;30m                             \x1b[0m │\n"+
 		"╰───────────────────────────────────────────────────────────────────╯",
-	}, "\n")
-	out := tableOuter.Render()
-	assert.Equal(t, expectedOut, out)
-
-	// dump it out in a easy way to update the test if things are meant to
-	// change due to some other feature
-	if expectedOut != out {
-		for _, line := range strings.Split(out, "\n") {
-			fmt.Printf("%#v,\n", line)
-		}
-		fmt.Println()
-	}
+	)
 }
 
 func TestTable_Render_ColoredTableWithinAColoredTable(t *testing.T) {
@@ -1103,27 +1137,16 @@ func TestTable_Render_ColoredTableWithinAColoredTable(t *testing.T) {
 	tableOuter.SetColumnConfigs([]ColumnConfig{{Number: 1, AlignHeader: text.AlignCenter}})
 	tableOuter.SetStyle(StyleColoredBright)
 
-	expectedOut := strings.Join([]string{
-		"\x1b[106;30m                COLORED TABLE WITHIN A COLORED TABLE               \x1b[0m",
+	compareOutputColored(t, tableOuter.Render(), ""+
+		"\x1b[106;30m                COLORED TABLE WITHIN A COLORED TABLE               \x1b[0m\n"+
+		"\x1b[107;30m                                                                   \x1b[0m\n"+
+		"\x1b[107;30m \x1b[106;30m   # \x1b[0m\x1b[107;30m\x1b[106;30m FIRST NAME \x1b[0m\x1b[107;30m\x1b[106;30m LAST NAME \x1b[0m\x1b[107;30m\x1b[106;30m SALARY \x1b[0m\x1b[107;30m\x1b[106;30m                             \x1b[0m\x1b[107;30m \x1b[0m\n"+
+		"\x1b[107;30m \x1b[106;30m   1 \x1b[0m\x1b[107;30m\x1b[107;30m Arya       \x1b[0m\x1b[107;30m\x1b[107;30m Stark     \x1b[0m\x1b[107;30m\x1b[107;30m   3000 \x1b[0m\x1b[107;30m\x1b[107;30m                             \x1b[0m\x1b[107;30m \x1b[0m\n"+
+		"\x1b[107;30m \x1b[106;30m  20 \x1b[0m\x1b[107;30m\x1b[47;30m Jon        \x1b[0m\x1b[107;30m\x1b[47;30m Snow      \x1b[0m\x1b[107;30m\x1b[47;30m   2000 \x1b[0m\x1b[107;30m\x1b[47;30m You know nothing, Jon Snow! \x1b[0m\x1b[107;30m \x1b[0m\n"+
+		"\x1b[107;30m \x1b[106;30m 300 \x1b[0m\x1b[107;30m\x1b[107;30m Tyrion     \x1b[0m\x1b[107;30m\x1b[107;30m Lannister \x1b[0m\x1b[107;30m\x1b[107;30m   5000 \x1b[0m\x1b[107;30m\x1b[107;30m                             \x1b[0m\x1b[107;30m \x1b[0m\n"+
+		"\x1b[107;30m \x1b[46;30m     \x1b[0m\x1b[107;30m\x1b[46;30m            \x1b[0m\x1b[107;30m\x1b[46;30m TOTAL     \x1b[0m\x1b[107;30m\x1b[46;30m  10000 \x1b[0m\x1b[107;30m\x1b[46;30m                             \x1b[0m\x1b[107;30m \x1b[0m\n"+
 		"\x1b[107;30m                                                                   \x1b[0m",
-		"\x1b[107;30m \x1b[106;30m   # \x1b[0m\x1b[107;30m\x1b[106;30m FIRST NAME \x1b[0m\x1b[107;30m\x1b[106;30m LAST NAME \x1b[0m\x1b[107;30m\x1b[106;30m SALARY \x1b[0m\x1b[107;30m\x1b[106;30m                             \x1b[0m\x1b[107;30m \x1b[0m",
-		"\x1b[107;30m \x1b[106;30m   1 \x1b[0m\x1b[107;30m\x1b[107;30m Arya       \x1b[0m\x1b[107;30m\x1b[107;30m Stark     \x1b[0m\x1b[107;30m\x1b[107;30m   3000 \x1b[0m\x1b[107;30m\x1b[107;30m                             \x1b[0m\x1b[107;30m \x1b[0m",
-		"\x1b[107;30m \x1b[106;30m  20 \x1b[0m\x1b[107;30m\x1b[47;30m Jon        \x1b[0m\x1b[107;30m\x1b[47;30m Snow      \x1b[0m\x1b[107;30m\x1b[47;30m   2000 \x1b[0m\x1b[107;30m\x1b[47;30m You know nothing, Jon Snow! \x1b[0m\x1b[107;30m \x1b[0m",
-		"\x1b[107;30m \x1b[106;30m 300 \x1b[0m\x1b[107;30m\x1b[107;30m Tyrion     \x1b[0m\x1b[107;30m\x1b[107;30m Lannister \x1b[0m\x1b[107;30m\x1b[107;30m   5000 \x1b[0m\x1b[107;30m\x1b[107;30m                             \x1b[0m\x1b[107;30m \x1b[0m",
-		"\x1b[107;30m \x1b[46;30m     \x1b[0m\x1b[107;30m\x1b[46;30m            \x1b[0m\x1b[107;30m\x1b[46;30m TOTAL     \x1b[0m\x1b[107;30m\x1b[46;30m  10000 \x1b[0m\x1b[107;30m\x1b[46;30m                             \x1b[0m\x1b[107;30m \x1b[0m",
-		"\x1b[107;30m                                                                   \x1b[0m",
-	}, "\n")
-	out := tableOuter.Render()
-	assert.Equal(t, expectedOut, out)
-
-	// dump it out in a easy way to update the test if things are meant to
-	// change due to some other feature
-	if expectedOut != out {
-		for _, line := range strings.Split(out, "\n") {
-			fmt.Printf("%#v,\n", line)
-		}
-		fmt.Println()
-	}
+	)
 }
 
 func TestTable_Render_ColoredStyleAutoIndex(t *testing.T) {
@@ -1135,26 +1158,15 @@ func TestTable_Render_ColoredStyleAutoIndex(t *testing.T) {
 	table.SetStyle(StyleColoredDark)
 	table.SetTitle(testTitle2)
 
-	expectedOut := strings.Join([]string{
-		"\x1b[106;30;1m When you play the Game of Thrones, you win or you die. There is no \x1b[0m",
-		"\x1b[106;30;1m middle ground.                                                     \x1b[0m",
-		"\x1b[96;100m   \x1b[0m\x1b[96;100m   # \x1b[0m\x1b[96;100m FIRST NAME \x1b[0m\x1b[96;100m LAST NAME \x1b[0m\x1b[96;100m SALARY \x1b[0m\x1b[96;100m                             \x1b[0m",
-		"\x1b[96;100m 1 \x1b[0m\x1b[97;40m   1 \x1b[0m\x1b[97;40m Arya       \x1b[0m\x1b[97;40m Stark     \x1b[0m\x1b[97;40m   3000 \x1b[0m\x1b[97;40m                             \x1b[0m",
-		"\x1b[96;100m 2 \x1b[0m\x1b[37;40m  20 \x1b[0m\x1b[37;40m Jon        \x1b[0m\x1b[37;40m Snow      \x1b[0m\x1b[37;40m   2000 \x1b[0m\x1b[37;40m You know nothing, Jon Snow! \x1b[0m",
-		"\x1b[96;100m 3 \x1b[0m\x1b[97;40m 300 \x1b[0m\x1b[97;40m Tyrion     \x1b[0m\x1b[97;40m Lannister \x1b[0m\x1b[97;40m   5000 \x1b[0m\x1b[97;40m                             \x1b[0m",
+	compareOutputColored(t, table.Render(), ""+
+		"\x1b[106;30;1m When you play the Game of Thrones, you win or you die. There is no \x1b[0m\n"+
+		"\x1b[106;30;1m middle ground.                                                     \x1b[0m\n"+
+		"\x1b[96;100m   \x1b[0m\x1b[96;100m   # \x1b[0m\x1b[96;100m FIRST NAME \x1b[0m\x1b[96;100m LAST NAME \x1b[0m\x1b[96;100m SALARY \x1b[0m\x1b[96;100m                             \x1b[0m\n"+
+		"\x1b[96;100m 1 \x1b[0m\x1b[97;40m   1 \x1b[0m\x1b[97;40m Arya       \x1b[0m\x1b[97;40m Stark     \x1b[0m\x1b[97;40m   3000 \x1b[0m\x1b[97;40m                             \x1b[0m\n"+
+		"\x1b[96;100m 2 \x1b[0m\x1b[37;40m  20 \x1b[0m\x1b[37;40m Jon        \x1b[0m\x1b[37;40m Snow      \x1b[0m\x1b[37;40m   2000 \x1b[0m\x1b[37;40m You know nothing, Jon Snow! \x1b[0m\n"+
+		"\x1b[96;100m 3 \x1b[0m\x1b[97;40m 300 \x1b[0m\x1b[97;40m Tyrion     \x1b[0m\x1b[97;40m Lannister \x1b[0m\x1b[97;40m   5000 \x1b[0m\x1b[97;40m                             \x1b[0m\n"+
 		"\x1b[36;100m   \x1b[0m\x1b[36;100m     \x1b[0m\x1b[36;100m            \x1b[0m\x1b[36;100m TOTAL     \x1b[0m\x1b[36;100m  10000 \x1b[0m\x1b[36;100m                             \x1b[0m",
-	}, "\n")
-	out := table.Render()
-	assert.Equal(t, expectedOut, out)
-
-	// dump it out in a easy way to update the test if things are meant to
-	// change due to some other feature
-	if expectedOut != out {
-		for _, line := range strings.Split(out, "\n") {
-			fmt.Printf("%#v,\n", line)
-		}
-		fmt.Println()
-	}
+	)
 }
 
 func TestTable_Render_ColumnConfigs(t *testing.T) {
@@ -1231,25 +1243,23 @@ func TestTable_Render_ColumnConfigs(t *testing.T) {
 	})
 	tw.SetStyle(styleTest)
 
-	expectedOutLines := []string{
-		"(---^-----^-----------^------------^------------------^-----------------------------)",
-		"[< >|<  #>|\x1b[41;30;1m< (H_FIRST>\x1b[0m|\x1b[42;30;1m<LAST      >\x1b[0m|\x1b[44;30;1m<                >\x1b[0m|<                           >]",
-		"[< >|<   >|\x1b[41;30;1m<     NAME>\x1b[0m|\x1b[42;30;1m<NAME_H)   >\x1b[0m|\x1b[44;30;1m<        SALARIII>\x1b[0m|<                           >]",
-		"{---+-----+-----------+------------+------------------+-----------------------------}",
-		"[<1>|<  1>|\x1b[40;31m<  (r_Arya>\x1b[0m|\x1b[40;32m<Stark_r)  >\x1b[0m|\x1b[40;34m<       $ 3000.03>\x1b[0m|<                           >]",
-		"[<2>|< 20>|\x1b[40;31m<   (r_Jon>\x1b[0m|\x1b[40;32m<Snow_r)   >\x1b[0m|\x1b[40;34m<       $ 2000.03>\x1b[0m|<You know nothing, Jon Snow!>]",
-		"[<3>|<300>|\x1b[40;31m<(r_Tyrion>\x1b[0m|\x1b[40;32m<Lannister_>\x1b[0m|\x1b[40;34m<                >\x1b[0m|<                           >]",
-		"[< >|<   >|\x1b[40;31m<         >\x1b[0m|\x1b[40;32m<r)        >\x1b[0m|\x1b[40;34m<       $ 5000.03>\x1b[0m|<                           >]",
-		"[<4>|<  0>|\x1b[40;31m<(r_Winter>\x1b[0m|\x1b[40;32m<          >\x1b[0m|\x1b[40;34m<                >\x1b[0m|<Coming.                    >]",
-		"[< >|<   >|\x1b[40;31m<         >\x1b[0m|\x1b[40;32m<Is_r)     >\x1b[0m|\x1b[40;34m<                >\x1b[0m|<The North Remembers!       >]",
-		"[< >|<   >|\x1b[40;31m<         >\x1b[0m|\x1b[40;32m<          >\x1b[0m|\x1b[40;34m<          $ 0.03>\x1b[0m|<This is known.             >]",
-		"{---+-----+-----------+------------+------------------+-----------------------------}",
-		"[< >|<   >|\x1b[41;30m<      (F_>\x1b[0m|\x1b[42;30m<TOTAL     >\x1b[0m|\x1b[44;30m<                >\x1b[0m|<                           >]",
-		"[< >|<   >|\x1b[41;30m<         >\x1b[0m|\x1b[42;30m<SALARY_F) >\x1b[0m|\x1b[44;30m<      $ 10000.03>\x1b[0m|<                           >]",
+	compareOutputColored(t, tw.Render(), ""+
+		"(---^-----^-----------^------------^------------------^-----------------------------)\n"+
+		"[< >|<  #>|\x1b[41;30;1m< (H_FIRST>\x1b[0m|\x1b[42;30;1m<LAST      >\x1b[0m|\x1b[44;30;1m<                >\x1b[0m|<                           >]\n"+
+		"[< >|<   >|\x1b[41;30;1m<     NAME>\x1b[0m|\x1b[42;30;1m<NAME_H)   >\x1b[0m|\x1b[44;30;1m<        SALARIII>\x1b[0m|<                           >]\n"+
+		"{---+-----+-----------+------------+------------------+-----------------------------}\n"+
+		"[<1>|<  1>|\x1b[40;31m<  (r_Arya>\x1b[0m|\x1b[40;32m<Stark_r)  >\x1b[0m|\x1b[40;34m<       $ 3000.03>\x1b[0m|<                           >]\n"+
+		"[<2>|< 20>|\x1b[40;31m<   (r_Jon>\x1b[0m|\x1b[40;32m<Snow_r)   >\x1b[0m|\x1b[40;34m<       $ 2000.03>\x1b[0m|<You know nothing, Jon Snow!>]\n"+
+		"[<3>|<300>|\x1b[40;31m<(r_Tyrion>\x1b[0m|\x1b[40;32m<Lannister_>\x1b[0m|\x1b[40;34m<                >\x1b[0m|<                           >]\n"+
+		"[< >|<   >|\x1b[40;31m<         >\x1b[0m|\x1b[40;32m<r)        >\x1b[0m|\x1b[40;34m<       $ 5000.03>\x1b[0m|<                           >]\n"+
+		"[<4>|<  0>|\x1b[40;31m<(r_Winter>\x1b[0m|\x1b[40;32m<          >\x1b[0m|\x1b[40;34m<                >\x1b[0m|<Coming.                    >]\n"+
+		"[< >|<   >|\x1b[40;31m<         >\x1b[0m|\x1b[40;32m<Is_r)     >\x1b[0m|\x1b[40;34m<                >\x1b[0m|<The North Remembers!       >]\n"+
+		"[< >|<   >|\x1b[40;31m<         >\x1b[0m|\x1b[40;32m<          >\x1b[0m|\x1b[40;34m<          $ 0.03>\x1b[0m|<This is known.             >]\n"+
+		"{---+-----+-----------+------------+------------------+-----------------------------}\n"+
+		"[< >|<   >|\x1b[41;30m<      (F_>\x1b[0m|\x1b[42;30m<TOTAL     >\x1b[0m|\x1b[44;30m<                >\x1b[0m|<                           >]\n"+
+		"[< >|<   >|\x1b[41;30m<         >\x1b[0m|\x1b[42;30m<SALARY_F) >\x1b[0m|\x1b[44;30m<      $ 10000.03>\x1b[0m|<                           >]\n"+
 		"\\---v-----v-----------v------------v------------------v-----------------------------/",
-	}
-	expectedOut := strings.Join(expectedOutLines, "\n")
-	assert.Equal(t, expectedOut, tw.Render())
+	)
 }
 
 func TestTable_Render_Empty(t *testing.T) {
