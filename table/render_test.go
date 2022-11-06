@@ -751,6 +751,54 @@ func TestTable_Render_AutoMerge_WithSomeColumnsCompletelyMergedCustom(t *testing
 │   │                              │ 6         │      4      │   3  │
 └───┴──────────────────────────────┴───────────┴─────────────┴──────┘`)
 	})
+
+	t.Run("with a lot of merging all around", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"COLUMNS", "COLUMNS", "COLUMNS", "COLUMNS", "COLUMNS", "COLUMNS", "COLUMNS"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "Y", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "N", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendFooter(Row{"foo", "foo", "foo", "foo", "bar", "bar", "bar"}, rcAutoMerge)
+		tw.AppendFooter(Row{7, 7, 7, 7, 7, 7, 7}, rcAutoMerge)
+		tw.SetAutoIndex(true)
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 1, AutoMerge: true},
+			{Number: 2, AutoMerge: true},
+			{Number: 3, AutoMerge: true},
+			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 7, WidthMaxEnforcer: text.WrapHard},
+			{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 7, WidthMaxEnforcer: text.WrapHard},
+			{Number: 7, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 7, WidthMaxEnforcer: text.WrapHard},
+		})
+		tw.SetStyle(StyleLight)
+		tw.Style().Options.SeparateRows = true
+
+		compareOutput(t, tw.Render(), `
+┌───┬───────────────────────────────────────────────────┐
+│   │                      COLUMNS                      │
+├───┼─────────┬─────────┬─────────┬─────────┬───────────┤
+│ 1 │ 1.1.1.1 │ Pod 1A  │ NS 1A   │ C 1     │     Y     │
+├───┤         │         │         ├─────────┼───────┬───┤
+│ 2 │         │         │         │ C 2     │   Y   │ N │
+├───┤         │         ├─────────┼─────────┼───────┴───┤
+│ 3 │         │         │ NS 1B   │ C 3     │     N     │
+├───┤         ├─────────┼─────────┼─────────┼───┬───┬───┤
+│ 4 │         │ Pod 1B  │ NS 2    │ C 4     │ N │ Y │ N │
+├───┤         │         │         ├─────────┼───┴───┴───┤
+│ 5 │         │         │         │ C 5     │     Y     │
+├───┼─────────┼─────────┼─────────┼─────────┼───┬───────┤
+│ 6 │ 2.2.2.2 │ Pod 2   │ NS 3    │ C 6     │ N │   Y   │
+├───┤         │         │         ├─────────┼───┴───────┤
+│ 7 │         │         │         │ C 7     │     Y     │
+├───┼─────────┴─────────┴─────────┴─────────┼───────────┤
+│   │                  FOO                  │    BAR    │
+│   ├───────────────────────────────────────┴───────────┤
+│   │                         7                         │
+└───┴───────────────────────────────────────────────────┘`)
+	})
 }
 
 func TestTable_Render_BiDiText(t *testing.T) {
@@ -1437,7 +1485,7 @@ func TestTable_Render_RowPainter(t *testing.T) {
 	tw.AppendRow(testRowMultiLine)
 	tw.AppendFooter(testFooter)
 	tw.SetIndexColumn(1)
-	tw.SetRowPainter(RowPainter(func(row Row) text.Colors {
+	tw.SetRowPainter(func(row Row) text.Colors {
 		if salary, ok := row[3].(int); ok {
 			if salary > 3000 {
 				return text.Colors{text.BgYellow, text.FgBlack}
@@ -1446,7 +1494,7 @@ func TestTable_Render_RowPainter(t *testing.T) {
 			}
 		}
 		return nil
-	}))
+	})
 	tw.SetStyle(StyleLight)
 	tw.SortBy([]SortBy{{Name: "Salary", Mode: AscNumeric}})
 
