@@ -371,12 +371,14 @@ func (t *Table) getAutoIndexColumnIDs() rowStr {
 }
 
 func (t *Table) getBorderColors(hint renderHint) text.Colors {
-	if hint.isFooterRow {
+	if hint.isHeaderRow {
+		return t.style.Color.Header
+	} else if hint.isFooterRow {
 		return t.style.Color.Footer
 	} else if t.autoIndex {
 		return t.style.Color.IndexColumn
 	}
-	return t.style.Color.Header
+	return t.style.Color.Row
 }
 
 func (t *Table) getBorderLeft(hint renderHint) string {
