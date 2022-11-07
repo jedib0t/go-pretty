@@ -42,6 +42,18 @@ func isNumber(x interface{}) bool {
 
 type mergedColumnIndices map[int]map[int]bool
 
+func (m mergedColumnIndices) mergedLength(colIdx int, maxColumnLengths []int) int {
+	mergedLength := maxColumnLengths[colIdx]
+	for otherColIdx := range m[colIdx] {
+		mergedLength += maxColumnLengths[otherColIdx]
+	}
+	return mergedLength
+}
+
+func (m mergedColumnIndices) len(colIdx int) int {
+	return len(m[colIdx]) + 1
+}
+
 func (m mergedColumnIndices) safeAppend(colIdx, otherColIdx int) {
 	// map
 	if m[colIdx] == nil {
