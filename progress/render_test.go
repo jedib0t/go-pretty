@@ -11,6 +11,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var (
+	trackerIncrementInterval = time.Millisecond * 20
+	renderUpdateFrequency    = time.Millisecond * 10
+	renderWaitTime           = time.Millisecond * 20
+)
+
 type outputWriter struct {
 	Text strings.Builder
 }
@@ -31,7 +37,7 @@ func generateWriter() Writer {
 	pw.SetStyle(StyleDefault)
 	pw.SetTrackerLength(25)
 	pw.SetTrackerPosition(PositionRight)
-	pw.SetUpdateFrequency(time.Millisecond * 50)
+	pw.SetUpdateFrequency(renderUpdateFrequency)
 	pw.Style().Colors = StyleColors{}
 	pw.Style().Options = StyleOptionsDefault
 	pw.Style().Visibility.Percentage = true
@@ -47,7 +53,7 @@ func trackSomething(pw Writer, tracker *Tracker) {
 
 	pw.AppendTracker(tracker)
 
-	c := time.Tick(time.Millisecond * 100)
+	c := time.Tick(trackerIncrementInterval)
 	for !tracker.IsDone() {
 		select {
 		case <-c:
@@ -67,7 +73,7 @@ func trackSomethingErrored(pw Writer, tracker *Tracker) {
 
 	pw.AppendTracker(tracker)
 
-	c := time.Tick(time.Millisecond * 100)
+	c := time.Tick(trackerIncrementInterval)
 	for !tracker.IsDone() {
 		select {
 		case <-c:
@@ -87,7 +93,7 @@ func trackSomethingIndeterminate(pw Writer, tracker *Tracker) {
 
 	pw.AppendTracker(tracker)
 
-	c := time.Tick(time.Millisecond * 100)
+	c := time.Tick(trackerIncrementInterval)
 	for !tracker.IsDone() {
 		select {
 		case <-c:
@@ -106,12 +112,12 @@ func trackSomethingIndeterminate(pw Writer, tracker *Tracker) {
 func renderAndWait(pw Writer, autoStop bool) {
 	go pw.Render()
 	go pw.Render() // this call should be a no-op
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(renderWaitTime)
 	for pw.IsRenderInProgress() {
 		if pw.LengthActive() == 0 {
 			break
 		}
-		time.Sleep(time.Millisecond * 100)
+		time.Sleep(renderWaitTime)
 	}
 	if !autoStop {
 		pw.Stop()
