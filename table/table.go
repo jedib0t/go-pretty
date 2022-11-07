@@ -568,34 +568,24 @@ func (t *Table) getMergedColumnIndices(row rowStr, hint renderHint) map[int]map[
 		return nil
 	}
 
-	rsp := make(map[int]map[int]bool)
-	appendColumnsToResponse := func(colIdx, otherColIdx int) {
-		if rsp[colIdx] == nil {
-			rsp[colIdx] = make(map[int]bool)
-		}
-		if rsp[otherColIdx] == nil {
-			rsp[otherColIdx] = make(map[int]bool)
-		}
-		rsp[colIdx][otherColIdx] = true
-		rsp[otherColIdx][colIdx] = true
-	}
+	mci := make(mergedColumnIndices)
 	for colIdx := 0; colIdx < t.numColumns-1; colIdx++ {
 		// look backward
 		for otherColIdx := colIdx - 1; colIdx >= 0 && otherColIdx >= 0; otherColIdx-- {
 			if row[colIdx] != row[otherColIdx] {
 				break
 			}
-			appendColumnsToResponse(colIdx, otherColIdx)
+			mci.safeAppend(colIdx, otherColIdx)
 		}
 		// look forward
 		for otherColIdx := colIdx + 1; colIdx < len(row) && otherColIdx < len(row); otherColIdx++ {
 			if row[colIdx] != row[otherColIdx] {
 				break
 			}
-			appendColumnsToResponse(colIdx, otherColIdx)
+			mci.safeAppend(colIdx, otherColIdx)
 		}
 	}
-	return rsp
+	return mci
 }
 
 func (t *Table) getRow(rowIdx int, hint renderHint) rowStr {
