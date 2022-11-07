@@ -377,6 +377,8 @@ func (t *Table) getBorderColors(hint renderHint) text.Colors {
 		return t.style.Color.Footer
 	} else if t.autoIndex {
 		return t.style.Color.IndexColumn
+	} else if hint.rowNumber%2 == 0 && t.style.Color.RowAlternate != nil {
+		return t.style.Color.RowAlternate
 	}
 	return t.style.Color.Row
 }
