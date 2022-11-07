@@ -16,6 +16,8 @@ func compareOutput(t *testing.T, out string, expectedOut string) {
 	}
 	assert.Equal(t, expectedOut, out)
 	if out != expectedOut {
+		fmt.Printf("Expected:\n%s\nActual:\n%s\n", expectedOut, out)
+	} else {
 		fmt.Println(out)
 	}
 }
@@ -26,6 +28,10 @@ func compareOutputColored(t *testing.T, out string, expectedOut string) {
 	}
 	assert.Equal(t, expectedOut, out)
 	if out != expectedOut {
+		fmt.Printf("Expected:\n%s\nActual:\n%s\n", expectedOut, out)
+
+		// dump formatted output that can be "pasted" into the expectation in
+		// the test in case of valid changed behavior
 		outLines := strings.Split(out, "\n")
 		fmt.Printf("\"\" +\n")
 		for idx, line := range outLines {
@@ -36,7 +42,8 @@ func compareOutputColored(t *testing.T, out string, expectedOut string) {
 			}
 			fmt.Printf("\n")
 		}
-		fmt.Printf("Expected:\n%s\nActual:\n%s\n", expectedOut, out)
+	} else {
+		fmt.Println(out)
 	}
 }
 
@@ -134,32 +141,167 @@ func TestTable_Render_AutoIndex(t *testing.T) {
 }
 
 func TestTable_Render_AutoMerge(t *testing.T) {
-	rowConfigAutoMerge := RowConfig{AutoMerge: true}
+	rcAutoMerge := RowConfig{AutoMerge: true}
 
-	tw := NewWriter()
-	tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE"}, rowConfigAutoMerge)
-	tw.AppendHeader(Row{"", "", "", "", "EXE", "RUN"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rowConfigAutoMerge)
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"}, rowConfigAutoMerge)
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"}, rowConfigAutoMerge)
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, rowConfigAutoMerge)
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"}, rowConfigAutoMerge)
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rowConfigAutoMerge)
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, rowConfigAutoMerge)
-	tw.AppendFooter(Row{"", "", "", 7, 5, 3})
-	tw.SetAutoIndex(true)
-	tw.SetColumnConfigs([]ColumnConfig{
-		{Number: 1, AutoMerge: true},
-		{Number: 2, AutoMerge: true},
-		{Number: 3, AutoMerge: true},
-		{Number: 4, AutoMerge: true},
-		{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
-		{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+	t.Run("columns only", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE\nEXE", "RCE\nRUN"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"})
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"})
+		tw.AppendFooter(Row{"", "", "", 7, 5, 3})
+		tw.SetAutoIndex(true)
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 1, AutoMerge: true},
+			{Number: 2, AutoMerge: true},
+			{Number: 3, AutoMerge: true},
+			{Number: 4, AutoMerge: true},
+			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+			{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+		})
+		tw.SetStyle(StyleLight)
+		tw.Style().Options.SeparateRows = true
+
+		compareOutput(t, tw.Render(), `
+┌───┬─────────┬────────┬───────────┬───────────┬─────┬─────┐
+│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │ RCE │ RCE │
+│   │         │        │           │           │ EXE │ RUN │
+├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
+│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │  Y  │  Y  │
+├───┤         │        │           ├───────────┼─────┼─────┤
+│ 2 │         │        │           │ C 2       │  Y  │  N  │
+├───┤         │        ├───────────┼───────────┼─────┼─────┤
+│ 3 │         │        │ NS 1B     │ C 3       │  N  │  N  │
+├───┤         ├────────┼───────────┼───────────┼─────┼─────┤
+│ 4 │         │ Pod 1B │ NS 2      │ C 4       │  N  │  N  │
+├───┤         │        │           ├───────────┼─────┼─────┤
+│ 5 │         │        │           │ C 5       │  Y  │  N  │
+├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
+│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │  Y  │  Y  │
+├───┤         │        │           ├───────────┼─────┼─────┤
+│ 7 │         │        │           │ C 7       │  Y  │  Y  │
+├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
+│   │         │        │           │ 7         │  5  │  3  │
+└───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`)
 	})
-	tw.SetStyle(StyleLight)
-	tw.Style().Options.SeparateRows = true
 
-	compareOutput(t, tw.Render(), `
+	t.Run("columns only with hidden columns", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE\nEXE", "RCE\nRUN"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "Y", "Y"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"})
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "N"})
+		tw.AppendFooter(Row{"", "", "", 7, 5, 3})
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 1, AutoMerge: true},
+			{Number: 2, AutoMerge: true},
+			{Number: 3, AutoMerge: true},
+			{Number: 4, Hidden: true},
+			{Number: 5, Hidden: true, Align: text.AlignCenter},
+			{Number: 6, Hidden: true, Align: text.AlignCenter},
+		})
+		tw.SetStyle(StyleLight)
+		tw.Style().Options.SeparateRows = true
+
+		compareOutput(t, tw.Render(), `
+┌─────────┬────────┬───────────┐
+│ NODE IP │ PODS   │ NAMESPACE │
+├─────────┼────────┼───────────┤
+│ 1.1.1.1 │ Pod 1A │ NS 1A     │
+│         │        │           │
+│         │        │           │
+│         │        ├───────────┤
+│         │        │ NS 1B     │
+│         ├────────┼───────────┤
+│         │ Pod 1B │ NS 2      │
+│         │        │           │
+│         │        │           │
+├─────────┼────────┼───────────┤
+│ 2.2.2.2 │ Pod 2  │ NS 3      │
+│         │        │           │
+│         │        │           │
+├─────────┼────────┼───────────┤
+│         │        │           │
+└─────────┴────────┴───────────┘`)
+	})
+
+	t.Run("rows only", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE"}, rcAutoMerge)
+		tw.AppendHeader(Row{"", "", "", "", "EXE", "RUN"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true, AutoMergeAlign: text.AlignRight})
+		tw.AppendFooter(Row{"", "", "", 7, 5, 3})
+		tw.SetAutoIndex(true)
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+			{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+		})
+		tw.SetStyle(StyleLight)
+		tw.Style().Options.SeparateRows = true
+
+		compareOutput(t, tw.Render(), `
+┌───┬─────────┬────────┬───────────┬───────────┬───────────┐
+│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │    RCE    │
+│   ├─────────┼────────┼───────────┼───────────┼─────┬─────┤
+│   │         │        │           │           │ EXE │ RUN │
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │     Y     │
+├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
+│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 2       │  Y  │  N  │
+├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
+│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B     │ C 3       │  N  │  N  │
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │     N     │
+├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
+│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 5       │  Y  │  N  │
+├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
+│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │     Y     │
+├───┼─────────┼────────┼───────────┼───────────┼───────────┤
+│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │         Y │
+├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
+│   │         │        │           │ 7         │  5  │  3  │
+└───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`)
+	})
+
+	t.Run("rows and columns", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE"}, rcAutoMerge)
+		tw.AppendHeader(Row{"", "", "", "", "EXE", "RUN"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, rcAutoMerge)
+		tw.AppendFooter(Row{"", "", "", 7, 5, 3})
+		tw.SetAutoIndex(true)
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 1, AutoMerge: true},
+			{Number: 2, AutoMerge: true},
+			{Number: 3, AutoMerge: true},
+			{Number: 4, AutoMerge: true},
+			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+			{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+		})
+		tw.SetStyle(StyleLight)
+		tw.Style().Options.SeparateRows = true
+
+		compareOutput(t, tw.Render(), `
 ┌───┬─────────┬────────┬───────────┬───────────┬───────────┐
 │   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │    RCE    │
 │   │         │        │           │           ├─────┬─────┤
@@ -181,37 +323,108 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 ├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
 │   │         │        │           │ 7         │  5  │  3  │
 └───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`)
-}
-
-func TestTable_Render_AutoMerge_Complex(t *testing.T) {
-	tw := NewWriter()
-	tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE", "ID"}, RowConfig{AutoMerge: true})
-	tw.AppendHeader(Row{"", "", "", "", "EXE", "RUN", ""})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y", 123}, RowConfig{AutoMerge: true})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N", 234})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N", 345})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N", 456}, RowConfig{AutoMerge: true})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N", 567})
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y", 678}, RowConfig{AutoMerge: true})
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y", 789}, RowConfig{AutoMerge: true})
-	tw.AppendFooter(Row{"", "", "", 7, 5, 5}, RowConfig{AutoMerge: true})
-	tw.AppendFooter(Row{"", "", "", 7, 5, 3}, RowConfig{AutoMerge: true})
-	tw.AppendFooter(Row{"", "", "", 7, 5, 5}, RowConfig{AutoMerge: true})
-	tw.AppendFooter(Row{"", "", "", 7, 5, 3}, RowConfig{AutoMerge: true})
-	tw.AppendFooter(Row{"", "", "", 7, 5, 5}, RowConfig{AutoMerge: true})
-	tw.SetAutoIndex(true)
-	tw.SetColumnConfigs([]ColumnConfig{
-		{Number: 1, AutoMerge: true},
-		{Number: 2, AutoMerge: true},
-		{Number: 3, AutoMerge: true},
-		{Number: 4, AutoMerge: true},
-		{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
-		{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
 	})
-	tw.SetStyle(StyleLight)
-	tw.Style().Options.SeparateRows = true
 
-	compareOutput(t, tw.Render(), `
+	t.Run("rows and columns no headers or footers", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true, AutoMergeAlign: text.AlignRight})
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 5, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
+			{Number: 6, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
+		})
+		tw.SetStyle(StyleLight)
+		tw.Style().Options.SeparateRows = true
+
+		compareOutput(t, tw.Render(), `
+┌─────────┬────────┬───────┬─────┬───────┐
+│ 1.1.1.1 │ Pod 1A │ NS 1A │ C 1 │   Y   │
+├─────────┼────────┼───────┼─────┼───┬───┤
+│ 1.1.1.1 │ Pod 1A │ NS 1A │ C 2 │ Y │ N │
+├─────────┼────────┼───────┼─────┼───┼───┤
+│ 1.1.1.1 │ Pod 1A │ NS 1B │ C 3 │ N │ N │
+├─────────┼────────┼───────┼─────┼───┴───┤
+│ 1.1.1.1 │ Pod 1B │ NS 2  │ C 4 │   N   │
+├─────────┼────────┼───────┼─────┼───┬───┤
+│ 1.1.1.1 │ Pod 1B │ NS 2  │ C 5 │ Y │ N │
+├─────────┼────────┼───────┼─────┼───┴───┤
+│ 2.2.2.2 │ Pod 2  │ NS 3  │ C 6 │   Y   │
+├─────────┼────────┼───────┼─────┼───────┤
+│ 2.2.2.2 │ Pod 2  │ NS 3  │ C 7 │     Y │
+└─────────┴────────┴───────┴─────┴───────┘`)
+	})
+
+	t.Run("rows and columns no headers or footers with auto-index", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true, AutoMergeAlign: text.AlignRight})
+		tw.SetAutoIndex(true)
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 5, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
+			{Number: 6, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
+		})
+		tw.SetStyle(StyleLight)
+		tw.Style().Options.SeparateRows = true
+
+		compareOutput(t, tw.Render(), `
+┌───┬─────────┬────────┬───────┬─────┬───┬───┐
+│   │    A    │    B   │   C   │  D  │ E │ F │
+├───┼─────────┼────────┼───────┼─────┼───┴───┤
+│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A │ C 1 │   Y   │
+├───┼─────────┼────────┼───────┼─────┼───┬───┤
+│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A │ C 2 │ Y │ N │
+├───┼─────────┼────────┼───────┼─────┼───┼───┤
+│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B │ C 3 │ N │ N │
+├───┼─────────┼────────┼───────┼─────┼───┴───┤
+│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2  │ C 4 │   N   │
+├───┼─────────┼────────┼───────┼─────┼───┬───┤
+│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2  │ C 5 │ Y │ N │
+├───┼─────────┼────────┼───────┼─────┼───┴───┤
+│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3  │ C 6 │   Y   │
+├───┼─────────┼────────┼───────┼─────┼───────┤
+│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3  │ C 7 │     Y │
+└───┴─────────┴────────┴───────┴─────┴───────┘`)
+	})
+
+	t.Run("rows and columns and footers", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE", "ID"}, rcAutoMerge)
+		tw.AppendHeader(Row{"", "", "", "", "EXE", "RUN", ""})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y", 123}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N", 234})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N", 345})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N", 456}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N", 567})
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y", 678}, rcAutoMerge)
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y", 789}, rcAutoMerge)
+		tw.AppendFooter(Row{"", "", "", 7, 5, 5}, rcAutoMerge)
+		tw.AppendFooter(Row{"", "", "", 7, 5, 3}, rcAutoMerge)
+		tw.AppendFooter(Row{"", "", "", 7, 5, 5}, rcAutoMerge)
+		tw.AppendFooter(Row{"", "", "", 7, 5, 3}, rcAutoMerge)
+		tw.AppendFooter(Row{"", "", "", 7, 5, 5}, rcAutoMerge)
+		tw.SetAutoIndex(true)
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 1, AutoMerge: true},
+			{Number: 2, AutoMerge: true},
+			{Number: 3, AutoMerge: true},
+			{Number: 4, AutoMerge: true},
+			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+			{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
+		})
+		tw.SetStyle(StyleLight)
+		tw.Style().Options.SeparateRows = true
+
+		compareOutput(t, tw.Render(), `
 ┌───┬─────────┬────────┬───────────┬───────────┬───────────┬─────┐
 │   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │    RCE    │  ID │
 │   │         │        │           │           ├─────┬─────┼─────┤
@@ -241,28 +454,28 @@ func TestTable_Render_AutoMerge_Complex(t *testing.T) {
 │   │                              │           ├─────┴─────┼─────┤
 │   │                              │           │     5     │     │
 └───┴──────────────────────────────┴───────────┴───────────┴─────┘`)
-}
-
-func TestTable_Render_AutoMerge_Complex2(t *testing.T) {
-	tw := NewWriter()
-	tw.AppendRow(Row{"1.1\n1.1", "1.2\n1.2", "1.3\n1.3", " ", "2.1\n2.1", "2.2\n2.2", "2.3\n2.3"})
-	tw.AppendRow(Row{"1.4\n1.4", "1.5\n1.5", "1.6\n1.6", " ", "2.4\n2.4", "2.5\n2.5", "2.6\n2.6"})
-	tw.AppendRow(Row{"1.7\n1.7", "1.8\n1.8", "1.9\n0.1", "0.2\n0.2", "2.7\n0.3", "2.8\n2.8", "2.9\n2.9"})
-	tw.AppendRow(Row{" ", " ", "0.4\n0.4", "0.5\n0.5", "0.6\n0.6", " ", " "}, RowConfig{AutoMerge: true})
-	tw.AppendRow(Row{"3.1\n3.1", "3.2\n3.2", "3.3\n0.7", "0.8\n0.8", "4.1\n0.9", "4.2\n4.2", "4.3\n4.3"})
-	tw.AppendRow(Row{"3.4\n3.4", "3.5\n3.5", "3.6\n3.6", " ", "4.4\n4.4", "4.5\n4.5", "4.6\n4.6"})
-	tw.AppendRow(Row{"3.7\n3.7", "3.8\n3.8", "3.9\n3.9", " ", "4.7\n4.7", "4.8\n4.8", "4.9\n4.9"})
-	tw.SetColumnConfigs([]ColumnConfig{
-		{Number: 4, AutoMerge: true},
 	})
-	tw.SetStyle(StyleLight)
-	tw.Style().Box.PaddingLeft = ""
-	tw.Style().Box.PaddingRight = ""
-	tw.Style().Options.DrawBorder = true
-	tw.Style().Options.SeparateRows = true
-	tw.Style().Options.SeparateColumns = true
 
-	compareOutput(t, tw.Render(), `
+	t.Run("samurai sudoku", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendRow(Row{"1.1\n1.1", "1.2\n1.2", "1.3\n1.3", " ", "2.1\n2.1", "2.2\n2.2", "2.3\n2.3"})
+		tw.AppendRow(Row{"1.4\n1.4", "1.5\n1.5", "1.6\n1.6", " ", "2.4\n2.4", "2.5\n2.5", "2.6\n2.6"})
+		tw.AppendRow(Row{"1.7\n1.7", "1.8\n1.8", "1.9\n0.1", "0.2\n0.2", "2.7\n0.3", "2.8\n2.8", "2.9\n2.9"})
+		tw.AppendRow(Row{" ", " ", "0.4\n0.4", "0.5\n0.5", "0.6\n0.6", " ", " "}, rcAutoMerge)
+		tw.AppendRow(Row{"3.1\n3.1", "3.2\n3.2", "3.3\n0.7", "0.8\n0.8", "4.1\n0.9", "4.2\n4.2", "4.3\n4.3"})
+		tw.AppendRow(Row{"3.4\n3.4", "3.5\n3.5", "3.6\n3.6", " ", "4.4\n4.4", "4.5\n4.5", "4.6\n4.6"})
+		tw.AppendRow(Row{"3.7\n3.7", "3.8\n3.8", "3.9\n3.9", " ", "4.7\n4.7", "4.8\n4.8", "4.9\n4.9"})
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 4, AutoMerge: true},
+		})
+		tw.SetStyle(StyleLight)
+		tw.Style().Box.PaddingLeft = ""
+		tw.Style().Box.PaddingRight = ""
+		tw.Style().Options.DrawBorder = true
+		tw.Style().Options.SeparateRows = true
+		tw.Style().Options.SeparateColumns = true
+
+		compareOutput(t, tw.Render(), `
 ┌───┬───┬───┬───┬───┬───┬───┐
 │1.1│1.2│1.3│   │2.1│2.2│2.3│
 │1.1│1.2│1.3│   │2.1│2.2│2.3│
@@ -285,217 +498,9 @@ func TestTable_Render_AutoMerge_Complex2(t *testing.T) {
 │3.7│3.8│3.9│   │4.7│4.8│4.9│
 │3.7│3.8│3.9│   │4.7│4.8│4.9│
 └───┴───┴───┴───┴───┴───┴───┘`)
-}
-
-func TestTable_Render_AutoMerge_ColumnsOnly(t *testing.T) {
-	tw := NewWriter()
-	tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE\nEXE", "RCE\nRUN"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"})
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"})
-	tw.AppendFooter(Row{"", "", "", 7, 5, 3})
-	tw.SetAutoIndex(true)
-	tw.SetColumnConfigs([]ColumnConfig{
-		{Number: 1, AutoMerge: true},
-		{Number: 2, AutoMerge: true},
-		{Number: 3, AutoMerge: true},
-		{Number: 4, AutoMerge: true},
-		{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
-		{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
 	})
-	tw.SetStyle(StyleLight)
-	tw.Style().Options.SeparateRows = true
 
-	compareOutput(t, tw.Render(), `
-┌───┬─────────┬────────┬───────────┬───────────┬─────┬─────┐
-│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │ RCE │ RCE │
-│   │         │        │           │           │ EXE │ RUN │
-├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
-│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │  Y  │  Y  │
-├───┤         │        │           ├───────────┼─────┼─────┤
-│ 2 │         │        │           │ C 2       │  Y  │  N  │
-├───┤         │        ├───────────┼───────────┼─────┼─────┤
-│ 3 │         │        │ NS 1B     │ C 3       │  N  │  N  │
-├───┤         ├────────┼───────────┼───────────┼─────┼─────┤
-│ 4 │         │ Pod 1B │ NS 2      │ C 4       │  N  │  N  │
-├───┤         │        │           ├───────────┼─────┼─────┤
-│ 5 │         │        │           │ C 5       │  Y  │  N  │
-├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
-│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │  Y  │  Y  │
-├───┤         │        │           ├───────────┼─────┼─────┤
-│ 7 │         │        │           │ C 7       │  Y  │  Y  │
-├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
-│   │         │        │           │ 7         │  5  │  3  │
-└───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`)
-}
-
-func TestTable_Render_AutoMerge_RowsOnly(t *testing.T) {
-	tw := NewWriter()
-	tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE"}, RowConfig{AutoMerge: true})
-	tw.AppendHeader(Row{"", "", "", "", "EXE", "RUN"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, RowConfig{AutoMerge: true})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, RowConfig{AutoMerge: true})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, RowConfig{AutoMerge: true})
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true, AutoMergeAlign: text.AlignRight})
-	tw.AppendFooter(Row{"", "", "", 7, 5, 3})
-	tw.SetAutoIndex(true)
-	tw.SetColumnConfigs([]ColumnConfig{
-		{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
-		{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter},
-	})
-	tw.SetStyle(StyleLight)
-	tw.Style().Options.SeparateRows = true
-
-	compareOutput(t, tw.Render(), `
-┌───┬─────────┬────────┬───────────┬───────────┬───────────┐
-│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │    RCE    │
-│   ├─────────┼────────┼───────────┼───────────┼─────┬─────┤
-│   │         │        │           │           │ EXE │ RUN │
-├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
-│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │     Y     │
-├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
-│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 2       │  Y  │  N  │
-├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
-│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B     │ C 3       │  N  │  N  │
-├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
-│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │     N     │
-├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
-│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 5       │  Y  │  N  │
-├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
-│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │     Y     │
-├───┼─────────┼────────┼───────────┼───────────┼───────────┤
-│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │         Y │
-├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
-│   │         │        │           │ 7         │  5  │  3  │
-└───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`)
-}
-
-func TestTable_Render_AutoMerge_NoHeaderFooter(t *testing.T) {
-	tw := NewWriter()
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, RowConfig{AutoMerge: true})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, RowConfig{AutoMerge: true})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, RowConfig{AutoMerge: true})
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true, AutoMergeAlign: text.AlignRight})
-	tw.SetColumnConfigs([]ColumnConfig{
-		{Number: 5, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
-		{Number: 6, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
-	})
-	tw.SetStyle(StyleLight)
-	tw.Style().Options.SeparateRows = true
-
-	compareOutput(t, tw.Render(), `
-┌─────────┬────────┬───────┬─────┬───────┐
-│ 1.1.1.1 │ Pod 1A │ NS 1A │ C 1 │   Y   │
-├─────────┼────────┼───────┼─────┼───┬───┤
-│ 1.1.1.1 │ Pod 1A │ NS 1A │ C 2 │ Y │ N │
-├─────────┼────────┼───────┼─────┼───┼───┤
-│ 1.1.1.1 │ Pod 1A │ NS 1B │ C 3 │ N │ N │
-├─────────┼────────┼───────┼─────┼───┴───┤
-│ 1.1.1.1 │ Pod 1B │ NS 2  │ C 4 │   N   │
-├─────────┼────────┼───────┼─────┼───┬───┤
-│ 1.1.1.1 │ Pod 1B │ NS 2  │ C 5 │ Y │ N │
-├─────────┼────────┼───────┼─────┼───┴───┤
-│ 2.2.2.2 │ Pod 2  │ NS 3  │ C 6 │   Y   │
-├─────────┼────────┼───────┼─────┼───────┤
-│ 2.2.2.2 │ Pod 2  │ NS 3  │ C 7 │     Y │
-└─────────┴────────┴───────┴─────┴───────┘`)
-}
-
-func TestTable_Render_AutoMerge_NoHeaderFooter_AutoIndex(t *testing.T) {
-	tw := NewWriter()
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, RowConfig{AutoMerge: true})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, RowConfig{AutoMerge: true})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, RowConfig{AutoMerge: true})
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true, AutoMergeAlign: text.AlignRight})
-	tw.SetAutoIndex(true)
-	tw.SetColumnConfigs([]ColumnConfig{
-		{Number: 5, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
-		{Number: 6, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
-	})
-	tw.SetStyle(StyleLight)
-	tw.Style().Options.SeparateRows = true
-
-	compareOutput(t, tw.Render(), `
-┌───┬─────────┬────────┬───────┬─────┬───┬───┐
-│   │    A    │    B   │   C   │  D  │ E │ F │
-├───┼─────────┼────────┼───────┼─────┼───┴───┤
-│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A │ C 1 │   Y   │
-├───┼─────────┼────────┼───────┼─────┼───┬───┤
-│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A │ C 2 │ Y │ N │
-├───┼─────────┼────────┼───────┼─────┼───┼───┤
-│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B │ C 3 │ N │ N │
-├───┼─────────┼────────┼───────┼─────┼───┴───┤
-│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2  │ C 4 │   N   │
-├───┼─────────┼────────┼───────┼─────┼───┬───┤
-│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2  │ C 5 │ Y │ N │
-├───┼─────────┼────────┼───────┼─────┼───┴───┤
-│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3  │ C 6 │   Y   │
-├───┼─────────┼────────┼───────┼─────┼───────┤
-│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3  │ C 7 │     Y │
-└───┴─────────┴────────┴───────┴─────┴───────┘`)
-}
-
-func TestTable_Render_AutoMerge_WithHiddenColumns(t *testing.T) {
-	tw := NewWriter()
-	tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE\nEXE", "RCE\nRUN"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "Y", "Y"})
-	tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"})
-	tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "N"})
-	tw.AppendFooter(Row{"", "", "", 7, 5, 3})
-	tw.SetColumnConfigs([]ColumnConfig{
-		{Number: 1, AutoMerge: true},
-		{Number: 2, AutoMerge: true},
-		{Number: 3, AutoMerge: true},
-		{Number: 4, Hidden: true},
-		{Number: 5, Hidden: true, Align: text.AlignCenter},
-		{Number: 6, Hidden: true, Align: text.AlignCenter},
-	})
-	tw.SetStyle(StyleLight)
-	tw.Style().Options.SeparateRows = true
-
-	compareOutput(t, tw.Render(), `
-┌─────────┬────────┬───────────┐
-│ NODE IP │ PODS   │ NAMESPACE │
-├─────────┼────────┼───────────┤
-│ 1.1.1.1 │ Pod 1A │ NS 1A     │
-│         │        │           │
-│         │        │           │
-│         │        ├───────────┤
-│         │        │ NS 1B     │
-│         ├────────┼───────────┤
-│         │ Pod 1B │ NS 2      │
-│         │        │           │
-│         │        │           │
-├─────────┼────────┼───────────┤
-│ 2.2.2.2 │ Pod 2  │ NS 3      │
-│         │        │           │
-│         │        │           │
-├─────────┼────────┼───────────┤
-│         │        │           │
-└─────────┴────────┴───────────┘`)
-}
-
-func TestTable_Render_AutoMerge_WithSomeColumnsCompletelyMergedCustom(t *testing.T) {
-	rcAutoMerge := RowConfig{AutoMerge: true}
-
-	t.Run("Column 5-8 with different String", func(t *testing.T) {
+	t.Run("long column no merge", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Column 1", "Column 2", "Column 3", "Column 4", "Column 5", "Column 6", "Column 7", "Column 8"}, rcAutoMerge)
 		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRW", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRH", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRY"}, rcAutoMerge)
@@ -528,40 +533,7 @@ func TestTable_Render_AutoMerge_WithSomeColumnsCompletelyMergedCustom(t *testing
 └───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────┘`)
 	})
 
-	t.Run("Column 5-8 with equal String", func(t *testing.T) {
-		tw := NewWriter()
-		tw.AppendHeader(Row{"Column 1", "Column 2", "Column 3", "Column 4", "Column 5", "Column 6", "Column 7", "Column 8"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.SetAutoIndex(true)
-		tw.SetColumnConfigs([]ColumnConfig{
-			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-			{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-			{Number: 7, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-			{Number: 8, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-		})
-		tw.SetStyle(StyleLight)
-		tw.Style().Options.SeparateRows = true
-
-		compareOutput(t, tw.Render(), `
-┌───┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┐
-│   │ COLUMN 1 │ COLUMN 2 │ COLUMN 3 │ COLUMN 4 │ COLUMN 5 │ COLUMN 6 │ COLUMN 7 │ COLUMN 8 │
-├───┼──────────┼──────────┼──────────┼──────────┼──────────┴──────────┴──────────┴──────────┤
-│ 1 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 1      │          4F8F5CB531E3D49A61CF417C         │
-│   │          │          │          │          │          D133792CCFA501FD8DA53EE3         │
-│   │          │          │          │          │          68FED20E5FE0248C3A0B64F9         │
-│   │          │          │          │          │          8A6533CEE1DA614C3A8DDEC7         │
-│   │          │          │          │          │          91FF05FEE6D971D57C134832         │
-│   │          │          │          │          │                 0F4EB42DR                 │
-├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────┤
-│ 2 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 2      │                     Y                     │
-├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────┤
-│ 3 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 2      │                     Y                     │
-└───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────┘`)
-	})
-
-	t.Run("Column 5-6 and 7-8 with equal String", func(t *testing.T) {
+	t.Run("long column partially merged #1", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Column 1", "Column 2", "Column 3", "Column 4", "Column 5", "Column 6", "Column 7", "Column 8"}, rcAutoMerge)
 		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRR"}, rcAutoMerge)
@@ -594,7 +566,7 @@ func TestTable_Render_AutoMerge_WithSomeColumnsCompletelyMergedCustom(t *testing
 └───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────────────────┘`)
 	})
 
-	t.Run("Column 5-7 with equal String, column 8 other", func(t *testing.T) {
+	t.Run("long column partially merged #2", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Column 1", "Column 2", "Column 3", "Column 4", "Column 5", "Column 6", "Column 7", "Column 8"}, rcAutoMerge)
 		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRE"}, rcAutoMerge)
@@ -627,19 +599,52 @@ func TestTable_Render_AutoMerge_WithSomeColumnsCompletelyMergedCustom(t *testing
 └───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────────────────────┘`)
 	})
 
-	t.Run("with all header columns merged", func(t *testing.T) {
+	t.Run("long column fully merged", func(t *testing.T) {
 		tw := NewWriter()
-		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE"}, RowConfig{AutoMerge: true})
-		tw.AppendHeader(Row{"", "", "", "", "EXE EXE EXE", "EXE EXE EXE"}, RowConfig{AutoMerge: true})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, RowConfig{AutoMerge: true})
+		tw.AppendHeader(Row{"Column 1", "Column 2", "Column 3", "Column 4", "Column 5", "Column 6", "Column 7", "Column 8"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.SetAutoIndex(true)
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
+			{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
+			{Number: 7, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
+			{Number: 8, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
+		})
+		tw.SetStyle(StyleLight)
+		tw.Style().Options.SeparateRows = true
+
+		compareOutput(t, tw.Render(), `
+┌───┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┐
+│   │ COLUMN 1 │ COLUMN 2 │ COLUMN 3 │ COLUMN 4 │ COLUMN 5 │ COLUMN 6 │ COLUMN 7 │ COLUMN 8 │
+├───┼──────────┼──────────┼──────────┼──────────┼──────────┴──────────┴──────────┴──────────┤
+│ 1 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 1      │          4F8F5CB531E3D49A61CF417C         │
+│   │          │          │          │          │          D133792CCFA501FD8DA53EE3         │
+│   │          │          │          │          │          68FED20E5FE0248C3A0B64F9         │
+│   │          │          │          │          │          8A6533CEE1DA614C3A8DDEC7         │
+│   │          │          │          │          │          91FF05FEE6D971D57C134832         │
+│   │          │          │          │          │                 0F4EB42DR                 │
+├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────┤
+│ 2 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 2      │                     Y                     │
+├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────┤
+│ 3 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 2      │                     Y                     │
+└───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────┘`)
+	})
+
+	t.Run("headers too", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE"}, rcAutoMerge)
+		tw.AppendHeader(Row{"", "", "", "", "EXE EXE EXE", "EXE EXE EXE"}, rcAutoMerge)
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rcAutoMerge)
 		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
 		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, RowConfig{AutoMerge: true})
+		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
 		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, RowConfig{AutoMerge: true})
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true})
-		tw.AppendFooter(Row{"", "", "", 7, 5, 3}, RowConfig{AutoMerge: true})
-		tw.AppendFooter(Row{"", "", "", 6, 4, 4}, RowConfig{AutoMerge: true})
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, rcAutoMerge)
+		tw.AppendFooter(Row{"", "", "", 7, 5, 3}, rcAutoMerge)
+		tw.AppendFooter(Row{"", "", "", 6, 4, 4}, rcAutoMerge)
 		tw.SetAutoIndex(true)
 		tw.SetColumnConfigs([]ColumnConfig{
 			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 7, WidthMaxEnforcer: text.WrapHard},
@@ -675,7 +680,7 @@ func TestTable_Render_AutoMerge_WithSomeColumnsCompletelyMergedCustom(t *testing
 └───┴──────────────────────────────┴───────────┴───────────┘`)
 	})
 
-	t.Run("with one long header column merged", func(t *testing.T) {
+	t.Run("headers and footers too", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE1", "RCE2"}, rcAutoMerge)
 		tw.AppendHeader(Row{"", "", "", "", "EXE EXE EXE", "EXE EXE EXE"}, rcAutoMerge)
@@ -723,7 +728,7 @@ func TestTable_Render_AutoMerge_WithSomeColumnsCompletelyMergedCustom(t *testing
 └───┴──────────────────────────────┴───────────┴─────────────┘`)
 	})
 
-	t.Run("with one long header column and one footer row merged", func(t *testing.T) {
+	t.Run("long header column", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE1", "RCE2", "RCE3"}, rcAutoMerge)
 		tw.AppendHeader(Row{"", "", "", "", "EXE EXE EXE", "EXE EXE EXE", "EXE EXE EXE"}, rcAutoMerge)
@@ -772,7 +777,7 @@ func TestTable_Render_AutoMerge_WithSomeColumnsCompletelyMergedCustom(t *testing
 └───┴──────────────────────────────┴───────────┴─────────────┴──────┘`)
 	})
 
-	t.Run("with a lot of merging all around", func(t *testing.T) {
+	t.Run("everything", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"COLUMNS", "COLUMNS", "COLUMNS", "COLUMNS", "COLUMNS", "COLUMNS", "COLUMNS"}, rcAutoMerge)
 		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y", "Y"}, rcAutoMerge)
@@ -819,52 +824,6 @@ func TestTable_Render_AutoMerge_WithSomeColumnsCompletelyMergedCustom(t *testing
 │   │                         7                         │
 └───┴───────────────────────────────────────────────────┘`)
 	})
-}
-
-func TestTable_Render_BiDiText(t *testing.T) {
-	table := Table{}
-	table.AppendHeader(Row{"תאריך", "סכום", "מחלקה", "תגים"})
-	table.AppendRow(Row{"2020-01-01", 5.0, "מחלקה1", []string{"תג1", "תג2"}})
-	table.AppendRow(Row{"2021-02-01", 5.0, "מחלקה1", []string{"תג1"}})
-	table.AppendRow(Row{"2022-03-01", 5.0, "מחלקה2", []string{"תג1"}})
-	table.AppendFooter(Row{"סהכ", 30})
-	table.SetAutoIndex(true)
-
-	//table.Style().Format.Direction = text.Default
-	compareOutput(t, table.Render(), `
-+---+------------+------+--------+-----------+
-|   | תאריך      | סכום | מחלקה  | תגים      |
-+---+------------+------+--------+-----------+
-| 1 | 2020-01-01 |    5 | מחלקה1 | [תג1 תג2] |
-| 2 | 2021-02-01 |    5 | מחלקה1 | [תג1]     |
-| 3 | 2022-03-01 |    5 | מחלקה2 | [תג1]     |
-+---+------------+------+--------+-----------+
-|   | סהכ        |   30 |        |           |
-+---+------------+------+--------+-----------+`)
-
-	table.Style().Format.Direction = text.LeftToRight
-	compareOutput(t, table.Render(), `
-‪+---+------------+------+--------+-----------+
-‪|   | ‪תאריך      | ‪סכום | ‪מחלקה  | ‪תגים      |
-‪+---+------------+------+--------+-----------+
-‪| 1 | ‪2020-01-01 |    ‪5 | ‪מחלקה1 | ‪[תג1 תג2] |
-‪| 2 | ‪2021-02-01 |    ‪5 | ‪מחלקה1 | ‪[תג1]     |
-‪| 3 | ‪2022-03-01 |    ‪5 | ‪מחלקה2 | ‪[תג1]     |
-‪+---+------------+------+--------+-----------+
-‪|   | ‪סהכ        |   ‪30 |        |           |
-‪+---+------------+------+--------+-----------+`)
-
-	table.Style().Format.Direction = text.RightToLeft
-	compareOutput(t, table.Render(), `
-‫+---+------------+------+--------+-----------+
-‫|   | ‫תאריך      | ‫סכום | ‫מחלקה  | ‫תגים      |
-‫+---+------------+------+--------+-----------+
-‫| 1 | ‫2020-01-01 |    ‫5 | ‫מחלקה1 | ‫[תג1 תג2] |
-‫| 2 | ‫2021-02-01 |    ‫5 | ‫מחלקה1 | ‫[תג1]     |
-‫| 3 | ‫2022-03-01 |    ‫5 | ‫מחלקה2 | ‫[תג1]     |
-‫+---+------------+------+--------+-----------+
-‫|   | ‫סהכ        |   ‫30 |        |           |
-‫+---+------------+------+--------+-----------+`)
 }
 
 func TestTable_Render_BorderAndSeparators(t *testing.T) {
@@ -983,190 +942,175 @@ func TestTable_Render_BorderAndSeparators(t *testing.T) {
 }
 
 func TestTable_Render_Colored(t *testing.T) {
-	tw := NewWriter()
-	tw.AppendHeader(testHeader)
-	tw.AppendRows(testRows)
-	tw.AppendRow(testRowMultiLine)
-	tw.AppendFooter(testFooter)
-	tw.SetAutoIndex(true)
-	tw.SetStyle(StyleColoredBright)
-	tw.Style().Options.DrawBorder = true
-	tw.Style().Options.SeparateColumns = true
-	tw.Style().Options.SeparateFooter = true
-	tw.Style().Options.SeparateHeader = true
-	tw.Style().Options.SeparateRows = true
+	t.Run("simple", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(testHeader)
+		tw.AppendRows(testRows)
+		tw.AppendRow(testRowMultiLine)
+		tw.AppendFooter(testFooter)
+		tw.SetAutoIndex(true)
+		tw.SetStyle(StyleColoredBright)
+		tw.Style().Options.DrawBorder = true
+		tw.Style().Options.SeparateColumns = true
+		tw.Style().Options.SeparateFooter = true
+		tw.Style().Options.SeparateHeader = true
+		tw.Style().Options.SeparateRows = true
 
-	compareOutputColored(t, tw.Render(), ""+
-		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m------------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m--------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m\n"+
-		"\x1b[106;30m|\x1b[0m\x1b[106;30m   \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m   # \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m FIRST NAME \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m LAST NAME \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m SALARY \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m                             \x1b[0m\x1b[106;30m|\x1b[0m\n"+
-		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m------------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m--------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m\n"+
-		"\x1b[106;30m|\x1b[0m\x1b[106;30m 1 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[107;30m   1 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Arya       \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Stark     \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m   3000 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m                             \x1b[0m\x1b[106;30m|\x1b[0m\n"+
-		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[107;30m-----\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m------------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m--------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m\n"+
-		"\x1b[106;30m|\x1b[0m\x1b[106;30m 2 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m  20 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Jon        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Snow      \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m   2000 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m You know nothing, Jon Snow! \x1b[0m\x1b[106;30m|\x1b[0m\n"+
-		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[47;30m-----\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m------------\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m-----------\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m--------\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m\n"+
-		"\x1b[106;30m|\x1b[0m\x1b[106;30m 3 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[107;30m 300 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Tyrion     \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Lannister \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m   5000 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m                             \x1b[0m\x1b[106;30m|\x1b[0m\n"+
-		"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[107;30m-----\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m------------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m--------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m\n"+
-		"\x1b[106;30m|\x1b[0m\x1b[106;30m 4 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m   0 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Winter     \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Is        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m      0 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Coming.                     \x1b[0m\x1b[106;30m|\x1b[0m\n"+
-		"\x1b[106;30m|\x1b[0m\x1b[106;30m   \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m     \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m            \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m           \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m The North Remembers!        \x1b[0m\x1b[106;30m|\x1b[0m\n"+
-		"\x1b[106;30m|\x1b[0m\x1b[106;30m   \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m     \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m            \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m           \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m This is known.              \x1b[0m\x1b[106;30m|\x1b[0m\n"+
-		"\x1b[46;30m+\x1b[0m\x1b[46;30m---\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m------------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m--------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----------------------------\x1b[0m\x1b[46;30m+\x1b[0m\n"+
-		"\x1b[46;30m|\x1b[0m\x1b[46;30m   \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m     \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m            \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m TOTAL     \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m  10000 \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m                             \x1b[0m\x1b[46;30m|\x1b[0m\n"+
-		"\x1b[46;30m+\x1b[0m\x1b[46;30m---\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m------------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m--------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----------------------------\x1b[0m\x1b[46;30m+\x1b[0m",
-	)
-}
-
-func TestTable_Render_ColoredBorders(t *testing.T) {
-	tw := NewWriter()
-	tw.AppendHeader(testHeader)
-	tw.AppendRows(testRows)
-	tw.AppendRow(testRowMultiLine)
-	tw.AppendFooter(testFooter)
-	tw.SetTitle(testTitle1)
-	tw.Style().Title.Colors = text.Colors{text.FgYellow}
-	tw.Style().Color = ColorOptions{
-		Header:       text.Colors{text.FgRed},
-		Row:          text.Colors{text.FgGreen},
-		RowAlternate: text.Colors{text.FgHiGreen},
-		Footer:       text.Colors{text.FgBlue},
-	}
-
-	compareOutputColored(t, tw.Render(), ""+
-		"\x1b[33m+\x1b[0m\x1b[33m---------------------------------------------------------------------\x1b[0m\x1b[33m+\x1b[0m\n"+
-		"\x1b[33m|\x1b[0m\x1b[33m Game of Thrones                                                     \x1b[0m\x1b[33m|\x1b[0m\n"+
-		"\x1b[31m+\x1b[0m\x1b[31m-----\x1b[0m\x1b[31m+\x1b[0m\x1b[31m------------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m-----------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m--------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m-----------------------------\x1b[0m\x1b[31m+\x1b[0m\n"+
-		"\x1b[31m|\x1b[0m\x1b[31m   # \x1b[0m\x1b[31m|\x1b[0m\x1b[31m FIRST NAME \x1b[0m\x1b[31m|\x1b[0m\x1b[31m LAST NAME \x1b[0m\x1b[31m|\x1b[0m\x1b[31m SALARY \x1b[0m\x1b[31m|\x1b[0m\x1b[31m                             \x1b[0m\x1b[31m|\x1b[0m\n"+
-		"\x1b[31m+\x1b[0m\x1b[31m-----\x1b[0m\x1b[31m+\x1b[0m\x1b[31m------------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m-----------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m--------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m-----------------------------\x1b[0m\x1b[31m+\x1b[0m\n"+
-		"\x1b[32m|\x1b[0m\x1b[32m   1 \x1b[0m\x1b[32m|\x1b[0m\x1b[32m Arya       \x1b[0m\x1b[32m|\x1b[0m\x1b[32m Stark     \x1b[0m\x1b[32m|\x1b[0m\x1b[32m   3000 \x1b[0m\x1b[32m|\x1b[0m\x1b[32m                             \x1b[0m\x1b[32m|\x1b[0m\n"+
-		"\x1b[32m|\x1b[0m\x1b[92m  20 \x1b[0m\x1b[92m|\x1b[0m\x1b[92m Jon        \x1b[0m\x1b[92m|\x1b[0m\x1b[92m Snow      \x1b[0m\x1b[92m|\x1b[0m\x1b[92m   2000 \x1b[0m\x1b[92m|\x1b[0m\x1b[92m You know nothing, Jon Snow! \x1b[0m\x1b[32m|\x1b[0m\n"+
-		"\x1b[32m|\x1b[0m\x1b[32m 300 \x1b[0m\x1b[32m|\x1b[0m\x1b[32m Tyrion     \x1b[0m\x1b[32m|\x1b[0m\x1b[32m Lannister \x1b[0m\x1b[32m|\x1b[0m\x1b[32m   5000 \x1b[0m\x1b[32m|\x1b[0m\x1b[32m                             \x1b[0m\x1b[32m|\x1b[0m\n"+
-		"\x1b[32m|\x1b[0m\x1b[92m   0 \x1b[0m\x1b[92m|\x1b[0m\x1b[92m Winter     \x1b[0m\x1b[92m|\x1b[0m\x1b[92m Is        \x1b[0m\x1b[92m|\x1b[0m\x1b[92m      0 \x1b[0m\x1b[92m|\x1b[0m\x1b[92m Coming.                     \x1b[0m\x1b[32m|\x1b[0m\n"+
-		"\x1b[32m|\x1b[0m\x1b[92m     \x1b[0m\x1b[92m|\x1b[0m\x1b[92m            \x1b[0m\x1b[92m|\x1b[0m\x1b[92m           \x1b[0m\x1b[92m|\x1b[0m\x1b[92m        \x1b[0m\x1b[92m|\x1b[0m\x1b[92m The North Remembers!        \x1b[0m\x1b[32m|\x1b[0m\n"+
-		"\x1b[32m|\x1b[0m\x1b[92m     \x1b[0m\x1b[92m|\x1b[0m\x1b[92m            \x1b[0m\x1b[92m|\x1b[0m\x1b[92m           \x1b[0m\x1b[92m|\x1b[0m\x1b[92m        \x1b[0m\x1b[92m|\x1b[0m\x1b[92m This is known.              \x1b[0m\x1b[32m|\x1b[0m\n"+
-		"\x1b[34m+\x1b[0m\x1b[34m-----\x1b[0m\x1b[34m+\x1b[0m\x1b[34m------------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m-----------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m--------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m-----------------------------\x1b[0m\x1b[34m+\x1b[0m\n"+
-		"\x1b[34m|\x1b[0m\x1b[34m     \x1b[0m\x1b[34m|\x1b[0m\x1b[34m            \x1b[0m\x1b[34m|\x1b[0m\x1b[34m TOTAL     \x1b[0m\x1b[34m|\x1b[0m\x1b[34m  10000 \x1b[0m\x1b[34m|\x1b[0m\x1b[34m                             \x1b[0m\x1b[34m|\x1b[0m\n"+
-		"\x1b[34m+\x1b[0m\x1b[34m-----\x1b[0m\x1b[34m+\x1b[0m\x1b[34m------------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m-----------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m--------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m-----------------------------\x1b[0m\x1b[34m+\x1b[0m",
-	)
-}
-
-func TestTable_Render_ColoredCustom(t *testing.T) {
-	tw := NewWriter()
-	tw.AppendHeader(testHeader)
-	tw.AppendRows(testRows)
-	tw.AppendRow(testRowMultiLine)
-	tw.AppendFooter(testFooter)
-	tw.SetCaption(testCaption)
-	tw.SetColumnConfigs([]ColumnConfig{
-		{
-			Name:         "#",
-			Colors:       testColor,
-			ColorsHeader: testColorHiRedBold,
-		}, {
-			Name:         "First Name",
-			Colors:       testColor,
-			ColorsHeader: testColorHiRedBold,
-		}, {
-			Name:         "Last Name",
-			Colors:       testColor,
-			ColorsHeader: testColorHiRedBold,
-			ColorsFooter: testColorHiBlueBold,
-		}, {
-			Name:         "Salary",
-			Colors:       testColor,
-			ColorsHeader: testColorHiRedBold,
-			ColorsFooter: testColorHiBlueBold,
-		}, {
-			Number: 5,
-			Colors: text.Colors{text.FgCyan},
-		},
+		compareOutputColored(t, tw.Render(), ""+
+			"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m------------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m--------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m\n"+
+			"\x1b[106;30m|\x1b[0m\x1b[106;30m   \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m   # \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m FIRST NAME \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m LAST NAME \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m SALARY \x1b[0m\x1b[106;30m|\x1b[0m\x1b[106;30m                             \x1b[0m\x1b[106;30m|\x1b[0m\n"+
+			"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m------------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m--------\x1b[0m\x1b[106;30m+\x1b[0m\x1b[106;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m\n"+
+			"\x1b[106;30m|\x1b[0m\x1b[106;30m 1 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[107;30m   1 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Arya       \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Stark     \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m   3000 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m                             \x1b[0m\x1b[106;30m|\x1b[0m\n"+
+			"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[107;30m-----\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m------------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m--------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m\n"+
+			"\x1b[106;30m|\x1b[0m\x1b[106;30m 2 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m  20 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Jon        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Snow      \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m   2000 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m You know nothing, Jon Snow! \x1b[0m\x1b[106;30m|\x1b[0m\n"+
+			"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[47;30m-----\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m------------\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m-----------\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m--------\x1b[0m\x1b[47;30m+\x1b[0m\x1b[47;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m\n"+
+			"\x1b[106;30m|\x1b[0m\x1b[106;30m 3 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[107;30m 300 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Tyrion     \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m Lannister \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m   5000 \x1b[0m\x1b[107;30m|\x1b[0m\x1b[107;30m                             \x1b[0m\x1b[106;30m|\x1b[0m\n"+
+			"\x1b[106;30m+\x1b[0m\x1b[106;30m---\x1b[0m\x1b[106;30m+\x1b[0m\x1b[107;30m-----\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m------------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m--------\x1b[0m\x1b[107;30m+\x1b[0m\x1b[107;30m-----------------------------\x1b[0m\x1b[106;30m+\x1b[0m\n"+
+			"\x1b[106;30m|\x1b[0m\x1b[106;30m 4 \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m   0 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Winter     \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Is        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m      0 \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m Coming.                     \x1b[0m\x1b[106;30m|\x1b[0m\n"+
+			"\x1b[106;30m|\x1b[0m\x1b[106;30m   \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m     \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m            \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m           \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m The North Remembers!        \x1b[0m\x1b[106;30m|\x1b[0m\n"+
+			"\x1b[106;30m|\x1b[0m\x1b[106;30m   \x1b[0m\x1b[106;30m|\x1b[0m\x1b[47;30m     \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m            \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m           \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m        \x1b[0m\x1b[47;30m|\x1b[0m\x1b[47;30m This is known.              \x1b[0m\x1b[106;30m|\x1b[0m\n"+
+			"\x1b[46;30m+\x1b[0m\x1b[46;30m---\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m------------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m--------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----------------------------\x1b[0m\x1b[46;30m+\x1b[0m\n"+
+			"\x1b[46;30m|\x1b[0m\x1b[46;30m   \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m     \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m            \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m TOTAL     \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m  10000 \x1b[0m\x1b[46;30m|\x1b[0m\x1b[46;30m                             \x1b[0m\x1b[46;30m|\x1b[0m\n"+
+			"\x1b[46;30m+\x1b[0m\x1b[46;30m---\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m------------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m--------\x1b[0m\x1b[46;30m+\x1b[0m\x1b[46;30m-----------------------------\x1b[0m\x1b[46;30m+\x1b[0m",
+		)
 	})
-	tw.SetStyle(StyleRounded)
 
-	compareOutputColored(t, tw.Render(), ""+
-		"╭─────┬────────────┬───────────┬────────┬─────────────────────────────╮\n"+
-		"│\x1b[91;1m   # \x1b[0m│\x1b[91;1m FIRST NAME \x1b[0m│\x1b[91;1m LAST NAME \x1b[0m│\x1b[91;1m SALARY \x1b[0m│                             │\n"+
-		"├─────┼────────────┼───────────┼────────┼─────────────────────────────┤\n"+
-		"│\x1b[32m   1 \x1b[0m│\x1b[32m Arya       \x1b[0m│\x1b[32m Stark     \x1b[0m│\x1b[32m   3000 \x1b[0m│\x1b[36m                             \x1b[0m│\n"+
-		"│\x1b[32m  20 \x1b[0m│\x1b[32m Jon        \x1b[0m│\x1b[32m Snow      \x1b[0m│\x1b[32m   2000 \x1b[0m│\x1b[36m You know nothing, Jon Snow! \x1b[0m│\n"+
-		"│\x1b[32m 300 \x1b[0m│\x1b[32m Tyrion     \x1b[0m│\x1b[32m Lannister \x1b[0m│\x1b[32m   5000 \x1b[0m│\x1b[36m                             \x1b[0m│\n"+
-		"│\x1b[32m   0 \x1b[0m│\x1b[32m Winter     \x1b[0m│\x1b[32m Is        \x1b[0m│\x1b[32m      0 \x1b[0m│\x1b[36m Coming.                     \x1b[0m│\n"+
-		"│\x1b[32m     \x1b[0m│\x1b[32m            \x1b[0m│\x1b[32m           \x1b[0m│\x1b[32m        \x1b[0m│\x1b[36m The North Remembers!        \x1b[0m│\n"+
-		"│\x1b[32m     \x1b[0m│\x1b[32m            \x1b[0m│\x1b[32m           \x1b[0m│\x1b[32m        \x1b[0m│\x1b[36m This is known.              \x1b[0m│\n"+
-		"├─────┼────────────┼───────────┼────────┼─────────────────────────────┤\n"+
-		"│     │            │\x1b[94;1m TOTAL     \x1b[0m│\x1b[94;1m  10000 \x1b[0m│                             │\n"+
-		"╰─────┴────────────┴───────────┴────────┴─────────────────────────────╯\n"+
-		"A Song of Ice and Fire",
-	)
-}
+	t.Run("with borders", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(testHeader)
+		tw.AppendRows(testRows)
+		tw.AppendRow(testRowMultiLine)
+		tw.AppendFooter(testFooter)
+		tw.SetTitle(testTitle1)
+		tw.Style().Title.Colors = text.Colors{text.FgYellow}
+		tw.Style().Color = ColorOptions{
+			Header:       text.Colors{text.FgRed},
+			Row:          text.Colors{text.FgGreen},
+			RowAlternate: text.Colors{text.FgHiGreen},
+			Footer:       text.Colors{text.FgBlue},
+		}
 
-func TestTable_Render_ColoredTableWithinATable(t *testing.T) {
-	table := Table{}
-	table.AppendHeader(testHeader)
-	table.AppendRows(testRows)
-	table.AppendFooter(testFooter)
-	table.SetStyle(StyleColoredBright)
-	table.SetIndexColumn(1)
+		compareOutputColored(t, tw.Render(), ""+
+			"\x1b[33m+\x1b[0m\x1b[33m---------------------------------------------------------------------\x1b[0m\x1b[33m+\x1b[0m\n"+
+			"\x1b[33m|\x1b[0m\x1b[33m Game of Thrones                                                     \x1b[0m\x1b[33m|\x1b[0m\n"+
+			"\x1b[31m+\x1b[0m\x1b[31m-----\x1b[0m\x1b[31m+\x1b[0m\x1b[31m------------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m-----------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m--------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m-----------------------------\x1b[0m\x1b[31m+\x1b[0m\n"+
+			"\x1b[31m|\x1b[0m\x1b[31m   # \x1b[0m\x1b[31m|\x1b[0m\x1b[31m FIRST NAME \x1b[0m\x1b[31m|\x1b[0m\x1b[31m LAST NAME \x1b[0m\x1b[31m|\x1b[0m\x1b[31m SALARY \x1b[0m\x1b[31m|\x1b[0m\x1b[31m                             \x1b[0m\x1b[31m|\x1b[0m\n"+
+			"\x1b[31m+\x1b[0m\x1b[31m-----\x1b[0m\x1b[31m+\x1b[0m\x1b[31m------------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m-----------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m--------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m-----------------------------\x1b[0m\x1b[31m+\x1b[0m\n"+
+			"\x1b[32m|\x1b[0m\x1b[32m   1 \x1b[0m\x1b[32m|\x1b[0m\x1b[32m Arya       \x1b[0m\x1b[32m|\x1b[0m\x1b[32m Stark     \x1b[0m\x1b[32m|\x1b[0m\x1b[32m   3000 \x1b[0m\x1b[32m|\x1b[0m\x1b[32m                             \x1b[0m\x1b[32m|\x1b[0m\n"+
+			"\x1b[92m|\x1b[0m\x1b[92m  20 \x1b[0m\x1b[92m|\x1b[0m\x1b[92m Jon        \x1b[0m\x1b[92m|\x1b[0m\x1b[92m Snow      \x1b[0m\x1b[92m|\x1b[0m\x1b[92m   2000 \x1b[0m\x1b[92m|\x1b[0m\x1b[92m You know nothing, Jon Snow! \x1b[0m\x1b[92m|\x1b[0m\n"+
+			"\x1b[32m|\x1b[0m\x1b[32m 300 \x1b[0m\x1b[32m|\x1b[0m\x1b[32m Tyrion     \x1b[0m\x1b[32m|\x1b[0m\x1b[32m Lannister \x1b[0m\x1b[32m|\x1b[0m\x1b[32m   5000 \x1b[0m\x1b[32m|\x1b[0m\x1b[32m                             \x1b[0m\x1b[32m|\x1b[0m\n"+
+			"\x1b[92m|\x1b[0m\x1b[92m   0 \x1b[0m\x1b[92m|\x1b[0m\x1b[92m Winter     \x1b[0m\x1b[92m|\x1b[0m\x1b[92m Is        \x1b[0m\x1b[92m|\x1b[0m\x1b[92m      0 \x1b[0m\x1b[92m|\x1b[0m\x1b[92m Coming.                     \x1b[0m\x1b[92m|\x1b[0m\n"+
+			"\x1b[92m|\x1b[0m\x1b[92m     \x1b[0m\x1b[92m|\x1b[0m\x1b[92m            \x1b[0m\x1b[92m|\x1b[0m\x1b[92m           \x1b[0m\x1b[92m|\x1b[0m\x1b[92m        \x1b[0m\x1b[92m|\x1b[0m\x1b[92m The North Remembers!        \x1b[0m\x1b[92m|\x1b[0m\n"+
+			"\x1b[92m|\x1b[0m\x1b[92m     \x1b[0m\x1b[92m|\x1b[0m\x1b[92m            \x1b[0m\x1b[92m|\x1b[0m\x1b[92m           \x1b[0m\x1b[92m|\x1b[0m\x1b[92m        \x1b[0m\x1b[92m|\x1b[0m\x1b[92m This is known.              \x1b[0m\x1b[92m|\x1b[0m\n"+
+			"\x1b[34m+\x1b[0m\x1b[34m-----\x1b[0m\x1b[34m+\x1b[0m\x1b[34m------------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m-----------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m--------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m-----------------------------\x1b[0m\x1b[34m+\x1b[0m\n"+
+			"\x1b[34m|\x1b[0m\x1b[34m     \x1b[0m\x1b[34m|\x1b[0m\x1b[34m            \x1b[0m\x1b[34m|\x1b[0m\x1b[34m TOTAL     \x1b[0m\x1b[34m|\x1b[0m\x1b[34m  10000 \x1b[0m\x1b[34m|\x1b[0m\x1b[34m                             \x1b[0m\x1b[34m|\x1b[0m\n"+
+			"\x1b[34m+\x1b[0m\x1b[34m-----\x1b[0m\x1b[34m+\x1b[0m\x1b[34m------------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m-----------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m--------\x1b[0m\x1b[34m+\x1b[0m\x1b[34m-----------------------------\x1b[0m\x1b[34m+\x1b[0m",
+		)
+	})
 
-	// colored is simple; render the colored table into another table
-	tableOuter := Table{}
-	tableOuter.AppendRow(Row{table.Render()})
-	tableOuter.SetStyle(StyleRounded)
+	t.Run("column customizations", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(testHeader)
+		tw.AppendRows(testRows)
+		tw.AppendRow(testRowMultiLine)
+		tw.AppendFooter(testFooter)
+		tw.SetCaption(testCaption)
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Name: "#", Colors: testColor, ColorsHeader: testColorHiRedBold},
+			{Name: "First Name", Colors: testColor, ColorsHeader: testColorHiRedBold},
+			{Name: "Last Name", Colors: testColor, ColorsHeader: testColorHiRedBold, ColorsFooter: testColorHiBlueBold},
+			{Name: "Salary", Colors: testColor, ColorsHeader: testColorHiRedBold, ColorsFooter: testColorHiBlueBold},
+			{Number: 5, Colors: text.Colors{text.FgCyan}},
+		})
+		tw.SetStyle(StyleRounded)
 
-	compareOutputColored(t, tableOuter.Render(), ""+
-		"╭───────────────────────────────────────────────────────────────────╮\n"+
-		"│ \x1b[106;30m   # \x1b[0m\x1b[106;30m FIRST NAME \x1b[0m\x1b[106;30m LAST NAME \x1b[0m\x1b[106;30m SALARY \x1b[0m\x1b[106;30m                             \x1b[0m │\n"+
-		"│ \x1b[106;30m   1 \x1b[0m\x1b[107;30m Arya       \x1b[0m\x1b[107;30m Stark     \x1b[0m\x1b[107;30m   3000 \x1b[0m\x1b[107;30m                             \x1b[0m │\n"+
-		"│ \x1b[106;30m  20 \x1b[0m\x1b[47;30m Jon        \x1b[0m\x1b[47;30m Snow      \x1b[0m\x1b[47;30m   2000 \x1b[0m\x1b[47;30m You know nothing, Jon Snow! \x1b[0m │\n"+
-		"│ \x1b[106;30m 300 \x1b[0m\x1b[107;30m Tyrion     \x1b[0m\x1b[107;30m Lannister \x1b[0m\x1b[107;30m   5000 \x1b[0m\x1b[107;30m                             \x1b[0m │\n"+
-		"│ \x1b[46;30m     \x1b[0m\x1b[46;30m            \x1b[0m\x1b[46;30m TOTAL     \x1b[0m\x1b[46;30m  10000 \x1b[0m\x1b[46;30m                             \x1b[0m │\n"+
-		"╰───────────────────────────────────────────────────────────────────╯",
-	)
-}
+		compareOutputColored(t, tw.Render(), ""+
+			"╭─────┬────────────┬───────────┬────────┬─────────────────────────────╮\n"+
+			"│\x1b[91;1m   # \x1b[0m│\x1b[91;1m FIRST NAME \x1b[0m│\x1b[91;1m LAST NAME \x1b[0m│\x1b[91;1m SALARY \x1b[0m│                             │\n"+
+			"├─────┼────────────┼───────────┼────────┼─────────────────────────────┤\n"+
+			"│\x1b[32m   1 \x1b[0m│\x1b[32m Arya       \x1b[0m│\x1b[32m Stark     \x1b[0m│\x1b[32m   3000 \x1b[0m│\x1b[36m                             \x1b[0m│\n"+
+			"│\x1b[32m  20 \x1b[0m│\x1b[32m Jon        \x1b[0m│\x1b[32m Snow      \x1b[0m│\x1b[32m   2000 \x1b[0m│\x1b[36m You know nothing, Jon Snow! \x1b[0m│\n"+
+			"│\x1b[32m 300 \x1b[0m│\x1b[32m Tyrion     \x1b[0m│\x1b[32m Lannister \x1b[0m│\x1b[32m   5000 \x1b[0m│\x1b[36m                             \x1b[0m│\n"+
+			"│\x1b[32m   0 \x1b[0m│\x1b[32m Winter     \x1b[0m│\x1b[32m Is        \x1b[0m│\x1b[32m      0 \x1b[0m│\x1b[36m Coming.                     \x1b[0m│\n"+
+			"│\x1b[32m     \x1b[0m│\x1b[32m            \x1b[0m│\x1b[32m           \x1b[0m│\x1b[32m        \x1b[0m│\x1b[36m The North Remembers!        \x1b[0m│\n"+
+			"│\x1b[32m     \x1b[0m│\x1b[32m            \x1b[0m│\x1b[32m           \x1b[0m│\x1b[32m        \x1b[0m│\x1b[36m This is known.              \x1b[0m│\n"+
+			"├─────┼────────────┼───────────┼────────┼─────────────────────────────┤\n"+
+			"│     │            │\x1b[94;1m TOTAL     \x1b[0m│\x1b[94;1m  10000 \x1b[0m│                             │\n"+
+			"╰─────┴────────────┴───────────┴────────┴─────────────────────────────╯\n"+
+			"A Song of Ice and Fire",
+		)
+	})
 
-func TestTable_Render_ColoredTableWithinAColoredTable(t *testing.T) {
-	table := Table{}
-	table.AppendHeader(testHeader)
-	table.AppendRows(testRows)
-	table.AppendFooter(testFooter)
-	table.SetStyle(StyleColoredBright)
-	table.SetIndexColumn(1)
+	t.Run("colored table within table", func(t *testing.T) {
+		table := Table{}
+		table.AppendHeader(testHeader)
+		table.AppendRows(testRows)
+		table.AppendFooter(testFooter)
+		table.SetStyle(StyleColoredBright)
+		table.SetIndexColumn(1)
 
-	// colored is simple; render the colored table into another colored table
-	tableOuter := Table{}
-	tableOuter.AppendHeader(Row{"Colored Table within a Colored Table"})
-	tableOuter.AppendRow(Row{"\n" + table.Render() + "\n"})
-	tableOuter.SetColumnConfigs([]ColumnConfig{{Number: 1, AlignHeader: text.AlignCenter}})
-	tableOuter.SetStyle(StyleColoredBright)
+		// colored is simple; render the colored table into another table
+		tableOuter := Table{}
+		tableOuter.AppendRow(Row{table.Render()})
+		tableOuter.SetStyle(StyleRounded)
 
-	compareOutputColored(t, tableOuter.Render(), ""+
-		"\x1b[106;30m                COLORED TABLE WITHIN A COLORED TABLE               \x1b[0m\n"+
-		"\x1b[107;30m                                                                   \x1b[0m\n"+
-		"\x1b[107;30m \x1b[106;30m   # \x1b[0m\x1b[107;30m\x1b[106;30m FIRST NAME \x1b[0m\x1b[107;30m\x1b[106;30m LAST NAME \x1b[0m\x1b[107;30m\x1b[106;30m SALARY \x1b[0m\x1b[107;30m\x1b[106;30m                             \x1b[0m\x1b[107;30m \x1b[0m\n"+
-		"\x1b[107;30m \x1b[106;30m   1 \x1b[0m\x1b[107;30m\x1b[107;30m Arya       \x1b[0m\x1b[107;30m\x1b[107;30m Stark     \x1b[0m\x1b[107;30m\x1b[107;30m   3000 \x1b[0m\x1b[107;30m\x1b[107;30m                             \x1b[0m\x1b[107;30m \x1b[0m\n"+
-		"\x1b[107;30m \x1b[106;30m  20 \x1b[0m\x1b[107;30m\x1b[47;30m Jon        \x1b[0m\x1b[107;30m\x1b[47;30m Snow      \x1b[0m\x1b[107;30m\x1b[47;30m   2000 \x1b[0m\x1b[107;30m\x1b[47;30m You know nothing, Jon Snow! \x1b[0m\x1b[107;30m \x1b[0m\n"+
-		"\x1b[107;30m \x1b[106;30m 300 \x1b[0m\x1b[107;30m\x1b[107;30m Tyrion     \x1b[0m\x1b[107;30m\x1b[107;30m Lannister \x1b[0m\x1b[107;30m\x1b[107;30m   5000 \x1b[0m\x1b[107;30m\x1b[107;30m                             \x1b[0m\x1b[107;30m \x1b[0m\n"+
-		"\x1b[107;30m \x1b[46;30m     \x1b[0m\x1b[107;30m\x1b[46;30m            \x1b[0m\x1b[107;30m\x1b[46;30m TOTAL     \x1b[0m\x1b[107;30m\x1b[46;30m  10000 \x1b[0m\x1b[107;30m\x1b[46;30m                             \x1b[0m\x1b[107;30m \x1b[0m\n"+
-		"\x1b[107;30m                                                                   \x1b[0m",
-	)
-}
+		compareOutputColored(t, tableOuter.Render(), ""+
+			"╭───────────────────────────────────────────────────────────────────╮\n"+
+			"│ \x1b[106;30m   # \x1b[0m\x1b[106;30m FIRST NAME \x1b[0m\x1b[106;30m LAST NAME \x1b[0m\x1b[106;30m SALARY \x1b[0m\x1b[106;30m                             \x1b[0m │\n"+
+			"│ \x1b[106;30m   1 \x1b[0m\x1b[107;30m Arya       \x1b[0m\x1b[107;30m Stark     \x1b[0m\x1b[107;30m   3000 \x1b[0m\x1b[107;30m                             \x1b[0m │\n"+
+			"│ \x1b[106;30m  20 \x1b[0m\x1b[47;30m Jon        \x1b[0m\x1b[47;30m Snow      \x1b[0m\x1b[47;30m   2000 \x1b[0m\x1b[47;30m You know nothing, Jon Snow! \x1b[0m │\n"+
+			"│ \x1b[106;30m 300 \x1b[0m\x1b[107;30m Tyrion     \x1b[0m\x1b[107;30m Lannister \x1b[0m\x1b[107;30m   5000 \x1b[0m\x1b[107;30m                             \x1b[0m │\n"+
+			"│ \x1b[46;30m     \x1b[0m\x1b[46;30m            \x1b[0m\x1b[46;30m TOTAL     \x1b[0m\x1b[46;30m  10000 \x1b[0m\x1b[46;30m                             \x1b[0m │\n"+
+			"╰───────────────────────────────────────────────────────────────────╯",
+		)
+	})
 
-func TestTable_Render_ColoredStyleAutoIndex(t *testing.T) {
-	table := Table{}
-	table.AppendHeader(testHeader)
-	table.AppendRows(testRows)
-	table.AppendFooter(testFooter)
-	table.SetAutoIndex(true)
-	table.SetStyle(StyleColoredDark)
-	table.SetTitle(testTitle2)
+	t.Run("colored table within colored table", func(t *testing.T) {
+		table := Table{}
+		table.AppendHeader(testHeader)
+		table.AppendRows(testRows)
+		table.AppendFooter(testFooter)
+		table.SetStyle(StyleColoredBright)
+		table.SetIndexColumn(1)
 
-	compareOutputColored(t, table.Render(), ""+
-		"\x1b[106;30;1m When you play the Game of Thrones, you win or you die. There is no \x1b[0m\n"+
-		"\x1b[106;30;1m middle ground.                                                     \x1b[0m\n"+
-		"\x1b[96;100m   \x1b[0m\x1b[96;100m   # \x1b[0m\x1b[96;100m FIRST NAME \x1b[0m\x1b[96;100m LAST NAME \x1b[0m\x1b[96;100m SALARY \x1b[0m\x1b[96;100m                             \x1b[0m\n"+
-		"\x1b[96;100m 1 \x1b[0m\x1b[97;40m   1 \x1b[0m\x1b[97;40m Arya       \x1b[0m\x1b[97;40m Stark     \x1b[0m\x1b[97;40m   3000 \x1b[0m\x1b[97;40m                             \x1b[0m\n"+
-		"\x1b[96;100m 2 \x1b[0m\x1b[37;40m  20 \x1b[0m\x1b[37;40m Jon        \x1b[0m\x1b[37;40m Snow      \x1b[0m\x1b[37;40m   2000 \x1b[0m\x1b[37;40m You know nothing, Jon Snow! \x1b[0m\n"+
-		"\x1b[96;100m 3 \x1b[0m\x1b[97;40m 300 \x1b[0m\x1b[97;40m Tyrion     \x1b[0m\x1b[97;40m Lannister \x1b[0m\x1b[97;40m   5000 \x1b[0m\x1b[97;40m                             \x1b[0m\n"+
-		"\x1b[36;100m   \x1b[0m\x1b[36;100m     \x1b[0m\x1b[36;100m            \x1b[0m\x1b[36;100m TOTAL     \x1b[0m\x1b[36;100m  10000 \x1b[0m\x1b[36;100m                             \x1b[0m",
-	)
+		// colored is simple; render the colored table into another colored table
+		tableOuter := Table{}
+		tableOuter.AppendHeader(Row{"Colored Table within a Colored Table"})
+		tableOuter.AppendRow(Row{"\n" + table.Render() + "\n"})
+		tableOuter.SetColumnConfigs([]ColumnConfig{{Number: 1, AlignHeader: text.AlignCenter}})
+		tableOuter.SetStyle(StyleColoredBright)
+
+		compareOutputColored(t, tableOuter.Render(), ""+
+			"\x1b[106;30m                COLORED TABLE WITHIN A COLORED TABLE               \x1b[0m\n"+
+			"\x1b[107;30m                                                                   \x1b[0m\n"+
+			"\x1b[107;30m \x1b[106;30m   # \x1b[0m\x1b[107;30m\x1b[106;30m FIRST NAME \x1b[0m\x1b[107;30m\x1b[106;30m LAST NAME \x1b[0m\x1b[107;30m\x1b[106;30m SALARY \x1b[0m\x1b[107;30m\x1b[106;30m                             \x1b[0m\x1b[107;30m \x1b[0m\n"+
+			"\x1b[107;30m \x1b[106;30m   1 \x1b[0m\x1b[107;30m\x1b[107;30m Arya       \x1b[0m\x1b[107;30m\x1b[107;30m Stark     \x1b[0m\x1b[107;30m\x1b[107;30m   3000 \x1b[0m\x1b[107;30m\x1b[107;30m                             \x1b[0m\x1b[107;30m \x1b[0m\n"+
+			"\x1b[107;30m \x1b[106;30m  20 \x1b[0m\x1b[107;30m\x1b[47;30m Jon        \x1b[0m\x1b[107;30m\x1b[47;30m Snow      \x1b[0m\x1b[107;30m\x1b[47;30m   2000 \x1b[0m\x1b[107;30m\x1b[47;30m You know nothing, Jon Snow! \x1b[0m\x1b[107;30m \x1b[0m\n"+
+			"\x1b[107;30m \x1b[106;30m 300 \x1b[0m\x1b[107;30m\x1b[107;30m Tyrion     \x1b[0m\x1b[107;30m\x1b[107;30m Lannister \x1b[0m\x1b[107;30m\x1b[107;30m   5000 \x1b[0m\x1b[107;30m\x1b[107;30m                             \x1b[0m\x1b[107;30m \x1b[0m\n"+
+			"\x1b[107;30m \x1b[46;30m     \x1b[0m\x1b[107;30m\x1b[46;30m            \x1b[0m\x1b[107;30m\x1b[46;30m TOTAL     \x1b[0m\x1b[107;30m\x1b[46;30m  10000 \x1b[0m\x1b[107;30m\x1b[46;30m                             \x1b[0m\x1b[107;30m \x1b[0m\n"+
+			"\x1b[107;30m                                                                   \x1b[0m",
+		)
+	})
+
+	t.Run("colored table with auto-index", func(t *testing.T) {
+		table := Table{}
+		table.AppendHeader(testHeader)
+		table.AppendRows(testRows)
+		table.AppendFooter(testFooter)
+		table.SetAutoIndex(true)
+		table.SetStyle(StyleColoredDark)
+		table.SetTitle(testTitle2)
+
+		compareOutputColored(t, table.Render(), ""+
+			"\x1b[106;30;1m When you play the Game of Thrones, you win or you die. There is no \x1b[0m\n"+
+			"\x1b[106;30;1m middle ground.                                                     \x1b[0m\n"+
+			"\x1b[96;100m   \x1b[0m\x1b[96;100m   # \x1b[0m\x1b[96;100m FIRST NAME \x1b[0m\x1b[96;100m LAST NAME \x1b[0m\x1b[96;100m SALARY \x1b[0m\x1b[96;100m                             \x1b[0m\n"+
+			"\x1b[96;100m 1 \x1b[0m\x1b[97;40m   1 \x1b[0m\x1b[97;40m Arya       \x1b[0m\x1b[97;40m Stark     \x1b[0m\x1b[97;40m   3000 \x1b[0m\x1b[97;40m                             \x1b[0m\n"+
+			"\x1b[96;100m 2 \x1b[0m\x1b[37;40m  20 \x1b[0m\x1b[37;40m Jon        \x1b[0m\x1b[37;40m Snow      \x1b[0m\x1b[37;40m   2000 \x1b[0m\x1b[37;40m You know nothing, Jon Snow! \x1b[0m\n"+
+			"\x1b[96;100m 3 \x1b[0m\x1b[97;40m 300 \x1b[0m\x1b[97;40m Tyrion     \x1b[0m\x1b[97;40m Lannister \x1b[0m\x1b[97;40m   5000 \x1b[0m\x1b[97;40m                             \x1b[0m\n"+
+			"\x1b[36;100m   \x1b[0m\x1b[36;100m     \x1b[0m\x1b[36;100m            \x1b[0m\x1b[36;100m TOTAL     \x1b[0m\x1b[36;100m  10000 \x1b[0m\x1b[36;100m                             \x1b[0m",
+		)
+	})
 }
 
 func TestTable_Render_ColumnConfigs(t *testing.T) {

@@ -377,17 +377,6 @@ func (p *Progress) renderTrackerStatsSpeed(out *strings.Builder, t *Tracker, hin
 	}
 
 	speedPrecision := p.style.Options.SpeedPrecision
-	writeSpeed := func(speed string) {
-		if p.style.Options.SpeedPosition == PositionRight {
-			out.WriteString("; ")
-		}
-		out.WriteString(p.style.Colors.Speed.Sprint(speed))
-		out.WriteString(p.style.Options.SpeedSuffix)
-		if p.style.Options.SpeedPosition == PositionLeft {
-			out.WriteString("; ")
-		}
-	}
-
 	if hint.isOverallTracker {
 		speed := float64(0)
 
@@ -398,13 +387,24 @@ func (p *Progress) renderTrackerStatsSpeed(out *strings.Builder, t *Tracker, hin
 		p.trackersActiveMutex.RUnlock()
 
 		if speed > 0 {
-			writeSpeed(p.style.Options.SpeedOverallFormatter(int64(speed)))
+			p.renderTrackerStatsSpeedInternal(out, p.style.Options.SpeedOverallFormatter(int64(speed)))
 		}
 	} else {
 		timeTaken := time.Since(t.timeStart)
 		if timeTakenRounded := timeTaken.Round(speedPrecision); timeTakenRounded > speedPrecision {
-			writeSpeed(t.Units.Sprint(int64(float64(t.Value()) / timeTakenRounded.Seconds())))
+			p.renderTrackerStatsSpeedInternal(out, t.Units.Sprint(int64(float64(t.Value())/timeTakenRounded.Seconds())))
 		}
+	}
+}
+
+func (p *Progress) renderTrackerStatsSpeedInternal(out *strings.Builder, speed string) {
+	if p.style.Options.SpeedPosition == PositionRight {
+		out.WriteString("; ")
+	}
+	out.WriteString(p.style.Colors.Speed.Sprint(speed))
+	out.WriteString(p.style.Options.SpeedSuffix)
+	if p.style.Options.SpeedPosition == PositionLeft {
+		out.WriteString("; ")
 	}
 }
 
