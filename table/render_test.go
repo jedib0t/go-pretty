@@ -16,6 +16,8 @@ func compareOutput(t *testing.T, out string, expectedOut string) {
 	}
 	assert.Equal(t, expectedOut, out)
 	if out != expectedOut {
+		fmt.Printf("Expected:\n%s\nActual:\n%s\n", expectedOut, out)
+	} else {
 		fmt.Println(out)
 	}
 }
@@ -26,6 +28,10 @@ func compareOutputColored(t *testing.T, out string, expectedOut string) {
 	}
 	assert.Equal(t, expectedOut, out)
 	if out != expectedOut {
+		fmt.Printf("Expected:\n%s\nActual:\n%s\n", expectedOut, out)
+
+		// dump formatted output that can be "pasted" into the expectation in
+		// the test in case of valid changed behavior
 		outLines := strings.Split(out, "\n")
 		fmt.Printf("\"\" +\n")
 		for idx, line := range outLines {
@@ -36,7 +42,8 @@ func compareOutputColored(t *testing.T, out string, expectedOut string) {
 			}
 			fmt.Printf("\n")
 		}
-		fmt.Printf("Expected:\n%s\nActual:\n%s\n", expectedOut, out)
+	} else {
+		fmt.Println(out)
 	}
 }
 

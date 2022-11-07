@@ -37,6 +37,9 @@ Pretty-print tables into ASCII/Unicode strings.
     - HTML Table (with custom CSS Class)
     - Markdown Table
 
+**Helpful Hint**: I've tried to ensure that almost all supported use-cases are
+covered by unit-tests. Run `go test -v ./table` for outputs to help you figure
+out how to do something.
 
 ```
 +---------------------------------------------------------------------+
