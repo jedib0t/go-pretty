@@ -184,3 +184,20 @@ func TestTracker_UpdateMessage(t *testing.T) {
 	tracker.UpdateMessage("bar")
 	assert.Equal(t, "bar", tracker.message())
 }
+
+func TestTracker_UpdateTotal(t *testing.T) {
+	tracker := Tracker{Total: 100}
+	assert.False(t, tracker.IsDone())
+	tracker.SetValue(100)
+	assert.True(t, tracker.IsDone())
+
+	tracker.UpdateTotal(101)
+	assert.False(t, tracker.IsDone())
+	tracker.SetValue(101)
+	assert.True(t, tracker.IsDone())
+
+	tracker.UpdateTotal(100)
+	assert.True(t, tracker.IsDone())
+	tracker.SetValue(100)
+	assert.True(t, tracker.IsDone())
+}

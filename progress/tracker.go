@@ -158,6 +158,16 @@ func (t *Tracker) UpdateMessage(msg string) {
 	t.mutex.Unlock()
 }
 
+// UpdateTotal updates the total value.
+func (t *Tracker) UpdateTotal(total int64) {
+	t.mutex.Lock()
+	if total > t.Total {
+		t.done = false
+	}
+	t.Total = total
+	t.mutex.Unlock()
+}
+
 // Value returns the current value of the tracker.
 func (t *Tracker) Value() int64 {
 	t.mutex.RLock()
