@@ -68,8 +68,9 @@ const (
 // cycle.
 func (p *Progress) AppendTracker(t *Tracker) {
 	t.start()
-
 	p.overallTrackerMutex.Lock()
+	defer p.overallTrackerMutex.Unlock()
+
 	if p.overallTracker == nil {
 		p.overallTracker = &Tracker{Total: 1}
 		if p.numTrackersExpected > 0 {
@@ -78,23 +79,13 @@ func (p *Progress) AppendTracker(t *Tracker) {
 		p.overallTracker.start()
 	}
 
-	// corner case: overall tracker is done, but new tracker is being added. We should recover it.
-	// issue: #245
-	if p.overallTracker.IsDone() {
-		p.overallTracker.mutex.Lock()
-		p.overallTracker.done = false
-		p.overallTracker.mutex.Unlock()
-	}
-
+	// append the tracker to the "in-queue" list
 	p.trackersInQueueMutex.Lock()
 	p.trackersInQueue = append(p.trackersInQueue, t)
 	p.trackersInQueueMutex.Unlock()
-	p.overallTracker.mutex.Lock()
-	if p.overallTracker.Total < int64(p.Length())*100 {
-		p.overallTracker.Total = int64(p.Length()) * 100
-	}
-	p.overallTracker.mutex.Unlock()
-	p.overallTrackerMutex.Unlock()
+
+	// update the expected total progress since we are appending a new tracker
+	p.overallTracker.UpdateTotal(int64(p.Length()) * 100)
 }
 
 // AppendTrackers appends one or more Trackers for tracking.
