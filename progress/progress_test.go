@@ -238,3 +238,11 @@ func TestProgress_Style(t *testing.T) {
 	assert.NotNil(t, p.Style())
 	assert.Equal(t, StyleDefault.Name, p.Style().Name)
 }
+
+func TestProgress_OverallTrackerDisappearsCase(t *testing.T) {
+	p := &Progress{}
+	p.overallTracker = &Tracker{Total: 1, done: true}
+	p.AppendTracker(&Tracker{Total: 1})
+
+	assert.Equal(t, false, p.overallTracker.IsDone())
+}

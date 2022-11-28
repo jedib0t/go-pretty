@@ -77,6 +77,15 @@ func (p *Progress) AppendTracker(t *Tracker) {
 		}
 		p.overallTracker.start()
 	}
+
+	// corner case: overall tracker is done, but new tracker is being added. We should recover it.
+	// issue: #245
+	if p.overallTracker.IsDone() {
+		p.overallTracker.mutex.Lock()
+		p.overallTracker.done = false
+		p.overallTracker.mutex.Unlock()
+	}
+
 	p.trackersInQueueMutex.Lock()
 	p.trackersInQueue = append(p.trackersInQueue, t)
 	p.trackersInQueueMutex.Unlock()
