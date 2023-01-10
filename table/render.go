@@ -143,8 +143,6 @@ func (t *Table) renderColumnColorized(out *strings.Builder, colIdx int, colStr s
 	colors := t.getColumnColors(colIdx, hint)
 	if colors != nil {
 		out.WriteString(colors.Sprint(colStr))
-	} else if hint.isBorderOrSeparator() && t.style.Options.DoNotColorBordersAndSeparators {
-		out.WriteString(colStr)
 	} else if hint.isHeaderRow && t.style.Color.Header != nil {
 		out.WriteString(t.style.Color.Header.Sprint(colStr))
 	} else if hint.isFooterRow && t.style.Color.Footer != nil {

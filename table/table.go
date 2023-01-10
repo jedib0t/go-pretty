@@ -383,8 +383,8 @@ func (t *Table) getBorderRight(hint renderHint) string {
 }
 
 func (t *Table) getColumnColors(colIdx int, hint renderHint) text.Colors {
-	if t.style.Options.DoNotColorBordersAndSeparators {
-		return nil
+	if hint.isBorderOrSeparator() && t.style.Options.DoNotColorBordersAndSeparators {
+		return text.Colors{} // not nil to force caller to paint with no colors
 	}
 	if t.rowPainter != nil && hint.isRegularNonSeparatorRow() && !t.isIndexColumn(colIdx, hint) {
 		colors := t.rowsColors[hint.rowNumber-1]
