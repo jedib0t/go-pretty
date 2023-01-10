@@ -1008,6 +1008,40 @@ func TestTable_Render_Colored(t *testing.T) {
 		)
 	})
 
+	t.Run("with borders and separators not colored", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(testHeader)
+		tw.AppendRows(testRows)
+		tw.AppendRow(testRowMultiLine)
+		tw.AppendFooter(testFooter)
+		tw.SetTitle(testTitle1)
+		tw.Style().Title.Colors = text.Colors{text.FgYellow}
+		tw.Style().Color = ColorOptions{
+			Header:       text.Colors{text.FgRed},
+			Row:          text.Colors{text.FgGreen},
+			RowAlternate: text.Colors{text.FgHiGreen},
+			Footer:       text.Colors{text.FgBlue},
+		}
+		tw.Style().Options.DoNotColorBordersAndSeparators = true
+
+		compareOutputColored(t, tw.Render(), ""+
+			"+---------------------------------------------------------------------+\n"+
+			"|\x1b[33m Game of Thrones                                                     \x1b[0m|\n"+
+			"+-----+------------+-----------+--------+-----------------------------+\n"+
+			"|\x1b[31m   # \x1b[0m|\x1b[31m FIRST NAME \x1b[0m|\x1b[31m LAST NAME \x1b[0m|\x1b[31m SALARY \x1b[0m|\x1b[31m                             \x1b[0m|\n"+
+			"+-----+------------+-----------+--------+-----------------------------+\n"+
+			"|\x1b[32m   1 \x1b[0m|\x1b[32m Arya       \x1b[0m|\x1b[32m Stark     \x1b[0m|\x1b[32m   3000 \x1b[0m|\x1b[32m                             \x1b[0m|\n"+
+			"|\x1b[92m  20 \x1b[0m|\x1b[92m Jon        \x1b[0m|\x1b[92m Snow      \x1b[0m|\x1b[92m   2000 \x1b[0m|\x1b[92m You know nothing, Jon Snow! \x1b[0m|\n"+
+			"|\x1b[32m 300 \x1b[0m|\x1b[32m Tyrion     \x1b[0m|\x1b[32m Lannister \x1b[0m|\x1b[32m   5000 \x1b[0m|\x1b[32m                             \x1b[0m|\n"+
+			"|\x1b[92m   0 \x1b[0m|\x1b[92m Winter     \x1b[0m|\x1b[92m Is        \x1b[0m|\x1b[92m      0 \x1b[0m|\x1b[92m Coming.                     \x1b[0m|\n"+
+			"|\x1b[92m     \x1b[0m|\x1b[92m            \x1b[0m|\x1b[92m           \x1b[0m|\x1b[92m        \x1b[0m|\x1b[92m The North Remembers!        \x1b[0m|\n"+
+			"|\x1b[92m     \x1b[0m|\x1b[92m            \x1b[0m|\x1b[92m           \x1b[0m|\x1b[92m        \x1b[0m|\x1b[92m This is known.              \x1b[0m|\n"+
+			"+-----+------------+-----------+--------+-----------------------------+\n"+
+			"|\x1b[34m     \x1b[0m|\x1b[34m            \x1b[0m|\x1b[34m TOTAL     \x1b[0m|\x1b[34m  10000 \x1b[0m|\x1b[34m                             \x1b[0m|\n"+
+			"+-----+------------+-----------+--------+-----------------------------+",
+		)
+	})
+
 	t.Run("column customizations", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(testHeader)
