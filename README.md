@@ -37,7 +37,9 @@ Pretty-print tables in a terminal with colors, nested tables and more.
 +-----+------------+-----------+--------+-----------------------------+
 ```
 
-<img src="table/images/table-StyleColoredBright.png" alt="Table with Colors in a Terminal"/>
+Execute `go run github.com/jedib0t/go-pretty/v6/cmd/demo-table colors` to get:
+
+<img src="cmd/demo-table/demo-colors.png" alt="Tables with Colors within a Table in a Terminal"/>
 
 More details can be found here: [table/](table)
 
