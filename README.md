@@ -37,7 +37,7 @@ Pretty-print tables in a terminal with colors, nested tables and more.
 +-----+------------+-----------+--------+-----------------------------+
 ```
 
-Execute `go run github.com/jedib0t/go-pretty/v6/cmd/demo-table colors` to get:
+Execute `go run github.com/jedib0t/go-pretty/v6/cmd/demo-table@latest colors` to get:
 
 <img src="cmd/demo-table/demo-colors.png" alt="Tables with Colors within a Table in a Terminal"/>
 
