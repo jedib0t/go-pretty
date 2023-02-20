@@ -9,11 +9,13 @@ import (
 
 // Constants
 const (
-	EscapeReset     = EscapeStart + "0" + EscapeStop
-	EscapeStart     = "\x1b["
-	EscapeStartRune = rune(27) // \x1b
-	EscapeStop      = "m"
-	EscapeStopRune  = 'm'
+	EscapeReset       = EscapeStart + "0" + EscapeStop
+	EscapeStart       = "\x1b["
+	EscapeStartAlt    = "\x1b]8"
+	EscapeStartRune   = rune(27) // \x1b
+	EscapeStop        = "m"
+	EscapeStopRune    = 'm'
+	EscapeStopRuneAlt = '\\'
 )
 
 // RuneWidth stuff
@@ -35,22 +37,27 @@ func InsertEveryN(str string, runeToInsert rune, n int) string {
 	sLen := RuneWidthWithoutEscSequences(str)
 	var out strings.Builder
 	out.Grow(sLen + (sLen / n))
-	outLen, isEscSeq := 0, false
+	outLen, isEscSeq, isEscSeqAlt := 0, false, false
 	for idx, c := range str {
-		if c == EscapeStartRune {
-			isEscSeq = true
+		if !isEscSeqAlt && c == EscapeStartRune {
+			if (idx+len(EscapeStartAlt) <= utf8.RuneCountInString(str)) && (str[idx:idx+len(EscapeStartAlt)] == EscapeStartAlt) {
+				isEscSeqAlt = true
+			} else {
+				isEscSeq = true
+			}
 		}
 
-		if !isEscSeq && outLen > 0 && (outLen%n) == 0 && idx != sLen {
+		if !isEscSeq && !isEscSeqAlt && outLen > 0 && (outLen%n) == 0 && idx != sLen {
 			out.WriteRune(runeToInsert)
 		}
 		out.WriteRune(c)
-		if !isEscSeq {
+		if !isEscSeq && !isEscSeqAlt {
 			outLen += RuneWidth(c)
 		}
 
-		if isEscSeq && c == EscapeStopRune {
+		if (isEscSeq && c == EscapeStopRune) || (isEscSeqAlt && c == EscapeStopRuneAlt) {
 			isEscSeq = false
+			isEscSeqAlt = false
 		}
 	}
 	return out.String()
@@ -60,12 +67,17 @@ func InsertEveryN(str string, runeToInsert rune, n int) string {
 // argument string. For ex.:
 //  LongestLineLen("Ghost!\nCome back here!\nRight now!") == 15
 func LongestLineLen(str string) int {
-	maxLength, currLength, isEscSeq := 0, 0, false
-	for _, c := range str {
-		if c == EscapeStartRune {
-			isEscSeq = true
-		} else if isEscSeq && c == EscapeStopRune {
+	maxLength, currLength, isEscSeq, isEscSeqAlt := 0, 0, false, false
+	for idx, c := range str {
+		if !isEscSeqAlt && c == EscapeStartRune {
+			if (idx+len(EscapeStartAlt) <= utf8.RuneCountInString(str)) && (str[idx:idx+len(EscapeStartAlt)] == EscapeStartAlt) {
+				isEscSeqAlt = true
+			} else {
+				isEscSeq = true
+			}
+		} else if (isEscSeq && c == EscapeStopRune) || (isEscSeqAlt && c == EscapeStopRuneAlt) {
 			isEscSeq = false
+			isEscSeqAlt = false
 			continue
 		}
 
@@ -74,7 +86,7 @@ func LongestLineLen(str string) int {
 				maxLength = currLength
 			}
 			currLength = 0
-		} else if !isEscSeq {
+		} else if !isEscSeq && !isEscSeqAlt {
 			currLength += RuneWidth(c)
 		}
 	}
@@ -164,13 +176,21 @@ func RuneWidth(r rune) int {
 //  RuneWidthWithoutEscSequences("\x1b[33mGhost\x1b[0m") == 5
 //  RuneWidthWithoutEscSequences("\x1b[33mGhost\x1b[0") == 5
 func RuneWidthWithoutEscSequences(str string) int {
-	count, isEscSeq := 0, false
-	for _, c := range str {
-		if c == EscapeStartRune {
-			isEscSeq = true
-		} else if isEscSeq {
+	count, isEscSeq, isEscSeqAlt := 0, false, false
+	for idx, c := range str {
+		if !isEscSeqAlt && c == EscapeStartRune {
+			if (idx+len(EscapeStartAlt) <= utf8.RuneCountInString(str)) && (str[idx:idx+len(EscapeStartAlt)] == EscapeStartAlt) {
+				isEscSeqAlt = true
+			} else {
+				isEscSeq = true
+			}
+	    } else if isEscSeq {
 			if c == EscapeStopRune {
 				isEscSeq = false
+			}
+		} else if isEscSeqAlt {
+			if c == EscapeStopRuneAlt {
+				isEscSeqAlt = false
 			}
 		} else {
 			count += RuneWidth(c)
@@ -211,16 +231,23 @@ func Trim(str string, maxLen int) string {
 	var out strings.Builder
 	out.Grow(maxLen)
 
-	outLen, isEscSeq, lastEscSeq := 0, false, strings.Builder{}
-	for _, sChr := range str {
+	outLen, isEscSeq, isEscSeqAlt, lastEscSeq := 0, false, false, strings.Builder{}
+	for idx, sChr := range str {
 		out.WriteRune(sChr)
-		if sChr == EscapeStartRune {
-			isEscSeq = true
+		if !isEscSeqAlt && sChr == EscapeStartRune {
+			if (idx+len(EscapeStartAlt) <= utf8.RuneCountInString(str)) && (str[idx:idx+len(EscapeStartAlt)] == EscapeStartAlt) {
+				isEscSeqAlt = true
+			} else {
+				isEscSeq = true
+			}
 			lastEscSeq.Reset()
 			lastEscSeq.WriteRune(sChr)
-		} else if isEscSeq {
+		} else if isEscSeq || isEscSeqAlt {
 			lastEscSeq.WriteRune(sChr)
 			if sChr == EscapeStopRune {
+				isEscSeq = false
+			}
+			if sChr == EscapeStopRuneAlt {
 				isEscSeq = false
 			}
 		} else {
