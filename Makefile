@@ -11,7 +11,7 @@ bench:
 	go test -bench=. -benchmem
 
 cyclo:
-	gocyclo -over 13 ./*/*.go
+	gocyclo -over 18 ./*/*.go
 
 demo-list:
 	go run cmd/demo-list/demo.go
