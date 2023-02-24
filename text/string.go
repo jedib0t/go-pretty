@@ -9,19 +9,56 @@ import (
 
 // Constants
 const (
-	EscapeReset       = EscapeStart + "0" + EscapeStop
-	EscapeStart       = "\x1b["
-	EscapeStartAlt    = "\x1b]8"
-	EscapeStartRune   = rune(27) // \x1b
-	EscapeStop        = "m"
-	EscapeStopRune    = 'm'
-	EscapeStopRuneAlt = '\\'
+	EscapeReset     = EscapeStart + "0" + EscapeStop
+	EscapeStart     = "\x1b["
+	CSIStartRune    = rune(91) // [
+	CSIStopRune     = 'm'
+	OSIStartRune    = rune(93) // ]
+	OSIStopRune     = '\\'
+	EscapeStartRune = rune(27) // \x1b
+	EscapeStop      = "m"
+	EscapeStopRune  = 'm'
 )
 
 // RuneWidth stuff
 var (
 	rwCondition = runewidth.NewCondition()
 )
+
+type EscKind int
+
+const (
+	Unknown EscKind = iota
+	CSI
+	OSI
+)
+
+type EscSeq struct {
+	isIn    bool
+	content strings.Builder
+	kind    EscKind
+}
+
+func (e *EscSeq) InspectRune(r rune) {
+	if !e.isIn && r == EscapeStartRune {
+		e.isIn = true
+		e.kind = Unknown
+		e.content.Reset()
+		e.content.WriteRune(r)
+	} else if e.isIn {
+		switch {
+		case e.kind == Unknown && r == CSIStartRune:
+			e.kind = CSI
+		case e.kind == Unknown && r == OSIStartRune:
+			e.kind = OSI
+		case e.kind == CSI && r == CSIStopRune || e.kind == OSI && r == OSIStopRune:
+			e.isIn = false
+			e.kind = Unknown
+		}
+		e.content.WriteRune(r)
+	}
+	return
+}
 
 // InsertEveryN inserts the rune every N characters in the string. For ex.:
 //
@@ -38,27 +75,20 @@ func InsertEveryN(str string, runeToInsert rune, n int) string {
 	sLen := RuneWidthWithoutEscSequences(str)
 	var out strings.Builder
 	out.Grow(sLen + (sLen / n))
-	outLen, isEscSeq, isEscSeqAlt := 0, false, false
+	outLen, escSeq := 0, EscSeq{}
 	for idx, c := range str {
-		if !isEscSeqAlt && c == EscapeStartRune {
-			if (idx+len(EscapeStartAlt) <= utf8.RuneCountInString(str)) && (str[idx:idx+len(EscapeStartAlt)] == EscapeStartAlt) {
-				isEscSeqAlt = true
-			} else {
-				isEscSeq = true
-			}
+		if escSeq.isIn {
+			escSeq.InspectRune(c)
+			out.WriteRune(c)
+			continue
 		}
-
-		if !isEscSeq && !isEscSeqAlt && outLen > 0 && (outLen%n) == 0 && idx != sLen {
+		escSeq.InspectRune(c)
+		if !escSeq.isIn && outLen > 0 && (outLen%n) == 0 && idx != sLen {
 			out.WriteRune(runeToInsert)
 		}
 		out.WriteRune(c)
-		if !isEscSeq && !isEscSeqAlt {
+		if !escSeq.isIn {
 			outLen += RuneWidth(c)
-		}
-
-		if (isEscSeq && c == EscapeStopRune) || (isEscSeqAlt && c == EscapeStopRuneAlt) {
-			isEscSeq = false
-			isEscSeqAlt = false
 		}
 	}
 	return out.String()
@@ -69,26 +99,19 @@ func InsertEveryN(str string, runeToInsert rune, n int) string {
 //
 //	LongestLineLen("Ghost!\nCome back here!\nRight now!") == 15
 func LongestLineLen(str string) int {
-	maxLength, currLength, isEscSeq, isEscSeqAlt := 0, 0, false, false
-	for idx, c := range str {
-		if !isEscSeqAlt && c == EscapeStartRune {
-			if (idx+len(EscapeStartAlt) <= utf8.RuneCountInString(str)) && (str[idx:idx+len(EscapeStartAlt)] == EscapeStartAlt) {
-				isEscSeqAlt = true
-			} else {
-				isEscSeq = true
-			}
-		} else if (isEscSeq && c == EscapeStopRune) || (isEscSeqAlt && c == EscapeStopRuneAlt) {
-			isEscSeq = false
-			isEscSeqAlt = false
+	maxLength, currLength, escSeq := 0, 0, EscSeq{}
+	for _, c := range str {
+		if escSeq.isIn {
+			escSeq.InspectRune(c)
 			continue
 		}
-
+		escSeq.InspectRune(c)
 		if c == '\n' {
 			if currLength > maxLength {
 				maxLength = currLength
 			}
 			currLength = 0
-		} else if !isEscSeq && !isEscSeqAlt {
+		} else if !escSeq.isIn {
 			currLength += RuneWidth(c)
 		}
 	}
@@ -184,23 +207,14 @@ func RuneWidth(r rune) int {
 //	RuneWidthWithoutEscSequences("\x1b[33mGhost\x1b[0m") == 5
 //	RuneWidthWithoutEscSequences("\x1b[33mGhost\x1b[0") == 5
 func RuneWidthWithoutEscSequences(str string) int {
-	count, isEscSeq, isEscSeqAlt := 0, false, false
-	for idx, c := range str {
-		if !isEscSeqAlt && c == EscapeStartRune {
-			if (idx+len(EscapeStartAlt) <= utf8.RuneCountInString(str)) && (str[idx:idx+len(EscapeStartAlt)] == EscapeStartAlt) {
-				isEscSeqAlt = true
-			} else {
-				isEscSeq = true
-			}
-		} else if isEscSeq {
-			if c == EscapeStopRune {
-				isEscSeq = false
-			}
-		} else if isEscSeqAlt {
-			if c == EscapeStopRuneAlt {
-				isEscSeqAlt = false
-			}
-		} else {
+	count, escSeq := 0, EscSeq{}
+	for _, c := range str {
+		if escSeq.isIn {
+			escSeq.InspectRune(c)
+			continue
+		}
+		escSeq.InspectRune(c)
+		if !escSeq.isIn {
 			count += RuneWidth(c)
 		}
 	}
@@ -241,33 +255,23 @@ func Trim(str string, maxLen int) string {
 	var out strings.Builder
 	out.Grow(maxLen)
 
-	outLen, isEscSeq, isEscSeqAlt, lastEscSeq := 0, false, false, strings.Builder{}
-	for idx, sChr := range str {
+	outLen, escSeq := 0, EscSeq{}
+	for _, sChr := range str {
 		out.WriteRune(sChr)
-		if !isEscSeqAlt && sChr == EscapeStartRune {
-			if (idx+len(EscapeStartAlt) <= utf8.RuneCountInString(str)) && (str[idx:idx+len(EscapeStartAlt)] == EscapeStartAlt) {
-				isEscSeqAlt = true
-			} else {
-				isEscSeq = true
-			}
-			lastEscSeq.Reset()
-			lastEscSeq.WriteRune(sChr)
-		} else if isEscSeq || isEscSeqAlt {
-			lastEscSeq.WriteRune(sChr)
-			if sChr == EscapeStopRune {
-				isEscSeq = false
-			}
-			if sChr == EscapeStopRuneAlt {
-				isEscSeq = false
-			}
-		} else {
-			outLen++
-			if outLen == maxLen {
-				break
-			}
+		if escSeq.isIn {
+			escSeq.InspectRune(sChr)
+			continue
+		}
+		escSeq.InspectRune(sChr)
+		if escSeq.isIn {
+			continue
+		}
+		outLen++
+		if outLen == maxLen {
+			break
 		}
 	}
-	if lastEscSeq.Len() > 0 && lastEscSeq.String() != EscapeReset {
+	if escSeq.content.Len() > 0 && escSeq.content.String() != EscapeReset {
 		out.WriteString(EscapeReset)
 	}
 	return out.String()
