@@ -247,22 +247,21 @@ func Trim(str string, maxLen int) string {
 
 	outLen, eSeq := 0, escSeq{}
 	for _, sChr := range str {
-		out.WriteRune(sChr)
 		if eSeq.isIn {
 			eSeq.InspectRune(sChr)
+			out.WriteRune(sChr)
 			continue
 		}
 		eSeq.InspectRune(sChr)
 		if eSeq.isIn {
+			out.WriteRune(sChr)
 			continue
 		}
-		outLen++
-		if outLen == maxLen {
-			break
+		if outLen < maxLen {
+			outLen++
+			out.WriteRune(sChr)
+			continue
 		}
-	}
-	if eSeq.content.Len() > 0 && eSeq.content.String() != EscapeReset {
-		out.WriteString(EscapeReset)
 	}
 	return out.String()
 }
