@@ -7,58 +7,10 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
-// Constants
-const (
-	EscapeReset     = EscapeStart + "0" + EscapeStop
-	EscapeStart     = "\x1b["
-	CSIStartRune    = rune(91) // [
-	CSIStopRune     = 'm'
-	OSIStartRune    = rune(93) // ]
-	OSIStopRune     = '\\'
-	EscapeStartRune = rune(27) // \x1b
-	EscapeStop      = "m"
-	EscapeStopRune  = 'm'
-)
-
 // RuneWidth stuff
 var (
 	rwCondition = runewidth.NewCondition()
 )
-
-type escKind int
-
-const (
-	Unknown escKind = iota
-	CSI
-	OSI
-)
-
-type escSeq struct {
-	isIn    bool
-	content strings.Builder
-	kind    escKind
-}
-
-func (e *escSeq) InspectRune(r rune) {
-	if !e.isIn && r == EscapeStartRune {
-		e.isIn = true
-		e.kind = Unknown
-		e.content.Reset()
-		e.content.WriteRune(r)
-	} else if e.isIn {
-		switch {
-		case e.kind == Unknown && r == CSIStartRune:
-			e.kind = CSI
-		case e.kind == Unknown && r == OSIStartRune:
-			e.kind = OSI
-		case e.kind == CSI && r == CSIStopRune || e.kind == OSI && r == OSIStopRune:
-			e.isIn = false
-			e.kind = Unknown
-		}
-		e.content.WriteRune(r)
-	}
-	return
-}
 
 // InsertEveryN inserts the rune every N characters in the string. For ex.:
 //  InsertEveryN("Ghost", '-', 1) == "G-h-o-s-t"
