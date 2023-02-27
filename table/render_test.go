@@ -941,6 +941,53 @@ func TestTable_Render_BorderAndSeparators(t *testing.T) {
 +-----+------------+-----------+--------+-----------------------------+`)
 }
 
+func TestTable_Render_BorderAndSeparators_Colored(t *testing.T) {
+	table := Table{}
+	table.AppendHeader(testHeader)
+	table.AppendRows(testRows)
+	table.AppendFooter(testFooter)
+
+	compareOutput(t, table.Render(), `
++-----+------------+-----------+--------+-----------------------------+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++-----+------------+-----------+--------+-----------------------------+
+|   1 | Arya       | Stark     |   3000 |                             |
+|  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
+| 300 | Tyrion     | Lannister |   5000 |                             |
++-----+------------+-----------+--------+-----------------------------+
+|     |            | TOTAL     |  10000 |                             |
++-----+------------+-----------+--------+-----------------------------+`)
+
+	table.Style().Color.Border = text.Colors{text.FgRed}
+	table.Style().Color.Separator = text.Colors{text.FgYellow}
+	compareOutputColored(t, table.Render(), ""+
+		"\x1b[31m+\x1b[0m\x1b[31m-----\x1b[0m\x1b[31m+\x1b[0m\x1b[31m------------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m-----------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m--------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m-----------------------------\x1b[0m\x1b[31m+\x1b[0m\n"+
+		"\x1b[31m|\x1b[0m   # \x1b[33m|\x1b[0m FIRST NAME \x1b[33m|\x1b[0m LAST NAME \x1b[33m|\x1b[0m SALARY \x1b[33m|\x1b[0m                             \x1b[31m|\x1b[0m\n"+
+		"\x1b[31m+\x1b[0m\x1b[33m-----\x1b[0m\x1b[33m+\x1b[0m\x1b[33m------------\x1b[0m\x1b[33m+\x1b[0m\x1b[33m-----------\x1b[0m\x1b[33m+\x1b[0m\x1b[33m--------\x1b[0m\x1b[33m+\x1b[0m\x1b[33m-----------------------------\x1b[0m\x1b[31m+\x1b[0m\n"+
+		"\x1b[31m|\x1b[0m   1 \x1b[33m|\x1b[0m Arya       \x1b[33m|\x1b[0m Stark     \x1b[33m|\x1b[0m   3000 \x1b[33m|\x1b[0m                             \x1b[31m|\x1b[0m\n"+
+		"\x1b[31m|\x1b[0m  20 \x1b[33m|\x1b[0m Jon        \x1b[33m|\x1b[0m Snow      \x1b[33m|\x1b[0m   2000 \x1b[33m|\x1b[0m You know nothing, Jon Snow! \x1b[31m|\x1b[0m\n"+
+		"\x1b[31m|\x1b[0m 300 \x1b[33m|\x1b[0m Tyrion     \x1b[33m|\x1b[0m Lannister \x1b[33m|\x1b[0m   5000 \x1b[33m|\x1b[0m                             \x1b[31m|\x1b[0m\n"+
+		"\x1b[31m+\x1b[0m\x1b[33m-----\x1b[0m\x1b[33m+\x1b[0m\x1b[33m------------\x1b[0m\x1b[33m+\x1b[0m\x1b[33m-----------\x1b[0m\x1b[33m+\x1b[0m\x1b[33m--------\x1b[0m\x1b[33m+\x1b[0m\x1b[33m-----------------------------\x1b[0m\x1b[31m+\x1b[0m\n"+
+		"\x1b[31m|\x1b[0m     \x1b[33m|\x1b[0m            \x1b[33m|\x1b[0m TOTAL     \x1b[33m|\x1b[0m  10000 \x1b[33m|\x1b[0m                             \x1b[31m|\x1b[0m\n"+
+		"\x1b[31m+\x1b[0m\x1b[31m-----\x1b[0m\x1b[31m+\x1b[0m\x1b[31m------------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m-----------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m--------\x1b[0m\x1b[31m+\x1b[0m\x1b[31m-----------------------------\x1b[0m\x1b[31m+\x1b[0m",
+	)
+
+	table.SetStyle(StyleLight)
+	table.Style().Color.Border = text.Colors{text.FgRed}
+	table.Style().Color.Separator = text.Colors{text.FgYellow}
+	compareOutputColored(t, table.Render(), ""+
+		"\x1b[31m┌\x1b[0m\x1b[31m─────\x1b[0m\x1b[31m┬\x1b[0m\x1b[31m────────────\x1b[0m\x1b[31m┬\x1b[0m\x1b[31m───────────\x1b[0m\x1b[31m┬\x1b[0m\x1b[31m────────\x1b[0m\x1b[31m┬\x1b[0m\x1b[31m─────────────────────────────\x1b[0m\x1b[31m┐\x1b[0m\n"+
+		"\x1b[31m│\x1b[0m   # \x1b[33m│\x1b[0m FIRST NAME \x1b[33m│\x1b[0m LAST NAME \x1b[33m│\x1b[0m SALARY \x1b[33m│\x1b[0m                             \x1b[31m│\x1b[0m\n"+
+		"\x1b[31m├\x1b[0m\x1b[33m─────\x1b[0m\x1b[33m┼\x1b[0m\x1b[33m────────────\x1b[0m\x1b[33m┼\x1b[0m\x1b[33m───────────\x1b[0m\x1b[33m┼\x1b[0m\x1b[33m────────\x1b[0m\x1b[33m┼\x1b[0m\x1b[33m─────────────────────────────\x1b[0m\x1b[31m┤\x1b[0m\n"+
+		"\x1b[31m│\x1b[0m   1 \x1b[33m│\x1b[0m Arya       \x1b[33m│\x1b[0m Stark     \x1b[33m│\x1b[0m   3000 \x1b[33m│\x1b[0m                             \x1b[31m│\x1b[0m\n"+
+		"\x1b[31m│\x1b[0m  20 \x1b[33m│\x1b[0m Jon        \x1b[33m│\x1b[0m Snow      \x1b[33m│\x1b[0m   2000 \x1b[33m│\x1b[0m You know nothing, Jon Snow! \x1b[31m│\x1b[0m\n"+
+		"\x1b[31m│\x1b[0m 300 \x1b[33m│\x1b[0m Tyrion     \x1b[33m│\x1b[0m Lannister \x1b[33m│\x1b[0m   5000 \x1b[33m│\x1b[0m                             \x1b[31m│\x1b[0m\n"+
+		"\x1b[31m├\x1b[0m\x1b[33m─────\x1b[0m\x1b[33m┼\x1b[0m\x1b[33m────────────\x1b[0m\x1b[33m┼\x1b[0m\x1b[33m───────────\x1b[0m\x1b[33m┼\x1b[0m\x1b[33m────────\x1b[0m\x1b[33m┼\x1b[0m\x1b[33m─────────────────────────────\x1b[0m\x1b[31m┤\x1b[0m\n"+
+		"\x1b[31m│\x1b[0m     \x1b[33m│\x1b[0m            \x1b[33m│\x1b[0m TOTAL     \x1b[33m│\x1b[0m  10000 \x1b[33m│\x1b[0m                             \x1b[31m│\x1b[0m\n"+
+		"\x1b[31m└\x1b[0m\x1b[31m─────\x1b[0m\x1b[31m┴\x1b[0m\x1b[31m────────────\x1b[0m\x1b[31m┴\x1b[0m\x1b[31m───────────\x1b[0m\x1b[31m┴\x1b[0m\x1b[31m────────\x1b[0m\x1b[31m┴\x1b[0m\x1b[31m─────────────────────────────\x1b[0m\x1b[31m┘\x1b[0m",
+	)
+}
+
 func TestTable_Render_Colored(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		tw := NewWriter()
