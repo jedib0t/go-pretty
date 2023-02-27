@@ -330,6 +330,8 @@ func (t *Table) getBorderColors(hint renderHint) text.Colors {
 		return nil
 	} else if t.style.Color.Border != nil {
 		return t.style.Color.Border
+	} else if hint.isTitleRow {
+		return t.style.Title.Colors
 	} else if hint.isHeaderRow {
 		return t.style.Color.Header
 	} else if hint.isFooterRow {
