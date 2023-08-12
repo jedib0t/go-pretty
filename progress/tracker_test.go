@@ -68,6 +68,28 @@ func TestTracker_IncrementWithError(t *testing.T) {
 	assert.True(t, tracker.IsDone())
 }
 
+func TestTracker_IsStarted(t *testing.T) {
+	tracker := Tracker{DeferStart: true}
+	assert.False(t, tracker.IsStarted())
+	tracker.Start()
+	assert.True(t, tracker.IsStarted())
+
+	tracker = Tracker{DeferStart: true}
+	assert.False(t, tracker.IsStarted())
+	tracker.Increment(1)
+	assert.True(t, tracker.IsStarted())
+
+	tracker = Tracker{DeferStart: true}
+	assert.False(t, tracker.IsStarted())
+	tracker.IncrementWithError(1)
+	assert.True(t, tracker.IsStarted())
+
+	tracker = Tracker{DeferStart: true}
+	assert.False(t, tracker.IsStarted())
+	tracker.SetValue(1)
+	assert.True(t, tracker.IsStarted())
+}
+
 func TestTracker_IsDone(t *testing.T) {
 	tracker := Tracker{Total: 10}
 	assert.False(t, tracker.IsDone())

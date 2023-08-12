@@ -93,7 +93,7 @@ func (p *Progress) extractDoneAndActiveTrackers() ([]*Tracker, []*Tracker) {
 
 func (p *Progress) generateTrackerStr(t *Tracker, maxLen int, hint renderHint) string {
 	value, total := t.valueAndTotal()
-	if !hint.isOverallTracker && (total == 0 || value > total) {
+	if !hint.isOverallTracker && t.IsStarted() && (total == 0 || value > total) {
 		return p.generateTrackerStrIndeterminate(maxLen)
 	}
 	return p.generateTrackerStrDeterminate(value, total, maxLen)
@@ -382,14 +382,16 @@ func (p *Progress) renderTrackerStatsSpeed(out *strings.Builder, t *Tracker, hin
 
 		p.trackersActiveMutex.RLock()
 		for _, tracker := range p.trackersActive {
-			speed += float64(tracker.Value()) / time.Since(tracker.timeStart).Round(speedPrecision).Seconds()
+			if !tracker.timeStart.IsZero() {
+				speed += float64(tracker.Value()) / time.Since(tracker.timeStart).Round(speedPrecision).Seconds()
+			}
 		}
 		p.trackersActiveMutex.RUnlock()
 
 		if speed > 0 {
 			p.renderTrackerStatsSpeedInternal(out, p.style.Options.SpeedOverallFormatter(int64(speed)))
 		}
-	} else {
+	} else if !t.timeStart.IsZero() {
 		timeTaken := time.Since(t.timeStart)
 		if timeTakenRounded := timeTaken.Round(speedPrecision); timeTakenRounded > speedPrecision {
 			p.renderTrackerStatsSpeedInternal(out, t.Units.Sprint(int64(float64(t.Value())/timeTakenRounded.Seconds())))
@@ -412,7 +414,7 @@ func (p *Progress) renderTrackerStatsTime(outStats *strings.Builder, t *Tracker,
 	var td, tp time.Duration
 	if t.IsDone() {
 		td = t.timeStop.Sub(t.timeStart)
-	} else {
+	} else if !t.timeStart.IsZero() {
 		td = time.Since(t.timeStart)
 	}
 	if hint.isOverallTracker {

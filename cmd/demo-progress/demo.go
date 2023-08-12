@@ -23,6 +23,7 @@ var (
 	flagShowSpeedOverall   = flag.Bool("show-speed-overall", false, "Show the overall tracker speed?")
 	flagShowPinned         = flag.Bool("show-pinned", false, "Show a pinned message?")
 	flagRandomFail         = flag.Bool("rnd-fail", false, "Introduce random failures in tracking")
+	flagRandomDefer        = flag.Bool("rnd-defer", false, "Introduce random deferred starts")
 	flagRandomLogs         = flag.Bool("rnd-logs", false, "Output random logs in the middle of tracking")
 
 	messageColors = []text.Color{
@@ -71,12 +72,17 @@ func trackSomething(pw progress.Writer, idx int64, updateMessage bool) {
 
 	units := getUnits(idx)
 	message := getMessage(idx, units)
-	tracker := progress.Tracker{Message: message, Total: total, Units: *units}
+	tracker := progress.Tracker{Message: message, Total: total, Units: *units, DeferStart: *flagRandomDefer && rand.Float64() < 0.5}
 	if idx == int64(*flagNumTrackers) {
 		tracker.Total = 0
 	}
 
 	pw.AppendTracker(&tracker)
+
+	if tracker.DeferStart {
+		time.Sleep(3 * time.Second)
+		tracker.Start()
+	}
 
 	ticker := time.Tick(time.Millisecond * 500)
 	updateTicker := time.Tick(time.Millisecond * 250)

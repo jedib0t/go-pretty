@@ -67,7 +67,9 @@ const (
 // to a queue, which gets picked up by the Render logic in the next rendering
 // cycle.
 func (p *Progress) AppendTracker(t *Tracker) {
-	t.start()
+	if !t.DeferStart {
+		t.start()
+	}
 	p.overallTrackerMutex.Lock()
 	defer p.overallTrackerMutex.Unlock()
 
