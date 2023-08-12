@@ -66,6 +66,28 @@ func trackSomething(pw Writer, tracker *Tracker) {
 	}
 }
 
+func trackSomethingDeferred(pw Writer, tracker *Tracker) {
+	incrementPerCycle := tracker.Total / 3
+	tracker.DeferStart = true
+
+	pw.AppendTracker(tracker)
+	skip := true
+
+	c := time.Tick(trackerIncrementInterval)
+	for !tracker.IsDone() {
+		select {
+		case <-c:
+			if skip {
+				skip = false
+			} else if tracker.value+incrementPerCycle > tracker.Total {
+				tracker.Increment(tracker.Total - tracker.value)
+			} else {
+				tracker.Increment(incrementPerCycle)
+			}
+		}
+	}
+}
+
 func trackSomethingErrored(pw Writer, tracker *Tracker) {
 	incrementPerCycle := tracker.Total / 3
 	total := tracker.Total
@@ -279,118 +301,37 @@ func TestProgress_generateTrackerStr_Indeterminate(t *testing.T) {
 	}
 
 	expectedTrackerStrMap := map[int64]string{
-		0:   "<=>.......",
-		1:   ".<=>......",
-		2:   "..<=>.....",
-		3:   "...<=>....",
-		4:   "....<=>...",
-		5:   ".....<=>..",
-		6:   "......<=>.",
-		7:   ".......<=>",
-		8:   "......<=>.",
-		9:   ".....<=>..",
-		10:  "....<=>...",
-		11:  "...<=>....",
-		12:  "..<=>.....",
-		13:  ".<=>......",
-		14:  "<=>.......",
-		15:  ".<=>......",
-		16:  "..<=>.....",
-		17:  "...<=>....",
-		18:  "....<=>...",
-		19:  ".....<=>..",
-		20:  "......<=>.",
-		21:  ".......<=>",
-		22:  "......<=>.",
-		23:  ".....<=>..",
-		24:  "....<=>...",
-		25:  "...<=>....",
-		26:  "..<=>.....",
-		27:  ".<=>......",
-		28:  "<=>.......",
-		29:  ".<=>......",
-		30:  "..<=>.....",
-		31:  "...<=>....",
-		32:  "....<=>...",
-		33:  ".....<=>..",
-		34:  "......<=>.",
-		35:  ".......<=>",
-		36:  "......<=>.",
-		37:  ".....<=>..",
-		38:  "....<=>...",
-		39:  "...<=>....",
-		40:  "..<=>.....",
-		41:  ".<=>......",
-		42:  "<=>.......",
-		43:  ".<=>......",
-		44:  "..<=>.....",
-		45:  "...<=>....",
-		46:  "....<=>...",
-		47:  ".....<=>..",
-		48:  "......<=>.",
-		49:  ".......<=>",
-		50:  "......<=>.",
-		51:  ".....<=>..",
-		52:  "....<=>...",
-		53:  "...<=>....",
-		54:  "..<=>.....",
-		55:  ".<=>......",
-		56:  "<=>.......",
-		57:  ".<=>......",
-		58:  "..<=>.....",
-		59:  "...<=>....",
-		60:  "....<=>...",
-		61:  ".....<=>..",
-		62:  "......<=>.",
-		63:  ".......<=>",
-		64:  "......<=>.",
-		65:  ".....<=>..",
-		66:  "....<=>...",
-		67:  "...<=>....",
-		68:  "..<=>.....",
-		69:  ".<=>......",
-		70:  "<=>.......",
-		71:  ".<=>......",
-		72:  "..<=>.....",
-		73:  "...<=>....",
-		74:  "....<=>...",
-		75:  ".....<=>..",
-		76:  "......<=>.",
-		77:  ".......<=>",
-		78:  "......<=>.",
-		79:  ".....<=>..",
-		80:  "....<=>...",
-		81:  "...<=>....",
-		82:  "..<=>.....",
-		83:  ".<=>......",
-		84:  "<=>.......",
-		85:  ".<=>......",
-		86:  "..<=>.....",
-		87:  "...<=>....",
-		88:  "....<=>...",
-		89:  ".....<=>..",
-		90:  "......<=>.",
-		91:  ".......<=>",
-		92:  "......<=>.",
-		93:  ".....<=>..",
-		94:  "....<=>...",
-		95:  "...<=>....",
-		96:  "..<=>.....",
-		97:  ".<=>......",
-		98:  "<=>.......",
-		99:  ".<=>......",
-		100: "..<=>.....",
+		-1: "..........",
+		0:  "<=>.......",
+		1:  ".<=>......",
+		2:  "..<=>.....",
+		3:  "...<=>....",
+		4:  "....<=>...",
+		5:  ".....<=>..",
+		6:  "......<=>.",
+		7:  ".......<=>",
+		8:  "......<=>.",
+		9:  ".....<=>..",
+		10: "....<=>...",
+		11: "...<=>....",
+		12: "..<=>.....",
+		13: ".<=>......",
 	}
 
 	finalOutput := strings.Builder{}
 	tr := Tracker{Total: 0}
-	for value := int64(0); value <= 100; value++ {
-		tr.value = value
+	for value := int64(-1); value <= 100; value++ {
+		if value >= 0 {
+			tr.value = value
+		}
 		actualStr := pw.generateTrackerStr(&tr, 10, renderHint{})
-		if expectedStr, ok := expectedTrackerStrMap[value]; ok {
+		if expectedStr, ok := expectedTrackerStrMap[value%14]; ok {
 			assert.Equal(t, expectedStr, actualStr, "value=%d", value)
 		}
 		finalOutput.WriteString(fmt.Sprintf(" %d: \"%s\",\n", value, actualStr))
+		if value < 0 {
+			tr.timeStart = time.Now()
+		}
 	}
 	if t.Failed() {
 		fmt.Println(finalOutput.String())
@@ -486,6 +427,35 @@ func TestProgress_RenderSomeTrackers_WithAutoStop(t *testing.T) {
 		regexp.MustCompile(`Calculating Total   # 1 \.\.\. done! \[\d+\.\d+K in [\d.]+ms]`),
 		regexp.MustCompile(`Downloading File    # 2 \.\.\. done! \[\d+\.\d+KB in [\d.]+ms]`),
 		regexp.MustCompile(`Transferring Amount # 3 \.\.\. done! \[\$\d+\.\d+K in [\d.]+ms]`),
+	}
+	out := renderOutput.String()
+	for _, expectedOutPattern := range expectedOutPatterns {
+		if !expectedOutPattern.MatchString(out) {
+			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
+		}
+	}
+	showOutputOnFailure(t, out)
+}
+
+func TestProgress_RenderSomeTrackers_DeferStart(t *testing.T) {
+	renderOutput := outputWriter{}
+
+	pw := generateWriter()
+	pw.Style().Visibility.Speed = true
+	pw.SetOutputWriter(&renderOutput)
+	go trackSomething(pw, &Tracker{Message: "Calculating Total   # 1\r", Total: 1000, Units: UnitsDefault})
+	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes})
+	go trackSomethingDeferred(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
+	renderAndWait(pw, false)
+
+	expectedOutPatterns := []*regexp.Regexp{
+		regexp.MustCompile(`Transferring Amount # 3 \.\.\. +0.00% \[\.{23}] \[\$0 in 0s]`),
+		regexp.MustCompile(`Calculating Total   # 1 \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+ in [\d.]+ms; \d+\.\d+\w+/s]`),
+		regexp.MustCompile(`Downloading File    # 2 \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+B in [\d.]+ms; \d+\.\d+\w+/s]`),
+		regexp.MustCompile(`Transferring Amount # 3 \.\.\. \d+\.\d+% \[[<#>.]{23}] \[\$\d+ in [\d.]+ms; \$\d+\.\d+\w+/s]`),
+		regexp.MustCompile(`Calculating Total   # 1 \.\.\. done! \[\d+\.\d+K in [\d.]+ms; \d+\.\d+\w+/s]`),
+		regexp.MustCompile(`Downloading File    # 2 \.\.\. done! \[\d+\.\d+KB in [\d.]+ms; \d+\.\d+\w+/s]`),
+		regexp.MustCompile(`Transferring Amount # 3 \.\.\. done! \[\$\d+\.\d+K in [\d.]+ms; \$\d+\.\d+\w+/s]`),
 	}
 	out := renderOutput.String()
 	for _, expectedOutPattern := range expectedOutPatterns {
