@@ -78,4 +78,4 @@ func (sb sortByValue) Less(i, j int) bool {
 
 type sortDsc struct{ sort.Interface }
 
-func (sd sortDsc) Less(i, j int) bool { return !sd.Interface.Less(i, j) }
+func (sd sortDsc) Less(i, j int) bool { return !sd.Interface.Less(i, j) && sd.Interface.Less(j, i) }
