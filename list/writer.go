@@ -2,7 +2,7 @@ package list
 
 import "io"
 
-// Writer declares the interfaces that can be used to setup and render a list.
+// Writer declares the interfaces that can be used to set up and render a list.
 type Writer interface {
 	AppendItem(item interface{})
 	AppendItems(items []interface{})

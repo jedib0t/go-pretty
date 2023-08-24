@@ -39,7 +39,7 @@ func (a Align) Apply(text string, maxLength int) string {
 		if sLenWoE < maxLength {
 			// left pad with half the number of spaces needed before using %text
 			return fmt.Sprintf("%"+strconv.Itoa(maxLength+numEscChars)+"s",
-				text+strings.Repeat(" ", int((maxLength-sLenWoE)/2)))
+				text+strings.Repeat(" ", (maxLength-sLenWoE)/2))
 		}
 	case AlignJustify:
 		return a.justifyText(text, sLenWoE, maxLength)

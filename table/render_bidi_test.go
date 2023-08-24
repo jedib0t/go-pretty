@@ -15,7 +15,6 @@ func TestTable_Render_BiDiText(t *testing.T) {
 	table.AppendFooter(Row{"סהכ", 30})
 	table.SetAutoIndex(true)
 
-	//table.Style().Format.Direction = text.Default
 	compareOutput(t, table.Render(), `
 +---+------------+------+--------+-----------+
 |   | תאריך      | סכום | מחלקה  | תגים      |

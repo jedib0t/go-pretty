@@ -112,7 +112,7 @@ func (t *Table) htmlRenderColumn(out *strings.Builder, colStr string) {
 	out.WriteString(colStr)
 }
 
-func (t *Table) htmlRenderColumnAttributes(out *strings.Builder, row rowStr, colIdx int, hint renderHint) {
+func (t *Table) htmlRenderColumnAttributes(out *strings.Builder, colIdx int, hint renderHint) {
 	// determine the HTML "align"/"valign" property values
 	align := t.getAlign(colIdx, hint).HTMLProperty()
 	vAlign := t.getVAlign(colIdx, hint).HTMLProperty()
@@ -161,7 +161,7 @@ func (t *Table) htmlRenderRow(out *strings.Builder, row rowStr, hint renderHint)
 		// write the row
 		out.WriteString("    <")
 		out.WriteString(colTagName)
-		t.htmlRenderColumnAttributes(out, row, colIdx, hint)
+		t.htmlRenderColumnAttributes(out, colIdx, hint)
 		out.WriteString(">")
 		if len(colStr) == 0 {
 			out.WriteString(t.style.HTML.EmptyColumn)

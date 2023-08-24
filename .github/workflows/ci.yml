@@ -21,7 +21,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      # Set up the GoLang enviroment
+      # Set up the GoLang environment
       - name: Set up Go
         uses: actions/setup-go@v2
         with:

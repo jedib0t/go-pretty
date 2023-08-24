@@ -111,4 +111,4 @@ the following from within your code folder to do the same:
 ```
 find . -type f -name "*.go" | grep -v vendor | xargs sed -i 's/jedib0t\/go-pretty\//jedib0t\/go-pretty\/v6\//g'
 ```
-If you are on MacOS, you'll have to use `sed -i ''` instead of `sed -i`.
+If you are on macOS, you'll have to use `sed -i ''` instead of `sed -i`.

@@ -331,5 +331,4 @@ func TestList_Render_UnindentAll(t *testing.T) {
         * Way
 * Right?`
 	assert.Equal(t, expectedOut, lw.Render())
-
 }

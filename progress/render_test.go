@@ -55,13 +55,11 @@ func trackSomething(pw Writer, tracker *Tracker) {
 
 	c := time.Tick(trackerIncrementInterval)
 	for !tracker.IsDone() {
-		select {
-		case <-c:
-			if tracker.value+incrementPerCycle > tracker.Total {
-				tracker.Increment(tracker.Total - tracker.value)
-			} else {
-				tracker.Increment(incrementPerCycle)
-			}
+		<-c
+		if tracker.value+incrementPerCycle > tracker.Total {
+			tracker.Increment(tracker.Total - tracker.value)
+		} else {
+			tracker.Increment(incrementPerCycle)
 		}
 	}
 }
@@ -75,15 +73,13 @@ func trackSomethingDeferred(pw Writer, tracker *Tracker) {
 
 	c := time.Tick(trackerIncrementInterval)
 	for !tracker.IsDone() {
-		select {
-		case <-c:
-			if skip {
-				skip = false
-			} else if tracker.value+incrementPerCycle > tracker.Total {
-				tracker.Increment(tracker.Total - tracker.value)
-			} else {
-				tracker.Increment(incrementPerCycle)
-			}
+		<-c
+		if skip {
+			skip = false
+		} else if tracker.value+incrementPerCycle > tracker.Total {
+			tracker.Increment(tracker.Total - tracker.value)
+		} else {
+			tracker.Increment(incrementPerCycle)
 		}
 	}
 }
@@ -97,13 +93,11 @@ func trackSomethingErrored(pw Writer, tracker *Tracker) {
 
 	c := time.Tick(trackerIncrementInterval)
 	for !tracker.IsDone() {
-		select {
-		case <-c:
-			if tracker.value+incrementPerCycle > total {
-				tracker.MarkAsErrored()
-			} else {
-				tracker.IncrementWithError(incrementPerCycle)
-			}
+		<-c
+		if tracker.value+incrementPerCycle > total {
+			tracker.MarkAsErrored()
+		} else {
+			tracker.IncrementWithError(incrementPerCycle)
 		}
 	}
 }
@@ -117,16 +111,14 @@ func trackSomethingIndeterminate(pw Writer, tracker *Tracker) {
 
 	c := time.Tick(trackerIncrementInterval)
 	for !tracker.IsDone() {
-		select {
-		case <-c:
-			if tracker.value+incrementPerCycle > total {
-				tracker.Increment(total - tracker.value)
-			} else {
-				tracker.Increment(incrementPerCycle)
-			}
-			if tracker.Value() >= total {
-				tracker.MarkAsDone()
-			}
+		<-c
+		if tracker.value+incrementPerCycle > total {
+			tracker.Increment(total - tracker.value)
+		} else {
+			tracker.Increment(incrementPerCycle)
+		}
+		if tracker.Value() >= total {
+			tracker.MarkAsDone()
 		}
 	}
 }

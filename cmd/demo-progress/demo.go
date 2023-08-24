@@ -97,7 +97,7 @@ func trackSomething(pw progress.Writer, idx int64, updateMessage bool) {
 			}
 			pw.SetPinnedMessages(
 				fmt.Sprintf(">> Current Time: %-32s", time.Now().Format(time.RFC3339)),
-				fmt.Sprintf(">>   Total Time: %-32s", time.Now().Sub(timeStart).Round(time.Millisecond)),
+				fmt.Sprintf(">>   Total Time: %-32s", time.Since(timeStart).Round(time.Millisecond)),
 			)
 		case <-updateTicker:
 			if updateMessage {

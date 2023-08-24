@@ -22,10 +22,10 @@ func (l *List) Render() string {
 	out.Grow(l.approxSize)
 	for idx, item := range l.items {
 		hint := renderHint{
-			isTopItem:    bool(idx == 0),
-			isFirstItem:  bool(idx == 0 || item.Level > l.items[idx-1].Level),
+			isTopItem:    idx == 0,
+			isFirstItem:  idx == 0 || item.Level > l.items[idx-1].Level,
 			isLastItem:   !l.hasMoreItemsInLevel(item.Level, idx),
-			isBottomItem: bool(idx == len(l.items)-1),
+			isBottomItem: idx == len(l.items)-1,
 		}
 		if hint.isFirstItem && hint.isLastItem {
 			hint.isOnlyItem = true
@@ -56,7 +56,7 @@ func (l *List) renderItem(out *strings.Builder, idx int, item *listItem, hint re
 		}
 
 		// render the prefix or the leading text before the actual item
-		l.renderItemBulletPrefix(out, idx, item.Level, lineIdx, hint)
+		l.renderItemBulletPrefix(out, idx, item.Level)
 		l.renderItemBullet(out, lineIdx, hint)
 
 		// render the actual item
@@ -73,11 +73,11 @@ func (l *List) renderItemBullet(out *strings.Builder, lineIdx int, hint renderHi
 			out.WriteString(l.style.CharItemVertical)
 		}
 	} else {
-		l.renderItemBulletSingleLine(out, lineIdx, hint)
+		l.renderItemBulletSingleLine(out, hint)
 	}
 }
 
-func (l *List) renderItemBulletSingleLine(out *strings.Builder, lineIdx int, hint renderHint) {
+func (l *List) renderItemBulletSingleLine(out *strings.Builder, hint renderHint) {
 	// single-line item.Text (or first line of a multi-line item.Text)
 	if hint.isOnlyItem {
 		if hint.isTopItem {
@@ -97,7 +97,7 @@ func (l *List) renderItemBulletSingleLine(out *strings.Builder, lineIdx int, hin
 	out.WriteRune(' ')
 }
 
-func (l *List) renderItemBulletPrefix(out *strings.Builder, itemIdx int, itemLevel int, lineIdx int, hint renderHint) {
+func (l *List) renderItemBulletPrefix(out *strings.Builder, itemIdx int, itemLevel int) {
 	// write a prefix if one has been set in l.style
 	if l.style.LinePrefix != "" {
 		out.WriteString(l.style.LinePrefix)

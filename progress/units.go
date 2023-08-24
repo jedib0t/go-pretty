@@ -109,15 +109,13 @@ func FormatNumber(value int64) string {
 	})
 }
 
-var (
-	unitScales = []int64{
-		1000000000000000,
-		1000000000000,
-		1000000000,
-		1000000,
-		1000,
-	}
-)
+var unitScales = []int64{
+	1000000000000000,
+	1000000000000,
+	1000000000,
+	1000000,
+	1000,
+}
 
 func formatNumber(value int64, notations map[int64]string) string {
 	for _, unitScale := range unitScales {
