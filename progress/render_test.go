@@ -330,6 +330,34 @@ func TestProgress_generateTrackerStr_Indeterminate(t *testing.T) {
 	}
 }
 
+func TestProgress_RenderNeverStarted(t *testing.T) {
+	renderOutput := strings.Builder{}
+
+	pw := generateWriter()
+	pw.SetOutputWriter(&renderOutput)
+
+	tr := &Tracker{DeferStart: true}
+	pw.AppendTracker(tr)
+
+	go pw.Render()
+	time.Sleep(renderWaitTime)
+	tr.MarkAsDone()
+	pw.Stop()
+	time.Sleep(time.Second)
+
+	expectedOutPatterns := []*regexp.Regexp{
+		regexp.MustCompile(`\s*\.\.\. {2}\?\?\? {2}\[\.{23}] \[0 in 0s]`),
+		regexp.MustCompile(`\s*\.\.\. done! \[0 in 0s]`),
+	}
+	out := renderOutput.String()
+	for _, expectedOutPattern := range expectedOutPatterns {
+		if !expectedOutPattern.MatchString(out) {
+			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
+		}
+	}
+	showOutputOnFailure(t, out)
+}
+
 func TestProgress_RenderNothing(t *testing.T) {
 	renderOutput := outputWriter{}
 

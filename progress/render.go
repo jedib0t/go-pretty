@@ -408,10 +408,12 @@ func (p *Progress) renderTrackerStatsSpeedInternal(out *strings.Builder, speed s
 
 func (p *Progress) renderTrackerStatsTime(outStats *strings.Builder, t *Tracker, hint renderHint) {
 	var td, tp time.Duration
-	if t.IsDone() {
-		td = t.timeStop.Sub(t.timeStart)
-	} else if !t.timeStart.IsZero() {
-		td = time.Since(t.timeStart)
+	if !t.timeStart.IsZero() {
+		if t.IsDone() {
+			td = t.timeStop.Sub(t.timeStart)
+		} else {
+			td = time.Since(t.timeStart)
+		}
 	}
 	if hint.isOverallTracker {
 		tp = p.style.Options.TimeOverallPrecision
