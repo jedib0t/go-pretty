@@ -70,10 +70,14 @@ func (p *Progress) extractDoneAndActiveTrackers() ([]*Tracker, []*Tracker) {
 	var trackersActive, trackersDone []*Tracker
 	var activeTrackersProgress int64
 	p.trackersActiveMutex.RLock()
+	var maxETA time.Duration
 	for _, tracker := range p.trackersActive {
 		if !tracker.IsDone() {
 			trackersActive = append(trackersActive, tracker)
 			activeTrackersProgress += int64(tracker.PercentDone())
+			if eta := tracker.ETA(); eta > maxETA {
+				maxETA = eta
+			}
 		} else {
 			trackersDone = append(trackersDone, tracker)
 		}
@@ -85,6 +89,7 @@ func (p *Progress) extractDoneAndActiveTrackers() ([]*Tracker, []*Tracker) {
 	// calculate the overall tracker's progress value
 	p.overallTracker.value = int64(p.LengthDone()+len(trackersDone)) * 100
 	p.overallTracker.value += activeTrackersProgress
+	p.overallTracker.minETA = maxETA
 	if len(trackersActive) == 0 {
 		p.overallTracker.MarkAsDone()
 	}

@@ -35,6 +35,7 @@ type Tracker struct {
 	timeStart time.Time
 	timeStop  time.Time
 	value     int64
+	minETA    time.Duration
 }
 
 // ETA returns the expected time of "arrival" or completion of this tracker. It
@@ -56,7 +57,11 @@ func (t *Tracker) ETA() time.Duration {
 	if pDone == 0 {
 		return time.Duration(0)
 	}
-	return time.Duration((int64(timeTaken) / pDone) * (100 - pDone))
+	eta := time.Duration((int64(timeTaken) / pDone) * (100 - pDone))
+	if eta < t.minETA {
+		eta = t.minETA
+	}
+	return eta
 }
 
 // Increment updates the current value of the task being tracked.
