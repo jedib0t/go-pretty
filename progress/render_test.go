@@ -55,13 +55,11 @@ func trackSomething(pw Writer, tracker *Tracker) {
 
 	c := time.Tick(trackerIncrementInterval)
 	for !tracker.IsDone() {
-		select {
-		case <-c:
-			if tracker.value+incrementPerCycle > tracker.Total {
-				tracker.Increment(tracker.Total - tracker.value)
-			} else {
-				tracker.Increment(incrementPerCycle)
-			}
+		<-c
+		if tracker.value+incrementPerCycle > tracker.Total {
+			tracker.Increment(tracker.Total - tracker.value)
+		} else {
+			tracker.Increment(incrementPerCycle)
 		}
 	}
 }
@@ -75,15 +73,13 @@ func trackSomethingDeferred(pw Writer, tracker *Tracker) {
 
 	c := time.Tick(trackerIncrementInterval)
 	for !tracker.IsDone() {
-		select {
-		case <-c:
-			if skip {
-				skip = false
-			} else if tracker.value+incrementPerCycle > tracker.Total {
-				tracker.Increment(tracker.Total - tracker.value)
-			} else {
-				tracker.Increment(incrementPerCycle)
-			}
+		<-c
+		if skip {
+			skip = false
+		} else if tracker.value+incrementPerCycle > tracker.Total {
+			tracker.Increment(tracker.Total - tracker.value)
+		} else {
+			tracker.Increment(incrementPerCycle)
 		}
 	}
 }
@@ -97,13 +93,11 @@ func trackSomethingErrored(pw Writer, tracker *Tracker) {
 
 	c := time.Tick(trackerIncrementInterval)
 	for !tracker.IsDone() {
-		select {
-		case <-c:
-			if tracker.value+incrementPerCycle > total {
-				tracker.MarkAsErrored()
-			} else {
-				tracker.IncrementWithError(incrementPerCycle)
-			}
+		<-c
+		if tracker.value+incrementPerCycle > total {
+			tracker.MarkAsErrored()
+		} else {
+			tracker.IncrementWithError(incrementPerCycle)
 		}
 	}
 }
@@ -117,16 +111,14 @@ func trackSomethingIndeterminate(pw Writer, tracker *Tracker) {
 
 	c := time.Tick(trackerIncrementInterval)
 	for !tracker.IsDone() {
-		select {
-		case <-c:
-			if tracker.value+incrementPerCycle > total {
-				tracker.Increment(total - tracker.value)
-			} else {
-				tracker.Increment(incrementPerCycle)
-			}
-			if tracker.Value() >= total {
-				tracker.MarkAsDone()
-			}
+		<-c
+		if tracker.value+incrementPerCycle > total {
+			tracker.Increment(total - tracker.value)
+		} else {
+			tracker.Increment(incrementPerCycle)
+		}
+		if tracker.Value() >= total {
+			tracker.MarkAsDone()
 		}
 	}
 }
@@ -336,6 +328,34 @@ func TestProgress_generateTrackerStr_Indeterminate(t *testing.T) {
 	if t.Failed() {
 		fmt.Println(finalOutput.String())
 	}
+}
+
+func TestProgress_RenderNeverStarted(t *testing.T) {
+	renderOutput := strings.Builder{}
+
+	pw := generateWriter()
+	pw.SetOutputWriter(&renderOutput)
+
+	tr := &Tracker{DeferStart: true}
+	pw.AppendTracker(tr)
+
+	go pw.Render()
+	time.Sleep(renderWaitTime)
+	tr.MarkAsDone()
+	pw.Stop()
+	time.Sleep(time.Second)
+
+	expectedOutPatterns := []*regexp.Regexp{
+		regexp.MustCompile(`\s*\.\.\. {2}\?\?\? {2}\[\.{23}] \[0 in 0s]`),
+		regexp.MustCompile(`\s*\.\.\. done! \[0 in 0s]`),
+	}
+	out := renderOutput.String()
+	for _, expectedOutPattern := range expectedOutPatterns {
+		if !expectedOutPattern.MatchString(out) {
+			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
+		}
+	}
+	showOutputOnFailure(t, out)
 }
 
 func TestProgress_RenderNothing(t *testing.T) {

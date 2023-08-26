@@ -4,7 +4,7 @@ import (
 	"io"
 )
 
-// Writer declares the interfaces that can be used to setup and render a table.
+// Writer declares the interfaces that can be used to set up and render a table.
 type Writer interface {
 	AppendFooter(row Row, configs ...RowConfig)
 	AppendHeader(row Row, configs ...RowConfig)

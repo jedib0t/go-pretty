@@ -168,27 +168,25 @@ type StyleOptions struct {
 	TimeOverallPrecision    time.Duration  // precision for overall time
 }
 
-var (
-	// StyleOptionsDefault defines sane defaults for the Options. Use this as an
-	// example to customize the Tracker rendering.
-	StyleOptionsDefault = StyleOptions{
-		DoneString:              "done!",
-		ErrorString:             "fail!",
-		ETAPrecision:            time.Second,
-		ETAString:               "~ETA",
-		PercentFormat:           "%5.2f%%",
-		PercentIndeterminate:    " ??? ",
-		Separator:               " ... ",
-		SnipIndicator:           "~",
-		SpeedPosition:           PositionRight,
-		SpeedPrecision:          time.Microsecond,
-		SpeedOverallFormatter:   FormatNumber,
-		SpeedSuffix:             "/s",
-		TimeDonePrecision:       time.Millisecond,
-		TimeInProgressPrecision: time.Microsecond,
-		TimeOverallPrecision:    time.Second,
-	}
-)
+// StyleOptionsDefault defines sane defaults for the Options. Use this as an
+// example to customize the Tracker rendering.
+var StyleOptionsDefault = StyleOptions{
+	DoneString:              "done!",
+	ErrorString:             "fail!",
+	ETAPrecision:            time.Second,
+	ETAString:               "~ETA",
+	PercentFormat:           "%5.2f%%",
+	PercentIndeterminate:    " ??? ",
+	Separator:               " ... ",
+	SnipIndicator:           "~",
+	SpeedPosition:           PositionRight,
+	SpeedPrecision:          time.Microsecond,
+	SpeedOverallFormatter:   FormatNumber,
+	SpeedSuffix:             "/s",
+	TimeDonePrecision:       time.Millisecond,
+	TimeInProgressPrecision: time.Microsecond,
+	TimeOverallPrecision:    time.Second,
+}
 
 // StyleVisibility controls what gets shown and what gets hidden.
 type StyleVisibility struct {
@@ -204,18 +202,16 @@ type StyleVisibility struct {
 	Value          bool // tracker value
 }
 
-var (
-	// StyleVisibilityDefault defines sane defaults for the Visibility.
-	StyleVisibilityDefault = StyleVisibility{
-		ETA:            false,
-		ETAOverall:     true,
-		Percentage:     true,
-		Pinned:         true,
-		Speed:          false,
-		SpeedOverall:   false,
-		Time:           true,
-		Tracker:        true,
-		TrackerOverall: false,
-		Value:          true,
-	}
-)
+// StyleVisibilityDefault defines sane defaults for the Visibility.
+var StyleVisibilityDefault = StyleVisibility{
+	ETA:            false,
+	ETAOverall:     true,
+	Percentage:     true,
+	Pinned:         true,
+	Speed:          false,
+	SpeedOverall:   false,
+	Time:           true,
+	Tracker:        true,
+	TrackerOverall: false,
+	Value:          true,
+}

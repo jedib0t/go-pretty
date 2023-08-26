@@ -149,7 +149,7 @@ func (p *Progress) generateTrackerStrIndeterminate(maxLen int) string {
 	}
 
 	return p.style.Colors.Tracker.Sprintf("%s%s%s",
-		p.style.Chars.BoxLeft, string(pUnfinished), p.style.Chars.BoxRight,
+		p.style.Chars.BoxLeft, pUnfinished, p.style.Chars.BoxRight,
 	)
 }
 
@@ -185,12 +185,8 @@ func (p *Progress) renderPinnedMessages(out *strings.Builder) {
 
 func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHint) {
 	message := t.message()
-	if strings.Contains(message, "\t") {
-		message = strings.Replace(message, "\t", "    ", -1)
-	}
-	if strings.Contains(message, "\r") {
-		message = strings.Replace(message, "\r", "", -1)
-	}
+	message = strings.ReplaceAll(message, "\t", "    ")
+	message = strings.ReplaceAll(message, "\r", "")
 	if p.messageWidth > 0 {
 		messageLen := text.RuneWidthWithoutEscSequences(message)
 		if messageLen < p.messageWidth {
@@ -412,10 +408,12 @@ func (p *Progress) renderTrackerStatsSpeedInternal(out *strings.Builder, speed s
 
 func (p *Progress) renderTrackerStatsTime(outStats *strings.Builder, t *Tracker, hint renderHint) {
 	var td, tp time.Duration
-	if t.IsDone() {
-		td = t.timeStop.Sub(t.timeStart)
-	} else if !t.timeStart.IsZero() {
-		td = time.Since(t.timeStart)
+	if !t.timeStart.IsZero() {
+		if t.IsDone() {
+			td = t.timeStop.Sub(t.timeStart)
+		} else {
+			td = time.Since(t.timeStart)
+		}
 	}
 	if hint.isOverallTracker {
 		tp = p.style.Options.TimeOverallPrecision

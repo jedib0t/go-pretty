@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// Writer declares the interfaces that can be used to setup and render a
+// Writer declares the interfaces that can be used to set up and render a
 // Progress tracker with one or more trackers.
 type Writer interface {
 	AppendTracker(tracker *Tracker)

@@ -169,8 +169,8 @@ func TestProgress_SetUpdateFrequency(t *testing.T) {
 	p.initForRender()
 	assert.Equal(t, DefaultUpdateFrequency, p.updateFrequency)
 
-	p.SetUpdateFrequency(time.Duration(time.Second))
-	assert.Equal(t, time.Duration(time.Second), p.updateFrequency)
+	p.SetUpdateFrequency(time.Second)
+	assert.Equal(t, time.Second, p.updateFrequency)
 }
 
 func TestProgress_ShowETA(t *testing.T) {
