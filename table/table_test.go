@@ -24,12 +24,13 @@ var (
 		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
 		{300, "Tyrion", "Lannister", 5000},
 	}
-	testRowMultiLine = Row{0, "Winter", "Is", 0, "Coming.\r\nThe North Remembers!\nThis is known."}
-	testRowNewLines  = Row{0, "Valar", "Morghulis", 0, "Faceless\nMen"}
-	testRowPipes     = Row{0, "Valar", "Morghulis", 0, "Faceless|Men"}
-	testRowTabs      = Row{0, "Valar", "Morghulis", 0, "Faceless\tMen"}
-	testTitle1       = "Game of Thrones"
-	testTitle2       = "When you play the Game of Thrones, you win or you die. There is no middle ground."
+	testRowMultiLine    = Row{0, "Winter", "Is", 0, "Coming.\r\nThe North Remembers!\nThis is known."}
+	testRowNewLines     = Row{0, "Valar", "Morghulis", 0, "Faceless\nMen"}
+	testRowPipes        = Row{0, "Valar", "Morghulis", 0, "Faceless|Men"}
+	testRowTabs         = Row{0, "Valar", "Morghulis", 0, "Faceless\tMen"}
+	testRowDoubleQuotes = Row{0, "Valar", "Morghulis", 0, "Faceless\"Men"}
+	testTitle1          = "Game of Thrones"
+	testTitle2          = "When you play the Game of Thrones, you win or you die. There is no middle ground."
 )
 
 func init() {

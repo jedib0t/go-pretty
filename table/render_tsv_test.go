@@ -18,6 +18,7 @@ func TestTable_RenderTSV(t *testing.T) {
 				tw.AppendRows(testRows)
 				tw.AppendRow(testRowMultiLine)
 				tw.AppendRow(testRowTabs)
+				tw.AppendRow(testRowDoubleQuotes)
 				tw.AppendFooter(testFooter)
 				tw.SetCaption(testCaption)
 				tw.SetTitle(testTitle1)
@@ -29,10 +30,11 @@ Game of Thrones
 1	Arya	Stark	3000	
 20	Jon	Snow	2000	You know nothing, Jon Snow!
 300	Tyrion	Lannister	5000	
-0	Winter	Is	0	Coming.
+0	Winter	Is	0	"Coming.
 The North Remembers!
-This is known.
-0	Valar	Morghulis	0	Faceless    Men
+This is known."
+0	Valar	Morghulis	0	"Faceless    Men"
+0	Valar	Morghulis	0	"Faceless""Men"
 		Total	10000	
 A Song of Ice and Fire`,
 		},
