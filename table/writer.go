@@ -16,6 +16,7 @@ type Writer interface {
 	RenderCSV() string
 	RenderHTML() string
 	RenderMarkdown() string
+	RenderTSV() string
 	ResetFooters()
 	ResetHeaders()
 	ResetRows()
