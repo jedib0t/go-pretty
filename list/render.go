@@ -6,15 +6,15 @@ import (
 )
 
 // Render renders the List in a human-readable "pretty" format. Example:
-//  * Game Of Thrones
-//    * Winter
-//    * Is
-//    * Coming
-//      * This
-//      * Is
-//      * Known
-//  * The Dark Tower
-//    * The Gunslinger
+// | * Game Of Thrones
+// |   * Winter
+// |   * Is
+// |   * Coming
+// |     * This
+// |     * Is
+// |     * Known
+// | * The Dark Tower
+// |   * The Gunslinger
 func (l *List) Render() string {
 	l.initForRender()
 
