@@ -146,13 +146,13 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 	t.Run("columns only", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE\nEXE", "RCE\nRUN"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"})
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "Y", "Y"})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1B", "C 3", "N", "N"})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 4", "N", "N"})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 5", "Y", "N"})
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 6", "Y", "Y"})
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 7", "Y", "Y"})
 		tw.AppendFooter(Row{"", "", "", 7, 5, 3})
 		tw.SetAutoIndex(true)
 		tw.SetColumnConfigs([]ColumnConfig{
@@ -171,7 +171,7 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 │   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │ RCE │ RCE │
 │   │         │        │           │           │ EXE │ RUN │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
-│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │  Y  │  Y  │
+│ 1 │ a.a.a.a │ Pod 1A │ NS 1A     │ C 1       │  Y  │  Y  │
 ├───┤         │        │           ├───────────┼─────┼─────┤
 │ 2 │         │        │           │ C 2       │  Y  │  N  │
 ├───┤         │        ├───────────┼───────────┼─────┼─────┤
@@ -181,7 +181,7 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 ├───┤         │        │           ├───────────┼─────┼─────┤
 │ 5 │         │        │           │ C 5       │  Y  │  N  │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
-│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │  Y  │  Y  │
+│ 6 │ b.b.b.b │ Pod 2  │ NS 3      │ C 6       │  Y  │  Y  │
 ├───┤         │        │           ├───────────┼─────┼─────┤
 │ 7 │         │        │           │ C 7       │  Y  │  Y  │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
@@ -192,13 +192,13 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 	t.Run("columns only with hidden columns", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE\nEXE", "RCE\nRUN"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "Y", "Y"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"})
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "N"})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "Y", "Y"})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1B", "C 3", "N", "N"})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 4", "Y", "Y"})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 5", "Y", "N"})
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 6", "Y", "Y"})
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 7", "Y", "N"})
 		tw.AppendFooter(Row{"", "", "", 7, 5, 3})
 		tw.SetColumnConfigs([]ColumnConfig{
 			{Number: 1, AutoMerge: true},
@@ -215,7 +215,7 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 ┌─────────┬────────┬───────────┐
 │ NODE IP │ PODS   │ NAMESPACE │
 ├─────────┼────────┼───────────┤
-│ 1.1.1.1 │ Pod 1A │ NS 1A     │
+│ a.a.a.a │ Pod 1A │ NS 1A     │
 │         │        │           │
 │         │        │           │
 │         │        ├───────────┤
@@ -225,7 +225,7 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 │         │        │           │
 │         │        │           │
 ├─────────┼────────┼───────────┤
-│ 2.2.2.2 │ Pod 2  │ NS 3      │
+│ b.b.b.b │ Pod 2  │ NS 3      │
 │         │        │           │
 │         │        │           │
 ├─────────┼────────┼───────────┤
@@ -237,13 +237,13 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE"}, rcAutoMerge)
 		tw.AppendHeader(Row{"", "", "", "", "EXE", "RUN"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true, AutoMergeAlign: text.AlignRight})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1B", "C 3", "N", "N"})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 5", "Y", "N"})
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true, AutoMergeAlign: text.AlignRight})
 		tw.AppendFooter(Row{"", "", "", 7, 5, 3})
 		tw.SetAutoIndex(true)
 		tw.SetColumnConfigs([]ColumnConfig{
@@ -259,19 +259,19 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 │   ├─────────┼────────┼───────────┼───────────┼─────┬─────┤
 │   │         │        │           │           │ EXE │ RUN │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
-│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │     Y     │
+│ 1 │ a.a.a.a │ Pod 1A │ NS 1A     │ C 1       │     Y     │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
-│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 2       │  Y  │  N  │
+│ 2 │ a.a.a.a │ Pod 1A │ NS 1A     │ C 2       │  Y  │  N  │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
-│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B     │ C 3       │  N  │  N  │
+│ 3 │ a.a.a.a │ Pod 1A │ NS 1B     │ C 3       │  N  │  N  │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
-│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │     N     │
+│ 4 │ a.a.a.a │ Pod 1B │ NS 2      │ C 4       │     N     │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
-│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 5       │  Y  │  N  │
+│ 5 │ a.a.a.a │ Pod 1B │ NS 2      │ C 5       │  Y  │  N  │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
-│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │     Y     │
+│ 6 │ b.b.b.b │ Pod 2  │ NS 3      │ C 6       │     Y     │
 ├───┼─────────┼────────┼───────────┼───────────┼───────────┤
-│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │         Y │
+│ 7 │ b.b.b.b │ Pod 2  │ NS 3      │ C 7       │         Y │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
 │   │         │        │           │ 7         │  5  │  3  │
 └───┴─────────┴────────┴───────────┴───────────┴─────┴─────┘`)
@@ -281,13 +281,13 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE"}, rcAutoMerge)
 		tw.AppendHeader(Row{"", "", "", "", "EXE", "RUN"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"}, rcAutoMerge)
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1B", "C 3", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 5", "Y", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 7", "Y", "Y"}, rcAutoMerge)
 		tw.AppendFooter(Row{"", "", "", 7, 5, 3})
 		tw.SetAutoIndex(true)
 		tw.SetColumnConfigs([]ColumnConfig{
@@ -307,7 +307,7 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 │   ├─────────┼────────┼───────────┼───────────┼─────┬─────┤
 │   │         │        │           │           │ EXE │ RUN │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
-│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │     Y     │
+│ 1 │ a.a.a.a │ Pod 1A │ NS 1A     │ C 1       │     Y     │
 ├───┤         │        │           ├───────────┼─────┬─────┤
 │ 2 │         │        │           │ C 2       │  Y  │  N  │
 ├───┤         │        ├───────────┼───────────┼─────┴─────┤
@@ -317,7 +317,7 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 ├───┤         │        │           ├───────────┼─────┬─────┤
 │ 5 │         │        │           │ C 5       │  Y  │  N  │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
-│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │     Y     │
+│ 6 │ b.b.b.b │ Pod 2  │ NS 3      │ C 6       │     Y     │
 ├───┤         │        │           ├───────────┼───────────┤
 │ 7 │         │        │           │ C 7       │     Y     │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
@@ -327,13 +327,13 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 
 	t.Run("rows and columns no headers or footers", func(t *testing.T) {
 		tw := NewWriter()
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true, AutoMergeAlign: text.AlignRight})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1B", "C 3", "N", "N"})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 5", "Y", "N"})
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true, AutoMergeAlign: text.AlignRight})
 		tw.SetColumnConfigs([]ColumnConfig{
 			{Number: 5, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
 			{Number: 6, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
@@ -343,31 +343,31 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 
 		compareOutput(t, tw.Render(), `
 ┌─────────┬────────┬───────┬─────┬───────┐
-│ 1.1.1.1 │ Pod 1A │ NS 1A │ C 1 │   Y   │
+│ a.a.a.a │ Pod 1A │ NS 1A │ C 1 │   Y   │
 ├─────────┼────────┼───────┼─────┼───┬───┤
-│ 1.1.1.1 │ Pod 1A │ NS 1A │ C 2 │ Y │ N │
+│ a.a.a.a │ Pod 1A │ NS 1A │ C 2 │ Y │ N │
 ├─────────┼────────┼───────┼─────┼───┼───┤
-│ 1.1.1.1 │ Pod 1A │ NS 1B │ C 3 │ N │ N │
+│ a.a.a.a │ Pod 1A │ NS 1B │ C 3 │ N │ N │
 ├─────────┼────────┼───────┼─────┼───┴───┤
-│ 1.1.1.1 │ Pod 1B │ NS 2  │ C 4 │   N   │
+│ a.a.a.a │ Pod 1B │ NS 2  │ C 4 │   N   │
 ├─────────┼────────┼───────┼─────┼───┬───┤
-│ 1.1.1.1 │ Pod 1B │ NS 2  │ C 5 │ Y │ N │
+│ a.a.a.a │ Pod 1B │ NS 2  │ C 5 │ Y │ N │
 ├─────────┼────────┼───────┼─────┼───┴───┤
-│ 2.2.2.2 │ Pod 2  │ NS 3  │ C 6 │   Y   │
+│ b.b.b.b │ Pod 2  │ NS 3  │ C 6 │   Y   │
 ├─────────┼────────┼───────┼─────┼───────┤
-│ 2.2.2.2 │ Pod 2  │ NS 3  │ C 7 │     Y │
+│ b.b.b.b │ Pod 2  │ NS 3  │ C 7 │     Y │
 └─────────┴────────┴───────┴─────┴───────┘`)
 	})
 
 	t.Run("rows and columns no headers or footers with auto-index", func(t *testing.T) {
 		tw := NewWriter()
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true, AutoMergeAlign: text.AlignRight})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1B", "C 3", "N", "N"})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 5", "Y", "N"})
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 7", "Y", "Y"}, RowConfig{AutoMerge: true, AutoMergeAlign: text.AlignRight})
 		tw.SetAutoIndex(true)
 		tw.SetColumnConfigs([]ColumnConfig{
 			{Number: 5, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
@@ -380,19 +380,19 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 ┌───┬─────────┬────────┬───────┬─────┬───┬───┐
 │   │    A    │    B   │   C   │  D  │ E │ F │
 ├───┼─────────┼────────┼───────┼─────┼───┴───┤
-│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A │ C 1 │   Y   │
+│ 1 │ a.a.a.a │ Pod 1A │ NS 1A │ C 1 │   Y   │
 ├───┼─────────┼────────┼───────┼─────┼───┬───┤
-│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A │ C 2 │ Y │ N │
+│ 2 │ a.a.a.a │ Pod 1A │ NS 1A │ C 2 │ Y │ N │
 ├───┼─────────┼────────┼───────┼─────┼───┼───┤
-│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B │ C 3 │ N │ N │
+│ 3 │ a.a.a.a │ Pod 1A │ NS 1B │ C 3 │ N │ N │
 ├───┼─────────┼────────┼───────┼─────┼───┴───┤
-│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2  │ C 4 │   N   │
+│ 4 │ a.a.a.a │ Pod 1B │ NS 2  │ C 4 │   N   │
 ├───┼─────────┼────────┼───────┼─────┼───┬───┤
-│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2  │ C 5 │ Y │ N │
+│ 5 │ a.a.a.a │ Pod 1B │ NS 2  │ C 5 │ Y │ N │
 ├───┼─────────┼────────┼───────┼─────┼───┴───┤
-│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3  │ C 6 │   Y   │
+│ 6 │ b.b.b.b │ Pod 2  │ NS 3  │ C 6 │   Y   │
 ├───┼─────────┼────────┼───────┼─────┼───────┤
-│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3  │ C 7 │     Y │
+│ 7 │ b.b.b.b │ Pod 2  │ NS 3  │ C 7 │     Y │
 └───┴─────────┴────────┴───────┴─────┴───────┘`)
 	})
 
@@ -400,13 +400,13 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE", "ID"}, rcAutoMerge)
 		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "EXE", "RUN", ""})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y", 123}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N", 234})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N", 345})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N", 456}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N", 567})
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y", 678}, rcAutoMerge)
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y", 789}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "Y", "Y", 123}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "N", 234})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1B", "C 3", "N", "N", 345})
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 4", "N", "N", 456}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 5", "Y", "N", 567})
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 6", "Y", "Y", 678}, rcAutoMerge)
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 7", "Y", "Y", 789}, rcAutoMerge)
 		tw.AppendFooter(Row{"", "", "", 7, 5, 5}, rcAutoMerge)
 		tw.AppendFooter(Row{"", "", "", 7, 5, 3}, rcAutoMerge)
 		tw.AppendFooter(Row{"", "", "", 7, 5, 5}, rcAutoMerge)
@@ -430,7 +430,7 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 │   │         │        │           │           ├─────┬─────┼─────┤
 │   │         │        │           │           │ EXE │ RUN │     │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┼─────┤
-│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │     Y     │ 123 │
+│ 1 │ a.a.a.a │ Pod 1A │ NS 1A     │ C 1       │     Y     │ 123 │
 ├───┤         │        │           ├───────────┼─────┬─────┼─────┤
 │ 2 │         │        │           │ C 2       │  Y  │  N  │ 234 │
 ├───┤         │        ├───────────┼───────────┼─────┼─────┼─────┤
@@ -440,7 +440,7 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 ├───┤         │        │           ├───────────┼─────┬─────┼─────┤
 │ 5 │         │        │           │ C 5       │  Y  │  N  │ 567 │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┼─────┤
-│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │     Y     │ 678 │
+│ 6 │ b.b.b.b │ Pod 2  │ NS 3      │ C 6       │     Y     │ 678 │
 ├───┤         │        │           ├───────────┼───────────┼─────┤
 │ 7 │         │        │           │ C 7       │     Y     │ 789 │
 ├───┼─────────┴────────┴───────────┼───────────┼───────────┼─────┤
@@ -503,9 +503,9 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 	t.Run("long column no merge", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Column 1", "Column 2", "Column 3", "Column 4", "Column 5", "Column 6", "Column 7", "Column 8"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRW", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRH", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRY"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRW", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRH", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRY"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
 		tw.SetAutoIndex(true)
 		tw.SetColumnConfigs([]ColumnConfig{
 			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
@@ -520,25 +520,25 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 ┌───┬──────────┬──────────┬──────────┬──────────┬──────────────────────────┬──────────────────────────┬──────────────────────────┬──────────────────────────┐
 │   │ COLUMN 1 │ COLUMN 2 │ COLUMN 3 │ COLUMN 4 │         COLUMN 5         │         COLUMN 6         │         COLUMN 7         │         COLUMN 8         │
 ├───┼──────────┼──────────┼──────────┼──────────┼──────────────────────────┼──────────────────────────┼──────────────────────────┼──────────────────────────┤
-│ 1 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 1      │ 4F8F5CB531E3D49A61CF417C │ 4F8F5CB531E3D49A61CF417C │ 4F8F5CB531E3D49A61CF417C │ 4F8F5CB531E3D49A61CF417C │
+│ 1 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 1      │ 4F8F5CB531E3D49A61CF417C │ 4F8F5CB531E3D49A61CF417C │ 4F8F5CB531E3D49A61CF417C │ 4F8F5CB531E3D49A61CF417C │
 │   │          │          │          │          │ D133792CCFA501FD8DA53EE3 │ D133792CCFA501FD8DA53EE3 │ D133792CCFA501FD8DA53EE3 │ D133792CCFA501FD8DA53EE3 │
 │   │          │          │          │          │ 68FED20E5FE0248C3A0B64F9 │ 68FED20E5FE0248C3A0B64F9 │ 68FED20E5FE0248C3A0B64F9 │ 68FED20E5FE0248C3A0B64F9 │
 │   │          │          │          │          │ 8A6533CEE1DA614C3A8DDEC7 │ 8A6533CEE1DA614C3A8DDEC7 │ 8A6533CEE1DA614C3A8DDEC7 │ 8A6533CEE1DA614C3A8DDEC7 │
 │   │          │          │          │          │ 91FF05FEE6D971D57C134832 │ 91FF05FEE6D971D57C134832 │ 91FF05FEE6D971D57C134832 │ 91FF05FEE6D971D57C134832 │
 │   │          │          │          │          │         0F4EB42DR        │        0F4EB42DRW        │        0F4EB42DRH        │        0F4EB42DRY        │
 ├───┼──────────┼──────────┼──────────┼──────────┼──────────────────────────┴──────────────────────────┴──────────────────────────┴──────────────────────────┤
-│ 2 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 2      │                                                     Y                                                     │
+│ 2 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 2      │                                                     Y                                                     │
 ├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ 3 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 2      │                                                     Y                                                     │
+│ 3 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 2      │                                                     Y                                                     │
 └───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────┘`)
 	})
 
 	t.Run("long column partially merged #1", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Column 1", "Column 2", "Column 3", "Column 4", "Column 5", "Column 6", "Column 7", "Column 8"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRR"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRR"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
 		tw.SetAutoIndex(true)
 		tw.SetColumnConfigs([]ColumnConfig{
 			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
@@ -553,25 +553,25 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 ┌───┬──────────┬──────────┬──────────┬──────────┬─────────────┬─────────────┬─────────────┬─────────────┐
 │   │ COLUMN 1 │ COLUMN 2 │ COLUMN 3 │ COLUMN 4 │   COLUMN 5  │   COLUMN 6  │   COLUMN 7  │   COLUMN 8  │
 ├───┼──────────┼──────────┼──────────┼──────────┼─────────────┴─────────────┼─────────────┴─────────────┤
-│ 1 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 1      │  4F8F5CB531E3D49A61CF417C │  4F8F5CB531E3D49A61CF417C │
+│ 1 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 1      │  4F8F5CB531E3D49A61CF417C │  4F8F5CB531E3D49A61CF417C │
 │   │          │          │          │          │  D133792CCFA501FD8DA53EE3 │  D133792CCFA501FD8DA53EE3 │
 │   │          │          │          │          │  68FED20E5FE0248C3A0B64F9 │  68FED20E5FE0248C3A0B64F9 │
 │   │          │          │          │          │  8A6533CEE1DA614C3A8DDEC7 │  8A6533CEE1DA614C3A8DDEC7 │
 │   │          │          │          │          │  91FF05FEE6D971D57C134832 │  91FF05FEE6D971D57C134832 │
 │   │          │          │          │          │         0F4EB42DR         │         0F4EB42DRR        │
 ├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────┴───────────────────────────┤
-│ 2 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 2      │                           Y                           │
+│ 2 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 2      │                           Y                           │
 ├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────────────────┤
-│ 3 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 2      │                           Y                           │
+│ 3 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 2      │                           Y                           │
 └───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────────────────┘`)
 	})
 
 	t.Run("long column partially merged #2", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Column 1", "Column 2", "Column 3", "Column 4", "Column 5", "Column 6", "Column 7", "Column 8"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRE"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRE"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
 		tw.SetAutoIndex(true)
 		tw.SetColumnConfigs([]ColumnConfig{
 			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
@@ -586,25 +586,25 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 ┌───┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────────────────────┐
 │   │ COLUMN 1 │ COLUMN 2 │ COLUMN 3 │ COLUMN 4 │ COLUMN 5 │ COLUMN 6 │ COLUMN 7 │         COLUMN 8         │
 ├───┼──────────┼──────────┼──────────┼──────────┼──────────┴──────────┴──────────┼──────────────────────────┤
-│ 1 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 1      │    4F8F5CB531E3D49A61CF417C    │ 4F8F5CB531E3D49A61CF417C │
+│ 1 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 1      │    4F8F5CB531E3D49A61CF417C    │ 4F8F5CB531E3D49A61CF417C │
 │   │          │          │          │          │    D133792CCFA501FD8DA53EE3    │ D133792CCFA501FD8DA53EE3 │
 │   │          │          │          │          │    68FED20E5FE0248C3A0B64F9    │ 68FED20E5FE0248C3A0B64F9 │
 │   │          │          │          │          │    8A6533CEE1DA614C3A8DDEC7    │ 8A6533CEE1DA614C3A8DDEC7 │
 │   │          │          │          │          │    91FF05FEE6D971D57C134832    │ 91FF05FEE6D971D57C134832 │
 │   │          │          │          │          │            0F4EB42DR           │        0F4EB42DRE        │
 ├───┼──────────┼──────────┼──────────┼──────────┼────────────────────────────────┴──────────────────────────┤
-│ 2 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 2      │                             Y                             │
+│ 2 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 2      │                             Y                             │
 ├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────────────────────┤
-│ 3 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 2      │                             Y                             │
+│ 3 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 2      │                             Y                             │
 └───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────────────────────┘`)
 	})
 
 	t.Run("long column fully merged", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Column 1", "Column 2", "Column 3", "Column 4", "Column 5", "Column 6", "Column 7", "Column 8"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
 		tw.SetAutoIndex(true)
 		tw.SetColumnConfigs([]ColumnConfig{
 			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
@@ -619,16 +619,16 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 ┌───┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┐
 │   │ COLUMN 1 │ COLUMN 2 │ COLUMN 3 │ COLUMN 4 │ COLUMN 5 │ COLUMN 6 │ COLUMN 7 │ COLUMN 8 │
 ├───┼──────────┼──────────┼──────────┼──────────┼──────────┴──────────┴──────────┴──────────┤
-│ 1 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 1      │          4F8F5CB531E3D49A61CF417C         │
+│ 1 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 1      │          4F8F5CB531E3D49A61CF417C         │
 │   │          │          │          │          │          D133792CCFA501FD8DA53EE3         │
 │   │          │          │          │          │          68FED20E5FE0248C3A0B64F9         │
 │   │          │          │          │          │          8A6533CEE1DA614C3A8DDEC7         │
 │   │          │          │          │          │          91FF05FEE6D971D57C134832         │
 │   │          │          │          │          │                 0F4EB42DR                 │
 ├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────┤
-│ 2 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 2      │                     Y                     │
+│ 2 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 2      │                     Y                     │
 ├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────┤
-│ 3 │ 1.1.1.1  │ Pod 1A   │ NS 1A    │ C 2      │                     Y                     │
+│ 3 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 2      │                     Y                     │
 └───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────┘`)
 	})
 
@@ -636,13 +636,13 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE1", "RCE2"}, rcAutoMerge)
 		tw.AppendHeader(Row{"", "", "", "", "EXE EXE EXE", "EXE EXE EXE"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1B", "C 3", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 5", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 7", "Y", "Y"}, rcAutoMerge)
 		tw.AppendFooter(Row{"", "", "", 7, 5, 5}, rcAutoMerge)
 		tw.AppendFooter(Row{"", "", "", 6, 4, 4}, rcAutoMerge)
 		tw.SetAutoIndex(true)
@@ -660,19 +660,19 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 │   │                                          │   EXE EXE   │
 │   │                                          │     EXE     │
 ├───┼─────────┬────────┬───────────┬───────────┼─────────────┤
-│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │      Y      │
+│ 1 │ a.a.a.a │ Pod 1A │ NS 1A     │ C 1       │      Y      │
 ├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
-│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 2       │      Y      │
+│ 2 │ a.a.a.a │ Pod 1A │ NS 1A     │ C 2       │      Y      │
 ├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
-│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B     │ C 3       │      N      │
+│ 3 │ a.a.a.a │ Pod 1A │ NS 1B     │ C 3       │      N      │
 ├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
-│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │      N      │
+│ 4 │ a.a.a.a │ Pod 1B │ NS 2      │ C 4       │      N      │
 ├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
-│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 5       │      Y      │
+│ 5 │ a.a.a.a │ Pod 1B │ NS 2      │ C 5       │      Y      │
 ├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
-│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │      Y      │
+│ 6 │ b.b.b.b │ Pod 2  │ NS 3      │ C 6       │      Y      │
 ├───┼─────────┼────────┼───────────┼───────────┼─────────────┤
-│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │      Y      │
+│ 7 │ b.b.b.b │ Pod 2  │ NS 3      │ C 7       │      Y      │
 ├───┼─────────┴────────┴───────────┼───────────┼─────────────┤
 │   │                              │ 7         │      5      │
 │   ├──────────────────────────────┼───────────┼─────────────┤
@@ -684,13 +684,13 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE1", "RCE2", "RCE3"}, rcAutoMerge)
 		tw.AppendHeader(Row{"", "", "", "", "EXE EXE EXE", "EXE EXE EXE", "EXE EXE EXE"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N", "N"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N", "N"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1B", "C 3", "N", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 4", "N", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 5", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 6", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 7", "Y", "Y", "Y"}, rcAutoMerge)
 		tw.AppendFooter(Row{"", "", "", 7, 5, 5, 5}, rcAutoMerge)
 		tw.AppendFooter(Row{"", "", "", 6, 4, 4, 3}, rcAutoMerge)
 		tw.SetAutoIndex(true)
@@ -709,19 +709,19 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 │   │                                          │       EXE EXE      │
 │   │                                          │         EXE        │
 ├───┼─────────┬────────┬───────────┬───────────┼────────────────────┤
-│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │          Y         │
+│ 1 │ a.a.a.a │ Pod 1A │ NS 1A     │ C 1       │          Y         │
 ├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
-│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 2       │          Y         │
+│ 2 │ a.a.a.a │ Pod 1A │ NS 1A     │ C 2       │          Y         │
 ├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
-│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B     │ C 3       │          N         │
+│ 3 │ a.a.a.a │ Pod 1A │ NS 1B     │ C 3       │          N         │
 ├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
-│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │          N         │
+│ 4 │ a.a.a.a │ Pod 1B │ NS 2      │ C 4       │          N         │
 ├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
-│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 5       │          Y         │
+│ 5 │ a.a.a.a │ Pod 1B │ NS 2      │ C 5       │          Y         │
 ├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
-│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │          Y         │
+│ 6 │ b.b.b.b │ Pod 2  │ NS 3      │ C 6       │          Y         │
 ├───┼─────────┼────────┼───────────┼───────────┼────────────────────┤
-│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │          Y         │
+│ 7 │ b.b.b.b │ Pod 2  │ NS 3      │ C 7       │          Y         │
 ├───┼─────────┴────────┴───────────┼───────────┼────────────────────┤
 │   │                              │ 7         │          5         │
 │   ├──────────────────────────────┼───────────┼─────────────┬──────┤
@@ -732,8 +732,8 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 	t.Run("empty cells", func(t *testing.T) {
 		tw := NewWriter()
 		rowConfigAutoMerge := RowConfig{AutoMerge: true}
-		tw.AppendRow(Row{"Product", "Standalone", "foo bar", "1.1.1.1", ""}, rowConfigAutoMerge)
-		tw.AppendRow(Row{"Test", "Standalone", "bar baz", "2.2.2.2", ""}, rowConfigAutoMerge)
+		tw.AppendRow(Row{"Product", "Standalone", "foo bar", "a.a.a.a", ""}, rowConfigAutoMerge)
+		tw.AppendRow(Row{"Test", "Standalone", "bar baz", "b.b.b.b", ""}, rowConfigAutoMerge)
 		tw.AppendRow(Row{"Product", "RedisCluster", "foo baz", "", "Cluster #1"}, rowConfigAutoMerge)
 		tw.AppendRow(Row{"Product", "RedisCluster", "bar baz", "", "Cluster #2"}, rowConfigAutoMerge)
 		tw.SetAutoIndex(true)
@@ -750,9 +750,9 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 		compareOutput(t, tw.Render(), `┌───┬─────────┬──────────────┬─────────┬─────────┬────────────┐
 │   │    A    │       B      │    C    │    D    │      E     │
 ├───┼─────────┼──────────────┼─────────┼─────────┼────────────┤
-│ 1 │ Product │ Standalone   │ foo bar │ 1.1.1.1 │            │
+│ 1 │ Product │ Standalone   │ foo bar │ a.a.a.a │            │
 ├───┼─────────┤              ├─────────┼─────────┤            │
-│ 2 │ Test    │              │ bar baz │ 2.2.2.2 │            │
+│ 2 │ Test    │              │ bar baz │ b.b.b.b │            │
 ├───┼─────────┼──────────────┼─────────┼─────────┼────────────┤
 │ 3 │ Product │ RedisCluster │ foo baz │         │ Cluster #1 │
 ├───┤         │              ├─────────┤         ├────────────┤
@@ -763,13 +763,13 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 	t.Run("everything", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"COLUMNS", "COLUMNS", "COLUMNS", "COLUMNS", "COLUMNS", "COLUMNS", "COLUMNS"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "N"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N", "N"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "Y", "N"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "N", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1B", "C 3", "N", "N", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 4", "N", "Y", "N"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1B", "NS 2", "C 5", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 6", "N", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"b.b.b.b", "Pod 2", "NS 3", "C 7", "Y", "Y", "Y"}, rcAutoMerge)
 		tw.AppendFooter(Row{"foo", "foo", "foo", "foo", "bar", "bar", "bar"}, rcAutoMerge)
 		tw.AppendFooter(Row{7, 7, 7, 7, 7, 7, 7}, rcAutoMerge)
 		tw.SetAutoIndex(true)
@@ -788,7 +788,7 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 ┌───┬───────────────────────────────────────────────────┐
 │   │                      COLUMNS                      │
 ├───┼─────────┬─────────┬─────────┬─────────┬───────────┤
-│ 1 │ 1.1.1.1 │ Pod 1A  │ NS 1A   │ C 1     │     Y     │
+│ 1 │ a.a.a.a │ Pod 1A  │ NS 1A   │ C 1     │     Y     │
 ├───┤         │         │         ├─────────┼───────┬───┤
 │ 2 │         │         │         │ C 2     │   Y   │ N │
 ├───┤         │         ├─────────┼─────────┼───────┴───┤
@@ -798,7 +798,7 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 ├───┤         │         │         ├─────────┼───┴───┴───┤
 │ 5 │         │         │         │ C 5     │     Y     │
 ├───┼─────────┼─────────┼─────────┼─────────┼───┬───────┤
-│ 6 │ 2.2.2.2 │ Pod 2   │ NS 3    │ C 6     │ N │   Y   │
+│ 6 │ b.b.b.b │ Pod 2   │ NS 3    │ C 6     │ N │   Y   │
 ├───┤         │         │         ├─────────┼───┴───────┤
 │ 7 │         │         │         │ C 7     │     Y     │
 ├───┼─────────┴─────────┴─────────┴─────────┼───────────┤
