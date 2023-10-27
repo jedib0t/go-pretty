@@ -304,7 +304,7 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 		compareOutput(t, tw.Render(), `
 ┌───┬─────────┬────────┬───────────┬───────────┬───────────┐
 │   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │    RCE    │
-│   │         │        │           │           ├─────┬─────┤
+│   ├─────────┼────────┼───────────┼───────────┼─────┬─────┤
 │   │         │        │           │           │ EXE │ RUN │
 ├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
 │ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │     Y     │
@@ -396,10 +396,10 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 └───┴─────────┴────────┴───────┴─────┴───────┘`)
 	})
 
-	t.Run("rows and columns and footers", func(t *testing.T) {
+	t.Run("rows and columns and headers and footers", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE", "ID"}, rcAutoMerge)
-		tw.AppendHeader(Row{"", "", "", "", "EXE", "RUN", ""})
+		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "EXE", "RUN", ""})
 		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y", 123}, rcAutoMerge)
 		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N", 234})
 		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N", 345})
@@ -632,55 +632,7 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 └───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────┘`)
 	})
 
-	t.Run("headers too", func(t *testing.T) {
-		tw := NewWriter()
-		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE", "RCE"}, rcAutoMerge)
-		tw.AppendHeader(Row{"", "", "", "", "EXE EXE EXE", "EXE EXE EXE"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 1", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1A", "C 2", "Y", "N"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1A", "NS 1B", "C 3", "N", "N"})
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 4", "N", "N"}, rcAutoMerge)
-		tw.AppendRow(Row{"1.1.1.1", "Pod 1B", "NS 2", "C 5", "Y", "N"})
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 6", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"2.2.2.2", "Pod 2", "NS 3", "C 7", "Y", "Y"}, rcAutoMerge)
-		tw.AppendFooter(Row{"", "", "", 7, 5, 3}, rcAutoMerge)
-		tw.AppendFooter(Row{"", "", "", 6, 4, 4}, rcAutoMerge)
-		tw.SetAutoIndex(true)
-		tw.SetColumnConfigs([]ColumnConfig{
-			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 7, WidthMaxEnforcer: text.WrapHard},
-			{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 7, WidthMaxEnforcer: text.WrapHard},
-		})
-		tw.SetStyle(StyleLight)
-		tw.Style().Options.SeparateRows = true
-
-		compareOutput(t, tw.Render(), `
-┌───┬─────────┬────────┬───────────┬───────────┬───────────┐
-│   │ NODE IP │ PODS   │ NAMESPACE │ CONTAINER │    RCE    │
-│   ├─────────┴────────┴───────────┴───────────┼───────────┤
-│   │                                          │  EXE EXE  │
-│   │                                          │    EXE    │
-├───┼─────────┬────────┬───────────┬───────────┼───────────┤
-│ 1 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 1       │     Y     │
-├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
-│ 2 │ 1.1.1.1 │ Pod 1A │ NS 1A     │ C 2       │  Y  │  N  │
-├───┼─────────┼────────┼───────────┼───────────┼─────┼─────┤
-│ 3 │ 1.1.1.1 │ Pod 1A │ NS 1B     │ C 3       │  N  │  N  │
-├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
-│ 4 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 4       │     N     │
-├───┼─────────┼────────┼───────────┼───────────┼─────┬─────┤
-│ 5 │ 1.1.1.1 │ Pod 1B │ NS 2      │ C 5       │  Y  │  N  │
-├───┼─────────┼────────┼───────────┼───────────┼─────┴─────┤
-│ 6 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 6       │     Y     │
-├───┼─────────┼────────┼───────────┼───────────┼───────────┤
-│ 7 │ 2.2.2.2 │ Pod 2  │ NS 3      │ C 7       │     Y     │
-├───┼─────────┴────────┴───────────┼───────────┼─────┬─────┤
-│   │                              │ 7         │  5  │  3  │
-│   ├──────────────────────────────┼───────────┼─────┴─────┤
-│   │                              │ 6         │     4     │
-└───┴──────────────────────────────┴───────────┴───────────┘`)
-	})
-
-	t.Run("headers and footers too", func(t *testing.T) {
+	t.Run("headers and footers", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Node IP", "Pods", "Namespace", "Container", "RCE1", "RCE2"}, rcAutoMerge)
 		tw.AppendHeader(Row{"", "", "", "", "EXE EXE EXE", "EXE EXE EXE"}, rcAutoMerge)
@@ -775,6 +727,37 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 │   ├──────────────────────────────┼───────────┼─────────────┬──────┤
 │   │                              │ 6         │      4      │   3  │
 └───┴──────────────────────────────┴───────────┴─────────────┴──────┘`)
+	})
+
+	t.Run("empty cells", func(t *testing.T) {
+		tw := NewWriter()
+		rowConfigAutoMerge := RowConfig{AutoMerge: true}
+		tw.AppendRow(Row{"Product", "Standalone", "foo bar", "1.1.1.1", ""}, rowConfigAutoMerge)
+		tw.AppendRow(Row{"Test", "Standalone", "bar baz", "2.2.2.2", ""}, rowConfigAutoMerge)
+		tw.AppendRow(Row{"Product", "RedisCluster", "foo baz", "", "Cluster #1"}, rowConfigAutoMerge)
+		tw.AppendRow(Row{"Product", "RedisCluster", "bar baz", "", "Cluster #2"}, rowConfigAutoMerge)
+		tw.SetAutoIndex(true)
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 1, AutoMerge: true},
+			{Number: 2, AutoMerge: true},
+			{Number: 3, AutoMerge: true},
+			{Number: 4, AutoMerge: true},
+			{Number: 5, AutoMerge: true},
+		})
+		tw.SetStyle(StyleLight)
+		tw.Style().Options.SeparateRows = true
+
+		compareOutput(t, tw.Render(), `┌───┬─────────┬──────────────┬─────────┬─────────┬────────────┐
+│   │    A    │       B      │    C    │    D    │      E     │
+├───┼─────────┼──────────────┼─────────┼─────────┼────────────┤
+│ 1 │ Product │ Standalone   │ foo bar │ 1.1.1.1 │            │
+├───┼─────────┤              ├─────────┼─────────┤            │
+│ 2 │ Test    │              │ bar baz │ 2.2.2.2 │            │
+├───┼─────────┼──────────────┼─────────┼─────────┼────────────┤
+│ 3 │ Product │ RedisCluster │ foo baz │         │ Cluster #1 │
+├───┤         │              ├─────────┤         ├────────────┤
+│ 4 │         │              │ bar baz │         │ Cluster #2 │
+└───┴─────────┴──────────────┴─────────┴─────────┴────────────┘`)
 	})
 
 	t.Run("everything", func(t *testing.T) {
