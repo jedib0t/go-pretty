@@ -56,8 +56,8 @@ func (sb sortByMessage) Less(i, j int) bool { return sb[i].message() < sb[j].mes
 
 type sortByPercent []*Tracker
 
-func (sb sortByPercent) Len() int           { return len(sb) }
-func (sb sortByPercent) Swap(i, j int)      { sb[i], sb[j] = sb[j], sb[i] }
+func (sb sortByPercent) Len() int      { return len(sb) }
+func (sb sortByPercent) Swap(i, j int) { sb[i], sb[j] = sb[j], sb[i] }
 func (sb sortByPercent) Less(i, j int) bool {
 	if sb[i].PercentDone() == sb[j].PercentDone() {
 		return sb[i].timeStart.Before(sb[j].timeStart)
@@ -67,8 +67,8 @@ func (sb sortByPercent) Less(i, j int) bool {
 
 type sortByValue []*Tracker
 
-func (sb sortByValue) Len() int           { return len(sb) }
-func (sb sortByValue) Swap(i, j int)      { sb[i], sb[j] = sb[j], sb[i] }
+func (sb sortByValue) Len() int      { return len(sb) }
+func (sb sortByValue) Swap(i, j int) { sb[i], sb[j] = sb[j], sb[i] }
 func (sb sortByValue) Less(i, j int) bool {
 	if sb[i].value == sb[j].value {
 		return sb[i].timeStart.Before(sb[j].timeStart)
