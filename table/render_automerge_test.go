@@ -366,21 +366,28 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 └───┴───┴───┴───┴───┴───┴───┘`)
 	})
 
-	t.Run("long column no merge", func(t *testing.T) {
+	testLongCol1 := "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR"
+	testLongRowCCs := []ColumnConfig{
+		{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
+		{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
+		{Number: 7, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
+		{Number: 8, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
+	}
+	generateTableForLongRows := func() Writer {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"Column 1", "Column 2", "Column 3", "Column 4", "Column 5", "Column 6", "Column 7", "Column 8"}, rcAutoMerge)
-		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRW", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRH", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRY"}, rcAutoMerge)
-		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
 		tw.SetAutoIndex(true)
-		tw.SetColumnConfigs([]ColumnConfig{
-			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-			{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-			{Number: 7, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-			{Number: 8, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-		})
+		tw.SetColumnConfigs(testLongRowCCs)
 		tw.SetStyle(StyleLight)
 		tw.Style().Options.SeparateRows = true
+		return tw
+	}
+
+	t.Run("long column no merge", func(t *testing.T) {
+		tw := generateTableForLongRows()
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", testLongCol1, testLongCol1 + "W", testLongCol1 + "H", testLongCol1 + "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
 
 		compareOutput(t, tw.Render(), `
 ┌───┬──────────┬──────────┬──────────┬──────────┬──────────────────────────┬──────────────────────────┬──────────────────────────┬──────────────────────────┐
@@ -400,20 +407,10 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 	})
 
 	t.Run("long column partially merged #1", func(t *testing.T) {
-		tw := NewWriter()
-		tw.AppendHeader(Row{"Column 1", "Column 2", "Column 3", "Column 4", "Column 5", "Column 6", "Column 7", "Column 8"}, rcAutoMerge)
-		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRR"}, rcAutoMerge)
+		tw := generateTableForLongRows()
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", testLongCol1, testLongCol1, testLongCol1 + "R", testLongCol1 + "R"}, rcAutoMerge)
 		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
 		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.SetAutoIndex(true)
-		tw.SetColumnConfigs([]ColumnConfig{
-			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-			{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-			{Number: 7, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-			{Number: 8, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-		})
-		tw.SetStyle(StyleLight)
-		tw.Style().Options.SeparateRows = true
 
 		compareOutput(t, tw.Render(), `
 ┌───┬──────────┬──────────┬──────────┬──────────┬─────────────┬─────────────┬─────────────┬─────────────┐
@@ -433,20 +430,10 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 	})
 
 	t.Run("long column partially merged #2", func(t *testing.T) {
-		tw := NewWriter()
-		tw.AppendHeader(Row{"Column 1", "Column 2", "Column 3", "Column 4", "Column 5", "Column 6", "Column 7", "Column 8"}, rcAutoMerge)
-		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DRE"}, rcAutoMerge)
+		tw := generateTableForLongRows()
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", testLongCol1, testLongCol1, testLongCol1, testLongCol1 + "E"}, rcAutoMerge)
 		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
 		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.SetAutoIndex(true)
-		tw.SetColumnConfigs([]ColumnConfig{
-			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-			{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-			{Number: 7, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-			{Number: 8, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-		})
-		tw.SetStyle(StyleLight)
-		tw.Style().Options.SeparateRows = true
 
 		compareOutput(t, tw.Render(), `
 ┌───┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────────────────────┐
@@ -466,20 +453,10 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 	})
 
 	t.Run("long column fully merged", func(t *testing.T) {
-		tw := NewWriter()
-		tw.AppendHeader(Row{"Column 1", "Column 2", "Column 3", "Column 4", "Column 5", "Column 6", "Column 7", "Column 8"}, rcAutoMerge)
-		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR", "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR"}, rcAutoMerge)
+		tw := generateTableForLongRows()
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", testLongCol1, testLongCol1, testLongCol1, testLongCol1}, rcAutoMerge)
 		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
 		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.SetAutoIndex(true)
-		tw.SetColumnConfigs([]ColumnConfig{
-			{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-			{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-			{Number: 7, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-			{Number: 8, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
-		})
-		tw.SetStyle(StyleLight)
-		tw.Style().Options.SeparateRows = true
 
 		compareOutput(t, tw.Render(), `
 ┌───┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┐
@@ -672,5 +649,117 @@ func TestTable_Render_AutoMerge(t *testing.T) {
 │   ├───────────────────────────────────────┴───────────┤
 │   │                         7                         │
 └───┴───────────────────────────────────────────────────┘`)
+	})
+}
+
+func TestTable_Render_AutoMergeLongColumns(t *testing.T) {
+	rcAutoMerge := RowConfig{AutoMerge: true}
+
+	testLongCol1 := "4F8F5CB531E3D49A61CF417CD133792CCFA501FD8DA53EE368FED20E5FE0248C3A0B64F98A6533CEE1DA614C3A8DDEC791FF05FEE6D971D57C1348320F4EB42DR"
+	testLongRowCCs := []ColumnConfig{
+		{Number: 5, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
+		{Number: 6, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
+		{Number: 7, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
+		{Number: 8, Align: text.AlignCenter, AlignFooter: text.AlignCenter, AlignHeader: text.AlignCenter, WidthMax: 24, WidthMaxEnforcer: text.WrapHard},
+	}
+	generateTableForLongRows := func(longRow Row) Writer {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"Column 1", "Column 2", "Column 3", "Column 4", "Column 5", "Column 6", "Column 7", "Column 8"}, rcAutoMerge)
+		tw.AppendRow(longRow, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 2", "Y", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.SetAutoIndex(true)
+		tw.SetColumnConfigs(testLongRowCCs)
+		tw.SetStyle(StyleLight)
+		tw.Style().Options.SeparateRows = true
+		return tw
+	}
+
+	t.Run("no merge", func(t *testing.T) {
+		tw := generateTableForLongRows(
+			Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", testLongCol1, testLongCol1 + "W", testLongCol1 + "H", testLongCol1 + "Y"},
+		)
+
+		compareOutput(t, tw.Render(), `
+┌───┬──────────┬──────────┬──────────┬──────────┬──────────────────────────┬──────────────────────────┬──────────────────────────┬──────────────────────────┐
+│   │ COLUMN 1 │ COLUMN 2 │ COLUMN 3 │ COLUMN 4 │         COLUMN 5         │         COLUMN 6         │         COLUMN 7         │         COLUMN 8         │
+├───┼──────────┼──────────┼──────────┼──────────┼──────────────────────────┼──────────────────────────┼──────────────────────────┼──────────────────────────┤
+│ 1 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 1      │ 4F8F5CB531E3D49A61CF417C │ 4F8F5CB531E3D49A61CF417C │ 4F8F5CB531E3D49A61CF417C │ 4F8F5CB531E3D49A61CF417C │
+│   │          │          │          │          │ D133792CCFA501FD8DA53EE3 │ D133792CCFA501FD8DA53EE3 │ D133792CCFA501FD8DA53EE3 │ D133792CCFA501FD8DA53EE3 │
+│   │          │          │          │          │ 68FED20E5FE0248C3A0B64F9 │ 68FED20E5FE0248C3A0B64F9 │ 68FED20E5FE0248C3A0B64F9 │ 68FED20E5FE0248C3A0B64F9 │
+│   │          │          │          │          │ 8A6533CEE1DA614C3A8DDEC7 │ 8A6533CEE1DA614C3A8DDEC7 │ 8A6533CEE1DA614C3A8DDEC7 │ 8A6533CEE1DA614C3A8DDEC7 │
+│   │          │          │          │          │ 91FF05FEE6D971D57C134832 │ 91FF05FEE6D971D57C134832 │ 91FF05FEE6D971D57C134832 │ 91FF05FEE6D971D57C134832 │
+│   │          │          │          │          │         0F4EB42DR        │        0F4EB42DRW        │        0F4EB42DRH        │        0F4EB42DRY        │
+├───┼──────────┼──────────┼──────────┼──────────┼──────────────────────────┴──────────────────────────┴──────────────────────────┴──────────────────────────┤
+│ 2 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 2      │                                                     Y                                                     │
+├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 3 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 2      │                                                     Y                                                     │
+└───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────┘`)
+	})
+
+	t.Run("merge 2 pairs", func(t *testing.T) {
+		tw := generateTableForLongRows(
+			Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", testLongCol1, testLongCol1, testLongCol1 + "R", testLongCol1 + "R"},
+		)
+
+		compareOutput(t, tw.Render(), `
+┌───┬──────────┬──────────┬──────────┬──────────┬─────────────┬─────────────┬─────────────┬─────────────┐
+│   │ COLUMN 1 │ COLUMN 2 │ COLUMN 3 │ COLUMN 4 │   COLUMN 5  │   COLUMN 6  │   COLUMN 7  │   COLUMN 8  │
+├───┼──────────┼──────────┼──────────┼──────────┼─────────────┴─────────────┼─────────────┴─────────────┤
+│ 1 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 1      │  4F8F5CB531E3D49A61CF417C │  4F8F5CB531E3D49A61CF417C │
+│   │          │          │          │          │  D133792CCFA501FD8DA53EE3 │  D133792CCFA501FD8DA53EE3 │
+│   │          │          │          │          │  68FED20E5FE0248C3A0B64F9 │  68FED20E5FE0248C3A0B64F9 │
+│   │          │          │          │          │  8A6533CEE1DA614C3A8DDEC7 │  8A6533CEE1DA614C3A8DDEC7 │
+│   │          │          │          │          │  91FF05FEE6D971D57C134832 │  91FF05FEE6D971D57C134832 │
+│   │          │          │          │          │         0F4EB42DR         │         0F4EB42DRR        │
+├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────┴───────────────────────────┤
+│ 2 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 2      │                           Y                           │
+├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────────────────┤
+│ 3 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 2      │                           Y                           │
+└───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────────────────┘`)
+	})
+
+	t.Run("marge 3 columns", func(t *testing.T) {
+		tw := generateTableForLongRows(
+			Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", testLongCol1, testLongCol1, testLongCol1, testLongCol1 + "E"},
+		)
+
+		compareOutput(t, tw.Render(), `
+┌───┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────────────────────┐
+│   │ COLUMN 1 │ COLUMN 2 │ COLUMN 3 │ COLUMN 4 │ COLUMN 5 │ COLUMN 6 │ COLUMN 7 │         COLUMN 8         │
+├───┼──────────┼──────────┼──────────┼──────────┼──────────┴──────────┴──────────┼──────────────────────────┤
+│ 1 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 1      │    4F8F5CB531E3D49A61CF417C    │ 4F8F5CB531E3D49A61CF417C │
+│   │          │          │          │          │    D133792CCFA501FD8DA53EE3    │ D133792CCFA501FD8DA53EE3 │
+│   │          │          │          │          │    68FED20E5FE0248C3A0B64F9    │ 68FED20E5FE0248C3A0B64F9 │
+│   │          │          │          │          │    8A6533CEE1DA614C3A8DDEC7    │ 8A6533CEE1DA614C3A8DDEC7 │
+│   │          │          │          │          │    91FF05FEE6D971D57C134832    │ 91FF05FEE6D971D57C134832 │
+│   │          │          │          │          │            0F4EB42DR           │        0F4EB42DRE        │
+├───┼──────────┼──────────┼──────────┼──────────┼────────────────────────────────┴──────────────────────────┤
+│ 2 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 2      │                             Y                             │
+├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────────────────────┤
+│ 3 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 2      │                             Y                             │
+└───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────────────────────┘`)
+	})
+
+	t.Run("merge 4 columns", func(t *testing.T) {
+		tw := generateTableForLongRows(
+			Row{"a.a.a.a", "Pod 1A", "NS 1A", "C 1", testLongCol1, testLongCol1, testLongCol1, testLongCol1},
+		)
+
+		compareOutput(t, tw.Render(), `
+┌───┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┐
+│   │ COLUMN 1 │ COLUMN 2 │ COLUMN 3 │ COLUMN 4 │ COLUMN 5 │ COLUMN 6 │ COLUMN 7 │ COLUMN 8 │
+├───┼──────────┼──────────┼──────────┼──────────┼──────────┴──────────┴──────────┴──────────┤
+│ 1 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 1      │          4F8F5CB531E3D49A61CF417C         │
+│   │          │          │          │          │          D133792CCFA501FD8DA53EE3         │
+│   │          │          │          │          │          68FED20E5FE0248C3A0B64F9         │
+│   │          │          │          │          │          8A6533CEE1DA614C3A8DDEC7         │
+│   │          │          │          │          │          91FF05FEE6D971D57C134832         │
+│   │          │          │          │          │                 0F4EB42DR                 │
+├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────┤
+│ 2 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 2      │                     Y                     │
+├───┼──────────┼──────────┼──────────┼──────────┼───────────────────────────────────────────┤
+│ 3 │ a.a.a.a  │ Pod 1A   │ NS 1A    │ C 2      │                     Y                     │
+└───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────┘`)
 	})
 }
