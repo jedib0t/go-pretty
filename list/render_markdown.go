@@ -1,7 +1,7 @@
 package list
 
 // RenderMarkdown renders the List in the Markdown format. Example:
-/  | * Game Of Thrones
+// | * Game Of Thrones
 // |    * Winter
 // |    * Is
 // |    * Coming
