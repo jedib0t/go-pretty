@@ -4,8 +4,17 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/jedib0t/go-pretty/v6/text"
 )
+
+func init() {
+	spew.Config.DisableCapacities = true
+	spew.Config.DisablePointerAddresses = true
+	spew.Config.DisablePointerMethods = true
+	spew.Config.Indent = "    "
+	spew.Config.SortKeys = true
+}
 
 func (t *Table) analyzeAndStringify(row Row, hint renderHint) rowStr {
 	// update t.numColumns if this row is the longest seen till now
@@ -110,6 +119,10 @@ func (t *Table) initForRender() {
 
 	// reset the counter for the number of lines rendered
 	t.numLinesRendered = 0
+
+	if t.debugWriter != nil {
+		_, _ = t.debugWriter.Write([]byte(spew.Sdump(*t)))
+	}
 }
 
 func (t *Table) initForRenderColumnConfigs() {

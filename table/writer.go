@@ -24,6 +24,7 @@ type Writer interface {
 	SetAutoIndex(autoIndex bool)
 	SetCaption(format string, a ...interface{})
 	SetColumnConfigs(configs []ColumnConfig)
+	SetDebugWriter(w io.Writer)
 	SetIndexColumn(colNum int)
 	SetOutputMirror(mirror io.Writer)
 	SetPageSize(numLines int)

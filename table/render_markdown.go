@@ -16,67 +16,67 @@ import (
 func (t *Table) RenderMarkdown() string {
 	t.initForRender()
 
-	var out strings.Builder
+	out := newOutputWriter(t.debugWriter)
 	if t.numColumns > 0 {
-		t.markdownRenderTitle(&out)
-		t.markdownRenderRowsHeader(&out)
-		t.markdownRenderRows(&out, t.rows, renderHint{})
-		t.markdownRenderRowsFooter(&out)
-		t.markdownRenderCaption(&out)
+		t.markdownRenderTitle(out)
+		t.markdownRenderRowsHeader(out)
+		t.markdownRenderRows(out, t.rows, renderHint{})
+		t.markdownRenderRowsFooter(out)
+		t.markdownRenderCaption(out)
 	}
-	return t.render(&out)
+	return t.render(out)
 }
 
-func (t *Table) markdownRenderCaption(out *strings.Builder) {
+func (t *Table) markdownRenderCaption(out outputWriter) {
 	if t.caption != "" {
-		out.WriteRune('\n')
-		out.WriteRune('_')
-		out.WriteString(t.caption)
-		out.WriteRune('_')
+		_, _ = out.WriteRune('\n')
+		_, _ = out.WriteRune('_')
+		_, _ = out.WriteString(t.caption)
+		_, _ = out.WriteRune('_')
 	}
 }
 
-func (t *Table) markdownRenderRow(out *strings.Builder, row rowStr, hint renderHint) {
+func (t *Table) markdownRenderRow(out outputWriter, row rowStr, hint renderHint) {
 	// when working on line number 2 or more, insert a newline first
 	if out.Len() > 0 {
-		out.WriteRune('\n')
+		_, _ = out.WriteRune('\n')
 	}
 
 	// render each column up to the max. columns seen in all the rows
-	out.WriteRune('|')
+	_, _ = out.WriteRune('|')
 	for colIdx := 0; colIdx < t.numColumns; colIdx++ {
 		t.markdownRenderRowAutoIndex(out, colIdx, hint)
 
 		if hint.isSeparatorRow {
-			out.WriteString(t.getAlign(colIdx, hint).MarkdownProperty())
+			_, _ = out.WriteString(t.getAlign(colIdx, hint).MarkdownProperty())
 		} else {
 			var colStr string
 			if colIdx < len(row) {
 				colStr = row[colIdx]
 			}
-			out.WriteRune(' ')
+			_, _ = out.WriteRune(' ')
 			colStr = strings.ReplaceAll(colStr, "|", "\\|")
 			colStr = strings.ReplaceAll(colStr, "\n", "<br/>")
-			out.WriteString(colStr)
-			out.WriteRune(' ')
+			_, _ = out.WriteString(colStr)
+			_, _ = out.WriteRune(' ')
 		}
-		out.WriteRune('|')
+		_, _ = out.WriteRune('|')
 	}
 }
 
-func (t *Table) markdownRenderRowAutoIndex(out *strings.Builder, colIdx int, hint renderHint) {
+func (t *Table) markdownRenderRowAutoIndex(out outputWriter, colIdx int, hint renderHint) {
 	if colIdx == 0 && t.autoIndex {
-		out.WriteRune(' ')
+		_, _ = out.WriteRune(' ')
 		if hint.isSeparatorRow {
-			out.WriteString("---:")
+			_, _ = out.WriteString("---:")
 		} else if hint.isRegularRow() {
-			out.WriteString(fmt.Sprintf("%d ", hint.rowNumber))
+			_, _ = out.WriteString(fmt.Sprintf("%d ", hint.rowNumber))
 		}
-		out.WriteRune('|')
+		_, _ = out.WriteRune('|')
 	}
 }
 
-func (t *Table) markdownRenderRows(out *strings.Builder, rows []rowStr, hint renderHint) {
+func (t *Table) markdownRenderRows(out outputWriter, rows []rowStr, hint renderHint) {
 	if len(rows) > 0 {
 		for idx, row := range rows {
 			hint.rowNumber = idx + 1
@@ -89,11 +89,11 @@ func (t *Table) markdownRenderRows(out *strings.Builder, rows []rowStr, hint ren
 	}
 }
 
-func (t *Table) markdownRenderRowsFooter(out *strings.Builder) {
+func (t *Table) markdownRenderRowsFooter(out outputWriter) {
 	t.markdownRenderRows(out, t.rowsFooter, renderHint{isFooterRow: true})
 }
 
-func (t *Table) markdownRenderRowsHeader(out *strings.Builder) {
+func (t *Table) markdownRenderRowsHeader(out outputWriter) {
 	if len(t.rowsHeader) > 0 {
 		t.markdownRenderRows(out, t.rowsHeader, renderHint{isHeaderRow: true})
 	} else if t.autoIndex {
@@ -101,9 +101,9 @@ func (t *Table) markdownRenderRowsHeader(out *strings.Builder) {
 	}
 }
 
-func (t *Table) markdownRenderTitle(out *strings.Builder) {
+func (t *Table) markdownRenderTitle(out outputWriter) {
 	if t.title != "" {
-		out.WriteString("# ")
-		out.WriteString(t.title)
+		_, _ = out.WriteString("# ")
+		_, _ = out.WriteString(t.title)
 	}
 }

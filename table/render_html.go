@@ -60,23 +60,23 @@ const (
 func (t *Table) RenderHTML() string {
 	t.initForRender()
 
-	var out strings.Builder
+	out := newOutputWriter(t.debugWriter)
 	if t.numColumns > 0 {
-		out.WriteString("<table class=\"")
+		_, _ = out.WriteString("<table class=\"")
 		if t.htmlCSSClass != "" {
-			out.WriteString(t.htmlCSSClass)
+			_, _ = out.WriteString(t.htmlCSSClass)
 		} else {
-			out.WriteString(t.style.HTML.CSSClass)
+			_, _ = out.WriteString(t.style.HTML.CSSClass)
 		}
-		out.WriteString("\">\n")
-		t.htmlRenderTitle(&out)
-		t.htmlRenderRowsHeader(&out)
-		t.htmlRenderRows(&out, t.rows, renderHint{})
-		t.htmlRenderRowsFooter(&out)
-		t.htmlRenderCaption(&out)
-		out.WriteString("</table>")
+		_, _ = out.WriteString("\">\n")
+		t.htmlRenderTitle(out)
+		t.htmlRenderRowsHeader(out)
+		t.htmlRenderRows(out, t.rows, renderHint{})
+		t.htmlRenderRowsFooter(out)
+		t.htmlRenderCaption(out)
+		_, _ = out.WriteString("</table>")
 	}
-	return t.render(&out)
+	return t.render(out)
 }
 
 func (t *Table) htmlGetColStrAndTag(row rowStr, colIdx int, hint renderHint) (string, string) {
@@ -95,25 +95,25 @@ func (t *Table) htmlGetColStrAndTag(row rowStr, colIdx int, hint renderHint) (st
 	return colStr, colTagName
 }
 
-func (t *Table) htmlRenderCaption(out *strings.Builder) {
+func (t *Table) htmlRenderCaption(out outputWriter) {
 	if t.caption != "" {
-		out.WriteString("  <caption class=\"caption\" style=\"caption-side: bottom;\">")
-		out.WriteString(t.caption)
-		out.WriteString("</caption>\n")
+		_, _ = out.WriteString("  <caption class=\"caption\" style=\"caption-side: bottom;\">")
+		_, _ = out.WriteString(t.caption)
+		_, _ = out.WriteString("</caption>\n")
 	}
 }
 
-func (t *Table) htmlRenderColumn(out *strings.Builder, colStr string) {
+func (t *Table) htmlRenderColumn(out outputWriter, colStr string) {
 	if t.style.HTML.EscapeText {
 		colStr = html.EscapeString(colStr)
 	}
 	if t.style.HTML.Newline != "\n" {
 		colStr = strings.Replace(colStr, "\n", t.style.HTML.Newline, -1)
 	}
-	out.WriteString(colStr)
+	_, _ = out.WriteString(colStr)
 }
 
-func (t *Table) htmlRenderColumnAttributes(out *strings.Builder, colIdx int, hint renderHint) {
+func (t *Table) htmlRenderColumnAttributes(out outputWriter, colIdx int, hint renderHint) {
 	// determine the HTML "align"/"valign" property values
 	align := t.getAlign(colIdx, hint).HTMLProperty()
 	vAlign := t.getVAlign(colIdx, hint).HTMLProperty()
@@ -121,37 +121,37 @@ func (t *Table) htmlRenderColumnAttributes(out *strings.Builder, colIdx int, hin
 	class := t.getColumnColors(colIdx, hint).HTMLProperty()
 
 	if align != "" {
-		out.WriteRune(' ')
-		out.WriteString(align)
+		_, _ = out.WriteRune(' ')
+		_, _ = out.WriteString(align)
 	}
 	if class != "" {
-		out.WriteRune(' ')
-		out.WriteString(class)
+		_, _ = out.WriteRune(' ')
+		_, _ = out.WriteString(class)
 	}
 	if vAlign != "" {
-		out.WriteRune(' ')
-		out.WriteString(vAlign)
+		_, _ = out.WriteRune(' ')
+		_, _ = out.WriteString(vAlign)
 	}
 }
 
-func (t *Table) htmlRenderColumnAutoIndex(out *strings.Builder, hint renderHint) {
+func (t *Table) htmlRenderColumnAutoIndex(out outputWriter, hint renderHint) {
 	if hint.isHeaderRow {
-		out.WriteString("    <th>")
-		out.WriteString(t.style.HTML.EmptyColumn)
-		out.WriteString("</th>\n")
+		_, _ = out.WriteString("    <th>")
+		_, _ = out.WriteString(t.style.HTML.EmptyColumn)
+		_, _ = out.WriteString("</th>\n")
 	} else if hint.isFooterRow {
-		out.WriteString("    <td>")
-		out.WriteString(t.style.HTML.EmptyColumn)
-		out.WriteString("</td>\n")
+		_, _ = out.WriteString("    <td>")
+		_, _ = out.WriteString(t.style.HTML.EmptyColumn)
+		_, _ = out.WriteString("</td>\n")
 	} else {
-		out.WriteString("    <td align=\"right\">")
-		out.WriteString(fmt.Sprint(hint.rowNumber))
-		out.WriteString("</td>\n")
+		_, _ = out.WriteString("    <td align=\"right\">")
+		_, _ = out.WriteString(fmt.Sprint(hint.rowNumber))
+		_, _ = out.WriteString("</td>\n")
 	}
 }
 
-func (t *Table) htmlRenderRow(out *strings.Builder, row rowStr, hint renderHint) {
-	out.WriteString("  <tr>\n")
+func (t *Table) htmlRenderRow(out outputWriter, row rowStr, hint renderHint) {
+	_, _ = out.WriteString("  <tr>\n")
 	for colIdx := 0; colIdx < t.numColumns; colIdx++ {
 		// auto-index column
 		if colIdx == 0 && t.autoIndex {
@@ -160,23 +160,23 @@ func (t *Table) htmlRenderRow(out *strings.Builder, row rowStr, hint renderHint)
 
 		colStr, colTagName := t.htmlGetColStrAndTag(row, colIdx, hint)
 		// write the row
-		out.WriteString("    <")
-		out.WriteString(colTagName)
+		_, _ = out.WriteString("    <")
+		_, _ = out.WriteString(colTagName)
 		t.htmlRenderColumnAttributes(out, colIdx, hint)
-		out.WriteString(">")
+		_, _ = out.WriteString(">")
 		if len(colStr) == 0 {
-			out.WriteString(t.style.HTML.EmptyColumn)
+			_, _ = out.WriteString(t.style.HTML.EmptyColumn)
 		} else {
 			t.htmlRenderColumn(out, colStr)
 		}
-		out.WriteString("</")
-		out.WriteString(colTagName)
-		out.WriteString(">\n")
+		_, _ = out.WriteString("</")
+		_, _ = out.WriteString(colTagName)
+		_, _ = out.WriteString(">\n")
 	}
-	out.WriteString("  </tr>\n")
+	_, _ = out.WriteString("  </tr>\n")
 }
 
-func (t *Table) htmlRenderRows(out *strings.Builder, rows []rowStr, hint renderHint) {
+func (t *Table) htmlRenderRows(out outputWriter, rows []rowStr, hint renderHint) {
 	if len(rows) > 0 {
 		// determine that tag to use based on the type of the row
 		rowsTag := "tbody"
@@ -191,9 +191,9 @@ func (t *Table) htmlRenderRows(out *strings.Builder, rows []rowStr, hint renderH
 			hint.rowNumber = idx + 1
 			if len(row) > 0 {
 				if !renderedTagOpen {
-					out.WriteString("  <")
-					out.WriteString(rowsTag)
-					out.WriteString(">\n")
+					_, _ = out.WriteString("  <")
+					_, _ = out.WriteString(rowsTag)
+					_, _ = out.WriteString(">\n")
 					renderedTagOpen = true
 				}
 				t.htmlRenderRow(out, row, hint)
@@ -201,20 +201,20 @@ func (t *Table) htmlRenderRows(out *strings.Builder, rows []rowStr, hint renderH
 			}
 		}
 		if shouldRenderTagClose {
-			out.WriteString("  </")
-			out.WriteString(rowsTag)
-			out.WriteString(">\n")
+			_, _ = out.WriteString("  </")
+			_, _ = out.WriteString(rowsTag)
+			_, _ = out.WriteString(">\n")
 		}
 	}
 }
 
-func (t *Table) htmlRenderRowsFooter(out *strings.Builder) {
+func (t *Table) htmlRenderRowsFooter(out outputWriter) {
 	if len(t.rowsFooter) > 0 {
 		t.htmlRenderRows(out, t.rowsFooter, renderHint{isFooterRow: true})
 	}
 }
 
-func (t *Table) htmlRenderRowsHeader(out *strings.Builder) {
+func (t *Table) htmlRenderRowsHeader(out outputWriter) {
 	if len(t.rowsHeader) > 0 {
 		t.htmlRenderRows(out, t.rowsHeader, renderHint{isHeaderRow: true})
 	} else if t.autoIndex {
@@ -223,23 +223,23 @@ func (t *Table) htmlRenderRowsHeader(out *strings.Builder) {
 	}
 }
 
-func (t *Table) htmlRenderTitle(out *strings.Builder) {
+func (t *Table) htmlRenderTitle(out outputWriter) {
 	if t.title != "" {
 		align := t.style.Title.Align.HTMLProperty()
 		colors := t.style.Title.Colors.HTMLProperty()
 		title := t.style.Title.Format.Apply(t.title)
 
-		out.WriteString("  <caption class=\"title\"")
+		_, _ = out.WriteString("  <caption class=\"title\"")
 		if align != "" {
-			out.WriteRune(' ')
-			out.WriteString(align)
+			_, _ = out.WriteRune(' ')
+			_, _ = out.WriteString(align)
 		}
 		if colors != "" {
-			out.WriteRune(' ')
-			out.WriteString(colors)
+			_, _ = out.WriteRune(' ')
+			_, _ = out.WriteString(colors)
 		}
-		out.WriteRune('>')
-		out.WriteString(title)
-		out.WriteString("</caption>\n")
+		_, _ = out.WriteRune('>')
+		_, _ = out.WriteString(title)
+		_, _ = out.WriteString("</caption>\n")
 	}
 }

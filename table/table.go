@@ -50,6 +50,8 @@ type Table struct {
 	// columnConfigMap stores the custom-configuration by column
 	// number and is generated before rendering
 	columnConfigMap map[int]ColumnConfig
+	// debugWriter is used to write debugging logs to
+	debugWriter io.Writer
 	// htmlCSSClass stores the HTML CSS Class to use on the <table> node
 	htmlCSSClass string
 	// indexColumn stores the number of the column considered as the "index"
@@ -227,6 +229,11 @@ func (t *Table) SetCaption(format string, a ...interface{}) {
 // SetColumnConfigs sets the configs for each Column.
 func (t *Table) SetColumnConfigs(configs []ColumnConfig) {
 	t.columnConfigs = configs
+}
+
+// SetDebugWriter sets the writer to send debugging logs to.
+func (t *Table) SetDebugWriter(w io.Writer) {
+	t.debugWriter = w
 }
 
 // SetHTMLCSSClass sets the HTML CSS Class to use on the <table> node
@@ -677,11 +684,16 @@ func (t *Table) isIndexColumn(colIdx int, hint renderHint) bool {
 	return t.indexColumn == colIdx+1 || hint.isAutoIndexColumn
 }
 
-func (t *Table) render(out *strings.Builder) string {
+func (t *Table) render(out outputWriter) string {
 	outStr := out.String()
 	if t.outputMirror != nil && len(outStr) > 0 {
 		_, _ = t.outputMirror.Write([]byte(outStr))
 		_, _ = t.outputMirror.Write([]byte("\n"))
+	}
+	if t.debugWriter != nil {
+		for idx, line := range strings.Split(outStr, "\n") {
+			_, _ = t.debugWriter.Write([]byte(fmt.Sprintf("[%02d] %#v\n", idx, line)))
+		}
 	}
 	return outStr
 }

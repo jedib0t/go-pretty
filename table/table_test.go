@@ -309,6 +309,14 @@ func TestTable_SetColumnConfigs(t *testing.T) {
 	assert.Equal(t, 3, len(table.columnConfigs))
 }
 
+func TestTable_SetDebugWriter(t *testing.T) {
+	table := Table{}
+	assert.Nil(t, table.debugWriter)
+
+	table.SetDebugWriter(&strings.Builder{})
+	assert.NotNil(t, table.debugWriter)
+}
+
 func TestTable_SetHTMLCSSClass(t *testing.T) {
 	table := Table{}
 	table.AppendRow(testRows[0])
