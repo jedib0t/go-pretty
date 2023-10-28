@@ -7,6 +7,7 @@ import (
 )
 
 func TestTable_Render_BiDiText(t *testing.T) {
+	// sonar: ignore from here
 	table := Table{}
 	table.AppendHeader(Row{"תאריך", "סכום", "מחלקה", "תגים"})
 	table.AppendRow(Row{"2020-01-01", 5.0, "מחלקה1", []string{"תג1", "תג2"}})
@@ -49,4 +50,5 @@ func TestTable_Render_BiDiText(t *testing.T) {
 ‫+---+------------+------+--------+-----------+
 ‫|   | ‫סהכ        |   ‫30 |        |           |
 ‫+---+------------+------+--------+-----------+`)
+	// sonar: ignore to here
 }
