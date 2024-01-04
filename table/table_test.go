@@ -19,6 +19,7 @@ var (
 	testFooterMultiLine = Row{"", "", "Total\nSalary", 10000}
 	testHeader          = Row{"#", "First Name", "Last Name", "Salary"}
 	testHeaderMultiLine = Row{"#", "First\nName", "Last\nName", "Salary"}
+	testHeader2         = Row{"ID", "Text1", "Date", "Text2"}
 	testRows            = []Row{
 		{1, "Arya", "Stark", 3000},
 		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
