@@ -300,9 +300,8 @@ func (t *Table) SuppressEmptyColumns() {
 	t.suppressEmptyColumns = true
 }
 
-// SupressTrailingSpaces removes all trailing spaces from the end of the last column
-// this is useful when OptionsNoBordersAndSeparators is used
-func (t *Table) SupressTrailingSpaces() {
+// SuppressTrailingSpaces removes all trailing spaces from the output.
+func (t *Table) SuppressTrailingSpaces() {
 	t.supressTrailingSpaces = true
 }
 

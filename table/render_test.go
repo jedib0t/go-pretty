@@ -1176,7 +1176,7 @@ func TestTable_Render_WidthEnforcer(t *testing.T) {
 +------+----------------------+------------------+----------------------------+`)
 }
 
-func TestTable_Render_SupressTrailingSpaces(t *testing.T) {
+func TestTable_Render_SuppressTrailingSpaces(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(testHeader2)
 	tw.AppendRows([]Row{
@@ -1186,10 +1186,10 @@ func TestTable_Render_SupressTrailingSpaces(t *testing.T) {
 		{"R123", "Some big name here and it's pretty big", "2021-04-19 13:37", "Abcdefghijklmnopqrstuvwxyz"},
 		{"R123", "Small name", "2021-04-19 13:37", "Abcdefghijklmnopqrstuvwxyz"},
 	})
+	tw.SuppressTrailingSpaces()
 
-	t.Run("borders and separators", func(t *testing.T) {
-		tw.Style().Options = OptionsDefault
-		compareOutput(t, tw.Render(), `
+	tw.Style().Options = OptionsDefault
+	compareOutput(t, tw.Render(), `
 +------+----------------------------------------+------------------+----------------------------+
 | ID   | TEXT1                                  | DATE             | TEXT2                      |
 +------+----------------------------------------+------------------+----------------------------+
@@ -1199,43 +1199,13 @@ func TestTable_Render_SupressTrailingSpaces(t *testing.T) {
 | R123 | Some big name here and it's pretty big | 2021-04-19 13:37 | Abcdefghijklmnopqrstuvwxyz |
 | R123 | Small name                             | 2021-04-19 13:37 | Abcdefghijklmnopqrstuvwxyz |
 +------+----------------------------------------+------------------+----------------------------+`)
-	})
 
-	t.Run("no borders and separators", func(t *testing.T) {
-		tw.Style().Options = OptionsNoBordersAndSeparators
-		compareOutput(t, tw.Render(), `
- ID    TEXT1                                   DATE              TEXT2                      
- U2    Hey                                     2021-04-19 13:37  Yuh yuh yuh                
- S12   Uhhhh                                   2021-04-19 13:37  Some dummy data here       
- R123  Lobsters                                2021-04-19 13:37  I like lobsters            
- R123  Some big name here and it's pretty big  2021-04-19 13:37  Abcdefghijklmnopqrstuvwxyz 
- R123  Small name                              2021-04-19 13:37  Abcdefghijklmnopqrstuvwxyz `)
-	})
-
-	tw.SupressTrailingSpaces()
-
-	t.Run("borders and separators suppressed spaces", func(t *testing.T) {
-		tw.Style().Options = OptionsDefault
-		compareOutput(t, tw.Render(), `
-+------+----------------------------------------+------------------+----------------------------+
-| ID   | TEXT1                                  | DATE             | TEXT2                      |
-+------+----------------------------------------+------------------+----------------------------+
-| U2   | Hey                                    | 2021-04-19 13:37 | Yuh yuh yuh                |
-| S12  | Uhhhh                                  | 2021-04-19 13:37 | Some dummy data here       |
-| R123 | Lobsters                               | 2021-04-19 13:37 | I like lobsters            |
-| R123 | Some big name here and it's pretty big | 2021-04-19 13:37 | Abcdefghijklmnopqrstuvwxyz |
-| R123 | Small name                             | 2021-04-19 13:37 | Abcdefghijklmnopqrstuvwxyz |
-+------+----------------------------------------+------------------+----------------------------+`)
-	})
-
-	t.Run("no borders and separators suppressed spaces", func(t *testing.T) {
-		tw.Style().Options = OptionsNoBordersAndSeparators
-		compareOutput(t, tw.Render(), `
+	tw.Style().Options = OptionsNoBordersAndSeparators
+	compareOutput(t, tw.Render(), `
 ID    TEXT1                                   DATE              TEXT2
 U2    Hey                                     2021-04-19 13:37  Yuh yuh yuh
 S12   Uhhhh                                   2021-04-19 13:37  Some dummy data here
 R123  Lobsters                                2021-04-19 13:37  I like lobsters
 R123  Some big name here and it's pretty big  2021-04-19 13:37  Abcdefghijklmnopqrstuvwxyz
 R123  Small name                              2021-04-19 13:37  Abcdefghijklmnopqrstuvwxyz`)
-	})
 }
