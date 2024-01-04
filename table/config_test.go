@@ -34,6 +34,20 @@ func TestColumnConfig_getWidthMaxEnforcer(t *testing.T) {
 		assert.Equal(t, "1234567890", widthEnforcer("1234567890", 1000))
 	})
 
+	t.Run("negative width enforcer", func(t *testing.T) {
+		cc := ColumnConfig{
+			WidthMax: -10,
+		}
+
+		widthEnforcer := cc.getWidthMaxEnforcer()
+		assert.Equal(t, "1234567890", widthEnforcer("1234567890", 0))
+		assert.Equal(t, "1234567890", widthEnforcer("1234567890", 1))
+		assert.Equal(t, "1234567890", widthEnforcer("1234567890", 5))
+		assert.Equal(t, "1234567890", widthEnforcer("1234567890", 10))
+		assert.Equal(t, "1234567890", widthEnforcer("1234567890", 100))
+		assert.Equal(t, "1234567890", widthEnforcer("1234567890", 1000))
+	})
+
 	t.Run("custom width enforcer (1)", func(t *testing.T) {
 		cc := ColumnConfig{
 			WidthMax:         10,
