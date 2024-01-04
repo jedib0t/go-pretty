@@ -33,7 +33,7 @@ type Writer interface {
 	SortBy(sortBy []SortBy)
 	Style() *Style
 	SuppressEmptyColumns()
-	SupressTrailingSpaces()
+	SuppressTrailingSpaces()
 
 	// deprecated; in favor of Style().HTML.CSSClass
 	SetHTMLCSSClass(cssClass string)
