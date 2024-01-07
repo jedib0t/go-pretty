@@ -30,8 +30,8 @@ jobs:
       # Download all the tools used in the steps that follow
       - name: Set up Tools
         run: |
-          go install github.com/fzipp/gocyclo/cmd/gocyclo
-          go install github.com/mattn/goveralls
+          go install github.com/fzipp/gocyclo/cmd/gocyclo@v0.6.0
+          go install github.com/mattn/goveralls@v0.0.12
 
       # Run all the unit-tests
       - name: Test
