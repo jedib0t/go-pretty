@@ -544,7 +544,7 @@ func TestProgress_RenderSomeTrackers_WithLineWidth1(t *testing.T) {
 	renderOutput := outputWriter{}
 
 	pw := generateWriter()
-	pw.SetMessageWidth(5)
+	pw.SetMessageLength(5)
 	pw.SetOutputWriter(&renderOutput)
 	pw.SetTrackerPosition(PositionRight)
 	go trackSomething(pw, &Tracker{Message: "Calculating Total   # 1\r", Total: 1000, Units: UnitsDefault})
@@ -573,7 +573,7 @@ func TestProgress_RenderSomeTrackers_WithLineWidth2(t *testing.T) {
 	renderOutput := outputWriter{}
 
 	pw := generateWriter()
-	pw.SetMessageWidth(50)
+	pw.SetMessageLength(50)
 	pw.SetOutputWriter(&renderOutput)
 	pw.SetTrackerPosition(PositionRight)
 	go trackSomething(pw, &Tracker{Message: "Calculating Total   # 1\r", Total: 1000, Units: UnitsDefault})
@@ -588,6 +588,33 @@ func TestProgress_RenderSomeTrackers_WithLineWidth2(t *testing.T) {
 		regexp.MustCompile(`Calculating Total   # 1\s{28}\.\.\. done! \[\d+\.\d+K in [\d.]+ms]`),
 		regexp.MustCompile(`Downloading File    # 2\s{28}\.\.\. done! \[\d+\.\d+KB in [\d.]+ms]`),
 		regexp.MustCompile(`Transferring Amount # 3\s{28}\.\.\. done! \[\$\d+\.\d+K in [\d.]+ms]`),
+	}
+	out := renderOutput.String()
+	for _, expectedOutPattern := range expectedOutPatterns {
+		if !expectedOutPattern.MatchString(out) {
+			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
+		}
+	}
+	showOutputOnFailure(t, out)
+}
+
+func TestProgress_RenderSomeTrackers_WithTerminalWidth(t *testing.T) {
+	renderOutput := outputWriter{}
+
+	pw := generateWriter()
+	pw.SetMessageLength(5)
+	pw.SetOutputWriter(&renderOutput)
+	pw.SetTerminalWidth(10)
+	pw.SetTrackerPosition(PositionRight)
+	go trackSomething(pw, &Tracker{Message: "Calculating Total   # 1\r", Total: 1000, Units: UnitsDefault})
+	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes})
+	go trackSomething(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
+	renderAndWait(pw, false)
+
+	expectedOutPatterns := []*regexp.Regexp{
+		regexp.MustCompile(`Calc~ \.\.\. \n`),
+		regexp.MustCompile(`Down~ \.\.\. \n`),
+		regexp.MustCompile(`Tran~ \.\.\. \n`),
 	}
 	out := renderOutput.String()
 	for _, expectedOutPattern := range expectedOutPatterns {
@@ -812,28 +839,26 @@ func TestProgress_RenderSomeTrackers_WithOverallTracker_WithSpeedOverall_Without
 	showOutputOnFailure(t, out)
 }
 
-func TestProgress_RenderSomeTrackers_WithPinMessage_OneLine(t *testing.T) {
+func TestProgress_RenderSomeTrackers_WithPinnedMessages_OneLine(t *testing.T) {
 	renderOutput := outputWriter{}
 
 	pw := generateWriter()
-	pw.SetMessageWidth(5)
+	pw.SetMessageLength(5)
 	pw.SetOutputWriter(&renderOutput)
+	pw.SetTerminalWidth(10)
 	pw.SetTrackerPosition(PositionRight)
 	pw.Style().Visibility.Pinned = true
-	pw.SetPinnedMessages("PIN")
+	pw.SetPinnedMessages("PINNED MESSAGE #1")
 	go trackSomething(pw, &Tracker{Message: "Calculating Total   # 1\r", Total: 1000, Units: UnitsDefault})
 	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes})
 	go trackSomething(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar})
 	renderAndWait(pw, false)
 
 	expectedOutPatterns := []*regexp.Regexp{
-		regexp.MustCompile(`PIN`),
-		regexp.MustCompile(`Calc~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+ in [\d.]+ms]`),
-		regexp.MustCompile(`Down~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\d+B in [\d.]+ms]`),
-		regexp.MustCompile(`Tran~ \.\.\. \d+\.\d+% \[[#.]{23}] \[\$\d+ in [\d.]+ms]`),
-		regexp.MustCompile(`Calc~ \.\.\. done! \[\d+\.\d+K in [\d.]+ms]`),
-		regexp.MustCompile(`Down~ \.\.\. done! \[\d+\.\d+KB in [\d.]+ms]`),
-		regexp.MustCompile(`Tran~ \.\.\. done! \[\$\d+\.\d+K in [\d.]+ms]`),
+		regexp.MustCompile(`PINNED MES\n`),
+		regexp.MustCompile(`Calc~ \.\.\. \n`),
+		regexp.MustCompile(`Down~ \.\.\. \n`),
+		regexp.MustCompile(`Tran~ \.\.\. \n`),
 	}
 	out := renderOutput.String()
 	for _, expectedOutPattern := range expectedOutPatterns {
@@ -844,11 +869,11 @@ func TestProgress_RenderSomeTrackers_WithPinMessage_OneLine(t *testing.T) {
 	showOutputOnFailure(t, out)
 }
 
-func TestProgress_RenderSomeTrackers_WithPinMessage_MultiLines(t *testing.T) {
+func TestProgress_RenderSomeTrackers_WithPinnedMessages_MultiLines(t *testing.T) {
 	renderOutput := outputWriter{}
 
 	pw := generateWriter()
-	pw.SetMessageWidth(5)
+	pw.SetMessageLength(5)
 	pw.SetOutputWriter(&renderOutput)
 	pw.SetTrackerPosition(PositionRight)
 	pw.Style().Visibility.Pinned = true
