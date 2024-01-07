@@ -22,7 +22,7 @@ func (p *Progress) Render() {
 			select {
 			case <-ticker.C:
 				lastRenderLength = p.renderTrackers(lastRenderLength)
-			case <-p.done:
+			case <-p.renderContext.Done():
 				// always render the current state before finishing render in
 				// case it hasn't been shown yet
 				p.renderTrackers(lastRenderLength)
@@ -180,7 +180,11 @@ func (p *Progress) renderPinnedMessages(out *strings.Builder) {
 	numLines := len(p.pinnedMessages)
 	for _, msg := range p.pinnedMessages {
 		msg = strings.TrimSpace(msg)
-		out.WriteString(p.style.Colors.Pinned.Sprint(msg))
+		msg = p.style.Colors.Pinned.Sprint(msg)
+		if width := p.getTerminalWidth(); width > 0 {
+			msg = text.Trim(msg, width)
+		}
+		out.WriteString(msg)
 		out.WriteRune('\n')
 
 		numLines += strings.Count(msg, "\n")
@@ -192,28 +196,37 @@ func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHi
 	message := t.message()
 	message = strings.ReplaceAll(message, "\t", "    ")
 	message = strings.ReplaceAll(message, "\r", "")
-	if p.messageWidth > 0 {
+	if p.lengthMessage > 0 {
 		messageLen := text.RuneWidthWithoutEscSequences(message)
-		if messageLen < p.messageWidth {
-			message = text.Pad(message, p.messageWidth, ' ')
+		if messageLen < p.lengthMessage {
+			message = text.Pad(message, p.lengthMessage, ' ')
 		} else {
-			message = text.Snip(message, p.messageWidth, p.style.Options.SnipIndicator)
+			message = text.Snip(message, p.lengthMessage, p.style.Options.SnipIndicator)
 		}
 	}
 
+	tOut := &strings.Builder{}
+	tOut.Grow(p.lengthProgressOverall)
 	if hint.isOverallTracker {
 		if !t.IsDone() {
 			hint := renderHint{hideValue: true, isOverallTracker: true}
-			p.renderTrackerProgress(out, t, message, p.generateTrackerStr(t, p.lengthProgressOverall, hint), hint)
+			p.renderTrackerProgress(tOut, t, message, p.generateTrackerStr(t, p.lengthProgressOverall, hint), hint)
 		}
 	} else {
 		if t.IsDone() {
-			p.renderTrackerDone(out, t, message)
+			p.renderTrackerDone(tOut, t, message)
 		} else {
 			hint := renderHint{hideTime: !p.style.Visibility.Time, hideValue: !p.style.Visibility.Value}
-			p.renderTrackerProgress(out, t, message, p.generateTrackerStr(t, p.lengthProgress, hint), hint)
+			p.renderTrackerProgress(tOut, t, message, p.generateTrackerStr(t, p.lengthProgress, hint), hint)
 		}
 	}
+
+	outStr := tOut.String()
+	if width := p.getTerminalWidth(); width > 0 {
+		outStr = text.Trim(outStr, width)
+	}
+	out.WriteString(outStr)
+	out.WriteRune('\n')
 }
 
 func (p *Progress) renderTrackerDone(out *strings.Builder, t *Tracker, message string) {
@@ -225,7 +238,6 @@ func (p *Progress) renderTrackerDone(out *strings.Builder, t *Tracker, message s
 		out.WriteString(p.style.Colors.Error.Sprint(p.style.Options.ErrorString))
 	}
 	p.renderTrackerStats(out, t, renderHint{hideTime: !p.style.Visibility.Time, hideValue: !p.style.Visibility.Value})
-	out.WriteRune('\n')
 }
 
 func (p *Progress) renderTrackerMessage(out *strings.Builder, t *Tracker, message string) {
@@ -252,7 +264,6 @@ func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, messa
 	if hint.isOverallTracker {
 		out.WriteString(p.style.Colors.Tracker.Sprint(trackerStr))
 		p.renderTrackerStats(out, t, hint)
-		out.WriteRune('\n')
 	} else if p.trackerPosition == PositionRight {
 		p.renderTrackerMessage(out, t, message)
 		out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.Separator))
@@ -261,7 +272,6 @@ func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, messa
 			out.WriteString(p.style.Colors.Tracker.Sprint(" " + trackerStr))
 		}
 		p.renderTrackerStats(out, t, hint)
-		out.WriteRune('\n')
 	} else {
 		p.renderTrackerPercentage(out, t)
 		if p.style.Visibility.Tracker {
@@ -270,7 +280,6 @@ func (p *Progress) renderTrackerProgress(out *strings.Builder, t *Tracker, messa
 		p.renderTrackerStats(out, t, hint)
 		out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.Separator))
 		p.renderTrackerMessage(out, t, message)
-		out.WriteRune('\n')
 	}
 }
 
@@ -301,7 +310,7 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 
 	// stop if auto stop is enabled and there are no more active trackers
 	if p.autoStop && p.LengthActive() == 0 {
-		p.done <- true
+		p.renderContextCancel()
 	}
 
 	return out.Len()

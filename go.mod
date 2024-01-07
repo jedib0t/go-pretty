@@ -6,5 +6,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.13
 	github.com/pkg/profile v1.6.0
 	github.com/stretchr/testify v1.7.4
-	golang.org/x/sys v0.1.0
+	golang.org/x/sys v0.16.0
+	golang.org/x/term v0.16.0
 )

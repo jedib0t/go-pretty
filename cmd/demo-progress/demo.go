@@ -118,11 +118,11 @@ func main() {
 	// instantiate a Progress Writer and set up the options
 	pw := progress.NewWriter()
 	pw.SetAutoStop(*flagAutoStop)
-	pw.SetTrackerLength(25)
-	pw.SetMessageWidth(24)
+	pw.SetMessageLength(24)
 	pw.SetNumTrackersExpected(*flagNumTrackers)
 	pw.SetSortBy(progress.SortByPercentDsc)
 	pw.SetStyle(progress.StyleDefault)
+	pw.SetTrackerLength(25)
 	pw.SetTrackerPosition(progress.PositionRight)
 	pw.SetUpdateFrequency(time.Millisecond * 100)
 	pw.Style().Colors = progress.StyleColorsExample

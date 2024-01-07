@@ -1,6 +1,7 @@
 package progress
 
 import (
+	"context"
 	"math"
 	"os"
 	"testing"
@@ -143,6 +144,16 @@ func TestProgress_SetStyle(t *testing.T) {
 	assert.Equal(t, StyleCircle.Name, p.Style().Name)
 }
 
+func TestProgress_SetMessageLength(t *testing.T) {
+	p := Progress{}
+	assert.Equal(t, 0, p.lengthMessage)
+
+	p.SetMessageLength(80)
+	assert.Equal(t, 80, p.lengthMessage)
+	p.SetMessageWidth(81)
+	assert.Equal(t, 81, p.lengthMessage)
+}
+
 func TestProgress_SetTrackerLength(t *testing.T) {
 	p := Progress{}
 	assert.Equal(t, 0, p.lengthTracker)
@@ -222,13 +233,11 @@ func TestProgress_ShowValue(t *testing.T) {
 }
 
 func TestProgress_Stop(t *testing.T) {
-	doneChannel := make(chan bool, 1)
-
 	p := Progress{}
-	p.done = doneChannel
+	p.renderContext, p.renderContextCancel = context.WithCancel(context.Background())
 	p.renderInProgress = true
 	p.Stop()
-	assert.True(t, <-doneChannel)
+	assert.NotNil(t, <-p.renderContext.Done())
 }
 
 func TestProgress_Style(t *testing.T) {

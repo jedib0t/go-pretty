@@ -17,14 +17,22 @@ type Writer interface {
 	LengthInQueue() int
 	Log(msg string, a ...interface{})
 	SetAutoStop(autoStop bool)
-	SetMessageWidth(width int)
+	SetMessageLength(length int)
 	SetNumTrackersExpected(numTrackers int)
 	SetOutputWriter(output io.Writer)
 	SetPinnedMessages(messages ...string)
 	SetSortBy(sortBy SortBy)
 	SetStyle(style Style)
+	SetTerminalWidth(width int)
 	SetTrackerLength(length int)
 	SetTrackerPosition(position Position)
+	SetUpdateFrequency(frequency time.Duration)
+	Stop()
+	Style() *Style
+	Render()
+
+	// Deprecated: in favor of SetMessageLength(length)
+	SetMessageWidth(width int)
 	// Deprecated: in favor of Style().Visibility.ETA
 	ShowETA(show bool)
 	// Deprecated: in favor of Style().Visibility.TrackerOverall
@@ -37,10 +45,6 @@ type Writer interface {
 	ShowTracker(show bool)
 	// Deprecated: in favor of Style().Visibility.Value
 	ShowValue(show bool)
-	SetUpdateFrequency(frequency time.Duration)
-	Stop()
-	Style() *Style
-	Render()
 }
 
 // NewWriter initializes and returns a Writer.
