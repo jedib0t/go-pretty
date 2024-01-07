@@ -44,6 +44,7 @@ type Progress struct {
 	sortBy                SortBy
 	style                 *Style
 	terminalWidth         int
+	terminalWidthMutex    sync.RWMutex
 	terminalWidthOverride int
 	trackerPosition       Position
 	trackersActive        []*Tracker
@@ -298,6 +299,9 @@ func (p *Progress) Style() *Style {
 }
 
 func (p *Progress) getTerminalWidth() int {
+	p.terminalWidthMutex.RLock()
+	defer p.terminalWidthMutex.RUnlock()
+
 	if p.terminalWidthOverride > 0 {
 		return p.terminalWidthOverride
 	}
@@ -349,6 +353,9 @@ func (p *Progress) initForRender() {
 }
 
 func (p *Progress) updateTerminalSize() {
+	p.terminalWidthMutex.Lock()
+	defer p.terminalWidthMutex.Unlock()
+
 	p.terminalWidth, _, _ = term.GetSize(int(os.Stdout.Fd()))
 }
 
