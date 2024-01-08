@@ -616,6 +616,27 @@ func TestTable_Render_ColumnConfigs(t *testing.T) {
 	)
 }
 
+func TestTable_Render_CRLF(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendRow(Row{5000, "Night", "King", 10000, "Was once a\r\nMortal \rMan"})
+	tw.AppendFooter(testFooter)
+
+	compareOutput(t, tw.Render(), `
++------+------------+-----------+--------+-----------------------------+
+|    # | FIRST NAME | LAST NAME | SALARY |                             |
++------+------------+-----------+--------+-----------------------------+
+|    1 | Arya       | Stark     |   3000 |                             |
+|   20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
+|  300 | Tyrion     | Lannister |   5000 |                             |
+| 5000 | Night      | King      |  10000 | Was once a                  |
+|      |            |           |        | Man                         |
++------+------------+-----------+--------+-----------------------------+
+|      |            | TOTAL     |  10000 |                             |
++------+------------+-----------+--------+-----------------------------+`)
+}
+
 func TestTable_Render_Empty(t *testing.T) {
 	tw := NewWriter()
 	assert.Empty(t, tw.Render())

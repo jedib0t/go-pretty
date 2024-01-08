@@ -1,6 +1,7 @@
 package text
 
 import (
+	"regexp"
 	"strings"
 	"unicode/utf8"
 
@@ -104,6 +105,29 @@ func Pad(str string, maxLen int, paddingChar rune) string {
 	if strLen < maxLen {
 		str += strings.Repeat(string(paddingChar), maxLen-strLen)
 	}
+	return str
+}
+
+var (
+	reCarriageReturn = regexp.MustCompile(`(.*)\r`)
+)
+
+// ProcessCRLF converts "\r\n" to "\n", and erases everything preceding a lone
+// "\r" in each line of the string.
+func ProcessCRLF(str string) string {
+	str = strings.ReplaceAll(str, "\r\n", "\n")
+
+	// process \r by erasing everything preceding it in the line
+	if strings.Contains(str, "\r") {
+		lines := strings.Split(str, "\n")
+		for idx := range lines {
+			for reCarriageReturn.MatchString(lines[idx]) {
+				lines[idx] = reCarriageReturn.ReplaceAllString(lines[idx], "")
+			}
+		}
+		str = strings.Join(lines, "\n")
+	}
+
 	return str
 }
 

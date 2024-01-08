@@ -195,7 +195,7 @@ func (p *Progress) renderPinnedMessages(out *strings.Builder) {
 func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHint) {
 	message := t.message()
 	message = strings.ReplaceAll(message, "\t", "    ")
-	message = strings.ReplaceAll(message, "\r", "")
+	message = strings.ReplaceAll(message, "\r", "") // replace with text.ProcessCRLF?
 	if p.lengthMessage > 0 {
 		messageLen := text.RuneWidthWithoutEscSequences(message)
 		if messageLen < p.lengthMessage {

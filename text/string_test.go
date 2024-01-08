@@ -134,6 +134,28 @@ func TestPad(t *testing.T) {
 	assert.Equal(t, "\x1b]8;;http://example.com\x1b\\Ghost\x1b]8;;\x1b\\.....", Pad("\x1b]8;;http://example.com\x1b\\Ghost\x1b]8;;\x1b\\", 10, '.'))
 }
 
+func ExampleProcessCRLF() {
+	fmt.Printf("%#v\n", ProcessCRLF("abc"))
+	fmt.Printf("%#v\n", ProcessCRLF("abc\r\ndef"))
+	fmt.Printf("%#v\n", ProcessCRLF("abc\r\ndef\rghi"))
+	fmt.Printf("%#v\n", ProcessCRLF("abc\r\ndef\rghi\njkl"))
+	fmt.Printf("%#v\n", ProcessCRLF("abc\r\ndef\rghi\njkl\r"))
+
+	// Output: "abc"
+	// "abc\ndef"
+	// "abc\nghi"
+	// "abc\nghi\njkl"
+	// "abc\nghi\n"
+}
+
+func TestProcessCRLF(t *testing.T) {
+	assert.Equal(t, "abc", ProcessCRLF("abc"))
+	assert.Equal(t, "abc\ndef", ProcessCRLF("abc\r\ndef"))
+	assert.Equal(t, "abc\nghi", ProcessCRLF("abc\r\ndef\rghi"))
+	assert.Equal(t, "abc\nghi\njkl", ProcessCRLF("abc\r\ndef\rghi\njkl"))
+	assert.Equal(t, "abc\nghi\n", ProcessCRLF("abc\r\ndef\rghi\njkl\r"))
+}
+
 func ExampleRepeatAndTrim() {
 	fmt.Printf("RepeatAndTrim(\"\", 5): %#v\n", RepeatAndTrim("", 5))
 	fmt.Printf("RepeatAndTrim(\"Ghost\", 0): %#v\n", RepeatAndTrim("Ghost", 0))
