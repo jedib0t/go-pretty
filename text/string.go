@@ -1,7 +1,6 @@
 package text
 
 import (
-	"regexp"
 	"strings"
 	"unicode/utf8"
 
@@ -108,27 +107,47 @@ func Pad(str string, maxLen int, paddingChar rune) string {
 	return str
 }
 
-var (
-	reCarriageReturn = regexp.MustCompile(`(.*)\r`)
-)
-
-// ProcessCRLF converts "\r\n" to "\n", and erases everything preceding a lone
-// "\r" in each line of the string.
+// ProcessCRLF converts "\r\n" to "\n", and processes lone "\r" by moving the
+// cursor/carriage to the start of the line and overwrites the contents
+// accordingly. Ex.:
+//
+// ProcessCRLF("abc") == "abc"
+// ProcessCRLF("abc\r\ndef") == "abc\ndef"
+// ProcessCRLF("abc\r\ndef\rghi") == "abc\nghi"
+// ProcessCRLF("abc\r\ndef\rghi\njkl") == "abc\nghi\njkl"
+// ProcessCRLF("abc\r\ndef\rghi\njkl\r") == "abc\nghi\njkl"
+// ProcessCRLF("abc\r\ndef\rghi\rjkl\rmn") == "abc\nmnl"
 func ProcessCRLF(str string) string {
 	str = strings.ReplaceAll(str, "\r\n", "\n")
-
-	// process \r by erasing everything preceding it in the line
-	if strings.Contains(str, "\r") {
-		lines := strings.Split(str, "\n")
-		for idx := range lines {
-			for reCarriageReturn.MatchString(lines[idx]) {
-				lines[idx] = reCarriageReturn.ReplaceAllString(lines[idx], "")
-			}
-		}
-		str = strings.Join(lines, "\n")
+	if !strings.Contains(str, "\r") {
+		return str
 	}
 
-	return str
+	lines := strings.Split(str, "\n")
+	for lineIdx, line := range lines {
+		if !strings.Contains(line, "\r") {
+			continue
+		}
+
+		lineRunes, newLineRunes := []rune(line), make([]rune, 0)
+		for idx, realIdx := 0, 0; idx < len(lineRunes); idx++ {
+			// if a CR, move "cursor" back to beginning of line
+			if lineRunes[idx] == '\r' {
+				realIdx = 0
+				continue
+			}
+
+			// if cursor is not at end, overwrite
+			if realIdx < len(newLineRunes) {
+				newLineRunes[realIdx] = lineRunes[idx]
+			} else { // else append
+				newLineRunes = append(newLineRunes, lineRunes[idx])
+			}
+			realIdx++
+		}
+		lines[lineIdx] = string(newLineRunes)
+	}
+	return strings.Join(lines, "\n")
 }
 
 // RepeatAndTrim repeats the given string until it is as long as maxRunes.
