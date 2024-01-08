@@ -140,12 +140,14 @@ func ExampleProcessCRLF() {
 	fmt.Printf("%#v\n", ProcessCRLF("abc\r\ndef\rghi"))
 	fmt.Printf("%#v\n", ProcessCRLF("abc\r\ndef\rghi\njkl"))
 	fmt.Printf("%#v\n", ProcessCRLF("abc\r\ndef\rghi\njkl\r"))
+	fmt.Printf("%#v\n", ProcessCRLF("abc\r\ndef\rghi\rjkl\rmn"))
 
 	// Output: "abc"
 	// "abc\ndef"
 	// "abc\nghi"
 	// "abc\nghi\njkl"
-	// "abc\nghi\n"
+	// "abc\nghi\njkl"
+	// "abc\nmnl"
 }
 
 func TestProcessCRLF(t *testing.T) {
@@ -153,7 +155,8 @@ func TestProcessCRLF(t *testing.T) {
 	assert.Equal(t, "abc\ndef", ProcessCRLF("abc\r\ndef"))
 	assert.Equal(t, "abc\nghi", ProcessCRLF("abc\r\ndef\rghi"))
 	assert.Equal(t, "abc\nghi\njkl", ProcessCRLF("abc\r\ndef\rghi\njkl"))
-	assert.Equal(t, "abc\nghi\n", ProcessCRLF("abc\r\ndef\rghi\njkl\r"))
+	assert.Equal(t, "abc\nghi\njkl", ProcessCRLF("abc\r\ndef\rghi\njkl\r"))
+	assert.Equal(t, "abc\nmnl", ProcessCRLF("abc\r\ndef\rghi\rjkl\rmn"))
 }
 
 func ExampleRepeatAndTrim() {

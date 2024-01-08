@@ -620,7 +620,7 @@ func TestTable_Render_CRLF(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(testHeader)
 	tw.AppendRows(testRows)
-	tw.AppendRow(Row{5000, "Night", "King", 10000, "Was once a\r\nMortal \rMan"})
+	tw.AppendRow(Row{5000, "Night", "King", 10000, "Was once a\r\nMortal \rMen"})
 	tw.AppendFooter(testFooter)
 
 	compareOutput(t, tw.Render(), `
@@ -631,7 +631,7 @@ func TestTable_Render_CRLF(t *testing.T) {
 |   20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
 |  300 | Tyrion     | Lannister |   5000 |                             |
 | 5000 | Night      | King      |  10000 | Was once a                  |
-|      |            |           |        | Man                         |
+|      |            |           |        | Mental                      |
 +------+------------+-----------+--------+-----------------------------+
 |      |            | TOTAL     |  10000 |                             |
 +------+------------+-----------+--------+-----------------------------+`)

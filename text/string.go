@@ -1,7 +1,6 @@
 package text
 
 import (
-	"regexp"
 	"strings"
 	"unicode/utf8"
 
@@ -108,21 +107,38 @@ func Pad(str string, maxLen int, paddingChar rune) string {
 	return str
 }
 
-var (
-	reCarriageReturn = regexp.MustCompile(`(.*)\r`)
-)
-
-// ProcessCRLF converts "\r\n" to "\n", and erases everything preceding a lone
-// "\r" in each line of the string.
+// ProcessCRLF converts "\r\n" to "\n", and processes lone "\r" by moving the
+// cursor/carriage to the start of the line and overwrites the contents
+// accordingly. Ex.:
+//
+// ProcessCRLF("abc") == "abc"
+// ProcessCRLF("abc\r\ndef") == "abc\ndef"
+// ProcessCRLF("abc\r\ndef\rghi") == "abc\nghi"
+// ProcessCRLF("abc\r\ndef\rghi\njkl") == "abc\nghi\njkl"
+// ProcessCRLF("abc\r\ndef\rghi\njkl\r") == "abc\nghi\njkl"
+// ProcessCRLF("abc\r\ndef\rghi\rjkl\rmn") == "abc\nmnl"
 func ProcessCRLF(str string) string {
 	str = strings.ReplaceAll(str, "\r\n", "\n")
 
-	// process \r by erasing everything preceding it in the line
 	if strings.Contains(str, "\r") {
 		lines := strings.Split(str, "\n")
-		for idx := range lines {
-			for reCarriageReturn.MatchString(lines[idx]) {
-				lines[idx] = reCarriageReturn.ReplaceAllString(lines[idx], "")
+		for lineIdx, line := range lines {
+			if strings.Contains(line, "\r") {
+				lineRunes, newLineRunes := []rune(line), make([]rune, 0)
+				for idx, realIdx := 0, 0; idx < len(lineRunes); idx++ {
+					if lineRunes[idx] == '\r' {
+						realIdx = 0
+						continue
+					}
+
+					if realIdx < len(newLineRunes) {
+						newLineRunes[realIdx] = lineRunes[idx]
+					} else {
+						newLineRunes = append(newLineRunes, lineRunes[idx])
+					}
+					realIdx++
+				}
+				lines[lineIdx] = string(newLineRunes)
 			}
 		}
 		str = strings.Join(lines, "\n")
