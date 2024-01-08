@@ -119,32 +119,35 @@ func Pad(str string, maxLen int, paddingChar rune) string {
 // ProcessCRLF("abc\r\ndef\rghi\rjkl\rmn") == "abc\nmnl"
 func ProcessCRLF(str string) string {
 	str = strings.ReplaceAll(str, "\r\n", "\n")
-
-	if strings.Contains(str, "\r") {
-		lines := strings.Split(str, "\n")
-		for lineIdx, line := range lines {
-			if strings.Contains(line, "\r") {
-				lineRunes, newLineRunes := []rune(line), make([]rune, 0)
-				for idx, realIdx := 0, 0; idx < len(lineRunes); idx++ {
-					if lineRunes[idx] == '\r' {
-						realIdx = 0
-						continue
-					}
-
-					if realIdx < len(newLineRunes) {
-						newLineRunes[realIdx] = lineRunes[idx]
-					} else {
-						newLineRunes = append(newLineRunes, lineRunes[idx])
-					}
-					realIdx++
-				}
-				lines[lineIdx] = string(newLineRunes)
-			}
-		}
-		str = strings.Join(lines, "\n")
+	if !strings.Contains(str, "\r") {
+		return str
 	}
 
-	return str
+	lines := strings.Split(str, "\n")
+	for lineIdx, line := range lines {
+		if !strings.Contains(line, "\r") {
+			continue
+		}
+
+		lineRunes, newLineRunes := []rune(line), make([]rune, 0)
+		for idx, realIdx := 0, 0; idx < len(lineRunes); idx++ {
+			// if a CR, move "cursor" back to beginning of line
+			if lineRunes[idx] == '\r' {
+				realIdx = 0
+				continue
+			}
+
+			// if cursor is not at end, overwrite
+			if realIdx < len(newLineRunes) {
+				newLineRunes[realIdx] = lineRunes[idx]
+			} else { // else append
+				newLineRunes = append(newLineRunes, lineRunes[idx])
+			}
+			realIdx++
+		}
+		lines[lineIdx] = string(newLineRunes)
+	}
+	return strings.Join(lines, "\n")
 }
 
 // RepeatAndTrim repeats the given string until it is as long as maxRunes.
