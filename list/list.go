@@ -5,6 +5,8 @@ import (
 	"io"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/jedib0t/go-pretty/v6/text"
 )
 
 const (
@@ -102,7 +104,7 @@ func (l *List) Style() *Style {
 func (l *List) analyzeAndStringify(item interface{}) *listItem {
 	itemStr := fmt.Sprint(item)
 	itemStr = strings.ReplaceAll(itemStr, "\t", "    ")
-	itemStr = strings.ReplaceAll(itemStr, "\r", "")
+	itemStr = text.ProcessCRLF(itemStr)
 	return &listItem{
 		Level: l.level,
 		Text:  itemStr,

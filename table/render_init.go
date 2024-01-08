@@ -44,7 +44,7 @@ func (t *Table) analyzeAndStringifyColumn(colIdx int, col interface{}, hint rend
 		colStr = fmt.Sprint(col)
 	}
 	colStr = strings.ReplaceAll(colStr, "\t", "    ")
-	colStr = strings.ReplaceAll(colStr, "\r", "")
+	colStr = text.ProcessCRLF(colStr)
 	return fmt.Sprintf("%s%s", t.style.Format.Direction.Modifier(), colStr)
 }
 
