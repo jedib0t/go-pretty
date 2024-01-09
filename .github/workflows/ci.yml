@@ -19,11 +19,11 @@ jobs:
     steps:
       # Checkout the code
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       # Set up the GoLang environment
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
           go-version: 1.17
 
