@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"unicode"
 
 	"github.com/jedib0t/go-pretty/v6/text"
 )
@@ -691,7 +692,11 @@ func (t *Table) render(out *strings.Builder) string {
 		var trimmed []string
 		sc := bufio.NewScanner(strings.NewReader(outStr))
 		for sc.Scan() {
-			trimmed = append(trimmed, strings.TrimSpace(sc.Text()))
+			trimmed = append(trimmed, strings.TrimRightFunc(
+				sc.Text(), func(r rune) bool {
+					return unicode.IsSpace(r)
+				},
+			))
 		}
 		outStr = strings.Join(trimmed, "\n")
 	}

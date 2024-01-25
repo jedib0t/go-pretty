@@ -1222,10 +1222,10 @@ func TestTable_Render_SuppressTrailingSpaces(t *testing.T) {
 
 	tw.Style().Options = OptionsNoBordersAndSeparators
 	compareOutput(t, tw.Render(), `
-ID    TEXT1                                   DATE              TEXT2
-U2    Hey                                     2021-04-19 13:37  Yuh yuh yuh
-S12   Uhhhh                                   2021-04-19 13:37  Some dummy data here
-R123  Lobsters                                2021-04-19 13:37  I like lobsters
-R123  Some big name here and it's pretty big  2021-04-19 13:37  Abcdefghijklmnopqrstuvwxyz
-R123  Small name                              2021-04-19 13:37  Abcdefghijklmnopqrstuvwxyz`)
+ ID    TEXT1                                   DATE              TEXT2
+ U2    Hey                                     2021-04-19 13:37  Yuh yuh yuh
+ S12   Uhhhh                                   2021-04-19 13:37  Some dummy data here
+ R123  Lobsters                                2021-04-19 13:37  I like lobsters
+ R123  Some big name here and it's pretty big  2021-04-19 13:37  Abcdefghijklmnopqrstuvwxyz
+ R123  Small name                              2021-04-19 13:37  Abcdefghijklmnopqrstuvwxyz`)
 }
