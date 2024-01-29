@@ -1,7 +1,6 @@
 package table
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"strings"
@@ -690,13 +689,8 @@ func (t *Table) render(out *strings.Builder) string {
 	outStr := out.String()
 	if t.supressTrailingSpaces {
 		var trimmed []string
-		sc := bufio.NewScanner(strings.NewReader(outStr))
-		for sc.Scan() {
-			trimmed = append(trimmed, strings.TrimRightFunc(
-				sc.Text(), func(r rune) bool {
-					return unicode.IsSpace(r)
-				},
-			))
+		for _, line := range strings.Split(outStr, "\n") {
+			trimmed = append(trimmed, strings.TrimRightFunc(line, unicode.IsSpace))
 		}
 		outStr = strings.Join(trimmed, "\n")
 	}
