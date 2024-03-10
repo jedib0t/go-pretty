@@ -1,8 +1,8 @@
 package table
 
 import (
-	"reflect"
 	"fmt"
+	"reflect"
 )
 
 // AutoIndexColumnID returns a unique Column ID/Name for the given Column Number.
