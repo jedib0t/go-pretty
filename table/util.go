@@ -2,6 +2,7 @@ package table
 
 import (
 	"reflect"
+	"fmt"
 )
 
 // AutoIndexColumnID returns a unique Column ID/Name for the given Column Number.
@@ -38,6 +39,14 @@ func isNumber(x interface{}) bool {
 		return true
 	}
 	return false
+}
+
+// isEmpty returns true if the argument is an empty string or nil
+func isEmpty(x interface{}) bool {
+	if x == nil {
+		return true
+	}
+	return fmt.Sprintf("%v", x) == ""
 }
 
 type mergedColumnIndices map[int]map[int]bool
