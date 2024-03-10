@@ -24,7 +24,7 @@ func (t *Table) analyzeAndStringify(row Row, hint renderHint) rowStr {
 	rowOut := make(rowStr, len(row))
 	for colIdx, col := range row {
 		// if the column is not a number, keep track of it
-		if !hint.isHeaderRow && !hint.isFooterRow && !t.columnIsNonNumeric[colIdx] && !isNumber(col) {
+		if !hint.isHeaderRow && !hint.isFooterRow && !t.columnIsNonNumeric[colIdx] && !(isNumber(col) || isEmpty(col) {
 			t.columnIsNonNumeric[colIdx] = true
 		}
 
