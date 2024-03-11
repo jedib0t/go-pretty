@@ -117,18 +117,20 @@ func (t *Table) initForRenderColumnConfigs() {
 	for i, colCfg := range t.columnConfigs {
 		// find the column number if none provided; this logic can work only if
 		// a header row is present and has a column with the given name
-		if colCfg.Number == 0 && colCfg.Name != "" {
-			for _, row := range t.rowsHeaderRaw {
-				colCfg.Number = row.findColumnNumber(colCfg.Name)
-				if colCfg.Number > 0 {
-					break
+		if colCfg.Number == 0 {
+			if colCfg.Name == "" {
+				colCfg.Number = i + 1
+			} else {
+				for _, row := range t.rowsHeaderRaw {
+					colCfg.Number = row.findColumnNumber(colCfg.Name)
+					if colCfg.Number > 0 {
+						break
+					}
 				}
 			}
 		}
 		if colCfg.Number > 0 {
 			t.columnConfigMap[colCfg.Number-1] = colCfg
-		} else {
-			t.columnConfigMap[i] = colCfg
 		}
 	}
 }
