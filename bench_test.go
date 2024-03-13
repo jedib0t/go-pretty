@@ -1,7 +1,7 @@
 package gopretty
 
 import (
-	"io/ioutil"
+	"io"
 	"testing"
 	"time"
 
@@ -52,7 +52,7 @@ func BenchmarkProgress_Render(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		pw := progress.NewWriter()
 		pw.SetAutoStop(true)
-		pw.SetOutputWriter(ioutil.Discard)
+		pw.SetOutputWriter(io.Discard)
 		go trackSomething(pw, &tracker1)
 		go trackSomething(pw, &tracker2)
 		go trackSomething(pw, &tracker3)
