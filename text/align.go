@@ -36,7 +36,8 @@ var (
 func (a Align) Apply(text string, maxLength int) string {
 	aComputed := a
 	if aComputed == AlignAuto {
-		if reNumericText.MatchString(text) {
+		_, err := strconv.ParseFloat(text, 64)
+		if err == nil { // was able to parse a number out of the string
 			aComputed = AlignRight
 		} else {
 			aComputed = AlignLeft
