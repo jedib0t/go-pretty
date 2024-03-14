@@ -93,34 +93,41 @@ func (rs rowsSorter) Swap(i, j int) {
 
 func (rs rowsSorter) Less(i, j int) bool {
 	realI, realJ := rs.sortedIndices[i], rs.sortedIndices[j]
-	for _, col := range rs.sortBy {
-		rowI, rowJ, colIdx := rs.rows[realI], rs.rows[realJ], col.Number-1
-		if colIdx < len(rowI) && colIdx < len(rowJ) {
-			shouldContinue, returnValue := rs.lessColumns(rowI, rowJ, colIdx, col)
-			if !shouldContinue {
-				return returnValue
-			}
+	for _, sortBy := range rs.sortBy {
+		rowI, rowJ, colIdx := rs.rows[realI], rs.rows[realJ], sortBy.Number-1
+		// extract the values/cells from the rows for comparison
+		iVal, jVal := "", ""
+		if colIdx < len(rowI) {
+			iVal = rowI[colIdx]
+		}
+		if colIdx < len(rowJ) {
+			jVal = rowJ[colIdx]
+		}
+		// compare and choose whether to continue
+		shouldContinue, returnValue := rs.lessColumns(iVal, jVal, sortBy)
+		if !shouldContinue {
+			return returnValue
 		}
 	}
 	return false
 }
 
-func (rs rowsSorter) lessColumns(rowI rowStr, rowJ rowStr, colIdx int, col SortBy) (bool, bool) {
-	if rowI[colIdx] == rowJ[colIdx] {
+func (rs rowsSorter) lessColumns(iVal string, jVal string, sortBy SortBy) (bool, bool) {
+	if iVal == jVal {
 		return true, false
-	} else if col.Mode == Asc {
-		return false, rowI[colIdx] < rowJ[colIdx]
-	} else if col.Mode == Dsc {
-		return false, rowI[colIdx] > rowJ[colIdx]
+	} else if sortBy.Mode == Asc {
+		return false, iVal < jVal
+	} else if sortBy.Mode == Dsc {
+		return false, iVal > jVal
 	}
 
-	iVal, iErr := strconv.ParseFloat(rowI[colIdx], 64)
-	jVal, jErr := strconv.ParseFloat(rowJ[colIdx], 64)
+	iNumVal, iErr := strconv.ParseFloat(iVal, 64)
+	jNumVal, jErr := strconv.ParseFloat(jVal, 64)
 	if iErr == nil && jErr == nil {
-		if col.Mode == AscNumeric {
-			return false, iVal < jVal
-		} else if col.Mode == DscNumeric {
-			return false, jVal < iVal
+		if sortBy.Mode == AscNumeric {
+			return false, iNumVal < jNumVal
+		} else if sortBy.Mode == DscNumeric {
+			return false, jNumVal < iNumVal
 		}
 	}
 	return true, false

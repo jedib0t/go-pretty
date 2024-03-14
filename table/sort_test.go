@@ -131,6 +131,22 @@ func TestTable_sortRows_WithoutName(t *testing.T) {
 	assert.Equal(t, []int{0, 1, 2, 3}, table.getSortedRowIndices())
 }
 
+func TestTable_sortRows_MissingCells(t *testing.T) {
+	table := Table{}
+	table.AppendRows([]Row{
+		{1, "Arya", "Stark", 3000, 9},
+		{11, "Sansa", "Stark", 3000},
+		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
+		{300, "Tyrion", "Lannister", 5000, 7},
+	})
+	table.SetStyle(StyleDefault)
+	table.initForRenderRows()
+
+	// sort by "First Name"
+	table.SortBy([]SortBy{{Number: 5, Mode: Asc}})
+	assert.Equal(t, []int{1, 3, 0, 2}, table.getSortedRowIndices())
+}
+
 func TestTable_sortRows_InvalidMode(t *testing.T) {
 	table := Table{}
 	table.AppendRows([]Row{
