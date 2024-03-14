@@ -13,12 +13,16 @@ func ExampleAlign_Apply() {
 	fmt.Printf("AlignCenter : '%s'\n", AlignCenter.Apply("Jon Snow", 12))
 	fmt.Printf("AlignJustify: '%s'\n", AlignJustify.Apply("Jon Snow", 12))
 	fmt.Printf("AlignRight  : '%s'\n", AlignRight.Apply("Jon Snow", 12))
+	fmt.Printf("AlignAuto   : '%s'\n", AlignAuto.Apply("Jon Snow", 12))
+	fmt.Printf("AlignAuto   : '%s'\n", AlignAuto.Apply("-5.43", 12))
 
 	// Output: AlignDefault: 'Jon Snow    '
 	// AlignLeft   : 'Jon Snow    '
 	// AlignCenter : '  Jon Snow  '
 	// AlignJustify: 'Jon     Snow'
 	// AlignRight  : '    Jon Snow'
+	// AlignAuto   : 'Jon Snow    '
+	// AlignAuto   : '       -5.43'
 }
 
 func TestAlign_Apply(t *testing.T) {
@@ -50,6 +54,17 @@ func TestAlign_Apply(t *testing.T) {
 	assert.Equal(t, "   Jon Snow ", AlignRight.Apply("Jon Snow ", 12))
 	assert.Equal(t, "   Jon Snow ", AlignRight.Apply("  Jon Snow ", 12))
 	assert.Equal(t, "            ", AlignRight.Apply("", 12))
+
+	// Align Auto
+	assert.Equal(t, "Jon Snow    ", AlignAuto.Apply("Jon Snow", 12))
+	assert.Equal(t, "Jon Snow    ", AlignAuto.Apply("Jon Snow ", 12))
+	assert.Equal(t, "  Jon Snow  ", AlignAuto.Apply("  Jon Snow ", 12))
+	assert.Equal(t, "            ", AlignAuto.Apply("", 12))
+	assert.Equal(t, "          13", AlignAuto.Apply("13", 12))
+	assert.Equal(t, "       -5.43", AlignAuto.Apply("-5.43", 12))
+	assert.Equal(t, "        +.43", AlignAuto.Apply("+.43", 12))
+	assert.Equal(t, "       +5.43", AlignAuto.Apply("+5.43", 12))
+	assert.Equal(t, "+5.43x      ", AlignAuto.Apply("+5.43x", 12))
 }
 
 func TestAlign_Apply_ColoredText(t *testing.T) {

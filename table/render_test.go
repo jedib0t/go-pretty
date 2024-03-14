@@ -111,6 +111,34 @@ func TestTable_Render(t *testing.T) {
 A Song of Ice and Fire`)
 }
 
+func TestTable_Render_Align(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendRow(Row{500, "Jamie", "Lannister", "Kingslayer", "The things I do for love."})
+	tw.AppendRow(Row{1000, "Tywin", "Lannister", nil})
+	tw.AppendFooter(testFooter)
+	tw.SetColumnConfigs([]ColumnConfig{
+		{Name: "First Name", Align: text.AlignLeft, AlignHeader: text.AlignLeft, AlignFooter: text.AlignLeft},
+		{Name: "Last Name", Align: text.AlignRight, AlignHeader: text.AlignRight, AlignFooter: text.AlignRight},
+		{Name: "Salary", Align: text.AlignAuto, AlignHeader: text.AlignRight, AlignFooter: text.AlignAuto},
+		{Number: 5, Align: text.AlignJustify, AlignHeader: text.AlignJustify, AlignFooter: text.AlignJustify},
+	})
+
+	compareOutput(t, tw.Render(), `
++------+------------+-----------+------------+-----------------------------+
+|    # | FIRST NAME | LAST NAME |     SALARY |                             |
++------+------------+-----------+------------+-----------------------------+
+|    1 | Arya       |     Stark |       3000 |                             |
+|   20 | Jon        |      Snow |       2000 | You know nothing, Jon Snow! |
+|  300 | Tyrion     | Lannister |       5000 |                             |
+|  500 | Jamie      | Lannister | Kingslayer | The things I do for   love. |
+| 1000 | Tywin      | Lannister | <nil>      |                             |
++------+------------+-----------+------------+-----------------------------+
+|      |            |     TOTAL |      10000 |                             |
++------+------------+-----------+------------+-----------------------------+`)
+}
+
 func TestTable_Render_AutoIndex(t *testing.T) {
 	tw := NewWriter()
 	for rowIdx := 0; rowIdx < 10; rowIdx++ {
