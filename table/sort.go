@@ -25,12 +25,24 @@ type SortMode int
 const (
 	// Asc sorts the column in Ascending order alphabetically.
 	Asc SortMode = iota
+	// AscAlphaNumeric sorts the column in Ascending order alphabetically and
+	// then numerically.
+	AscAlphaNumeric
 	// AscNumeric sorts the column in Ascending order numerically.
 	AscNumeric
+	// AscNumericAlpha sorts the column in Ascending order numerically and
+	// then alphabetically.
+	AscNumericAlpha
 	// Dsc sorts the column in Descending order alphabetically.
 	Dsc
+	// DscAlphaNumeric sorts the column in Descending order alphabetically and
+	// then numerically.
+	DscAlphaNumeric
 	// DscNumeric sorts the column in Descending order numerically.
 	DscNumeric
+	// DscNumericAlpha sorts the column in Descending order numerically and
+	// then alphabetically.
+	DscNumericAlpha
 )
 
 type rowsSorter struct {
@@ -94,8 +106,8 @@ func (rs rowsSorter) Swap(i, j int) {
 func (rs rowsSorter) Less(i, j int) bool {
 	realI, realJ := rs.sortedIndices[i], rs.sortedIndices[j]
 	for _, sortBy := range rs.sortBy {
-		rowI, rowJ, colIdx := rs.rows[realI], rs.rows[realJ], sortBy.Number-1
 		// extract the values/cells from the rows for comparison
+		rowI, rowJ, colIdx := rs.rows[realI], rs.rows[realJ], sortBy.Number-1
 		iVal, jVal := "", ""
 		if colIdx < len(rowI) {
 			iVal = rowI[colIdx]
@@ -103,8 +115,9 @@ func (rs rowsSorter) Less(i, j int) bool {
 		if colIdx < len(rowJ) {
 			jVal = rowJ[colIdx]
 		}
+
 		// compare and choose whether to continue
-		shouldContinue, returnValue := rs.lessColumns(iVal, jVal, sortBy)
+		shouldContinue, returnValue := less(iVal, jVal, sortBy.Mode)
 		if !shouldContinue {
 			return returnValue
 		}
@@ -112,23 +125,85 @@ func (rs rowsSorter) Less(i, j int) bool {
 	return false
 }
 
-func (rs rowsSorter) lessColumns(iVal string, jVal string, sortBy SortBy) (bool, bool) {
+func less(iVal string, jVal string, mode SortMode) (bool, bool) {
 	if iVal == jVal {
 		return true, false
-	} else if sortBy.Mode == Asc {
-		return false, iVal < jVal
-	} else if sortBy.Mode == Dsc {
-		return false, iVal > jVal
 	}
 
+	switch mode {
+	case Asc, Dsc:
+		return lessAlphabetic(iVal, jVal, mode)
+	case AscNumeric, DscNumeric:
+		return lessNumeric(iVal, jVal, mode)
+	default: // AscAlphaNumeric, AscNumericAlpha, DscAlphaNumeric, DscNumericAlpha
+		return lessMixedMode(iVal, jVal, mode)
+	}
+}
+
+func lessAlphabetic(iVal string, jVal string, mode SortMode) (bool, bool) {
+	switch mode {
+	case Asc, AscAlphaNumeric, AscNumericAlpha:
+		return false, iVal < jVal
+	default: // Dsc, DscAlphaNumeric, DscNumericAlpha
+		return false, iVal > jVal
+	}
+}
+
+func lessAlphaNumericI(mode SortMode) (bool, bool) {
+	// i == "abc"; j == 5
+	switch mode {
+	case AscAlphaNumeric, DscAlphaNumeric:
+		return false, true
+	default: // AscNumericAlpha, DscNumericAlpha
+		return false, false
+	}
+}
+
+func lessAlphaNumericJ(mode SortMode) (bool, bool) {
+	// i == 5; j == "abc"
+	switch mode {
+	case AscAlphaNumeric, DscAlphaNumeric:
+		return false, false
+	default: // AscNumericAlpha, DscNumericAlpha:
+		return false, true
+	}
+}
+
+func lessMixedMode(iVal string, jVal string, mode SortMode) (bool, bool) {
 	iNumVal, iErr := strconv.ParseFloat(iVal, 64)
 	jNumVal, jErr := strconv.ParseFloat(jVal, 64)
-	if iErr == nil && jErr == nil {
-		if sortBy.Mode == AscNumeric {
-			return false, iNumVal < jNumVal
-		} else if sortBy.Mode == DscNumeric {
-			return false, jNumVal < iNumVal
-		}
+	if iErr != nil && jErr != nil { // both are alphanumeric
+		return lessAlphabetic(iVal, jVal, mode)
 	}
-	return true, false
+	if iErr != nil { // iVal is alphabetic, jVal is numeric
+		return lessAlphaNumericI(mode)
+	}
+	if jErr != nil { // iVal is numeric, jVal is alphabetic
+		return lessAlphaNumericJ(mode)
+	}
+	// both values numeric
+	return lessNumericVal(iNumVal, jNumVal, mode)
+}
+
+func lessNumeric(iVal string, jVal string, mode SortMode) (bool, bool) {
+	iNumVal, iErr := strconv.ParseFloat(iVal, 64)
+	jNumVal, jErr := strconv.ParseFloat(jVal, 64)
+	if iErr != nil || jErr != nil {
+		return false, false
+	}
+
+	return lessNumericVal(iNumVal, jNumVal, mode)
+}
+
+func lessNumericVal(iVal float64, jVal float64, mode SortMode) (bool, bool) {
+	if iVal == jVal {
+		return true, false
+	}
+
+	switch mode {
+	case AscNumeric, AscAlphaNumeric, AscNumericAlpha:
+		return false, iVal < jVal
+	default: // DscNumeric, DscAlphaNumeric, DscNumericAlpha
+		return false, iVal > jVal
+	}
 }

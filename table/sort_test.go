@@ -6,6 +6,72 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestTable_sortRows_MissingCells(t *testing.T) {
+	table := Table{}
+	table.AppendRows([]Row{
+		{1, "Arya", "Stark", 3000, 9},
+		{11, "Sansa", "Stark", 3000},
+		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
+		{300, "Tyrion", "Lannister", 5000, 7},
+	})
+	table.SetStyle(StyleDefault)
+	table.initForRenderRows()
+
+	// sort by "First Name"
+	table.SortBy([]SortBy{{Number: 5, Mode: Asc}})
+	assert.Equal(t, []int{1, 3, 0, 2}, table.getSortedRowIndices())
+}
+
+func TestTable_sortRows_InvalidMode(t *testing.T) {
+	table := Table{}
+	table.AppendRows([]Row{
+		{1, "Arya", "Stark", 3000},
+		{11, "Sansa", "Stark", 3000},
+		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
+		{300, "Tyrion", "Lannister", 5000},
+	})
+	table.SetStyle(StyleDefault)
+	table.initForRenderRows()
+
+	// sort by "First Name"
+	table.SortBy([]SortBy{{Number: 2, Mode: AscNumeric}})
+	assert.Equal(t, []int{0, 1, 2, 3}, table.getSortedRowIndices())
+}
+
+func TestTable_sortRows_MixedMode(t *testing.T) {
+	table := Table{}
+	table.AppendHeader(Row{"#", "First Name", "Last Name", "Salary"})
+	table.AppendRows([]Row{
+		/* 0 */ {1, "Arya", "Stark", 3000, 4},
+		/* 1 */ {11, "Sansa", "Stark", 3000},
+		/* 2 */ {20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
+		/* 3 */ {300, "Tyrion", "Lannister", 5000, -7.54},
+		/* 4 */ {400, "Jamie", "Lannister", 5000, nil},
+		/* 5 */ {500, "Tywin", "Lannister", 5000, "-7.540"},
+	})
+	table.SetStyle(StyleDefault)
+	table.initForRenderRows()
+
+	// sort by nothing
+	assert.Equal(t, []int{0, 1, 2, 3, 4, 5}, table.getSortedRowIndices())
+
+	// sort column #5 in Ascending order alphabetically and then numerically
+	table.SortBy([]SortBy{{Number: 5, Mode: AscAlphaNumeric}, {Number: 1, Mode: AscNumeric}})
+	assert.Equal(t, []int{1, 4, 2, 3, 5, 0}, table.getSortedRowIndices())
+
+	// sort column #5 in Ascending order numerically and then alphabetically
+	table.SortBy([]SortBy{{Number: 5, Mode: AscNumericAlpha}, {Number: 1, Mode: AscNumeric}})
+	assert.Equal(t, []int{3, 5, 0, 1, 4, 2}, table.getSortedRowIndices())
+
+	// sort column #5 in Descending order alphabetically and then numerically
+	table.SortBy([]SortBy{{Number: 5, Mode: DscAlphaNumeric}, {Number: 1, Mode: AscNumeric}})
+	assert.Equal(t, []int{2, 4, 1, 0, 3, 5}, table.getSortedRowIndices())
+
+	// sort column #5 in Descending order numerically and then alphabetically
+	table.SortBy([]SortBy{{Number: 5, Mode: DscNumericAlpha}, {Number: 1, Mode: AscNumeric}})
+	assert.Equal(t, []int{0, 3, 5, 2, 4, 1}, table.getSortedRowIndices())
+}
+
 func TestTable_sortRows_WithName(t *testing.T) {
 	table := Table{}
 	table.AppendHeader(Row{"#", "First Name", "Last Name", "Salary"})
@@ -128,37 +194,5 @@ func TestTable_sortRows_WithoutName(t *testing.T) {
 	assert.Equal(t, []int{3, 0, 1, 2}, table.getSortedRowIndices())
 
 	table.SortBy(nil)
-	assert.Equal(t, []int{0, 1, 2, 3}, table.getSortedRowIndices())
-}
-
-func TestTable_sortRows_MissingCells(t *testing.T) {
-	table := Table{}
-	table.AppendRows([]Row{
-		{1, "Arya", "Stark", 3000, 9},
-		{11, "Sansa", "Stark", 3000},
-		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
-		{300, "Tyrion", "Lannister", 5000, 7},
-	})
-	table.SetStyle(StyleDefault)
-	table.initForRenderRows()
-
-	// sort by "First Name"
-	table.SortBy([]SortBy{{Number: 5, Mode: Asc}})
-	assert.Equal(t, []int{1, 3, 0, 2}, table.getSortedRowIndices())
-}
-
-func TestTable_sortRows_InvalidMode(t *testing.T) {
-	table := Table{}
-	table.AppendRows([]Row{
-		{1, "Arya", "Stark", 3000},
-		{11, "Sansa", "Stark", 3000},
-		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
-		{300, "Tyrion", "Lannister", 5000},
-	})
-	table.SetStyle(StyleDefault)
-	table.initForRenderRows()
-
-	// sort by "First Name"
-	table.SortBy([]SortBy{{Number: 2, Mode: AscNumeric}})
 	assert.Equal(t, []int{0, 1, 2, 3}, table.getSortedRowIndices())
 }
