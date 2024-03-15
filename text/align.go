@@ -2,7 +2,6 @@ package text
 
 import (
 	"fmt"
-	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -19,11 +18,6 @@ const (
 	AlignJustify              // "justify   it"
 	AlignRight                // "       right"
 	AlignAuto                 // AlignRight for numbers, AlignLeft for the rest
-)
-
-var (
-	// reNumericText - Regular Expression to match numbers.
-	reNumericText = regexp.MustCompile(`^\s*[+\-]?\d*[.]?\d+\s*$`)
 )
 
 // Apply aligns the text as directed. For ex.:
