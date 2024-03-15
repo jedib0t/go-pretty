@@ -290,6 +290,92 @@ func TestTable_SetAutoIndex(t *testing.T) {
 │   │     │            │           │        │ This is known.              │
 └───┴─────┴────────────┴───────────┴────────┴─────────────────────────────┘`
 	assert.Equal(t, expectedOut, table.Render())
+	tw := NewWriter()
+	tw.AppendHeader(Row{"#", "Name", "Prefix", "Number", "Class"})
+	tw.SetColumnConfigs([]ColumnConfig{
+		{Number: 1, Align: text.AlignRight, AlignHeader: text.AlignCenter},
+		{Number: 2, Align: text.AlignAuto, AlignHeader: text.AlignCenter},
+		{Number: 3, Align: text.AlignAuto, AlignHeader: text.AlignCenter},
+		{Number: 4, Align: text.AlignAuto, AlignHeader: text.AlignCenter},
+		{Number: 5, Align: text.AlignAuto, AlignHeader: text.AlignCenter},
+	})
+	tw.AppendRows([]Row{
+		{0, "defiant", "NCC", 1764, "Constitution"},
+		{1, "Defiant", "nx", 74205, "Defiant"},
+		{2, "entente", "ncc", 2120, "Dreadnought"},
+		{3, "Enterprise", "NCC", 1701, "Constitution"},
+		{4, "Farragut", "NCC", 1647, "(Farragut-Type)"},
+		{5, "farragut", "NCC", 60597, "Nebula"},
+		{6, "Bonaventure", "", "10283NCC", "(Bonaventure-Typ)"},
+		{7, "IKS Ch'Tang", "", "-----------", "Bird-of-Prey"},
+		{8, "IKS Drovana", "", "-----------", "Vor'cha-Klasse"},
+		{9, "IKS Buruk", "", "-----------", "Bird-of-Prey"},
+	})
+	tw.SetStyle(StyleLight)
+	tw.SortBy([]SortBy{{Name: "Name", Mode: Asc, IgnoreCase: false}})
+	assert.Equal(t, `┌───┬─────────────┬────────┬─────────────┬───────────────────┐
+│ # │     NAME    │ PREFIX │    NUMBER   │       CLASS       │
+├───┼─────────────┼────────┼─────────────┼───────────────────┤
+│ 6 │ Bonaventure │        │ 10283NCC    │ (Bonaventure-Typ) │
+│ 1 │ Defiant     │ nx     │       74205 │ Defiant           │
+│ 3 │ Enterprise  │ NCC    │        1701 │ Constitution      │
+│ 4 │ Farragut    │ NCC    │        1647 │ (Farragut-Type)   │
+│ 9 │ IKS Buruk   │        │ ----------- │ Bird-of-Prey      │
+│ 7 │ IKS Ch'Tang │        │ ----------- │ Bird-of-Prey      │
+│ 8 │ IKS Drovana │        │ ----------- │ Vor'cha-Klasse    │
+│ 0 │ defiant     │ NCC    │        1764 │ Constitution      │
+│ 2 │ entente     │ ncc    │        2120 │ Dreadnought       │
+│ 5 │ farragut    │ NCC    │       60597 │ Nebula            │
+└───┴─────────────┴────────┴─────────────┴───────────────────┘`, tw.Render())
+
+	tw.SortBy([]SortBy{{Name: "Name", Mode: Asc, IgnoreCase: true}})
+	assert.Equal(t, `┌───┬─────────────┬────────┬─────────────┬───────────────────┐
+│ # │     NAME    │ PREFIX │    NUMBER   │       CLASS       │
+├───┼─────────────┼────────┼─────────────┼───────────────────┤
+│ 6 │ Bonaventure │        │ 10283NCC    │ (Bonaventure-Typ) │
+│ 1 │ Defiant     │ nx     │       74205 │ Defiant           │
+│ 0 │ defiant     │ NCC    │        1764 │ Constitution      │
+│ 2 │ entente     │ ncc    │        2120 │ Dreadnought       │
+│ 3 │ Enterprise  │ NCC    │        1701 │ Constitution      │
+│ 4 │ Farragut    │ NCC    │        1647 │ (Farragut-Type)   │
+│ 5 │ farragut    │ NCC    │       60597 │ Nebula            │
+│ 9 │ IKS Buruk   │        │ ----------- │ Bird-of-Prey      │
+│ 7 │ IKS Ch'Tang │        │ ----------- │ Bird-of-Prey      │
+│ 8 │ IKS Drovana │        │ ----------- │ Vor'cha-Klasse    │
+└───┴─────────────┴────────┴─────────────┴───────────────────┘`, tw.Render())
+
+	tw.SortBy([]SortBy{{Name: "Prefix", Mode: Asc, IgnoreCase: true}, {Name: "Number", Mode: AscNumericAlpha}})
+	assert.Equal(t, `┌───┬─────────────┬────────┬─────────────┬───────────────────┐
+│ # │     NAME    │ PREFIX │    NUMBER   │       CLASS       │
+├───┼─────────────┼────────┼─────────────┼───────────────────┤
+│ 7 │ IKS Ch'Tang │        │ ----------- │ Bird-of-Prey      │
+│ 8 │ IKS Drovana │        │ ----------- │ Vor'cha-Klasse    │
+│ 9 │ IKS Buruk   │        │ ----------- │ Bird-of-Prey      │
+│ 6 │ Bonaventure │        │ 10283NCC    │ (Bonaventure-Typ) │
+│ 4 │ Farragut    │ NCC    │        1647 │ (Farragut-Type)   │
+│ 3 │ Enterprise  │ NCC    │        1701 │ Constitution      │
+│ 0 │ defiant     │ NCC    │        1764 │ Constitution      │
+│ 2 │ entente     │ ncc    │        2120 │ Dreadnought       │
+│ 5 │ farragut    │ NCC    │       60597 │ Nebula            │
+│ 1 │ Defiant     │ nx     │       74205 │ Defiant           │
+└───┴─────────────┴────────┴─────────────┴───────────────────┘`, tw.Render())
+
+	tw.SortBy([]SortBy{{Name: "Number", Mode: AscNumericAlpha}, {Name: "Name", Mode: Asc}})
+	assert.Equal(t, `┌───┬─────────────┬────────┬─────────────┬───────────────────┐
+│ # │     NAME    │ PREFIX │    NUMBER   │       CLASS       │
+├───┼─────────────┼────────┼─────────────┼───────────────────┤
+│ 4 │ Farragut    │ NCC    │        1647 │ (Farragut-Type)   │
+│ 3 │ Enterprise  │ NCC    │        1701 │ Constitution      │
+│ 0 │ defiant     │ NCC    │        1764 │ Constitution      │
+│ 2 │ entente     │ ncc    │        2120 │ Dreadnought       │
+│ 5 │ farragut    │ NCC    │       60597 │ Nebula            │
+│ 1 │ Defiant     │ nx     │       74205 │ Defiant           │
+│ 9 │ IKS Buruk   │        │ ----------- │ Bird-of-Prey      │
+│ 7 │ IKS Ch'Tang │        │ ----------- │ Bird-of-Prey      │
+│ 8 │ IKS Drovana │        │ ----------- │ Vor'cha-Klasse    │
+│ 6 │ Bonaventure │        │ 10283NCC    │ (Bonaventure-Typ) │
+└───┴─────────────┴────────┴─────────────┴───────────────────┘`, tw.Render())
+
 }
 
 func TestTable_SetCaption(t *testing.T) {
