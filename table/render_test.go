@@ -962,6 +962,17 @@ func TestTable_Render_Sorted(t *testing.T) {
 ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
 │     │            │ TOTAL     │  10000 │                             │
 └─────┴────────────┴───────────┴────────┴─────────────────────────────┘`)
+	tw.SortBy([]SortBy{{Number: 5, Mode: Dsc}, {Name: "Last Name", Mode: Asc}, {Name: "First Name", Mode: Asc}})
+	compareOutput(t, tw.Render(), `┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
+│   # │ FIRST NAME │ LAST NAME │ SALARY │                             │
+├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+│  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │
+│ 300 │ Tyrion     │ Lannister │   5000 │                             │
+│   1 │ Arya       │ Stark     │   3000 │                             │
+│  11 │ Sansa      │ Stark     │   6000 │                             │
+├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+│     │            │ TOTAL     │  10000 │                             │
+└─────┴────────────┴───────────┴────────┴─────────────────────────────┘`)
 }
 
 func TestTable_Render_Separator(t *testing.T) {
