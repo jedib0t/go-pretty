@@ -109,9 +109,9 @@ func (rs rowsSorter) Swap(i, j int) {
 }
 
 func (rs rowsSorter) Less(i, j int) bool {
+	shouldContinue, returnValue := false, false
 	realI, realJ := rs.sortedIndices[i], rs.sortedIndices[j]
-	lastSort := len(rs.sortBy) - 1
-	for sortIdx, sortBy := range rs.sortBy {
+	for _, sortBy := range rs.sortBy {
 		// extract the values/cells from the rows for comparison
 		rowI, rowJ, colIdx := rs.rows[realI], rs.rows[realJ], sortBy.Number-1
 		iVal, jVal := "", ""
@@ -123,12 +123,12 @@ func (rs rowsSorter) Less(i, j int) bool {
 		}
 
 		// compare and choose whether to continue
-		shouldContinue, returnValue := less(iVal, jVal, sortBy)
-		if !shouldContinue || lastSort == sortIdx {
-			return returnValue
+		shouldContinue, returnValue = less(iVal, jVal, sortBy)
+		if !shouldContinue {
+			break
 		}
 	}
-	return false
+	return returnValue
 }
 
 func less(iVal string, jVal string, sb SortBy) (bool, bool) {
