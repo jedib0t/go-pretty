@@ -25,6 +25,16 @@ var (
 		{20, "Jon", "Snow", 2000, "You know nothing, Jon Snow!"},
 		{300, "Tyrion", "Lannister", 5000},
 	}
+	testTitanicHeader = Row{
+		"PassengerId", "Survived", "Pclass", "Name", "Sex", "Age", "SibSp", "Parch", "Ticket", "Fare", "Cabin", "Embarked",
+	}
+	testTitanicRows = []Row{
+		{"1", "0", "3", "Braund, Mr. Owen Harris", "male", "22", "1", "0", "A/5 21171", "7.25", "", "S"},
+		{"2", "1", "1", "Cumings, Mrs. John Bradley (Florence Briggs Thayer)", "female", "38", "1", "0", "PC 17599", "71.2833", "C85", "C"},
+		{"3", "1", "3", "Heikkinen, Miss. Laina", "female", "26", "0", "0", "STON/O2. 3101282", "7.925", "", "S"},
+		{"4", "1", "1", "Futrelle, Mrs. Jacques Heath (Lily May Peel)", "female", "35", "1", "0", "113803", "53.1", "C123", "S"},
+		{"5", "0", "3", "Allen, Mr. William Henry", "male", "35", "0", "0", "373450", "8.05", "", "S"},
+	}
 	testRowMultiLine    = Row{0, "Winter", "Is", 0, "Coming.\r\nThe North Remembers!\nThis is known."}
 	testRowNewLines     = Row{0, "Valar", "Morghulis", 0, "Faceless\nMen"}
 	testRowPipes        = Row{0, "Valar", "Morghulis", 0, "Faceless|Men"}

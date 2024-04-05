@@ -211,7 +211,7 @@ func (t *Table) renderLine(out *strings.Builder, row rowStr, hint renderHint) {
 	// if a page size has been set, and said number of lines has already
 	// been rendered, and the header is not being rendered right now, render
 	// the header all over again with a spacing line
-	if hint.isRegularRow() {
+	if hint.isRegularNonSeparatorRow() {
 		t.numLinesRendered++
 		if t.pageSize > 0 && t.numLinesRendered%t.pageSize == 0 && !hint.isLastLineOfLastRow() {
 			t.renderRowsFooter(out)
@@ -313,27 +313,65 @@ func (t *Table) renderRows(out *strings.Builder, rows []rowStr, hint renderHint)
 		hint.rowNumber = rowIdx + 1
 		t.renderRow(out, row, hint)
 
-		if (t.style.Options.SeparateRows && rowIdx < len(rows)-1) || // last row before footer
-			(t.separators[rowIdx] && rowIdx != len(rows)-1) { // manually added separator not after last row
+		if t.shouldSeparate(rowIdx, len(rows)) {
 			hint.isFirstRow = false
 			t.renderRowSeparator(out, hint)
 		}
 	}
 }
 
+func (t *Table) shouldSeparate(rowIdx int, numRows int) bool {
+	// last row before footer
+	if t.style.Options.SeparateRows && rowIdx < numRows-1 {
+		return true
+	}
+	// no manually added separator
+	if !t.separators[rowIdx] {
+		return false
+	}
+
+	pageSize := numRows
+	if t.pageSize > 0 {
+		pageSize = t.pageSize
+	}
+	if rowIdx%pageSize == pageSize-1 { // last row of page
+		return false
+	}
+	if rowIdx == numRows-1 { // last row of table
+		return false
+	}
+	return true
+}
+
 func (t *Table) renderRowsBorderBottom(out *strings.Builder) {
 	if len(t.rowsFooter) > 0 {
-		t.renderRowSeparator(out, renderHint{isBorderBottom: true, isFooterRow: true, rowNumber: len(t.rowsFooter)})
+		t.renderRowSeparator(out, renderHint{
+			isBorderBottom: true,
+			isFooterRow:    true,
+			rowNumber:      len(t.rowsFooter),
+		})
 	} else {
-		t.renderRowSeparator(out, renderHint{isBorderBottom: true, isFooterRow: false, rowNumber: len(t.rows)})
+		t.renderRowSeparator(out, renderHint{
+			isBorderBottom: true,
+			isFooterRow:    false,
+			rowNumber:      len(t.rows),
+		})
 	}
 }
 
 func (t *Table) renderRowsBorderTop(out *strings.Builder) {
 	if len(t.rowsHeader) > 0 || t.autoIndex {
-		t.renderRowSeparator(out, renderHint{isBorderTop: true, isHeaderRow: true, rowNumber: 0})
+		t.renderRowSeparator(out, renderHint{
+			isBorderTop: true,
+			isHeaderRow: true,
+			rowNumber:   0,
+		})
 	} else {
-		t.renderRowSeparator(out, renderHint{isBorderTop: true, isHeaderRow: false, rowNumber: 0})
+		t.renderRowSeparator(out, renderHint{
+			isBorderTop: true,
+			isHeaderRow: false,
+			rowNumber:   0,
+		})
 	}
 }
 
