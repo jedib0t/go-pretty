@@ -207,6 +207,7 @@ func (t *Table) renderLine(out *strings.Builder, row rowStr, hint renderHint) {
 	if outLine != out {
 		t.renderLineMergeOutputs(out, outLine)
 	}
+	t.firstRowOfPage = false
 
 	// if a page size has been set, and said number of lines has already
 	// been rendered, and the header is not being rendered right now, render
@@ -219,6 +220,7 @@ func (t *Table) renderLine(out *strings.Builder, row rowStr, hint renderHint) {
 			out.WriteString(t.style.Box.PageSeparator)
 			t.renderRowsBorderTop(out)
 			t.renderRowsHeader(out)
+			t.firstRowOfPage = true
 		}
 	}
 }
@@ -313,34 +315,11 @@ func (t *Table) renderRows(out *strings.Builder, rows []rowStr, hint renderHint)
 		hint.rowNumber = rowIdx + 1
 		t.renderRow(out, row, hint)
 
-		if t.shouldSeparate(rowIdx, len(rows)) {
+		if t.shouldSeparateRows(rowIdx, len(rows)) {
 			hint.isFirstRow = false
 			t.renderRowSeparator(out, hint)
 		}
 	}
-}
-
-func (t *Table) shouldSeparate(rowIdx int, numRows int) bool {
-	// last row before footer
-	if t.style.Options.SeparateRows && rowIdx < numRows-1 {
-		return true
-	}
-	// no manually added separator
-	if !t.separators[rowIdx] {
-		return false
-	}
-
-	pageSize := numRows
-	if t.pageSize > 0 {
-		pageSize = t.pageSize
-	}
-	if rowIdx%pageSize == pageSize-1 { // last row of page
-		return false
-	}
-	if rowIdx == numRows-1 { // last row of table
-		return false
-	}
-	return true
 }
 
 func (t *Table) renderRowsBorderBottom(out *strings.Builder) {

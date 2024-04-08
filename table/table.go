@@ -51,6 +51,8 @@ type Table struct {
 	// columnConfigMap stores the custom-configuration by column
 	// number and is generated before rendering
 	columnConfigMap map[int]ColumnConfig
+	// firstRowOfPage tells if the renderer is on the first row of a page?
+	firstRowOfPage bool
 	// htmlCSSClass stores the HTML CSS Class to use on the <table> node
 	htmlCSSClass string
 	// indexColumn stores the number of the column considered as the "index"
@@ -759,7 +761,7 @@ func (t *Table) shouldMergeCellsHorizontallyBelow(row rowStr, colIdx int, hint r
 }
 
 func (t *Table) shouldMergeCellsVertically(colIdx int, hint renderHint) bool {
-	if t.columnConfigMap[colIdx].AutoMerge && colIdx < t.numColumns {
+	if !t.firstRowOfPage && t.columnConfigMap[colIdx].AutoMerge && colIdx < t.numColumns {
 		if hint.isSeparatorRow {
 			rowPrev := t.getRow(hint.rowNumber-1, hint)
 			rowNext := t.getRow(hint.rowNumber, hint)
@@ -775,6 +777,25 @@ func (t *Table) shouldMergeCellsVertically(colIdx int, hint renderHint) bool {
 		}
 	}
 	return false
+}
+
+func (t *Table) shouldSeparateRows(rowIdx int, numRows int) bool {
+	// not asked to separate rows and no manually added separator
+	if !t.style.Options.SeparateRows && !t.separators[rowIdx] {
+		return false
+	}
+
+	pageSize := numRows
+	if t.pageSize > 0 {
+		pageSize = t.pageSize
+	}
+	if rowIdx%pageSize == pageSize-1 { // last row of page
+		return false
+	}
+	if rowIdx == numRows-1 { // last row of table
+		return false
+	}
+	return true
 }
 
 func (t *Table) wrapRow(row rowStr) (int, rowStr) {
