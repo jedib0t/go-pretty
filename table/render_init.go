@@ -278,6 +278,7 @@ func (t *Table) reset() {
 	t.autoIndexVIndexMaxLength = 0
 	t.columnConfigMap = nil
 	t.columnIsNonNumeric = nil
+	t.firstRowOfPage = true
 	t.maxColumnLengths = nil
 	t.maxRowLength = 0
 	t.numColumns = 0
