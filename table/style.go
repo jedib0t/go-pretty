@@ -766,6 +766,19 @@ type Options struct {
 	//  │     │            │ TOTAL     │  10000 │                             │
 	//  └─────┴────────────┴───────────┴────────┴─────────────────────────────┘
 	SeparateRows bool
+
+	// DoNotFillSpaceWhenEndOfLine disables filling the space at the end of each
+	// line for AlignCenter and AlignLeft.It should be used when not draw border.
+	// Example of a table where it is enabled:
+	//  ┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐
+	//  │   # │ FIRST NAME │ LAST NAME │ SALARY ││
+	//  ├─────┼────────────┼───────────┼────────┼─────────────────────────────┤
+	//  │   1 │ Arya       │ Stark     │   3000 ││
+	//  │  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │
+	//  │ 300 │ Tyrion     │ Lannister │   5000 │test│
+	//  │     │            │ TOTAL     │  10000 │anothertest│
+	//  └─────┴────────────┴───────────┴────────┴─────────────────────────────┘
+	DoNotFillSpaceWhenEndOfLine bool
 }
 
 var (

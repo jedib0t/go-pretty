@@ -323,6 +323,8 @@ func (t *Table) getAlign(colIdx int, hint renderHint) text.Align {
 			align = text.AlignRight
 		} else if hint.isAutoIndexRow {
 			align = text.AlignCenter
+		} else if t.style.Options.DoNotFillSpaceWhenEndOfLine && t.isLastColumn(colIdx) {
+			align = text.AlignDisabled
 		}
 	}
 	return align
@@ -685,6 +687,10 @@ func (t *Table) hideColumns() map[int]int {
 
 func (t *Table) isIndexColumn(colIdx int, hint renderHint) bool {
 	return t.indexColumn == colIdx+1 || hint.isAutoIndexColumn
+}
+
+func (t *Table) isLastColumn(colIdx int) bool {
+	return colIdx == t.numColumns-1
 }
 
 func (t *Table) render(out *strings.Builder) string {

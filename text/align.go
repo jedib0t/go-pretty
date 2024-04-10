@@ -12,12 +12,14 @@ type Align int
 
 // Align enumerations
 const (
-	AlignDefault Align = iota // same as AlignLeft
-	AlignLeft                 // "left        "
-	AlignCenter               // "   center   "
-	AlignJustify              // "justify   it"
-	AlignRight                // "       right"
-	AlignAuto                 // AlignRight for numbers, AlignLeft for the rest
+	AlignDefault                 Align = iota // same as AlignLeft
+	AlignLeft                                 // "left        "
+	AlignCenter                               // "   center   "
+	AlignJustify                              // "justify   it"
+	AlignRight                                // "       right"
+	AlignAuto                                 // AlignRight for numbers, AlignLeft for the rest
+	AlignDisabled                             // "left"
+	AlignCenterWithoutRightSpace              // "   center"
 )
 
 // Apply aligns the text as directed. For ex.:
@@ -55,6 +57,12 @@ func (a Align) Apply(text string, maxLength int) string {
 		}
 	case AlignJustify:
 		return justifyText(text, sLenWoE, maxLength)
+	case AlignDisabled:
+		return text
+	case AlignCenterWithoutRightSpace:
+		if sLenWoE < maxLength {
+			return strings.Repeat(" ", (maxLength-sLenWoE+1)/2) + text
+		}
 	}
 	return fmt.Sprintf("%"+strconv.Itoa(maxLength+numEscChars)+"s", text)
 }
