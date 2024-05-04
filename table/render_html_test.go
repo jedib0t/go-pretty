@@ -517,3 +517,88 @@ func TestTable_RenderHTML_Sorted(t *testing.T) {
   </tfoot>
 </table>`)
 }
+
+func TestTable_RenderHTML_RowAutoMerge(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		rcAutoMerge := RowConfig{AutoMerge: true}
+		tw := NewWriter()
+		tw.AppendHeader(Row{"A", "B"})
+		tw.AppendRow(Row{"Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"Y", "N"}, rcAutoMerge)
+		compareOutput(t, tw.RenderHTML(), `
+<table class="go-pretty-table">
+  <thead>
+  <tr>
+    <th>A</th>
+    <th>B</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td align="center" colspan=2>Y</td>
+  </tr>
+  <tr>
+    <td>Y</td>
+    <td>N</td>
+  </tr>
+  </tbody>
+</table>`)
+	})
+	t.Run("merged and unmerged entries", func(t *testing.T) {
+		rcAutoMerge := RowConfig{AutoMerge: true}
+		tw := NewWriter()
+		tw.AppendHeader(Row{"A", "B", "C", "D"})
+		tw.AppendRow(Row{"Y", "Y", "0", "1"}, rcAutoMerge)
+		tw.AppendRow(Row{"0", "Y", "Y", "1"}, rcAutoMerge)
+		tw.AppendRow(Row{"0", "1", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"Y", "Y", "Y", "0"}, rcAutoMerge)
+		tw.AppendRow(Row{"0", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"Y", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"0", "1", "2", "3"}, rcAutoMerge)
+		compareOutput(t, tw.RenderHTML(), `
+<table class="go-pretty-table">
+  <thead>
+  <tr>
+    <th>A</th>
+    <th>B</th>
+    <th>C</th>
+    <th>D</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td align="center" colspan=2>Y</td>
+    <td>0</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td>0</td>
+    <td align="center" colspan=2>Y</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td>0</td>
+    <td>1</td>
+    <td align="center" colspan=2>Y</td>
+  </tr>
+  <tr>
+    <td align="center" colspan=3>Y</td>
+    <td>0</td>
+  </tr>
+  <tr>
+    <td>0</td>
+    <td align="center" colspan=3>Y</td>
+  </tr>
+  <tr>
+    <td align="center" colspan=4>Y</td>
+  </tr>
+  <tr>
+    <td>0</td>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+  </tr>
+  </tbody>
+</table>`)
+	})
+}
