@@ -706,28 +706,32 @@ func (t *Table) render(out *strings.Builder) string {
 
 	if t.outputMirror != nil && len(outStr) > 0 {
 		if t.batchSize > 0 {
-			splitOut := strings.Split(outStr, "\n")
-			for currentIndex, line := range splitOut {
-				_, _ = t.outputMirror.Write([]byte(line))
-				_, _ = t.outputMirror.Write([]byte("\n"))
-				if currentIndex < len(t.rowsHeader)+1 || currentIndex > len(splitOut)-len(t.rowsFooter)-3 || (currentIndex-(len(t.rowsHeader)+1))%t.batchSize != 0 {
-					continue
-				} else {
-					char, _, err := keyboard.GetSingleKey()
-					if err != nil {
-						panic(err)
-					}
-					if char == '\x00' {
-						continue
-					}
-				}
-			}
+			renderPartialTable(outStr, t)
 		} else {
 			_, _ = t.outputMirror.Write([]byte(outStr))
 			_, _ = t.outputMirror.Write([]byte("\n"))
 		}
 	}
 	return outStr
+}
+
+func renderPartialTable(outStr string, t *Table) {
+	splitOut := strings.Split(outStr, "\n")
+	for currentIndex, line := range splitOut {
+		_, _ = t.outputMirror.Write([]byte(line))
+		_, _ = t.outputMirror.Write([]byte("\n"))
+		if currentIndex < len(t.rowsHeader)+1 || currentIndex > len(splitOut)-len(t.rowsFooter)-3 || (currentIndex-(len(t.rowsHeader)+1))%t.batchSize != 0 {
+			continue
+		} else {
+			char, _, err := keyboard.GetSingleKey()
+			if err != nil {
+				panic(err)
+			}
+			if char == '\x00' {
+				continue
+			}
+		}
+	}
 }
 
 func (t *Table) shouldMergeCellsHorizontallyAbove(row rowStr, colIdx int, hint renderHint) bool {

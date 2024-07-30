@@ -24,20 +24,20 @@ func demoTableFeatures() {
 	tTemp := table.Table{}
 	tTemp.Render() // just to avoid the compile error of not using the object
 
-	t.AppendRow(table.Row{2, "Philip", "Fry", 856, "Shut up and take my money!"})
-	t.AppendRow(table.Row{3, "Turanga", "Leela", 735, "I'm nobody's servant!"})
-	t.AppendRow(table.Row{4, "Bender", "Rodriguez", 647, "Bite my shiny metal ass!"})
-	t.AppendRow(table.Row{5, "Amy", "Wong", 392, "Yay, I'm useful!"})
-	t.AppendRow(table.Row{6, "Hermes", "Conrad", 555, "Sweet three-toed sloth of ice planet Hoth!"})
-	t.AppendRow(table.Row{7, "Professor", "Farnsworth", 1212, "Good news, everyone!"})
-	t.AppendRow(table.Row{8, "Zapp", "Brannigan", 458, "If we can hit that bullseye, the rest of the dominoes will fall like a house of cards. Checkmate."})
-	t.AppendRow(table.Row{9, "Kif", "Kroker", 702, "Sigh."})
-	t.AppendRow(table.Row{10, "Dr. John A.", "Zoidberg", 819, "Why not Zoidberg?"})
-	t.AppendRow(table.Row{11, "Nibbler", "Nibbler", 334, "You are the last hope of the universe."})
+	t.AppendRow(table.Row{1, "Philip", "Fry", 856, "Shut up and take my money!"})
+	t.AppendRow(table.Row{2, "Turanga", "Leela", 735, "I'm nobody's servant!"})
+	t.AppendRow(table.Row{3, "Bender", "Rodriguez", 647, "Bite my shiny metal ass!"})
+	t.AppendRow(table.Row{4, "Amy", "Wong", 392, "Yay, I'm useful!"})
+	t.AppendRow(table.Row{5, "Hermes", "Conrad", 555, "Sweet three-toed sloth of ice planet Hoth!"})
+	t.AppendRow(table.Row{6, "Professor", "Farnsworth", 1212, "Good news, everyone!"})
+	t.AppendRow(table.Row{7, "Zapp", "Brannigan", 458, "If we can hit that bullseye, the rest of the dominoes will fall like a house of cards. Checkmate."})
+	t.AppendRow(table.Row{8, "Kif", "Kroker", 702, "Sigh."})
+	t.AppendRow(table.Row{9, "Dr. John A.", "Zoidberg", 819, "Why not Zoidberg?"})
+	t.AppendRow(table.Row{10, "Nibbler", "Nibbler", 334, "You are the last hope of the universe."})
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(rowHeader)
 	t.AppendFooter(rowHeader)
-	t.SetBatchSize(6)
+	t.SetBatchSize(4)
 	t.Render()
 	//+---+-----+------------+-----------+--------+-----------------------------+
 	//|   |   # | FIRST NAME | LAST NAME | SALARY |                             |
