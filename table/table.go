@@ -2,6 +2,7 @@ package table
 
 import (
 	"fmt"
+	"github.com/eiannone/keyboard"
 	"io"
 	"strings"
 	"unicode"
@@ -41,6 +42,8 @@ type Table struct {
 	autoIndex bool
 	// autoIndexVIndexMaxLength denotes the length in chars for the last row
 	autoIndexVIndexMaxLength int
+	// how many element are going to be shown after a enter. This excludes header and footer
+	batchSize int
 	// caption stores the text to be rendered just below the table; and doesn't
 	// get used when rendered as a CSV
 	caption string
@@ -221,6 +224,10 @@ func (t *Table) SetAllowedRowLength(length int) {
 // functionality.
 func (t *Table) SetAutoIndex(autoIndex bool) {
 	t.autoIndex = autoIndex
+}
+
+func (t *Table) SetBatchSize(batchSize int) {
+	t.batchSize = batchSize
 }
 
 // SetCaption sets the text to be rendered just below the table. This will not
@@ -696,9 +703,29 @@ func (t *Table) render(out *strings.Builder) string {
 		}
 		outStr = strings.Join(trimmed, "\n")
 	}
+
 	if t.outputMirror != nil && len(outStr) > 0 {
-		_, _ = t.outputMirror.Write([]byte(outStr))
-		_, _ = t.outputMirror.Write([]byte("\n"))
+		if t.batchSize > 0 {
+			splitOut := strings.Split(outStr, "\n")
+			for currentIndex, line := range splitOut {
+				_, _ = t.outputMirror.Write([]byte(line))
+				_, _ = t.outputMirror.Write([]byte("\n"))
+				if currentIndex < len(t.rowsHeader)+1 || currentIndex > len(splitOut)-len(t.rowsFooter)-3 || (currentIndex-(len(t.rowsHeader)+1))%t.batchSize != 0 {
+					continue
+				} else {
+					char, _, err := keyboard.GetSingleKey()
+					if err != nil {
+						panic(err)
+					}
+					if char == '\x00' {
+						continue
+					}
+				}
+			}
+		} else {
+			_, _ = t.outputMirror.Write([]byte(outStr))
+			_, _ = t.outputMirror.Write([]byte("\n"))
+		}
 	}
 	return outStr
 }

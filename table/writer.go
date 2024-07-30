@@ -22,6 +22,7 @@ type Writer interface {
 	ResetRows()
 	SetAllowedRowLength(length int)
 	SetAutoIndex(autoIndex bool)
+	SetBatchSize(batchSize int)
 	SetCaption(format string, a ...interface{})
 	SetColumnConfigs(configs []ColumnConfig)
 	SetIndexColumn(colNum int)
