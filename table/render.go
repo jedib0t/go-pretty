@@ -214,7 +214,7 @@ func (t *Table) renderLine(out *strings.Builder, row rowStr, hint renderHint) {
 	// the header all over again with a spacing line
 	if hint.isRegularNonSeparatorRow() {
 		t.numLinesRendered++
-		if t.pageSize > 0 && t.numLinesRendered%t.pageSize == 0 && !hint.isLastLineOfLastRow() {
+		if t.pager.size > 0 && t.numLinesRendered%t.pager.size == 0 && !hint.isLastLineOfLastRow() {
 			t.renderRowsFooter(out)
 			t.renderRowsBorderBottom(out)
 			out.WriteString(t.style.Box.PageSeparator)

@@ -349,10 +349,10 @@ func TestTable_SetOutputMirror(t *testing.T) {
 
 func TestTable_SePageSize(t *testing.T) {
 	table := Table{}
-	assert.Equal(t, 0, table.pageSize)
+	assert.Equal(t, 0, table.pager.size)
 
 	table.SetPageSize(13)
-	assert.Equal(t, 13, table.pageSize)
+	assert.Equal(t, 13, table.pager.size)
 }
 
 func TestTable_SortByColumn(t *testing.T) {
