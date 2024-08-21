@@ -3,6 +3,7 @@ package table
 import (
 	"fmt"
 	"strings"
+	"unicode"
 
 	"github.com/jedib0t/go-pretty/v6/text"
 )
@@ -255,7 +256,15 @@ func (t *Table) initForRenderSuppressColumns() {
 	shouldSuppressColumn := func(colIdx int) bool {
 		for _, row := range t.rows {
 			if colIdx < len(row) && row[colIdx] != "" {
-				return false
+				// Columns may contain non-printable characters. For example
+				// the text.Direction modifiers. These should not be considered
+				// when deciding to suppress a column.
+				for _, r := range row[colIdx] {
+					if unicode.IsPrint(r) {
+						return false
+					}
+				}
+				return true
 			}
 		}
 		return true

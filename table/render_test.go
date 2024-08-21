@@ -1165,6 +1165,22 @@ func TestTable_Render_SuppressEmptyColumns(t *testing.T) {
 ├─────┼────────────┼────────┼─────────────────────────────┤
 │     │            │  10000 │                             │
 └─────┴────────────┴────────┴─────────────────────────────┘`)
+
+	tw.SetStyle(Style{
+		Format: FormatOptions{
+			Direction: text.LeftToRight,
+		},
+	})
+	// Columns with non-printable characters should still be suppressed.
+	compareOutput(t, tw.Render(), strings.Join([]string{
+		"\u202a  \u202a#\u202aFirst Name\u202aSalary                           ",
+		"\u202a  \u202a1\u202aArya        \u202a3000                           ",
+		"\u202a \u202a20\u202aJon         \u202a2000\u202aYou know nothing, Jon Snow!",
+		"\u202a\u202a300\u202aTyrion      \u202a5000                           ",
+		"\u202a \u202a11\u202aSansa       \u202a6000                           ",
+		"\u202a   \u202a\u202a           \u202a10000                           ",
+	}, "\n"))
+
 }
 
 func TestTable_Render_TableWithinTable(t *testing.T) {
