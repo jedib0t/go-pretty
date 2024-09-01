@@ -69,33 +69,56 @@ func WrapText(str string, wrapLen int) string {
 	if wrapLen <= 0 {
 		return ""
 	}
-
-	var out strings.Builder
+	str = strings.Replace(str, "\t", "    ", -1)
 	sLen := utf8.RuneCountInString(str)
+	if sLen <= wrapLen {
+		return str
+	}
+
+	out := &strings.Builder{}
 	out.Grow(sLen + (sLen / wrapLen))
-	lineIdx, isEscSeq, lastEscSeq := 0, false, ""
-	for _, char := range str {
-		if char == EscapeStartRune {
-			isEscSeq = true
-			lastEscSeq = ""
+	for idx, line := range strings.Split(str, "\n") {
+		if idx > 0 {
+			out.WriteString("\n")
 		}
-		if isEscSeq {
-			lastEscSeq += string(char)
-		}
-
-		appendChar(char, wrapLen, &lineIdx, isEscSeq, lastEscSeq, &out)
-
-		if isEscSeq && char == EscapeStopRune {
-			isEscSeq = false
-		}
-		if lastEscSeq == EscapeReset {
-			lastEscSeq = ""
-		}
+		wrapHard(line, wrapLen, out)
 	}
-	if lastEscSeq != "" && lastEscSeq != EscapeReset {
-		out.WriteString(EscapeReset)
-	}
+
 	return out.String()
+
+	//if wrapLen <= 0 {
+	//	return ""
+	//}
+	//
+	//var out strings.Builder
+	//sLen := utf8.RuneCountInString(str)
+	//out.Grow(sLen + (sLen / wrapLen))
+	//
+	//esp := escSeqParser{}
+	//lineIdx, isEscSeq, lastEscSeq := 0, false, ""
+	//for _, char := range str {
+	//	if char == EscapeStartRune {
+	//		isEscSeq = true
+	//		lastEscSeq = ""
+	//	}
+	//	if isEscSeq {
+	//		lastEscSeq += string(char)
+	//	}
+	//
+	//	appendChar(char, wrapLen, &lineIdx, isEscSeq, lastEscSeq, &out)
+	//
+	//	if isEscSeq && char == EscapeStopRune {
+	//		isEscSeq = false
+	//		esp.Parse(lastEscSeq)
+	//	}
+	//	if lastEscSeq == EscapeReset {
+	//		lastEscSeq = ""
+	//	}
+	//}
+	//if lastEscSeq != "" && lastEscSeq != EscapeReset {
+	//	out.WriteString(EscapeReset)
+	//}
+	//return out.String()
 }
 
 func appendChar(char rune, wrapLen int, lineLen *int, inEscSeq bool, lastSeenEscSeq string, out *strings.Builder) {
@@ -149,26 +172,6 @@ func appendWord(word string, lineIdx *int, lastSeenEscSeq string, wrapLen int, o
 	}
 }
 
-func extractOpenEscapeSeq(str string) string {
-	escapeSeq, inEscSeq := "", false
-	for _, char := range str {
-		if char == EscapeStartRune {
-			inEscSeq = true
-			escapeSeq = ""
-		}
-		if inEscSeq {
-			escapeSeq += string(char)
-		}
-		if char == EscapeStopRune {
-			inEscSeq = false
-		}
-	}
-	if escapeSeq == EscapeReset {
-		escapeSeq = ""
-	}
-	return escapeSeq
-}
-
 func terminateLine(wrapLen int, lineLen *int, lastSeenEscSeq string, out *strings.Builder) {
 	if *lineLen < wrapLen {
 		out.WriteString(strings.Repeat(" ", wrapLen-*lineLen))
@@ -189,12 +192,12 @@ func terminateOutput(lastSeenEscSeq string, out *strings.Builder) {
 }
 
 func wrapHard(paragraph string, wrapLen int, out *strings.Builder) {
+	esp := escSeqParser{}
 	lineLen, lastSeenEscSeq := 0, ""
 	words := strings.Fields(paragraph)
 	for wordIdx, word := range words {
-		escSeq := extractOpenEscapeSeq(word)
-		if escSeq != "" {
-			lastSeenEscSeq = escSeq
+		if openEscSeq := esp.Extract(word); openEscSeq != "" {
+			lastSeenEscSeq = openEscSeq
 		}
 		if lineLen > 0 {
 			out.WriteRune(' ')
@@ -218,12 +221,12 @@ func wrapHard(paragraph string, wrapLen int, out *strings.Builder) {
 }
 
 func wrapSoft(paragraph string, wrapLen int, out *strings.Builder) {
+	esp := escSeqParser{}
 	lineLen, lastSeenEscSeq := 0, ""
 	words := strings.Fields(paragraph)
 	for wordIdx, word := range words {
-		escSeq := extractOpenEscapeSeq(word)
-		if escSeq != "" {
-			lastSeenEscSeq = escSeq
+		if openEscSeq := esp.Extract(word); openEscSeq != "" {
+			lastSeenEscSeq = openEscSeq
 		}
 
 		spacing, spacingLen := wrapSoftSpacing(lineLen)

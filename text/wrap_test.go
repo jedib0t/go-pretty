@@ -50,6 +50,15 @@ func TestWrapHard(t *testing.T) {
 
 	complexIn := "+---+------+-------+------+\n| 1 | Arya | Stark | 3000 |\n+---+------+-------+------+"
 	assert.Equal(t, complexIn, WrapHard(complexIn, 27))
+
+	// colored text with nested escape codes: "{red}{bold}...{un-bold}...{reset}"
+	textUnBold := "\x1b[91m\x1b[1mBold Title\x1b[22m Regular Red Text\x1b[0m"
+	expectedUnBold := "\x1b[91m\x1b[1mBold Title\x1b[22m Regular Red \x1b[0m\n\x1b[91mText\x1b[0m"
+	assert.Equal(t, expectedUnBold, WrapHard(textUnBold, 23))
+}
+
+func TestFoo(t *testing.T) {
+	assert.Equal(t, "\x1b[33mJon\x1b[0m\n\x1b[33mSno\x1b[0m\n\x1b[33mw\x1b[0m", WrapHard("\x1b[33mJon Snow\x1b[0m", 3))
 }
 
 func ExampleWrapSoft() {
@@ -100,6 +109,11 @@ func TestWrapSoft(t *testing.T) {
 
 	assert.Equal(t, "\x1b[33mJon \x1b[0m\n\x1b[33mSnow\x1b[0m", WrapSoft("\x1b[33mJon Snow\x1b[0m", 4))
 	assert.Equal(t, "\x1b[33mJon \x1b[0m\n\x1b[33mSnow\x1b[0m\n\x1b[33m???\x1b[0m", WrapSoft("\x1b[33mJon Snow???\x1b[0m", 4))
+
+	// colored text with nested escape codes: "{red}{bold}...{un-bold}...{reset}"
+	textUnBold := "\x1b[91m\x1b[1mBold Title\x1b[22m Regular Red Text\x1b[0m"
+	expectedUnBold := "\x1b[91m\x1b[1mBold Title\x1b[22m Regular Red \x1b[0m\n\x1b[91mText\x1b[0m"
+	assert.Equal(t, expectedUnBold, WrapSoft(textUnBold, 23))
 }
 
 func ExampleWrapText() {
@@ -138,10 +152,15 @@ func TestWrapText(t *testing.T) {
 	assert.Equal(t, "Jon\nSno\nw\n", WrapText("Jon\nSnow\n", 3))
 	assert.Equal(t, "\x1b[33mJon\x1b[0m\nSno\nw", WrapText("\x1b[33mJon\x1b[0m\nSnow", 3))
 	assert.Equal(t, "\x1b[33mJon\x1b[0m\nSno\nw\n", WrapText("\x1b[33mJon\x1b[0m\nSnow\n", 3))
-	assert.Equal(t, "\x1b[33mJon\x1b[0m\n\x1b[33m Sn\x1b[0m\n\x1b[33mow\x1b[0m", WrapText("\x1b[33mJon Snow\x1b[0m", 3))
-	assert.Equal(t, "\x1b[33mJon\x1b[0m\n\x1b[33m Sn\x1b[0m\n\x1b[33mow\x1b[0m\n\x1b[33m\x1b[0m", WrapText("\x1b[33mJon Snow\n", 3))
-	assert.Equal(t, "\x1b[33mJon\x1b[0m\n\x1b[33m Sn\x1b[0m\n\x1b[33mow\x1b[0m\n\x1b[33m\x1b[0m", WrapText("\x1b[33mJon Snow\n\x1b[0m", 3))
+	assert.Equal(t, "\x1b[33mJon\x1b[0m\n\x1b[33mSno\x1b[0m\n\x1b[33mw\x1b[0m", WrapText("\x1b[33mJon Snow\x1b[0m", 3))
+	assert.Equal(t, "\x1b[33mJon\x1b[0m\n\x1b[33mSno\x1b[0m\n\x1b[33mw\x1b[0m\n", WrapText("\x1b[33mJon Snow\n", 3))
+	assert.Equal(t, "\x1b[33mJon\x1b[0m\n\x1b[33mSno\x1b[0m\n\x1b[33mw\x1b[0m\n\x1b[0m", WrapText("\x1b[33mJon Snow\n\x1b[0m", 3))
 
 	complexIn := "+---+------+-------+------+\n| 1 | Arya | Stark | 3000 |\n+---+------+-------+------+"
 	assert.Equal(t, complexIn, WrapText(complexIn, 27))
+
+	// colored text with nested escape codes: "{red}{bold}...{un-bold}...{reset}"
+	textUnBold := "\x1b[91m\x1b[1mBold Title\x1b[22m Regular Red Text\x1b[0m"
+	expectedUnBold := "\x1b[91m\x1b[1mBold Title\x1b[22m Regular Red \x1b[0m\n\x1b[91mText\x1b[0m"
+	assert.Equal(t, expectedUnBold, WrapText(textUnBold, 23))
 }
