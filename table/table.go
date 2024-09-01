@@ -199,18 +199,20 @@ func (t *Table) Pager(opts ...PagerOption) Pager {
 	}
 
 	// use a temporary page separator for splitting up the pages
-	tempPageSep := fmt.Sprintf("%p // page separator // %d", t, time.Now().UnixNano())
+	tempPageSep := fmt.Sprintf("%p // page separator // %d", t.rows, time.Now().UnixNano())
 
 	// backup
 	origOutputMirror, origPageSep := t.outputMirror, t.Style().Box.PageSeparator
+	// restore on exit
+	defer func() {
+		t.outputMirror = origOutputMirror
+		t.Style().Box.PageSeparator = origPageSep
+	}()
 	// override
 	t.outputMirror = nil
 	t.Style().Box.PageSeparator = tempPageSep
 	// render
 	t.pager.pages = strings.Split(t.Render(), tempPageSep)
-	// reset
-	t.outputMirror = origOutputMirror
-	t.Style().Box.PageSeparator = origPageSep
 
 	return &t.pager
 }
