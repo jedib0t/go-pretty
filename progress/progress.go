@@ -23,37 +23,38 @@ var (
 
 // Progress helps track progress for one or more tasks.
 type Progress struct {
-	autoStop              bool
-	lengthMessage         int
-	lengthProgress        int
-	lengthProgressOverall int
-	lengthTracker         int
-	logsToRender          []string
-	logsToRenderMutex     sync.RWMutex
-	numTrackersExpected   int64
-	outputWriter          io.Writer
-	overallTracker        *Tracker
-	overallTrackerMutex   sync.RWMutex
-	pinnedMessages        []string
-	pinnedMessageMutex    sync.RWMutex
-	pinnedMessageNumLines int
-	renderContext         context.Context
-	renderContextCancel   context.CancelFunc
-	renderInProgress      bool
-	renderInProgressMutex sync.RWMutex
-	sortBy                SortBy
-	style                 *Style
-	terminalWidth         int
-	terminalWidthMutex    sync.RWMutex
-	terminalWidthOverride int
-	trackerPosition       Position
-	trackersActive        []*Tracker
-	trackersActiveMutex   sync.RWMutex
-	trackersDone          []*Tracker
-	trackersDoneMutex     sync.RWMutex
-	trackersInQueue       []*Tracker
-	trackersInQueueMutex  sync.RWMutex
-	updateFrequency       time.Duration
+	autoStop                 bool
+	lengthMessage            int
+	lengthProgress           int
+	lengthProgressOverall    int
+	lengthTracker            int
+	logsToRender             []string
+	logsToRenderMutex        sync.RWMutex
+	numTrackersExpected      int64
+	outputWriter             io.Writer
+	overallTracker           *Tracker
+	overallTrackerMutex      sync.RWMutex
+	pinnedMessages           []string
+	pinnedMessageMutex       sync.RWMutex
+	pinnedMessageNumLines    int
+	renderContext            context.Context
+	renderContextCancel      context.CancelFunc
+	renderContextCancelMutex sync.Mutex
+	renderInProgress         bool
+	renderInProgressMutex    sync.RWMutex
+	sortBy                   SortBy
+	style                    *Style
+	terminalWidth            int
+	terminalWidthMutex       sync.RWMutex
+	terminalWidthOverride    int
+	trackerPosition          Position
+	trackersActive           []*Tracker
+	trackersActiveMutex      sync.RWMutex
+	trackersDone             []*Tracker
+	trackersDoneMutex        sync.RWMutex
+	trackersInQueue          []*Tracker
+	trackersInQueueMutex     sync.RWMutex
+	updateFrequency          time.Duration
 }
 
 // Position defines the position of the Tracker with respect to the Tracker's
@@ -284,7 +285,10 @@ func (p *Progress) ShowValue(show bool) {
 
 // Stop stops the Render() logic that is in progress.
 func (p *Progress) Stop() {
-	if p.IsRenderInProgress() {
+	p.renderContextCancelMutex.Lock()
+	defer p.renderContextCancelMutex.Unlock()
+
+	if p.renderContextCancel != nil {
 		p.renderContextCancel()
 	}
 }
@@ -309,14 +313,16 @@ func (p *Progress) getTerminalWidth() int {
 }
 
 func (p *Progress) initForRender() {
+	// reset the signals
+	p.renderContextCancelMutex.Lock()
+	p.renderContext, p.renderContextCancel = context.WithCancel(context.Background())
+	p.renderContextCancelMutex.Unlock()
+
 	// pick a default style
 	p.Style()
 	if p.style.Options.SpeedOverallFormatter == nil {
 		p.style.Options.SpeedOverallFormatter = FormatNumber
 	}
-
-	// reset the signals
-	p.renderContext, p.renderContextCancel = context.WithCancel(context.Background())
 
 	// pick default lengths if no valid ones set
 	if p.lengthTracker <= 0 {
