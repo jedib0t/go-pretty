@@ -85,6 +85,7 @@ func TestLongestLineLen(t *testing.T) {
 	assert.Equal(t, 7, LongestLineLen("Mother\nOf\nDragons"))
 	assert.Equal(t, 7, LongestLineLen("\x1b[33mMother\x1b[0m\nOf\nDragons"))
 	assert.Equal(t, 7, LongestLineLen("Mother\nOf\n\x1b]8;;http://example.com\x1b\\Dragons\x1b]8;;\x1b\\"))
+	assert.Equal(t, 10, LongestLineLen(Hyperlink("C:\\Windows", "C:\\Windows")))
 }
 
 func TestOverrideRuneWidthEastAsianWidth(t *testing.T) {

@@ -162,7 +162,7 @@ func wrapHard(paragraph string, wrapLen int, out *strings.Builder) {
 	lineLen, lastSeenEscSeq := 0, ""
 	words := strings.Fields(paragraph)
 	for wordIdx, word := range words {
-		if openEscSeq := esp.Extract(word); openEscSeq != "" {
+		if openEscSeq := esp.ParseString(word); openEscSeq != "" {
 			lastSeenEscSeq = openEscSeq
 		}
 		if lineLen > 0 {
@@ -191,7 +191,7 @@ func wrapSoft(paragraph string, wrapLen int, out *strings.Builder) {
 	lineLen, lastSeenEscSeq := 0, ""
 	words := strings.Fields(paragraph)
 	for wordIdx, word := range words {
-		if openEscSeq := esp.Extract(word); openEscSeq != "" {
+		if openEscSeq := esp.ParseString(word); openEscSeq != "" {
 			lastSeenEscSeq = openEscSeq
 		}
 
