@@ -74,8 +74,20 @@ func (s *escSeqParser) Parse(seq string) {
 			switch codeNum {
 			case 0: // reset
 				s.openSeq = make(map[int]bool) // clear everything
-			case 22: // un-bold
+			case 22: // reset intensity
 				delete(s.openSeq, 1) // remove bold
+				delete(s.openSeq, 2) // remove faint
+			case 23: // not italic
+				delete(s.openSeq, 3) // remove italic
+			case 24: // not underlined
+				delete(s.openSeq, 4) // remove underline
+			case 25: // not blinking
+				delete(s.openSeq, 5) // remove slow blink
+				delete(s.openSeq, 6) // remove rapid blink
+			case 27: // not reversed
+				delete(s.openSeq, 7) // remove reverse
+			case 29: // not crossed-out
+				delete(s.openSeq, 9) // remove crossed-out
 			default:
 				s.openSeq[codeNum] = true
 			}
