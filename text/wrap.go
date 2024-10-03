@@ -85,40 +85,6 @@ func WrapText(str string, wrapLen int) string {
 	}
 
 	return out.String()
-
-	//if wrapLen <= 0 {
-	//	return ""
-	//}
-	//
-	//var out strings.Builder
-	//sLen := utf8.RuneCountInString(str)
-	//out.Grow(sLen + (sLen / wrapLen))
-	//
-	//esp := escSeqParser{}
-	//lineIdx, isEscSeq, lastEscSeq := 0, false, ""
-	//for _, char := range str {
-	//	if char == EscapeStartRune {
-	//		isEscSeq = true
-	//		lastEscSeq = ""
-	//	}
-	//	if isEscSeq {
-	//		lastEscSeq += string(char)
-	//	}
-	//
-	//	appendChar(char, wrapLen, &lineIdx, isEscSeq, lastEscSeq, &out)
-	//
-	//	if isEscSeq && char == EscapeStopRune {
-	//		isEscSeq = false
-	//		esp.Parse(lastEscSeq)
-	//	}
-	//	if lastEscSeq == EscapeReset {
-	//		lastEscSeq = ""
-	//	}
-	//}
-	//if lastEscSeq != "" && lastEscSeq != EscapeReset {
-	//	out.WriteString(EscapeReset)
-	//}
-	//return out.String()
 }
 
 func appendChar(char rune, wrapLen int, lineLen *int, inEscSeq bool, lastSeenEscSeq string, out *strings.Builder) {
