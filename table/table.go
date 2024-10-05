@@ -236,6 +236,8 @@ func (t *Table) ResetRows() {
 // SetAllowedRowLength sets the maximum allowed length or a row (or line of
 // output) when rendered as a table. Rows that are longer than this limit will
 // be "snipped" to the length. Length has to be a positive value to take effect.
+//
+// Deprecated: in favor if Style().Size.WidthMax
 func (t *Table) SetAllowedRowLength(length int) {
 	t.allowedRowLength = length
 }
@@ -632,6 +634,17 @@ func (t *Table) getRowConfig(hint renderHint) RowConfig {
 	default:
 		return t.rowsConfigMap[rowIdx]
 	}
+}
+
+func (t *Table) getRowWidthMax() int {
+	if t.allowedRowLength > 0 {
+		return t.allowedRowLength
+	}
+	return t.Style().Size.WidthMax
+}
+
+func (t *Table) getRowWidthMin() int {
+	return t.Style().Size.WidthMin
 }
 
 func (t *Table) getSeparatorColors(hint renderHint) text.Colors {

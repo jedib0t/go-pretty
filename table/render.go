@@ -185,7 +185,7 @@ func (t *Table) renderLine(out *strings.Builder, row rowStr, hint renderHint) {
 
 	// use a brand-new strings.Builder if a row length limit has been set
 	var outLine *strings.Builder
-	if t.allowedRowLength > 0 {
+	if t.getRowWidthMax() > 0 {
 		outLine = &strings.Builder{}
 	} else {
 		outLine = out
@@ -227,8 +227,8 @@ func (t *Table) renderLine(out *strings.Builder, row rowStr, hint renderHint) {
 
 func (t *Table) renderLineMergeOutputs(out *strings.Builder, outLine *strings.Builder) {
 	outLineStr := outLine.String()
-	if text.RuneWidthWithoutEscSequences(outLineStr) > t.allowedRowLength {
-		trimLength := t.allowedRowLength - utf8.RuneCountInString(t.style.Box.UnfinishedRow)
+	if text.RuneWidthWithoutEscSequences(outLineStr) > t.getRowWidthMax() {
+		trimLength := t.getRowWidthMax() - utf8.RuneCountInString(t.style.Box.UnfinishedRow)
 		if trimLength > 0 {
 			out.WriteString(text.Trim(outLineStr, trimLength))
 			out.WriteString(t.style.Box.UnfinishedRow)
@@ -385,8 +385,8 @@ func (t *Table) renderTitle(out *strings.Builder) {
 		colors := t.style.Title.Colors
 		colorsBorder := t.getBorderColors(renderHint{isTitleRow: true})
 		rowLength := t.maxRowLength
-		if t.allowedRowLength != 0 && t.allowedRowLength < rowLength {
-			rowLength = t.allowedRowLength
+		if t.getRowWidthMax() != 0 && t.getRowWidthMax() < rowLength {
+			rowLength = t.getRowWidthMax()
 		}
 		if t.style.Options.DrawBorder {
 			lenBorder := rowLength - text.RuneWidthWithoutEscSequences(t.style.Box.TopLeft+t.style.Box.TopRight)
