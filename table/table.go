@@ -321,6 +321,11 @@ func (t *Table) Style() *Style {
 		tempStyle := StyleDefault
 		t.style = &tempStyle
 	}
+	// override WidthMax with allowedRowLength until allowedRowLength is
+	// removed from code
+	if t.allowedRowLength > 0 {
+		t.style.Size.WidthMax = t.allowedRowLength
+	}
 	return t.style
 }
 
@@ -634,17 +639,6 @@ func (t *Table) getRowConfig(hint renderHint) RowConfig {
 	default:
 		return t.rowsConfigMap[rowIdx]
 	}
-}
-
-func (t *Table) getRowWidthMax() int {
-	if t.allowedRowLength > 0 {
-		return t.allowedRowLength
-	}
-	return t.Style().Size.WidthMax
-}
-
-func (t *Table) getRowWidthMin() int {
-	return t.Style().Size.WidthMin
 }
 
 func (t *Table) getSeparatorColors(hint renderHint) text.Colors {

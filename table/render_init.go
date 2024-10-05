@@ -194,16 +194,10 @@ func (t *Table) initForRenderMaxRowLength() {
 	if t.style.Options.DrawBorder {
 		t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.Left + t.style.Box.Right)
 	}
-
 }
 
 func (t *Table) initForRenderPaddedColumns() {
-	minWidth := t.getRowWidthMin()
-	if minWidth == 0 || t.maxRowLength >= minWidth {
-		return
-	}
-
-	paddingSize := minWidth - t.maxRowLength
+	paddingSize := t.style.Size.WidthMin - t.maxRowLength
 	for paddingSize > 0 {
 		// distribute padding equally among all columns
 		numColumnsPadded := 0
