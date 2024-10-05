@@ -105,6 +105,8 @@ func (t *Table) initForRender() {
 
 	// find the longest continuous line in each column
 	t.initForRenderColumnLengths()
+	t.initForRenderMaxRowLength()
+	t.initForRenderPaddedColumns()
 
 	// generate a separator row and calculate maximum row length
 	t.initForRenderRowSeparator()
@@ -172,6 +174,50 @@ func (t *Table) initForRenderHideColumns() {
 	t.columnConfigMap = columnConfigMap
 }
 
+func (t *Table) initForRenderMaxRowLength() {
+	t.maxRowLength = 0
+	if t.autoIndex {
+		t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.PaddingLeft)
+		t.maxRowLength += len(fmt.Sprint(len(t.rows)))
+		t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.PaddingRight)
+		if t.style.Options.SeparateColumns {
+			t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.MiddleSeparator)
+		}
+	}
+	if t.style.Options.SeparateColumns {
+		t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.MiddleSeparator) * (t.numColumns - 1)
+	}
+	for _, maxColumnLength := range t.maxColumnLengths {
+		maxColumnLength += text.RuneWidthWithoutEscSequences(t.style.Box.PaddingLeft + t.style.Box.PaddingRight)
+		t.maxRowLength += maxColumnLength
+	}
+	if t.style.Options.DrawBorder {
+		t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.Left + t.style.Box.Right)
+	}
+}
+
+func (t *Table) initForRenderPaddedColumns() {
+	paddingSize := t.style.Size.WidthMin - t.maxRowLength
+	for paddingSize > 0 {
+		// distribute padding equally among all columns
+		numColumnsPadded := 0
+		for colIdx := 0; paddingSize > 0 && colIdx < t.numColumns; colIdx++ {
+			colWidthMax := t.getColumnWidthMax(colIdx)
+			if colWidthMax == 0 || t.maxColumnLengths[colIdx] < colWidthMax {
+				t.maxColumnLengths[colIdx]++
+				numColumnsPadded++
+				paddingSize--
+			}
+		}
+
+		// avoid endless looping because all columns are at max size and cannot
+		// be expanded any further
+		if numColumnsPadded == 0 {
+			break
+		}
+	}
+}
+
 func (t *Table) initForRenderRows() {
 	// auto-index: calc the index column's max length
 	t.autoIndexVIndexMaxLength = len(fmt.Sprint(len(t.rowsRaw)))
@@ -206,26 +252,10 @@ func (t *Table) initForRenderRowsStringify(rows []Row, hint renderHint) []rowStr
 }
 
 func (t *Table) initForRenderRowSeparator() {
-	t.maxRowLength = 0
-	if t.autoIndex {
-		t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.PaddingLeft)
-		t.maxRowLength += len(fmt.Sprint(len(t.rows)))
-		t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.PaddingRight)
-		if t.style.Options.SeparateColumns {
-			t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.MiddleSeparator)
-		}
-	}
-	if t.style.Options.SeparateColumns {
-		t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.MiddleSeparator) * (t.numColumns - 1)
-	}
 	t.rowSeparator = make(rowStr, t.numColumns)
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
 		maxColumnLength += text.RuneWidthWithoutEscSequences(t.style.Box.PaddingLeft + t.style.Box.PaddingRight)
-		t.maxRowLength += maxColumnLength
 		t.rowSeparator[colIdx] = text.RepeatAndTrim(t.style.Box.MiddleHorizontal, maxColumnLength)
-	}
-	if t.style.Options.DrawBorder {
-		t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.Left + t.style.Box.Right)
 	}
 }
 

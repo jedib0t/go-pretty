@@ -13,6 +13,7 @@ type Style struct {
 	Format  FormatOptions // formatting options for the rows and columns
 	HTML    HTMLOptions   // rendering options for HTML mode
 	Options Options       // misc. options for the table
+	Size    SizeOptions   // size (width) options for the table
 	Title   TitleOptions  // formation options for the title text
 }
 
@@ -34,6 +35,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsDefault,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsDefault,
 	}
 
@@ -54,6 +56,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsDefault,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsDefault,
 	}
 
@@ -67,6 +70,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsDark,
 	}
 
@@ -80,6 +84,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsBright,
 	}
 
@@ -93,6 +98,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsBlueOnBlack,
 	}
 
@@ -106,6 +112,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsCyanOnBlack,
 	}
 
@@ -119,6 +126,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsGreenOnBlack,
 	}
 
@@ -132,6 +140,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsMagentaOnBlack,
 	}
 
@@ -145,6 +154,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsYellowOnBlack,
 	}
 
@@ -158,6 +168,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsRedOnBlack,
 	}
 
@@ -171,6 +182,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsBlackOnBlue,
 	}
 
@@ -184,6 +196,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsBlackOnCyan,
 	}
 
@@ -197,6 +210,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsBlackOnGreen,
 	}
 
@@ -210,6 +224,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsBlackOnMagenta,
 	}
 
@@ -223,6 +238,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsBlackOnRed,
 	}
 
@@ -236,6 +252,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsNoBordersAndSeparators,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsBlackOnYellow,
 	}
 
@@ -256,6 +273,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsDefault,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsDefault,
 	}
 
@@ -276,6 +294,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsDefault,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsDefault,
 	}
 
@@ -296,6 +315,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsDefault,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsDefault,
 	}
 
@@ -316,6 +336,7 @@ var (
 		Format:  FormatOptionsDefault,
 		HTML:    DefaultHTMLOptions,
 		Options: OptionsDefault,
+		Size:    SizeOptionsDefault,
 		Title:   TitleOptionsDefault,
 	}
 )
@@ -795,6 +816,26 @@ var (
 		SeparateFooter:  false,
 		SeparateHeader:  false,
 		SeparateRows:    false,
+	}
+)
+
+// SizeOptions defines the way to control the width of the table output.
+type SizeOptions struct {
+	// WidthMax is the maximum allotted width for the full row;
+	// any content beyond this will be truncated using the text
+	// in Style.Box.UnfinishedRow
+	WidthMax int
+	// WidthMin is the minimum allotted width for the full row;
+	// columns will be auto-expanded until the overall width
+	// is met
+	WidthMin int
+}
+
+var (
+	// SizeOptionsDefault defines sensible size options - basically NONE.
+	SizeOptionsDefault = SizeOptions{
+		WidthMax: 0,
+		WidthMin: 0,
 	}
 )
 

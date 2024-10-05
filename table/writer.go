@@ -21,7 +21,6 @@ type Writer interface {
 	ResetFooters()
 	ResetHeaders()
 	ResetRows()
-	SetAllowedRowLength(length int)
 	SetAutoIndex(autoIndex bool)
 	SetCaption(format string, a ...interface{})
 	SetColumnConfigs(configs []ColumnConfig)
@@ -35,6 +34,8 @@ type Writer interface {
 	SuppressEmptyColumns()
 	SuppressTrailingSpaces()
 
+	// deprecated; in favor if Style().Size.WidthMax
+	SetAllowedRowLength(length int)
 	// deprecated; in favor of Style().HTML.CSSClass
 	SetHTMLCSSClass(cssClass string)
 	// deprecated; in favor of Pager()
