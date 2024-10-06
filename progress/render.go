@@ -78,7 +78,7 @@ func (p *Progress) extractDoneAndActiveTrackers() ([]*Tracker, []*Tracker) {
 			if eta := tracker.ETA(); eta > maxETA {
 				maxETA = eta
 			}
-		} else {
+		} else if !tracker.RemoveOnCompletion {
 			trackersDone = append(trackersDone, tracker)
 		}
 	}
@@ -230,14 +230,16 @@ func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHi
 }
 
 func (p *Progress) renderTrackerDone(out *strings.Builder, t *Tracker, message string) {
-	out.WriteString(p.style.Colors.Message.Sprint(message))
-	out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.Separator))
-	if !t.IsErrored() {
-		out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.DoneString))
-	} else {
-		out.WriteString(p.style.Colors.Error.Sprint(p.style.Options.ErrorString))
+	if !t.RemoveOnCompletion {
+		out.WriteString(p.style.Colors.Message.Sprint(message))
+		out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.Separator))
+		if !t.IsErrored() {
+			out.WriteString(p.style.Colors.Message.Sprint(p.style.Options.DoneString))
+		} else {
+			out.WriteString(p.style.Colors.Error.Sprint(p.style.Options.ErrorString))
+		}
+		p.renderTrackerStats(out, t, renderHint{hideTime: !p.style.Visibility.Time, hideValue: !p.style.Visibility.Value})
 	}
-	p.renderTrackerStats(out, t, renderHint{hideTime: !p.style.Visibility.Time, hideValue: !p.style.Visibility.Value})
 }
 
 func (p *Progress) renderTrackerMessage(out *strings.Builder, t *Tracker, message string) {
