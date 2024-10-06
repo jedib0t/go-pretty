@@ -372,6 +372,43 @@ func TestProgress_RenderNothing(t *testing.T) {
 	assert.Empty(t, renderOutput.String())
 }
 
+func TestProgress_RenderSomeTrackers_AndRemove(t *testing.T) {
+	renderOutput := outputWriter{}
+
+	pw := generateWriter()
+	pw.SetOutputWriter(&renderOutput)
+	pw.SetTrackerPosition(PositionLeft)
+	go trackSomething(pw, &Tracker{Message: "Calculating Total   # 1\r", Total: 1000, Units: UnitsDefault, RemoveOnCompletion: true})
+	go trackSomething(pw, &Tracker{Message: "Downloading File\t# 2", Total: 1000, Units: UnitsBytes, RemoveOnCompletion: true})
+	go trackSomething(pw, &Tracker{Message: "Transferring Amount # 3", Total: 1000, Units: UnitsCurrencyDollar, RemoveOnCompletion: true})
+	renderAndWait(pw, false)
+	out := renderOutput.String()
+
+	expectedOutPatterns := []*regexp.Regexp{
+		regexp.MustCompile(`\d+\.\d+% \[[#.]{23}] \[\d+ in [\d.]+ms] \.\.\. Calculating Total   # 1`),
+		regexp.MustCompile(`\d+\.\d+% \[[#.]{23}] \[\d+B in [\d.]+ms] \.\.\. Downloading File    # 2`),
+		regexp.MustCompile(`\d+\.\d+% \[[#.]{23}] \[\$\d+ in [\d.]+ms] \.\.\. Transferring Amount # 3`),
+	}
+	for _, expectedOutPattern := range expectedOutPatterns {
+		if !expectedOutPattern.MatchString(out) {
+			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
+		}
+	}
+
+	unexpectedOutPatterns := []*regexp.Regexp{
+		regexp.MustCompile(`Calculating Total   # 1 \.\.\. done! \[\d+\.\d+K in [\d.]+ms]`),
+		regexp.MustCompile(`Downloading File    # 2 \.\.\. done! \[\d+\.\d+KB in [\d.]+ms]`),
+		regexp.MustCompile(`Transferring Amount # 3 \.\.\. done! \[\$\d+\.\d+K in [\d.]+ms]`),
+	}
+	for _, unexpectedOutPattern := range unexpectedOutPatterns {
+		if unexpectedOutPattern.MatchString(out) {
+			assert.Fail(t, "Found a pattern in the Output which was not expected.", unexpectedOutPattern.String())
+		}
+	}
+
+	showOutputOnFailure(t, out)
+}
+
 func TestProgress_RenderSomeTrackers_OnLeftSide(t *testing.T) {
 	renderOutput := outputWriter{}
 

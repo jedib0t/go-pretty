@@ -24,6 +24,7 @@ var (
 	flagShowPinned         = flag.Bool("show-pinned", false, "Show a pinned message?")
 	flagRandomFail         = flag.Bool("rnd-fail", false, "Introduce random failures in tracking")
 	flagRandomDefer        = flag.Bool("rnd-defer", false, "Introduce random deferred starts")
+	flagRandomRemove       = flag.Bool("rnd-remove", false, "Introduce random remove of trackers on completion")
 	flagRandomLogs         = flag.Bool("rnd-logs", false, "Output random logs in the middle of tracking")
 
 	messageColors = []text.Color{
@@ -72,7 +73,13 @@ func trackSomething(pw progress.Writer, idx int64, updateMessage bool) {
 
 	units := getUnits(idx)
 	message := getMessage(idx, units)
-	tracker := progress.Tracker{Message: message, Total: total, Units: *units, DeferStart: *flagRandomDefer && rand.Float64() < 0.5}
+	tracker := progress.Tracker{
+		DeferStart:         *flagRandomDefer && rand.Float64() < 0.5,
+		Message:            message,
+		RemoveOnCompletion: *flagRandomRemove && rand.Float64() < 0.25,
+		Total:              total,
+		Units:              *units,
+	}
 	if idx == int64(*flagNumTrackers) {
 		tracker.Total = 0
 	}

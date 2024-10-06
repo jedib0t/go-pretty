@@ -24,6 +24,9 @@ type Tracker struct {
 	// ExpectedDuration tells how long this task is expected to take; and will
 	// be used in calculation of the ETA value
 	ExpectedDuration time.Duration
+	// RemoveOnCompletion tells the Progress Bar to remove this tracker when
+	// it is done, instead of rendering a "completed" line
+	RemoveOnCompletion bool
 	// Total should be set to the (expected) Total/Final value to be reached
 	Total int64
 	// Units defines the type of the "value" being tracked

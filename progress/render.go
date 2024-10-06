@@ -78,7 +78,7 @@ func (p *Progress) extractDoneAndActiveTrackers() ([]*Tracker, []*Tracker) {
 			if eta := tracker.ETA(); eta > maxETA {
 				maxETA = eta
 			}
-		} else {
+		} else if !tracker.RemoveOnCompletion {
 			trackersDone = append(trackersDone, tracker)
 		}
 	}
