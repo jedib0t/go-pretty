@@ -356,6 +356,12 @@ func (t *Table) getAlign(colIdx int, hint renderHint) text.Align {
 			align = text.AlignRight
 		} else if hint.isAutoIndexRow {
 			align = text.AlignCenter
+		} else if hint.isHeaderRow {
+			align = t.style.Format.HeaderAlign
+		} else if hint.isFooterRow {
+			align = t.style.Format.FooterAlign
+		} else {
+			align = t.style.Format.RowAlign
 		}
 	}
 	return align
@@ -669,6 +675,15 @@ func (t *Table) getVAlign(colIdx int, hint renderHint) text.VAlign {
 			vAlign = cfg.VAlignFooter
 		} else {
 			vAlign = cfg.VAlign
+		}
+	}
+	if vAlign == text.VAlignDefault {
+		if hint.isHeaderRow {
+			vAlign = t.style.Format.HeaderVAlign
+		} else if hint.isFooterRow {
+			vAlign = t.style.Format.FooterVAlign
+		} else {
+			vAlign = t.style.Format.RowVAlign
 		}
 	}
 	return vAlign
