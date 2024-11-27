@@ -87,15 +87,6 @@ func objAsSlice(in interface{}) []interface{} {
 				}
 
 				out = append(out, v2.Interface())
-				//if v2.Kind() == reflect.Pointer {
-				//	if !v2.IsNil() {
-				//		out = append(out, reflect.ValueOf(v2.Elem().Interface()))
-				//	} else {
-				//		out = append(out, nil)
-				//	}
-				//} else {
-				//	out = append(out, v2.Elem().Interface())
-				//}
 			}
 		}
 	}
