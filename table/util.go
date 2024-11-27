@@ -73,7 +73,7 @@ func objAsSlice(in interface{}) []interface{} {
 	if in != nil {
 		// dereference pointers
 		val := reflect.ValueOf(in)
-		if val.Kind() == reflect.Pointer && !val.IsNil() {
+		if val.Kind() == reflect.Ptr && !val.IsNil() {
 			in = val.Elem().Interface()
 		}
 
@@ -82,7 +82,7 @@ func objAsSlice(in interface{}) []interface{} {
 			for i := 0; i < v.Len(); i++ {
 				// dereference pointers
 				v2 := v.Index(i)
-				if v2.Kind() == reflect.Pointer && !v2.IsNil() {
+				if v2.Kind() == reflect.Ptr && !v2.IsNil() {
 					v2 = reflect.ValueOf(v2.Elem().Interface())
 				}
 
@@ -103,7 +103,7 @@ func objAsSlice(in interface{}) []interface{} {
 	// remove trailing nil pointers
 	for i := len(out) - 1; i >= 0; i-- {
 		val := reflect.ValueOf(out[i])
-		if val.Kind() == reflect.Pointer && val.IsNil() {
+		if val.Kind() == reflect.Ptr && val.IsNil() {
 			out = out[:i]
 		} else {
 			break
