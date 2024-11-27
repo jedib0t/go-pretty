@@ -58,6 +58,8 @@ func Test_objAsSlice(t *testing.T) {
 	assert.Equal(t, "[1 2 3]", fmt.Sprint(objAsSlice(&[]int{a, b, c})))
 	assert.Equal(t, "[1 2 3]", fmt.Sprint(objAsSlice(&[]*int{&a, &b, &c})))
 	assert.Equal(t, "[1 2]", fmt.Sprint(objAsSlice(&[]*int{&a, &b, nil})))
+	assert.Equal(t, "[1]", fmt.Sprint(objAsSlice(&[]*int{&a, nil, nil})))
+	assert.Equal(t, "[]", fmt.Sprint(objAsSlice(&[]*int{nil, nil, nil})))
 	assert.Equal(t, "[<nil> 2]", fmt.Sprint(objAsSlice(&[]*int{nil, &b, nil})))
 }
 

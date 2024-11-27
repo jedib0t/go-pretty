@@ -92,15 +92,15 @@ func objAsSlice(in interface{}) []interface{} {
 	}
 
 	// remove trailing nil pointers
+	tailIdx := len(out)
 	for i := len(out) - 1; i >= 0; i-- {
 		val := reflect.ValueOf(out[i])
-		if val.Kind() == reflect.Ptr && val.IsNil() {
-			out = out[:i]
-		} else {
+		if val.Kind() != reflect.Ptr || !val.IsNil() {
 			break
 		}
+		tailIdx = i
 	}
-	return out
+	return out[:tailIdx]
 }
 
 func objIsSlice(in interface{}) bool {
