@@ -186,6 +186,25 @@ func (t *Table) AppendSeparator() {
 	}
 }
 
+// ImportGrid helps import 1d or 2d arrays as rows.
+func (t *Table) ImportGrid(grid interface{}) bool {
+	rows := objAsSlice(grid)
+	if rows == nil {
+		return false
+	}
+	addedRows := false
+	for _, row := range rows {
+		rowAsSlice := objAsSlice(row)
+		if rowAsSlice != nil {
+			t.AppendRow(rowAsSlice)
+		} else if row != nil {
+			t.AppendRow(Row{row})
+		}
+		addedRows = true
+	}
+	return addedRows
+}
+
 // Length returns the number of rows to be rendered.
 func (t *Table) Length() int {
 	return len(t.rowsRaw)

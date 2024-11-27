@@ -10,11 +10,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func compareOutput(t *testing.T, out string, expectedOut string) {
+func compareOutput(t *testing.T, out string, expectedOut string, message ...interface{}) {
 	if strings.HasPrefix(expectedOut, "\n") {
 		expectedOut = strings.Replace(expectedOut, "\n", "", 1)
 	}
-	assert.Equal(t, expectedOut, out)
+	assert.Equal(t, expectedOut, out, message...)
 	if out != expectedOut {
 		fmt.Printf("Expected:\n%s\nActual:\n%s\n", expectedOut, out)
 	} else {

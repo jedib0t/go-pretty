@@ -1,6 +1,8 @@
 package table
 
 import (
+	"fmt"
+	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
 	"unicode/utf8"
@@ -148,6 +150,127 @@ func TestTable_AppendRows(t *testing.T) {
 	assert.False(t, table.rowsConfigMap[1].AutoMerge)
 	assert.True(t, table.rowsConfigMap[2].AutoMerge)
 	assert.True(t, table.rowsConfigMap[3].AutoMerge)
+}
+
+func TestTable_ImportGrid(t *testing.T) {
+	t.Run("invalid grid", func(t *testing.T) {
+		table := Table{}
+
+		assert.False(t, table.ImportGrid(nil))
+		require.Len(t, table.rowsRaw, 0)
+
+		assert.False(t, table.ImportGrid(123))
+		require.Len(t, table.rowsRaw, 0)
+
+		assert.False(t, table.ImportGrid("abc"))
+		require.Len(t, table.rowsRaw, 0)
+
+		assert.False(t, table.ImportGrid(Table{}))
+		require.Len(t, table.rowsRaw, 0)
+
+		assert.False(t, table.ImportGrid(&Table{}))
+		require.Len(t, table.rowsRaw, 0)
+	})
+
+	a, b, c := 1, 2, 3
+	d, e, f := 4, 5, 6
+	g, h, i := 7, 8, 9
+
+	t.Run("valid 1d", func(t *testing.T) {
+		inputs := []interface{}{
+			[3]int{a, b, c},     // array
+			[]int{a, b, c},      // slice
+			&[]int{a, b, c},     // pointer to slice
+			[]*int{&a, &b, &c},  // slice of pointers-to-slices
+			&[]*int{&a, &b, &c}, // pointer to slice of pointers
+		}
+
+		for _, grid := range inputs {
+			message := fmt.Sprintf("grid: %#v", grid)
+
+			table := Table{}
+			table.Style().Options.SeparateRows = true
+			assert.True(t, table.ImportGrid(grid), message)
+			compareOutput(t, table.Render(), `
++---+
+| 1 |
++---+
+| 2 |
++---+
+| 3 |
++---+`, message)
+		}
+	})
+
+	t.Run("valid 2d", func(t *testing.T) {
+		inputs := []interface{}{
+			[3][3]int{{a, b, c}, {d, e, f}, {g, h, i}},           // array of arrays
+			[3][]int{{a, b, c}, {d, e, f}, {g, h, i}},            // array of slices
+			[][]int{{a, b, c}, {d, e, f}, {g, h, i}},             // slice of slices
+			&[][]int{{a, b, c}, {d, e, f}, {g, h, i}},            // pointer-to-slice of slices
+			[]*[]int{{a, b, c}, {d, e, f}, {g, h, i}},            // slice of pointers-to-slices
+			&[]*[]int{{a, b, c}, {d, e, f}, {g, h, i}},           // pointer-to-slice of pointers-to-slices
+			&[]*[]*int{{&a, &b, &c}, {&d, &e, &f}, {&g, &h, &i}}, // pointer-to-slice of pointers-to-slices of pointers
+		}
+
+		for _, grid := range inputs {
+			message := fmt.Sprintf("grid: %#v", grid)
+
+			table := Table{}
+			table.Style().Options.SeparateRows = true
+			assert.True(t, table.ImportGrid(grid), message)
+			compareOutput(t, table.Render(), `
++---+---+---+
+| 1 | 2 | 3 |
++---+---+---+
+| 4 | 5 | 6 |
++---+---+---+
+| 7 | 8 | 9 |
++---+---+---+`, message)
+		}
+	})
+
+	t.Run("valid 2d with nil rows", func(t *testing.T) {
+		inputs := []interface{}{
+			[]*[]int{{a, b, c}, {d, e, f}, nil},         // slice of pointers-to-slices
+			&[]*[]int{{a, b, c}, {d, e, f}, nil},        // pointer-to-slice of pointers-to-slices
+			&[]*[]*int{{&a, &b, &c}, {&d, &e, &f}, nil}, // pointer-to-slice of pointers-to-slices of pointers
+		}
+
+		for _, grid := range inputs {
+			message := fmt.Sprintf("grid: %#v", grid)
+
+			table := Table{}
+			table.Style().Options.SeparateRows = true
+			assert.True(t, table.ImportGrid(grid), message)
+			compareOutput(t, table.Render(), `
++---+---+---+
+| 1 | 2 | 3 |
++---+---+---+
+| 4 | 5 | 6 |
++---+---+---+`, message)
+		}
+	})
+
+	t.Run("valid 2d with nil columns and rows", func(t *testing.T) {
+		inputs := []interface{}{
+			&[]*[]*int{{&a, &b, &c}, {&d, &e, nil}, nil},
+		}
+
+		for _, grid := range inputs {
+			message := fmt.Sprintf("grid: %#v", grid)
+
+			table := Table{}
+			table.Style().Options.SeparateRows = true
+			assert.True(t, table.ImportGrid(grid), message)
+			compareOutput(t, table.Render(), `
++---+---+---+
+| 1 | 2 | 3 |
++---+---+---+
+| 4 | 5 |   |
++---+---+---+`, message)
+		}
+	})
 }
 
 func TestTable_Length(t *testing.T) {

@@ -67,3 +67,55 @@ func (m mergedColumnIndices) safeAppend(colIdx, otherColIdx int) {
 	}
 	m[otherColIdx][colIdx] = true
 }
+
+func objAsSlice(in interface{}) []interface{} {
+	var out []interface{}
+	if in != nil {
+		// dereference pointers
+		val := reflect.ValueOf(in)
+		if val.Kind() == reflect.Pointer && !val.IsNil() {
+			in = val.Elem().Interface()
+		}
+
+		if objIsSlice(in) {
+			v := reflect.ValueOf(in)
+			for i := 0; i < v.Len(); i++ {
+				// dereference pointers
+				v2 := v.Index(i)
+				if v2.Kind() == reflect.Pointer && !v2.IsNil() {
+					v2 = reflect.ValueOf(v2.Elem().Interface())
+				}
+
+				out = append(out, v2.Interface())
+				//if v2.Kind() == reflect.Pointer {
+				//	if !v2.IsNil() {
+				//		out = append(out, reflect.ValueOf(v2.Elem().Interface()))
+				//	} else {
+				//		out = append(out, nil)
+				//	}
+				//} else {
+				//	out = append(out, v2.Elem().Interface())
+				//}
+			}
+		}
+	}
+
+	// remove trailing nil pointers
+	for i := len(out) - 1; i >= 0; i-- {
+		val := reflect.ValueOf(out[i])
+		if val.Kind() == reflect.Pointer && val.IsNil() {
+			out = out[:i]
+		} else {
+			break
+		}
+	}
+	return out
+}
+
+func objIsSlice(in interface{}) bool {
+	if in == nil {
+		return false
+	}
+	k := reflect.TypeOf(in).Kind()
+	return k == reflect.Slice || k == reflect.Array
+}
