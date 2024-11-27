@@ -51,3 +51,24 @@ func TestIsNumber(t *testing.T) {
 	assert.False(t, isNumber("1"))
 	assert.False(t, isNumber(nil))
 }
+
+func Test_objAsSlice(t *testing.T) {
+	a, b, c := 1, 2, 3
+	assert.Equal(t, "[1 2 3]", fmt.Sprint(objAsSlice([]int{a, b, c})))
+	assert.Equal(t, "[1 2 3]", fmt.Sprint(objAsSlice(&[]int{a, b, c})))
+	assert.Equal(t, "[1 2 3]", fmt.Sprint(objAsSlice(&[]*int{&a, &b, &c})))
+	assert.Equal(t, "[1 2]", fmt.Sprint(objAsSlice(&[]*int{&a, &b, nil})))
+	assert.Equal(t, "[1]", fmt.Sprint(objAsSlice(&[]*int{&a, nil, nil})))
+	assert.Equal(t, "[]", fmt.Sprint(objAsSlice(&[]*int{nil, nil, nil})))
+	assert.Equal(t, "[<nil> 2]", fmt.Sprint(objAsSlice(&[]*int{nil, &b, nil})))
+}
+
+func Test_objIsSlice(t *testing.T) {
+	assert.True(t, objIsSlice([]int{}))
+	assert.True(t, objIsSlice([]*int{}))
+	assert.False(t, objIsSlice(&[]int{}))
+	assert.False(t, objIsSlice(&[]*int{}))
+	assert.False(t, objIsSlice(Table{}))
+	assert.False(t, objIsSlice(&Table{}))
+	assert.False(t, objIsSlice(nil))
+}
