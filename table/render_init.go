@@ -226,7 +226,7 @@ func (t *Table) initForRenderRows() {
 	t.initForRenderSortRows()
 
 	// stringify all the rows to make it easy to render
-	if t.rowPainter != nil {
+	if t.rowPainter != nil || t.indexedRowPainter != nil {
 		t.rowsColors = make([]text.Colors, len(t.rowsRaw))
 	}
 	t.rows = t.initForRenderRowsStringify(t.rowsRaw, renderHint{})
@@ -244,7 +244,10 @@ func (t *Table) initForRenderRowsStringify(rows []Row, hint renderHint) []rowStr
 	rowsStr := make([]rowStr, len(rows))
 	for idx, row := range rows {
 		if t.rowPainter != nil && hint.isRegularRow() {
-			t.rowsColors[idx] = t.rowPainter(row, idx)
+			t.rowsColors[idx] = t.rowPainter(row)
+		}
+		if t.indexedRowPainter != nil && hint.isRegularRow() {
+			t.rowsColors[idx] = t.indexedRowPainter(idx)
 		}
 		rowsStr[idx] = t.analyzeAndStringify(row, hint)
 	}
