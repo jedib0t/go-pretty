@@ -13,6 +13,7 @@ type Writer interface {
 	AppendSeparator()
 	ImportGrid(grid interface{}) bool
 	Length() int
+	SortedIndices() []int
 	Pager(opts ...PagerOption) Pager
 	Render() string
 	RenderCSV() string

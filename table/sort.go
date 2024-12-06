@@ -55,6 +55,10 @@ type rowsSorter struct {
 	sortedIndices []int
 }
 
+func (t *Table) SortedIndices() []int {
+	return t.sortedRowIndices
+}
+
 // getSortedRowIndices sorts and returns the row indices in Sorted order as
 // directed by Table.sortBy which can be set using Table.SortBy(...)
 func (t *Table) getSortedRowIndices() []int {

@@ -110,6 +110,8 @@ type Table struct {
 	separators map[int]bool
 	// sortBy stores a map of Column
 	sortBy []SortBy
+	// sortedRowIndices contains the sorted row indices for later reference
+	sortedRowIndices []int
 	// style contains all the strings used to draw the table, and more
 	style *Style
 	// suppressEmptyColumns hides columns which have no content on all regular
