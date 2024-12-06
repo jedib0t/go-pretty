@@ -99,7 +99,7 @@ type Table struct {
 	// rowPainter is a custom function that given a Row, returns the colors to
 	// use on the entire row
 	rowPainter RowPainter
-	// rowPainter is a custom function that given a Row, returns the colors to
+	// indexedRowPainter is a custom function that given a row index, returns the colors to
 	// use on the entire row
 	indexedRowPainter IndexedRowPainter
 	// rowSeparator is a dummy row that contains the separator columns (dashes
