@@ -879,11 +879,7 @@ func TestTable_Render_Reset(t *testing.T) {
 
 func TestTable_Render_RowPainter(t *testing.T) {
 	tw := NewWriter()
-	tw.AppendHeader(testHeader)
-	tw.AppendRows(testRows)
-	tw.AppendRow(testRowMultiLine)
-	tw.AppendFooter(testFooter)
-	tw.SetIndexColumn(1)
+
 	tw.SetRowPainter(func(row Row) text.Colors {
 		if salary, ok := row[3].(int); ok {
 			if salary > 3000 {
@@ -894,49 +890,13 @@ func TestTable_Render_RowPainter(t *testing.T) {
 		}
 		return nil
 	})
-	tw.SetStyle(StyleLight)
-	tw.SortBy([]SortBy{{Name: "Salary", Mode: AscNumeric}})
 
-	expectedOutLines := []string{
-		"┌─────┬────────────┬───────────┬────────┬─────────────────────────────┐",
-		"│   # │ FIRST NAME │ LAST NAME │ SALARY │                             │",
-		"├─────┼────────────┼───────────┼────────┼─────────────────────────────┤",
-		"│   0 │\x1b[41;30m Winter     \x1b[0m│\x1b[41;30m Is        \x1b[0m│\x1b[41;30m      0 \x1b[0m│\x1b[41;30m Coming.                     \x1b[0m│",
-		"│     │\x1b[41;30m            \x1b[0m│\x1b[41;30m           \x1b[0m│\x1b[41;30m        \x1b[0m│\x1b[41;30m The North Remembers!        \x1b[0m│",
-		"│     │\x1b[41;30m            \x1b[0m│\x1b[41;30m           \x1b[0m│\x1b[41;30m        \x1b[0m│\x1b[41;30m This is known.              \x1b[0m│",
-		"│  20 │ Jon        │ Snow      │   2000 │ You know nothing, Jon Snow! │",
-		"│   1 │ Arya       │ Stark     │   3000 │                             │",
-		"│ 300 │\x1b[43;30m Tyrion     \x1b[0m│\x1b[43;30m Lannister \x1b[0m│\x1b[43;30m   5000 \x1b[0m│\x1b[43;30m                             \x1b[0m│",
-		"├─────┼────────────┼───────────┼────────┼─────────────────────────────┤",
-		"│     │            │ TOTAL     │  10000 │                             │",
-		"└─────┴────────────┴───────────┴────────┴─────────────────────────────┘",
-	}
-	expectedOut := strings.Join(expectedOutLines, "\n")
-	assert.Equal(t, expectedOut, tw.Render())
-
-	tw.SetStyle(StyleColoredBright)
-	tw.Style().Color.RowAlternate = tw.Style().Color.Row
-	expectedOutLines = []string{
-		"\x1b[106;30m   # \x1b[0m\x1b[106;30m FIRST NAME \x1b[0m\x1b[106;30m LAST NAME \x1b[0m\x1b[106;30m SALARY \x1b[0m\x1b[106;30m                             \x1b[0m",
-		"\x1b[106;30m   0 \x1b[0m\x1b[41;30m Winter     \x1b[0m\x1b[41;30m Is        \x1b[0m\x1b[41;30m      0 \x1b[0m\x1b[41;30m Coming.                     \x1b[0m",
-		"\x1b[106;30m     \x1b[0m\x1b[41;30m            \x1b[0m\x1b[41;30m           \x1b[0m\x1b[41;30m        \x1b[0m\x1b[41;30m The North Remembers!        \x1b[0m",
-		"\x1b[106;30m     \x1b[0m\x1b[41;30m            \x1b[0m\x1b[41;30m           \x1b[0m\x1b[41;30m        \x1b[0m\x1b[41;30m This is known.              \x1b[0m",
-		"\x1b[106;30m  20 \x1b[0m\x1b[107;30m Jon        \x1b[0m\x1b[107;30m Snow      \x1b[0m\x1b[107;30m   2000 \x1b[0m\x1b[107;30m You know nothing, Jon Snow! \x1b[0m",
-		"\x1b[106;30m   1 \x1b[0m\x1b[107;30m Arya       \x1b[0m\x1b[107;30m Stark     \x1b[0m\x1b[107;30m   3000 \x1b[0m\x1b[107;30m                             \x1b[0m",
-		"\x1b[106;30m 300 \x1b[0m\x1b[43;30m Tyrion     \x1b[0m\x1b[43;30m Lannister \x1b[0m\x1b[43;30m   5000 \x1b[0m\x1b[43;30m                             \x1b[0m",
-		"\x1b[46;30m     \x1b[0m\x1b[46;30m            \x1b[0m\x1b[46;30m TOTAL     \x1b[0m\x1b[46;30m  10000 \x1b[0m\x1b[46;30m                             \x1b[0m",
-	}
-	expectedOut = strings.Join(expectedOutLines, "\n")
-	assert.Equal(t, expectedOut, tw.Render())
+	RunTestTable_Render_WithRowPainter(t, tw)
 }
 
 func TestTable_Render_IndexedRowPainter(t *testing.T) {
 	tw := NewWriter()
-	tw.AppendHeader(testHeader)
-	tw.AppendRows(testRows)
-	tw.AppendRow(testRowMultiLine)
-	tw.AppendFooter(testFooter)
-	tw.SetIndexColumn(1)
+
 	tw.SetIndexedRowPainter(func(idx int) text.Colors {
 		if idx > -1 {
 			if idx == 3 {
@@ -947,6 +907,16 @@ func TestTable_Render_IndexedRowPainter(t *testing.T) {
 		}
 		return nil
 	})
+
+	RunTestTable_Render_WithRowPainter(t, tw)
+}
+
+func RunTestTable_Render_WithRowPainter(t *testing.T, tw Writer) {
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendRow(testRowMultiLine)
+	tw.AppendFooter(testFooter)
+	tw.SetIndexColumn(1)
 	tw.SetStyle(StyleLight)
 	tw.SortBy([]SortBy{{Name: "Salary", Mode: AscNumeric}})
 
