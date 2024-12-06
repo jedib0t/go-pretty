@@ -226,7 +226,6 @@ func (t *Table) initForRenderRows() {
 	if t.rowPainter != nil || t.indexedRowPainter != nil {
 		t.rowsColors = make([]text.Colors, len(t.rowsRaw))
 	}
-
 	t.rows = t.initForRenderRowsStringify(t.rowsRaw, renderHint{})
 	t.rowsFooter = t.initForRenderRowsStringify(t.rowsFooterRaw, renderHint{isFooterRow: true})
 	t.rowsHeader = t.initForRenderRowsStringify(t.rowsHeaderRaw, renderHint{isHeaderRow: true})
@@ -267,7 +266,6 @@ func (t *Table) initForRenderSortRows() {
 
 	// sort the rows
 	sortedRowIndices := t.getSortedRowIndices()
-
 	sortedRows := make([]rowStr, len(t.rows))
 	for idx := range t.rows {
 		sortedRows[idx] = t.rows[sortedRowIndices[idx]]
@@ -279,7 +277,6 @@ func (t *Table) initForRenderSortRows() {
 		sortedRowsColors := make([]text.Colors, len(t.rows))
 		for idx := range t.rows {
 			sortedRowsColors[idx] = t.rowsColors[sortedRowIndices[idx]]
-
 			if t.indexedRowPainter != nil {
 				sortedRowsColors[idx] = t.indexedRowPainter(idx)
 			}
