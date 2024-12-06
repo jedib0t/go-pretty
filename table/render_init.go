@@ -223,7 +223,7 @@ func (t *Table) initForRenderRows() {
 	t.autoIndexVIndexMaxLength = len(fmt.Sprint(len(t.rowsRaw)))
 
 	// stringify all the rows to make it easy to render
-	if t.rowPainter != nil {
+	if t.rowPainter != nil || t.indexedRowPainter != nil {
 		t.rowsColors = make([]text.Colors, len(t.rowsRaw))
 	}
 	t.rows = t.initForRenderRowsStringify(t.rowsRaw, renderHint{})
@@ -277,6 +277,9 @@ func (t *Table) initForRenderSortRows() {
 		sortedRowsColors := make([]text.Colors, len(t.rows))
 		for idx := range t.rows {
 			sortedRowsColors[idx] = t.rowsColors[sortedRowIndices[idx]]
+			if t.indexedRowPainter != nil {
+				sortedRowsColors[idx] = t.indexedRowPainter(idx)
+			}
 		}
 		t.rowsColors = sortedRowsColors
 	}

@@ -26,6 +26,10 @@ func (r Row) findColumnNumber(colName string) int {
 // text.Colors{} to use on the entire row
 type RowPainter func(row Row) text.Colors
 
+// IndexedRowPainter is a custom function that takes a Row index as input and returns the
+// text.Colors{} to use on the entire row
+type IndexedRowPainter func(idx int) text.Colors
+
 // rowStr defines a single row in the Table comprised of just string objects.
 type rowStr []string
 
@@ -95,6 +99,9 @@ type Table struct {
 	// rowPainter is a custom function that given a Row, returns the colors to
 	// use on the entire row
 	rowPainter RowPainter
+	// indexedRowPainter is a custom function that given a row index, returns the colors to
+	// use on the entire row
+	indexedRowPainter IndexedRowPainter
 	// rowSeparator is a dummy row that contains the separator columns (dashes
 	// that make up the separator between header/body/footer
 	rowSeparator rowStr
@@ -103,6 +110,8 @@ type Table struct {
 	separators map[int]bool
 	// sortBy stores a map of Column
 	sortBy []SortBy
+	// sortedRowIndices contains the sorted row indices for later reference
+	sortedRowIndices []int
 	// style contains all the strings used to draw the table, and more
 	style *Style
 	// suppressEmptyColumns hides columns which have no content on all regular
@@ -317,6 +326,14 @@ func (t *Table) SetRowPainter(painter RowPainter) {
 	t.rowPainter = painter
 }
 
+// SetIndexedRowPainter sets the IndexedRowPainter function which determines the colors to use
+// on a row at index idx. Before rendering, this function is invoked on all rows and the
+// color of each row is determined. This color takes precedence over other ways
+// to set color (ColumnConfig.Color*, SetColor*()).
+func (t *Table) SetIndexedRowPainter(painter IndexedRowPainter) {
+	t.indexedRowPainter = painter
+}
+
 // SetStyle overrides the DefaultStyle with the provided one.
 func (t *Table) SetStyle(style Style) {
 	t.style = &style
@@ -461,7 +478,7 @@ func (t *Table) getColumnColors(colIdx int, hint renderHint) text.Colors {
 			return colors
 		}
 	}
-	if t.rowPainter != nil && hint.isRegularNonSeparatorRow() && !t.isIndexColumn(colIdx, hint) {
+	if (t.rowPainter != nil || t.indexedRowPainter != nil) && hint.isRegularNonSeparatorRow() && !t.isIndexColumn(colIdx, hint) {
 		if colors := t.rowsColors[hint.rowNumber-1]; colors != nil {
 			return colors
 		}

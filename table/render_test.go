@@ -879,11 +879,7 @@ func TestTable_Render_Reset(t *testing.T) {
 
 func TestTable_Render_RowPainter(t *testing.T) {
 	tw := NewWriter()
-	tw.AppendHeader(testHeader)
-	tw.AppendRows(testRows)
-	tw.AppendRow(testRowMultiLine)
-	tw.AppendFooter(testFooter)
-	tw.SetIndexColumn(1)
+
 	tw.SetRowPainter(func(row Row) text.Colors {
 		if salary, ok := row[3].(int); ok {
 			if salary > 3000 {
@@ -894,6 +890,33 @@ func TestTable_Render_RowPainter(t *testing.T) {
 		}
 		return nil
 	})
+
+	RunTestTable_Render_WithRowPainter(t, tw)
+}
+
+func TestTable_Render_IndexedRowPainter(t *testing.T) {
+	tw := NewWriter()
+
+	tw.SetIndexedRowPainter(func(idx int) text.Colors {
+		if idx > -1 {
+			if idx == 3 {
+				return text.Colors{text.BgYellow, text.FgBlack}
+			} else if idx == 0 {
+				return text.Colors{text.BgRed, text.FgBlack}
+			}
+		}
+		return nil
+	})
+
+	RunTestTable_Render_WithRowPainter(t, tw)
+}
+
+func RunTestTable_Render_WithRowPainter(t *testing.T, tw Writer) {
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendRow(testRowMultiLine)
+	tw.AppendFooter(testFooter)
+	tw.SetIndexColumn(1)
 	tw.SetStyle(StyleLight)
 	tw.SortBy([]SortBy{{Name: "Salary", Mode: AscNumeric}})
 
