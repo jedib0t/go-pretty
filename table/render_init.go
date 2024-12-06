@@ -247,7 +247,6 @@ func (t *Table) initForRenderRowsStringify(rows []Row, hint renderHint) []rowStr
 		if t.rowPainter != nil && hint.isRegularRow() {
 			t.rowsColors[idx] = t.rowPainter(row)
 		}
-
 		rowsStr[idx] = t.analyzeAndStringify(row, hint)
 	}
 	return rowsStr
@@ -268,7 +267,7 @@ func (t *Table) initForRenderSortRows() {
 
 	// sort the rows
 	sortedRowIndices := t.getSortedRowIndices()
-	t.sortedRowIndices = sortedRowIndices
+
 	sortedRows := make([]rowStr, len(t.rows))
 	for idx := range t.rows {
 		sortedRows[idx] = t.rows[sortedRowIndices[idx]]

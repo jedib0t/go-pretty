@@ -75,6 +75,8 @@ func (t *Table) getSortedRowIndices() []int {
 		})
 	}
 
+	t.sortedRowIndices = sortedIndices
+
 	return sortedIndices
 }
 
