@@ -884,7 +884,7 @@ func TestTable_Render_RowPainter(t *testing.T) {
 	tw.AppendRow(testRowMultiLine)
 	tw.AppendFooter(testFooter)
 	tw.SetIndexColumn(1)
-	tw.SetRowPainter(func(row Row) text.Colors {
+	tw.SetRowPainter(func(row Row, idx int) text.Colors {
 		if salary, ok := row[3].(int); ok {
 			if salary > 3000 {
 				return text.Colors{text.BgYellow, text.FgBlack}

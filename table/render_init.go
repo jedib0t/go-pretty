@@ -222,6 +222,9 @@ func (t *Table) initForRenderRows() {
 	// auto-index: calc the index column's max length
 	t.autoIndexVIndexMaxLength = len(fmt.Sprint(len(t.rowsRaw)))
 
+	// sort the rows as requested
+	t.initForRenderSortRows()
+
 	// stringify all the rows to make it easy to render
 	if t.rowPainter != nil {
 		t.rowsColors = make([]text.Colors, len(t.rowsRaw))
@@ -229,9 +232,6 @@ func (t *Table) initForRenderRows() {
 	t.rows = t.initForRenderRowsStringify(t.rowsRaw, renderHint{})
 	t.rowsFooter = t.initForRenderRowsStringify(t.rowsFooterRaw, renderHint{isFooterRow: true})
 	t.rowsHeader = t.initForRenderRowsStringify(t.rowsHeaderRaw, renderHint{isHeaderRow: true})
-
-	// sort the rows as requested
-	t.initForRenderSortRows()
 
 	// suppress columns without any content
 	t.initForRenderSuppressColumns()
@@ -244,7 +244,7 @@ func (t *Table) initForRenderRowsStringify(rows []Row, hint renderHint) []rowStr
 	rowsStr := make([]rowStr, len(rows))
 	for idx, row := range rows {
 		if t.rowPainter != nil && hint.isRegularRow() {
-			t.rowsColors[idx] = t.rowPainter(row)
+			t.rowsColors[idx] = t.rowPainter(row, idx)
 		}
 		rowsStr[idx] = t.analyzeAndStringify(row, hint)
 	}

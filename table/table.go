@@ -24,7 +24,7 @@ func (r Row) findColumnNumber(colName string) int {
 
 // RowPainter is a custom function that takes a Row as input and returns the
 // text.Colors{} to use on the entire row
-type RowPainter func(row Row) text.Colors
+type RowPainter func(row Row, idx int) text.Colors
 
 // rowStr defines a single row in the Table comprised of just string objects.
 type rowStr []string
