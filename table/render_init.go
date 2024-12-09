@@ -223,15 +223,15 @@ func (t *Table) initForRenderRows() {
 	t.autoIndexVIndexMaxLength = len(fmt.Sprint(len(t.rowsRaw)))
 
 	// stringify all the rows to make it easy to render
-	if t.rowPainter != nil {
-		t.rowsColors = make([]text.Colors, len(t.rowsRaw))
-	}
 	t.rows = t.initForRenderRowsStringify(t.rowsRaw, renderHint{})
 	t.rowsFooter = t.initForRenderRowsStringify(t.rowsFooterRaw, renderHint{isFooterRow: true})
 	t.rowsHeader = t.initForRenderRowsStringify(t.rowsHeaderRaw, renderHint{isHeaderRow: true})
 
 	// sort the rows as requested
 	t.initForRenderSortRows()
+
+	// find the row colors (if any)
+	t.initForRenderRowPainterColors()
 
 	// suppress columns without any content
 	t.initForRenderSuppressColumns()
@@ -243,12 +243,40 @@ func (t *Table) initForRenderRows() {
 func (t *Table) initForRenderRowsStringify(rows []Row, hint renderHint) []rowStr {
 	rowsStr := make([]rowStr, len(rows))
 	for idx, row := range rows {
-		if t.rowPainter != nil && hint.isRegularRow() {
-			t.rowsColors[idx] = t.rowPainter(row)
-		}
+		hint.rowNumber = idx + 1
 		rowsStr[idx] = t.analyzeAndStringify(row, hint)
 	}
 	return rowsStr
+}
+
+func (t *Table) initForRenderRowPainterColors() {
+	if !t.hasRowPainter() {
+		return
+	}
+
+	// generate the colors
+	t.rowsColors = make([]text.Colors, len(t.rowsRaw))
+	for idx, row := range t.rowsRaw {
+		idxColors := idx
+		if len(t.sortedRowIndices) > 0 {
+			// override with the sorted row index
+			for j := 0; j < len(t.sortedRowIndices); j++ {
+				if t.sortedRowIndices[j] == idx {
+					idxColors = j
+					break
+				}
+			}
+		}
+
+		if t.rowPainter != nil {
+			t.rowsColors[idxColors] = t.rowPainter(row)
+		} else if t.rowPainterWithAttributes != nil {
+			t.rowsColors[idxColors] = t.rowPainterWithAttributes(row, RowAttributes{
+				Number:       idx + 1,
+				NumberSorted: idxColors + 1,
+			})
+		}
+	}
 }
 
 func (t *Table) initForRenderRowSeparator() {
@@ -265,21 +293,12 @@ func (t *Table) initForRenderSortRows() {
 	}
 
 	// sort the rows
-	sortedRowIndices := t.getSortedRowIndices()
+	t.sortedRowIndices = t.getSortedRowIndices()
 	sortedRows := make([]rowStr, len(t.rows))
 	for idx := range t.rows {
-		sortedRows[idx] = t.rows[sortedRowIndices[idx]]
+		sortedRows[idx] = t.rows[t.sortedRowIndices[idx]]
 	}
 	t.rows = sortedRows
-
-	// sort the rowsColors
-	if len(t.rowsColors) > 0 {
-		sortedRowsColors := make([]text.Colors, len(t.rows))
-		for idx := range t.rows {
-			sortedRowsColors[idx] = t.rowsColors[sortedRowIndices[idx]]
-		}
-		t.rowsColors = sortedRowsColors
-	}
 }
 
 func (t *Table) initForRenderSuppressColumns() {

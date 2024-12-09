@@ -2,13 +2,13 @@ package table
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
 	"unicode/utf8"
 
 	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var (
