@@ -6,6 +6,7 @@ all: test bench
 
 tools:
 	go install github.com/fzipp/gocyclo/cmd/gocyclo@v0.5.1
+	go install github.com/rinchsan/gosimports/cmd/gosimports@v0.3.8
 
 bench:
 	go test -bench=. -benchmem
@@ -23,16 +24,18 @@ demo-table:
 	go run cmd/demo-table/demo.go
 
 fmt:
-	go fmt $(shell go list ./...)
+	go fmt ./...
+	gosimports -w .
 
 profile:
 	sh profile.sh
 
 test: fmt vet cyclo
-	go test -cover -coverprofile=.coverprofile $(shell go list ./...)
+	go test -cover -coverprofile=.coverprofile ./...
 
 test-race:
 	go run -race ./cmd/demo-progress/demo.go
 
 vet:
-	go vet $(shell go list ./...)
+	go vet ./...
+
