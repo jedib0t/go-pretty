@@ -268,13 +268,13 @@ func (t *Table) initForRenderRowPainterColors() {
 			}
 		}
 
-		if t.rowPainterWithAttributes != nil {
+		if t.rowPainter != nil {
+			t.rowsColors[idxColors] = t.rowPainter(row)
+		} else if t.rowPainterWithAttributes != nil {
 			t.rowsColors[idxColors] = t.rowPainterWithAttributes(row, RowAttributes{
 				Number:       idx + 1,
 				NumberSorted: idxColors + 1,
 			})
-		} else if t.rowPainter != nil {
-			t.rowsColors[idxColors] = t.rowPainter(row)
 		}
 	}
 }

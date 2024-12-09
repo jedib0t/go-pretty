@@ -20,8 +20,8 @@ func (r Row) findColumnNumber(colName string) int {
 
 // RowAttributes contains properties about the Row during the render.
 type RowAttributes struct {
-	Number       int
-	NumberSorted int
+	Number       int // Row Number (1-indexed) as appended
+	NumberSorted int // Row number (1-indexed) after sorting
 }
 
 // RowPainter is a custom function that takes a Row as input and returns the
