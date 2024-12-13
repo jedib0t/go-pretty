@@ -332,13 +332,13 @@ func (p *Progress) initForRender() {
 	// calculate length of the actual progress bar by discounting the left/right
 	// border/box chars
 	p.lengthProgress = p.lengthTracker -
-		text.RuneWidthWithoutEscSequences(p.style.Chars.BoxLeft) -
-		text.RuneWidthWithoutEscSequences(p.style.Chars.BoxRight)
+		text.StringWidthWithoutEscSequences(p.style.Chars.BoxLeft) -
+		text.StringWidthWithoutEscSequences(p.style.Chars.BoxRight)
 	p.lengthProgressOverall = p.lengthMessage +
-		text.RuneWidthWithoutEscSequences(p.style.Options.Separator) +
+		text.StringWidthWithoutEscSequences(p.style.Options.Separator) +
 		p.lengthProgress + 1
 	if p.style.Visibility.Percentage {
-		p.lengthProgressOverall += text.RuneWidthWithoutEscSequences(
+		p.lengthProgressOverall += text.StringWidthWithoutEscSequences(
 			fmt.Sprintf(p.style.Options.PercentFormat, 0.0),
 		)
 	}

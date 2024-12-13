@@ -8,6 +8,6 @@ import (
 
 func TestDirection_Modifier(t *testing.T) {
 	assert.Equal(t, "", Default.Modifier())
-	assert.Equal(t, "\u202a", LeftToRight.Modifier())
-	assert.Equal(t, "\u202b", RightToLeft.Modifier())
+	assert.Equal(t, string(RuneL2R), LeftToRight.Modifier())
+	assert.Equal(t, string(RuneR2L), RightToLeft.Modifier())
 }

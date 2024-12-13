@@ -8,6 +8,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var (
+	textTable = "+---+------+-------+------+\n| 1 | Arya | Stark | 3000 |\n+---+------+-------+------+"
+
+	// colored text with nested escape codes: "{red}{bold}...{un-bold}...{reset}"
+	textUnBold     = "\x1b[91m\x1b[1mBold Title\x1b[22m Regular Red Text\x1b[0m"
+	expectedUnBold = "\x1b[91m\x1b[1mBold Title\x1b[22m Regular Red \x1b[0m\n\x1b[91mText\x1b[0m"
+
+	// text with wide characters
+	textWide     = "abcd甲乙丙丁abcd"
+	expectedWide = "abcd甲乙丙\n丁abcd"
+
+	// colored text with wide characters
+	textWideColored     = "\x1b[22mabcd甲乙丙丁abcd\x1b[0m"
+	expectedWideColored = "\x1b[22mabcd甲乙丙\x1b[0m\n\u001B[22m丁abcd\u001B[0m"
+)
+
 func ExampleWrapHard() {
 	str := `The quick brown fox jumped over the lazy dog.
 
@@ -48,13 +64,10 @@ func TestWrapHard(t *testing.T) {
 	assert.Equal(t, "\x1b[33mJon\x1b[0m\n\x1b[33mSno\x1b[0m\n\x1b[33mw\x1b[0m", WrapHard("\x1b[33mJon Snow\n", 3))
 	assert.Equal(t, "\x1b[33mJon\x1b[0m\n\x1b[33mSno\x1b[0m\n\x1b[33mw \x1b[0m", WrapHard("\x1b[33mJon Snow\n\x1b[0m", 3))
 
-	complexIn := "+---+------+-------+------+\n| 1 | Arya | Stark | 3000 |\n+---+------+-------+------+"
-	assert.Equal(t, complexIn, WrapHard(complexIn, 27))
-
-	// colored text with nested escape codes: "{red}{bold}...{un-bold}...{reset}"
-	textUnBold := "\x1b[91m\x1b[1mBold Title\x1b[22m Regular Red Text\x1b[0m"
-	expectedUnBold := "\x1b[91m\x1b[1mBold Title\x1b[22m Regular Red \x1b[0m\n\x1b[91mText\x1b[0m"
+	assert.Equal(t, textTable, WrapHard(textTable, 27))
 	assert.Equal(t, expectedUnBold, WrapHard(textUnBold, 23))
+	assert.Equal(t, expectedWide, WrapHard(textWide, 10))
+	assert.Equal(t, expectedWideColored, WrapHard(textWideColored, 10))
 }
 
 func TestFoo(t *testing.T) {
@@ -103,17 +116,13 @@ func TestWrapSoft(t *testing.T) {
 	assert.Equal(t, "\x1b[33mJon\x1b[0m\n\x1b[33mSno\x1b[0m\n\x1b[33mw\x1b[0m", WrapSoft("\x1b[33mJon Snow\x1b[0m", 3))
 	assert.Equal(t, "\x1b[33mJon\x1b[0m\n\x1b[33mSno\x1b[0m\n\x1b[33mw\x1b[0m", WrapSoft("\x1b[33mJon Snow\n", 3))
 	assert.Equal(t, "\x1b[33mJon\x1b[0m\n\x1b[33mSno\x1b[0m\n\x1b[33mw \x1b[0m", WrapSoft("\x1b[33mJon Snow\n\x1b[0m", 3))
-
-	complexIn := "+---+------+-------+------+\n| 1 | Arya | Stark | 3000 |\n+---+------+-------+------+"
-	assert.Equal(t, complexIn, WrapSoft(complexIn, 27))
-
 	assert.Equal(t, "\x1b[33mJon \x1b[0m\n\x1b[33mSnow\x1b[0m", WrapSoft("\x1b[33mJon Snow\x1b[0m", 4))
 	assert.Equal(t, "\x1b[33mJon \x1b[0m\n\x1b[33mSnow\x1b[0m\n\x1b[33m???\x1b[0m", WrapSoft("\x1b[33mJon Snow???\x1b[0m", 4))
 
-	// colored text with nested escape codes: "{red}{bold}...{un-bold}...{reset}"
-	textUnBold := "\x1b[91m\x1b[1mBold Title\x1b[22m Regular Red Text\x1b[0m"
-	expectedUnBold := "\x1b[91m\x1b[1mBold Title\x1b[22m Regular Red \x1b[0m\n\x1b[91mText\x1b[0m"
+	assert.Equal(t, textTable, WrapSoft(textTable, 27))
 	assert.Equal(t, expectedUnBold, WrapSoft(textUnBold, 23))
+	assert.Equal(t, expectedWide, WrapHard(textWide, 10))
+	assert.Equal(t, expectedWideColored, WrapHard(textWideColored, 10))
 }
 
 func ExampleWrapText() {
@@ -156,11 +165,8 @@ func TestWrapText(t *testing.T) {
 	assert.Equal(t, "\x1b[33mJon\x1b[0m\n\x1b[33mSno\x1b[0m\n\x1b[33mw\x1b[0m\n", WrapText("\x1b[33mJon Snow\n", 3))
 	assert.Equal(t, "\x1b[33mJon\x1b[0m\n\x1b[33mSno\x1b[0m\n\x1b[33mw\x1b[0m\n\x1b[0m", WrapText("\x1b[33mJon Snow\n\x1b[0m", 3))
 
-	complexIn := "+---+------+-------+------+\n| 1 | Arya | Stark | 3000 |\n+---+------+-------+------+"
-	assert.Equal(t, complexIn, WrapText(complexIn, 27))
-
-	// colored text with nested escape codes: "{red}{bold}...{un-bold}...{reset}"
-	textUnBold := "\x1b[91m\x1b[1mBold Title\x1b[22m Regular Red Text\x1b[0m"
-	expectedUnBold := "\x1b[91m\x1b[1mBold Title\x1b[22m Regular Red \x1b[0m\n\x1b[91mText\x1b[0m"
+	assert.Equal(t, textTable, WrapText(textTable, 27))
 	assert.Equal(t, expectedUnBold, WrapText(textUnBold, 23))
+	assert.Equal(t, expectedWide, WrapHard(textWide, 10))
+	assert.Equal(t, expectedWideColored, WrapHard(textWideColored, 10))
 }

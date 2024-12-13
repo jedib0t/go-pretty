@@ -94,7 +94,7 @@ func indeterminateIndicatorMovingBackAndForth(indicator string) IndeterminateInd
 
 		if currentPosition == 0 {
 			direction = 1
-		} else if currentPosition+text.RuneWidthWithoutEscSequences(indicator) == maxLen {
+		} else if currentPosition+text.StringWidthWithoutEscSequences(indicator) == maxLen {
 			direction = -1
 		}
 		nextPosition += direction
@@ -113,7 +113,7 @@ func indeterminateIndicatorMovingLeftToRight(indicator string) IndeterminateIndi
 		currentPosition := nextPosition
 
 		nextPosition++
-		if nextPosition+text.RuneWidthWithoutEscSequences(indicator) > maxLen {
+		if nextPosition+text.StringWidthWithoutEscSequences(indicator) > maxLen {
 			nextPosition = 0
 		}
 
@@ -129,7 +129,7 @@ func indeterminateIndicatorMovingRightToLeft(indicator string) IndeterminateIndi
 
 	return func(maxLen int) IndeterminateIndicator {
 		if nextPosition == -1 {
-			nextPosition = maxLen - text.RuneWidthWithoutEscSequences(indicator)
+			nextPosition = maxLen - text.StringWidthWithoutEscSequences(indicator)
 		}
 		currentPosition := nextPosition
 		nextPosition--
@@ -165,7 +165,7 @@ func indeterminateIndicatorPacMan() IndeterminateIndicatorGenerator {
 		if currentPosition == 0 {
 			direction = 1
 			indicator = pacManMovingRight
-		} else if currentPosition+text.RuneWidthWithoutEscSequences(indicator) == maxLen {
+		} else if currentPosition+text.StringWidthWithoutEscSequences(indicator) == maxLen {
 			direction = -1
 			indicator = pacManMovingLeft
 		}

@@ -78,7 +78,7 @@ func (t *Table) extractMaxColumnLengthsFromRow(row rowStr, mci mergedColumnIndic
 
 func (t *Table) extractMaxColumnLengthsFromRowForMergedColumns(colIdx int, mergedColumnLength int, mci mergedColumnIndices) {
 	numMergedColumns := mci.len(colIdx)
-	mergedColumnLength -= (numMergedColumns - 1) * text.RuneWidthWithoutEscSequences(t.style.Box.MiddleSeparator)
+	mergedColumnLength -= (numMergedColumns - 1) * text.StringWidthWithoutEscSequences(t.style.Box.MiddleSeparator)
 	maxLengthSplitAcrossColumns := mergedColumnLength / numMergedColumns
 	if maxLengthSplitAcrossColumns > t.maxColumnLengths[colIdx] {
 		t.maxColumnLengths[colIdx] = maxLengthSplitAcrossColumns
@@ -177,22 +177,22 @@ func (t *Table) initForRenderHideColumns() {
 func (t *Table) initForRenderMaxRowLength() {
 	t.maxRowLength = 0
 	if t.autoIndex {
-		t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.PaddingLeft)
+		t.maxRowLength += text.StringWidthWithoutEscSequences(t.style.Box.PaddingLeft)
 		t.maxRowLength += len(fmt.Sprint(len(t.rows)))
-		t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.PaddingRight)
+		t.maxRowLength += text.StringWidthWithoutEscSequences(t.style.Box.PaddingRight)
 		if t.style.Options.SeparateColumns {
-			t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.MiddleSeparator)
+			t.maxRowLength += text.StringWidthWithoutEscSequences(t.style.Box.MiddleSeparator)
 		}
 	}
 	if t.style.Options.SeparateColumns {
-		t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.MiddleSeparator) * (t.numColumns - 1)
+		t.maxRowLength += text.StringWidthWithoutEscSequences(t.style.Box.MiddleSeparator) * (t.numColumns - 1)
 	}
 	for _, maxColumnLength := range t.maxColumnLengths {
-		maxColumnLength += text.RuneWidthWithoutEscSequences(t.style.Box.PaddingLeft + t.style.Box.PaddingRight)
+		maxColumnLength += text.StringWidthWithoutEscSequences(t.style.Box.PaddingLeft + t.style.Box.PaddingRight)
 		t.maxRowLength += maxColumnLength
 	}
 	if t.style.Options.DrawBorder {
-		t.maxRowLength += text.RuneWidthWithoutEscSequences(t.style.Box.Left + t.style.Box.Right)
+		t.maxRowLength += text.StringWidthWithoutEscSequences(t.style.Box.Left + t.style.Box.Right)
 	}
 }
 
@@ -282,7 +282,7 @@ func (t *Table) initForRenderRowPainterColors() {
 func (t *Table) initForRenderRowSeparator() {
 	t.rowSeparator = make(rowStr, t.numColumns)
 	for colIdx, maxColumnLength := range t.maxColumnLengths {
-		maxColumnLength += text.RuneWidthWithoutEscSequences(t.style.Box.PaddingLeft + t.style.Box.PaddingRight)
+		maxColumnLength += text.StringWidthWithoutEscSequences(t.style.Box.PaddingLeft + t.style.Box.PaddingRight)
 		t.rowSeparator[colIdx] = text.RepeatAndTrim(t.style.Box.MiddleHorizontal, maxColumnLength)
 	}
 }
