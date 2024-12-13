@@ -603,9 +603,9 @@ func (t *Table) getFormat(hint renderHint) text.Format {
 
 func (t *Table) getMaxColumnLengthForMerging(colIdx int) int {
 	maxColumnLength := t.maxColumnLengths[colIdx]
-	maxColumnLength += text.RuneWidthWithoutEscSequences(t.style.Box.PaddingRight + t.style.Box.PaddingLeft)
+	maxColumnLength += text.StringWidthWithoutEscSequences(t.style.Box.PaddingRight + t.style.Box.PaddingLeft)
 	if t.style.Options.SeparateColumns {
-		maxColumnLength += text.RuneWidthWithoutEscSequences(t.style.Box.EmptySeparator)
+		maxColumnLength += text.StringWidthWithoutEscSequences(t.style.Box.EmptySeparator)
 	}
 	return maxColumnLength
 }

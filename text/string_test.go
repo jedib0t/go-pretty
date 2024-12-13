@@ -95,9 +95,9 @@ func TestOverrideRuneWidthEastAsianWidth(t *testing.T) {
 	}()
 
 	OverrideRuneWidthEastAsianWidth(true)
-	assert.Equal(t, 2, RuneWidthWithoutEscSequences("╋"))
+	assert.Equal(t, 2, StringWidthWithoutEscSequences("╋"))
 	OverrideRuneWidthEastAsianWidth(false)
-	assert.Equal(t, 1, RuneWidthWithoutEscSequences("╋"))
+	assert.Equal(t, 1, StringWidthWithoutEscSequences("╋"))
 
 	// Note for posterity. We want the length of the box drawing character to
 	// be reported as 1. However, with an environment where LANG is set to
@@ -282,6 +282,48 @@ func TestSnip(t *testing.T) {
 	assert.Equal(t, "\x1b[33m\x1b]8;;http://example.com\x1b\\Gh\x1b]8;;\x1b\\\x1b[0m~", Snip("\x1b[33m\x1b]8;;http://example.com\x1b\\Ghost\x1b]8;;\x1b\\\x1b[0m", 3, "~"))
 }
 
+func ExampleStringWidth() {
+	fmt.Printf("StringWidth(\"Ghost 生命\"): %d\n", StringWidth("Ghost 生命"))
+	fmt.Printf("StringWidth(\"\\x1b[33mGhost 生命\\x1b[0m\"): %d\n", StringWidth("\x1b[33mGhost 生命\x1b[0m"))
+
+	// Output: StringWidth("Ghost 生命"): 10
+	// StringWidth("\x1b[33mGhost 生命\x1b[0m"): 17
+}
+
+func TestStringWidth(t *testing.T) {
+	assert.Equal(t, 10, StringWidth("Ghost 生命"))
+	assert.Equal(t, 17, StringWidth("\x1b[33mGhost 生命\x1b[0m"))
+}
+
+func ExampleStringWidthWithoutEscSequences() {
+	fmt.Printf("StringWidthWithoutEscSequences(\"\"): %d\n", StringWidthWithoutEscSequences(""))
+	fmt.Printf("StringWidthWithoutEscSequences(\"Ghost\"): %d\n", StringWidthWithoutEscSequences("Ghost"))
+	fmt.Printf("StringWidthWithoutEscSequences(\"Ghostツ\"): %d\n", StringWidthWithoutEscSequences("Ghostツ"))
+	fmt.Printf("StringWidthWithoutEscSequences(\"\\x1b[33mGhost\\x1b[0m\"): %d\n", StringWidthWithoutEscSequences("\x1b[33mGhost\x1b[0m"))
+	fmt.Printf("StringWidthWithoutEscSequences(\"\\x1b[33mGhost\\x1b[0\"): %d\n", StringWidthWithoutEscSequences("\x1b[33mGhost\x1b[0"))
+	fmt.Printf("StringWidthWithoutEscSequences(\"Ghost 生命\"): %d\n", StringWidthWithoutEscSequences("Ghost 生命"))
+	fmt.Printf("StringWidthWithoutEscSequences(\"\\x1b[33mGhost 生命\\x1b[0m\"): %d\n", StringWidthWithoutEscSequences("\x1b[33mGhost 生命\x1b[0m"))
+
+	// Output: StringWidthWithoutEscSequences(""): 0
+	// StringWidthWithoutEscSequences("Ghost"): 5
+	// StringWidthWithoutEscSequences("Ghostツ"): 7
+	// StringWidthWithoutEscSequences("\x1b[33mGhost\x1b[0m"): 5
+	// StringWidthWithoutEscSequences("\x1b[33mGhost\x1b[0"): 5
+	// StringWidthWithoutEscSequences("Ghost 生命"): 10
+	// StringWidthWithoutEscSequences("\x1b[33mGhost 生命\x1b[0m"): 10
+}
+
+func TestStringWidthWithoutEscSequences(t *testing.T) {
+	assert.Equal(t, 0, StringWidthWithoutEscSequences(""))
+	assert.Equal(t, 5, StringWidthWithoutEscSequences("Ghost"))
+	assert.Equal(t, 7, StringWidthWithoutEscSequences("Ghostツ"))
+	assert.Equal(t, 5, StringWidthWithoutEscSequences("\x1b[33mGhost\x1b[0m"))
+	assert.Equal(t, 5, StringWidthWithoutEscSequences("\x1b[33mGhost\x1b[0"))
+	assert.Equal(t, 5, StringWidthWithoutEscSequences("\x1b]8;;http://example.com\x1b\\Ghost\x1b]8;;\x1b\\"))
+	assert.Equal(t, 10, StringWidthWithoutEscSequences("Ghost 生命"))
+	assert.Equal(t, 10, StringWidthWithoutEscSequences("\x1b[33mGhost 生命\x1b[0m"))
+}
+
 func ExampleTrim() {
 	fmt.Printf("Trim(\"Ghost\", 0): %#v\n", Trim("Ghost", 0))
 	fmt.Printf("Trim(\"Ghost\", 3): %#v\n", Trim("Ghost", 3))
@@ -305,4 +347,17 @@ func TestTrim(t *testing.T) {
 	assert.Equal(t, "\x1b[33mGho\x1b[0m", Trim("\x1b[33mGhost\x1b[0m", 3))
 	assert.Equal(t, "\x1b[33mGhost\x1b[0m", Trim("\x1b[33mGhost\x1b[0m", 6))
 	assert.Equal(t, "\x1b]8;;http://example.com\x1b\\Gho\x1b]8;;\x1b\\", Trim("\x1b]8;;http://example.com\x1b\\Ghost\x1b]8;;\x1b\\", 3))
+}
+
+func ExampleWiden() {
+	fmt.Printf("Widen(\"Ghost 生命\"): %#v\n", Widen("Ghost 生命"))
+	fmt.Printf("Widen(\"\\x1b[33mGhost 生命\\x1b[0m\"): %#v\n", Widen("\x1b[33mGhost 生命\x1b[0m"))
+
+	// Output: Widen("Ghost 生命"): "Ｇｈｏｓｔ\u3000生命"
+	// Widen("\x1b[33mGhost 生命\x1b[0m"): "\x1b[33mＧｈｏｓｔ\u3000生命\x1b[0m"
+}
+
+func TestWiden(t *testing.T) {
+	assert.Equal(t, "Ｇｈｏｓｔ　生命", Widen("Ghost 生命"))
+	assert.Equal(t, "\x1b[33mＧｈｏｓｔ　生命\x1b[0m", Widen("\x1b[33mGhost 生命\x1b[0m"))
 }
