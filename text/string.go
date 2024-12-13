@@ -207,18 +207,7 @@ func RuneWidth(r rune) int {
 //
 // deprecated: use StringWidthWithoutEscSequences instead
 func RuneWidthWithoutEscSequences(str string) int {
-	count, esp := 0, escSeqParser{}
-	for _, c := range str {
-		if esp.InSequence() {
-			esp.Consume(c)
-			continue
-		}
-		esp.Consume(c)
-		if !esp.InSequence() {
-			count += RuneWidth(c)
-		}
-	}
-	return count
+	return StringWidthWithoutEscSequences(str)
 }
 
 // Snip returns the given string with a fixed length. For ex.:
