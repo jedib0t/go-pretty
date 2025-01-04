@@ -25,8 +25,8 @@ type ColumnConfig struct {
 	// AutoMerge merges cells with similar values and prevents separators from
 	// being drawn. Caveats:
 	// * VAlign is applied on the individual cell and not on the merged cell
-	// * Does not work in CSV/HTML/Markdown render modes
 	// * Does not work well with horizontal auto-merge (RowConfig.AutoMerge)
+	// * Does not work in CSV/Markdown render modes
 	//
 	// Works best when:
 	// * Style().Options.SeparateRows == true

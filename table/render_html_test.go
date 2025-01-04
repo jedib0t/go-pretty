@@ -518,6 +518,44 @@ func TestTable_RenderHTML_Sorted(t *testing.T) {
 </table>`)
 }
 
+func TestTable_RenderHTML_ColAutoMerge(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"A", "B", "C"})
+		tw.AppendRow(Row{"Y", "Y", 1})
+		tw.AppendRow(Row{"Y", "N", 2})
+		tw.AppendRow(Row{"Y", "N", 3})
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Name: "A", AutoMerge: true},
+			{Name: "B", AutoMerge: true},
+		})
+		compareOutput(t, tw.RenderHTML(), `
+<table class="go-pretty-table">
+  <thead>
+  <tr>
+    <th>A</th>
+    <th>B</th>
+    <th align="right">C</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td rowspan=3>Y</td>
+    <td>Y</td>
+    <td align="right">1</td>
+  </tr>
+  <tr>
+    <td rowspan=2>N</td>
+    <td align="right">2</td>
+  </tr>
+  <tr>
+    <td align="right">3</td>
+  </tr>
+  </tbody>
+</table>`)
+	})
+}
+
 func TestTable_RenderHTML_RowAutoMerge(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		rcAutoMerge := RowConfig{AutoMerge: true}
@@ -544,6 +582,7 @@ func TestTable_RenderHTML_RowAutoMerge(t *testing.T) {
   </tbody>
 </table>`)
 	})
+
 	t.Run("merged and unmerged entries", func(t *testing.T) {
 		rcAutoMerge := RowConfig{AutoMerge: true}
 		tw := NewWriter()
