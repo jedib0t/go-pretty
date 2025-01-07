@@ -87,8 +87,8 @@ type RowConfig struct {
 	// being drawn. Caveats:
 	// * Align is overridden to text.AlignCenter on the merged cell (unless set
 	//   by AutoMergeAlign value below)
-	// * Does not work in CSV/HTML/Markdown render modes
 	// * Does not work well with vertical auto-merge (ColumnConfig.AutoMerge)
+	// * Does not work in CSV/Markdown render modes
 	AutoMerge bool
 
 	// Alignment to use on a merge (defaults to text.AlignCenter)
