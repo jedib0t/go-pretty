@@ -2,6 +2,7 @@ package table
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"unicode"
 
@@ -57,35 +58,99 @@ func (t *Table) extractMaxColumnLengths(rows []rowStr, hint renderHint) {
 }
 
 func (t *Table) extractMaxColumnLengthsFromRow(row rowStr, mci mergedColumnIndices) {
-	for colIdx, colStr := range row {
+	for colIdx := 0; colIdx < len(row); colIdx++ {
+		colStr := row[colIdx]
 		longestLineLen := text.LongestLineLen(colStr)
 		maxColWidth := t.getColumnWidthMax(colIdx)
 		if maxColWidth > 0 && maxColWidth < longestLineLen {
 			longestLineLen = maxColWidth
 		}
-		mergedColumnsLength := mci.mergedLength(colIdx, t.maxColumnLengths)
-		if longestLineLen > mergedColumnsLength {
-			if mergedColumnsLength > 0 {
-				t.extractMaxColumnLengthsFromRowForMergedColumns(colIdx, longestLineLen, mci)
-			} else {
-				t.maxColumnLengths[colIdx] = longestLineLen
+
+		if mergeEndIndex, ok := mci[colIdx]; ok {
+			startIndexMap := t.maxMergedColumnLengths[mergeEndIndex]
+			if startIndexMap == nil {
+				startIndexMap = make(map[int]int)
+				t.maxMergedColumnLengths[mergeEndIndex] = startIndexMap
 			}
-		} else if maxColWidth == 0 && longestLineLen > t.maxColumnLengths[colIdx] {
+			for index := colIdx + 1; index <= mergeEndIndex; index++ {
+				maxColWidth := t.getColumnWidthMax(index)
+				if maxColWidth > 0 && maxColWidth < longestLineLen {
+					longestLineLen = maxColWidth
+				}
+			}
+			if longestLineLen > startIndexMap[colIdx] {
+				startIndexMap[colIdx] = longestLineLen
+			}
+			colIdx = mergeEndIndex
+		} else if longestLineLen > t.maxColumnLengths[colIdx] {
 			t.maxColumnLengths[colIdx] = longestLineLen
 		}
 	}
 }
 
-func (t *Table) extractMaxColumnLengthsFromRowForMergedColumns(colIdx int, mergedColumnLength int, mci mergedColumnIndices) {
-	numMergedColumns := mci.len(colIdx)
-	mergedColumnLength -= (numMergedColumns - 1) * text.StringWidthWithoutEscSequences(t.style.Box.MiddleSeparator)
-	maxLengthSplitAcrossColumns := mergedColumnLength / numMergedColumns
-	if maxLengthSplitAcrossColumns > t.maxColumnLengths[colIdx] {
-		t.maxColumnLengths[colIdx] = maxLengthSplitAcrossColumns
-	}
-	for otherColIdx := range mci[colIdx] {
-		if maxLengthSplitAcrossColumns > t.maxColumnLengths[otherColIdx] {
-			t.maxColumnLengths[otherColIdx] = maxLengthSplitAcrossColumns
+// Try to rebalance the merged column lengths across all columns
+// We rebalance from the lowest end index to the highest,
+// and within that set from the highest start index to the lowest.
+// We distribute the length across the columns not already exceeding
+// the average.
+func (t *Table) rebalanceMaxMergedColumnLengths() {
+	endIndexKeys, startIndexKeysMap := getSortedKeys(t.maxMergedColumnLengths)
+	for _, endIndexKey := range endIndexKeys {
+		startIndexKeys := startIndexKeysMap[endIndexKey]
+		for idx := len(startIndexKeys) - 1; idx >= 0; idx-- {
+			startIndexKey := startIndexKeys[idx]
+			columnBalanceMap := map[int]struct{}{}
+			for index := startIndexKey; index <= endIndexKey; index++ {
+				columnBalanceMap[index] = struct{}{}
+			}
+			mergedColumnLength := t.maxMergedColumnLengths[endIndexKey][startIndexKey] - (len(columnBalanceMap)-1)*text.StringWidthWithoutEscSequences(t.style.Box.MiddleSeparator)
+
+			// keep reducing the set of columns until the remainder are the ones less than
+			// the average of the remaining length (total merged length - all lengths > average)
+			for {
+				// If mergedColumnLength is zero or less then we already exceed the merged length
+				if mergedColumnLength <= 0 {
+					columnBalanceMap = map[int]struct{}{}
+					break
+				}
+				numMergedColumns := len(columnBalanceMap)
+				maxLengthSplitAcrossColumns := mergedColumnLength / numMergedColumns
+				mapReduced := false
+				for mergedColumn := range columnBalanceMap {
+					maxColumnLength := t.maxColumnLengths[mergedColumn]
+					// If column is already greater then remove from the map and reduce the amount to rebalance
+					if maxColumnLength >= maxLengthSplitAcrossColumns {
+						mapReduced = true
+						mergedColumnLength -= maxColumnLength
+						delete(columnBalanceMap, mergedColumn)
+					}
+				}
+				if !mapReduced {
+					break
+				}
+			}
+			// Do we still have any columns to balance?
+			if len(columnBalanceMap) > 0 {
+				// remove the max column sizes from the remaining amount to balance, we then
+				// share out the remainder amongst the columns.
+				numRebalancedColumns := len(columnBalanceMap)
+				balanceColumns := make([]int, 0, numRebalancedColumns)
+				for balanceColumn := range columnBalanceMap {
+					mergedColumnLength -= t.maxColumnLengths[balanceColumn]
+					balanceColumns = append(balanceColumns, balanceColumn)
+				}
+				// pad out the columns one by one
+				sort.Ints(balanceColumns)
+				columnLengthRemaining := mergedColumnLength
+				columnsRemaining := numRebalancedColumns
+				for index := 0; index < numRebalancedColumns; index++ {
+					balancedSpace := columnLengthRemaining / columnsRemaining
+					balanceColumn := balanceColumns[index]
+					t.maxColumnLengths[balanceColumn] += balancedSpace
+					columnLengthRemaining -= balancedSpace
+					columnsRemaining--
+				}
+			}
 		}
 	}
 }
@@ -136,6 +201,7 @@ func (t *Table) initForRenderColumnConfigs() {
 
 func (t *Table) initForRenderColumnLengths() {
 	t.maxColumnLengths = make([]int, t.numColumns)
+	t.maxMergedColumnLengths = make(map[int]map[int]int)
 	t.extractMaxColumnLengths(t.rowsHeader, renderHint{isHeaderRow: true})
 	t.extractMaxColumnLengths(t.rows, renderHint{})
 	t.extractMaxColumnLengths(t.rowsFooter, renderHint{isFooterRow: true})
@@ -147,6 +213,7 @@ func (t *Table) initForRenderColumnLengths() {
 			t.maxColumnLengths[colIdx] = minWidth
 		}
 	}
+	t.rebalanceMaxMergedColumnLengths()
 }
 
 func (t *Table) initForRenderHideColumns() {
