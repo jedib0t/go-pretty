@@ -1,6 +1,7 @@
 package table
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -763,12 +764,11 @@ func TestTable_Render_AutoMergeLongColumns(t *testing.T) {
 └───┴──────────┴──────────┴──────────┴──────────┴───────────────────────────────────────────┘`)
 	})
 
-	t.Run("Rebalance long merged columns", func(t *testing.T) {
+	t.Run("long_merged_columns", func(t *testing.T) {
 		tw := NewWriter()
 		tw.AppendHeader(Row{"ID", "Date", "From", "To", "Subject", "Size"})
-
 		tw.AppendRow(Row{
-			4,
+			1,
 			"2024-11-18T09:30:54Z",
 			"Shaylee McDermott",
 			"",
@@ -776,7 +776,7 @@ func TestTable_Render_AutoMergeLongColumns(t *testing.T) {
 			"4.2 MB",
 		})
 		tw.AppendRow(Row{
-			4,
+			2,
 			"2024-11-18T09:30:54Z",
 			"Anahi Braun ",
 			"",
@@ -784,21 +784,18 @@ func TestTable_Render_AutoMergeLongColumns(t *testing.T) {
 			"4.2 MB",
 		})
 		tw.AppendRow(Row{
-			4,
+			3,
 			"2024-11-18T09:30:54Z",
 			"Brando Barton",
 			"",
 			"Before they sold out jean shorts chartreuse neutra fixie flexitarian goth art party small batch sriracha.",
 			"4.2 MB",
 		})
-		const ID = "AAMkADdiOWM1OTBkLTBhZjEtNGFiNS1hOGYwLTY2YWFmOGQyNTMxNgBGAAAAAADBju3TxrP2SZIsqjNb8hmoBwA9J0gY/4/nQ73Lmp9F9NoaAABlJ281AAA9J0gY/4/nQ73Lmp9F9NoaAABlJ6bLAAA="
+		longColumn := strings.Repeat("1234567890", 15)
 		tw.AppendRow(
-			Row{ID, ID, ID, ID, ID, ID},
-			RowConfig{
-				AutoMerge:      true,
-				AutoMergeAlign: text.AlignLeft,
-			})
-
+			Row{4, longColumn, longColumn, longColumn, longColumn, longColumn},
+			RowConfig{AutoMerge: true, AutoMergeAlign: text.AlignLeft},
+		)
 		tw.SetStyle(StyleLight)
 		tw.Style().Options.SeparateRows = true
 
@@ -806,14 +803,14 @@ func TestTable_Render_AutoMergeLongColumns(t *testing.T) {
 ┌────┬──────────────────────┬───────────────────┬────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬────────┐
 │ ID │ DATE                 │ FROM              │ TO │ SUBJECT                                                                                                                │ SIZE   │
 ├────┼──────────────────────┼───────────────────┼────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼────────┤
-│ 4  │ 2024-11-18T09:30:54Z │ Shaylee McDermott │    │ Tote bag photo booth lumbersexual normcore synth meh lumbersexual disrupt craft beer aesthetic.                        │ 4.2 MB │
+│  1 │ 2024-11-18T09:30:54Z │ Shaylee McDermott │    │ Tote bag photo booth lumbersexual normcore synth meh lumbersexual disrupt craft beer aesthetic.                        │ 4.2 MB │
 ├────┼──────────────────────┼───────────────────┼────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼────────┤
-│ 4  │ 2024-11-18T09:30:54Z │ Anahi Braun       │    │ Mumblecore salvia mumblecore austin tofu viral asymmetrical small batch distillery you probably haven't heard of them. │ 4.2 MB │
+│  2 │ 2024-11-18T09:30:54Z │ Anahi Braun       │    │ Mumblecore salvia mumblecore austin tofu viral asymmetrical small batch distillery you probably haven't heard of them. │ 4.2 MB │
 ├────┼──────────────────────┼───────────────────┼────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼────────┤
-│ 4  │ 2024-11-18T09:30:54Z │ Brando Barton     │    │ Before they sold out jean shorts chartreuse neutra fixie flexitarian goth art party small batch sriracha.              │ 4.2 MB │
-├────┴──────────────────────┴───────────────────┴────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴────────┤
-│ AAMkADdiOWM1OTBkLTBhZjEtNGFiNS1hOGYwLTY2YWFmOGQyNTMxNgBGAAAAAADBju3TxrP2SZIsqjNb8hmoBwA9J0gY/4/nQ73Lmp9F9NoaAABlJ281AAA9J0gY/4/nQ73Lmp9F9NoaAABlJ6bLAAA=                             │
-└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘`)
+│  3 │ 2024-11-18T09:30:54Z │ Brando Barton     │    │ Before they sold out jean shorts chartreuse neutra fixie flexitarian goth art party small batch sriracha.              │ 4.2 MB │
+├────┼──────────────────────┴───────────────────┴────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴────────┤
+│  4 │ 123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890                          │
+└────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘`)
 	})
 
 }
