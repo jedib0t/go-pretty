@@ -36,6 +36,7 @@ var (
 		text.FgCyan,
 		text.FgWhite,
 	}
+	rng       = rand.New(rand.NewSource(time.Now().UnixNano()))
 	timeStart = time.Now()
 )
 
@@ -74,9 +75,9 @@ func trackSomething(pw progress.Writer, idx int64, updateMessage bool) {
 	units := getUnits(idx)
 	message := getMessage(idx, units)
 	tracker := progress.Tracker{
-		DeferStart:         *flagRandomDefer && rand.Float64() < 0.5,
+		DeferStart:         *flagRandomDefer && rng.Float64() < 0.5,
 		Message:            message,
-		RemoveOnCompletion: *flagRandomRemove && rand.Float64() < 0.25,
+		RemoveOnCompletion: *flagRandomRemove && rng.Float64() < 0.25,
 		Total:              total,
 		Units:              *units,
 	}
