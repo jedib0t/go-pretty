@@ -2,6 +2,7 @@ package text
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,6 +23,24 @@ func TestColor_EnableAndDisable(t *testing.T) {
 
 	EnableColors()
 	assert.Equal(t, "\x1b[31mtest\x1b[0m", FgRed.Sprint("test"))
+}
+
+func TestColor_areColorsOnInTheEnv(t *testing.T) {
+	_ = os.Setenv("FORCE_COLOR", "0")
+	_ = os.Setenv("NO_COLOR", "0")
+	assert.True(t, areColorsOnInTheEnv())
+
+	_ = os.Setenv("FORCE_COLOR", "0")
+	_ = os.Setenv("NO_COLOR", "1")
+	assert.False(t, areColorsOnInTheEnv())
+
+	_ = os.Setenv("FORCE_COLOR", "1")
+	_ = os.Setenv("NO_COLOR", "0")
+	assert.True(t, areColorsOnInTheEnv())
+
+	_ = os.Setenv("FORCE_COLOR", "1")
+	_ = os.Setenv("NO_COLOR", "1")
+	assert.True(t, areColorsOnInTheEnv())
 }
 
 func ExampleColor_EscapeSeq() {
