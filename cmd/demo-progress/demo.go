@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/jedib0t/go-pretty/v6/progress"
@@ -144,6 +145,34 @@ func main() {
 	pw.Style().Visibility.TrackerOverall = !*flagHideOverallTracker
 	pw.Style().Visibility.Value = !*flagHideValue
 	pw.Style().Visibility.Pinned = *flagShowPinned
+
+	colors := []text.Colors{
+		{text.FgRed},
+		{text.FgGreen},
+		{text.FgYellow},
+		{text.FgBlue},
+		{text.FgMagenta},
+		{text.FgCyan},
+	}
+
+	pw.Style().CustomFuncs.TrackerDeterminate = func(value int64, total int64, maxLen int) string {
+		v := float64(value) / float64(total)
+		b := &strings.Builder{}
+		fmt.Fprintf(b, "[")
+		inner := maxLen - 2
+		for i := 0; i < inner; i++ {
+			delta := float64(i) / float64(inner)
+			colorIdx := delta * float64(len(colors))
+			color := colors[int(colorIdx)%len(colors)]
+			if delta < v {
+				fmt.Fprintf(b, "%s", color.Sprint("█"))
+			} else {
+				fmt.Fprintf(b, " ")
+			}
+		}
+		fmt.Fprintf(b, "]")
+		return b.String()
+	}
 
 	// call Render() in async mode; yes we don't have any trackers at the moment
 	go pw.Render()

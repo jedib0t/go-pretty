@@ -8,11 +8,12 @@ import (
 
 // Style declares how to render the Progress/Trackers.
 type Style struct {
-	Name       string          // name of the Style
-	Chars      StyleChars      // characters to use on the progress bar
-	Colors     StyleColors     // colors to use on the progress bar
-	Options    StyleOptions    // misc. options for the progress bar
-	Visibility StyleVisibility // show/hide components of the progress bar(s)
+	Name        string          // name of the Style
+	Chars       StyleChars      // characters to use on the progress bar
+	Colors      StyleColors     // colors to use on the progress bar
+	Options     StyleOptions    // misc. options for the progress bar
+	Visibility  StyleVisibility // show/hide components of the progress bar(s)
+	CustomFuncs StyleFunctions  // custom render functions for the progress bar
 }
 
 var (
@@ -214,4 +215,8 @@ var StyleVisibilityDefault = StyleVisibility{
 	Tracker:        true,
 	TrackerOverall: false,
 	Value:          true,
+}
+
+type StyleFunctions struct {
+	TrackerDeterminate func(value int64, total int64, maxLen int) string
 }
