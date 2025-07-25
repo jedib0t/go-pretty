@@ -2,6 +2,7 @@ package progress
 
 import (
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -54,6 +55,91 @@ func IndeterminateIndicatorMovingRightToLeft(indicator string, duration time.Dur
 // the progress bar back and forth.
 func IndeterminateIndicatorPacMan(duration time.Duration) IndeterminateIndicatorGenerator {
 	return timedIndeterminateIndicatorGenerator(indeterminateIndicatorPacMan(), duration)
+}
+
+// IndeterminateIndicatorColoredDominoes simulates a bunch of colored dominoes falling back and
+// forth.
+func IndeterminateIndicatorColoredDominoes(duration time.Duration, slashColor, backslashColor text.Color) IndeterminateIndicatorGenerator {
+	baseGen := IndeterminateIndicatorDominoes(duration)
+	return func(maxLen int) IndeterminateIndicator {
+		base := baseGen(maxLen)
+		colored := strings.Builder{}
+		for _, ch := range base.Text {
+			switch ch {
+			case '/':
+				colored.WriteString(text.Colors{slashColor}.Sprint(string(ch)))
+			case '\\':
+				colored.WriteString(text.Colors{backslashColor}.Sprint(string(ch)))
+			default:
+				colored.WriteRune(ch)
+			}
+		}
+		return IndeterminateIndicator{
+			Position: 0,
+			Text:     colored.String(),
+		}
+	}
+}
+
+// IndeterminateIndicatorPacManChomp simulates a Pac-Man character chomping through the progress
+// bar back and forth.
+func IndeterminateIndicatorPacManChomp(duration time.Duration) IndeterminateIndicatorGenerator {
+	return timedIndeterminateIndicatorGenerator(indeterminateIndicatorPacManChomp(), duration)
+}
+
+func indeterminateIndicatorPacManChomp() IndeterminateIndicatorGenerator {
+	var frame int64
+
+	return func(maxLen int) IndeterminateIndicator {
+		i := atomic.AddInt64(&frame, 1)
+		cycle := i / int64(maxLen-1)
+		pos := int(i % int64(maxLen-1))
+
+		leftToRight := cycle%2 == 0
+		if !leftToRight {
+			pos = (maxLen - 1) - pos
+		}
+
+		// Alternate between open and closed mouth
+		mouthOpen := (i/3)%2 == 0
+		pac := "c"
+		if !leftToRight {
+			pac = "ɔ"
+		}
+		if !mouthOpen {
+			pac = "●"
+		}
+
+		trail := make([]string, maxLen)
+		for j := 0; j < maxLen; j++ {
+			trail[j] = "·"
+		}
+
+		for j := 0; j < maxLen; j++ {
+			if (leftToRight && j < pos) || (!leftToRight && j > pos) {
+				trail[j] = " "
+			}
+		}
+
+		trail[pos] = pac
+
+		var line string
+		for j := 0; j < maxLen; j++ {
+			switch {
+			case j == pos:
+				line += text.Colors{text.FgHiYellow}.Sprint(trail[j])
+			case trail[j] == "·":
+				line += text.Colors{text.FgWhite}.Sprint(trail[j])
+			default:
+				line += trail[j]
+			}
+		}
+
+		return IndeterminateIndicator{
+			Position: 0,
+			Text:     line,
+		}
+	}
 }
 
 func indeterminateIndicatorDominoes() IndeterminateIndicatorGenerator {
