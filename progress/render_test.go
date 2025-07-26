@@ -985,3 +985,40 @@ func TestProgress_RenderSomeTrackers_WithCustomTrackerDeterminate(t *testing.T) 
 	}
 	showOutputOnFailure(t, out)
 }
+
+func TestProgress_RenderSomeTrackers_WithCustomTrackerIndeterminate(t *testing.T) {
+	renderOutput := outputWriter{}
+
+	pw := generateWriter()
+	pw.SetOutputWriter(&renderOutput)
+	pw.SetTrackerPosition(PositionRight)
+
+	pw.Style().Renderer.TrackerIndeterminate = func(maxLen int) string {
+		b := &strings.Builder{}
+		fmt.Fprintf(b, "[")
+		inner := maxLen - 2
+		for i := 0; i < inner; i++ {
+			if i == 0 {
+				fmt.Fprintf(b, "★")
+			} else {
+				fmt.Fprintf(b, "☆")
+			}
+		}
+		fmt.Fprintf(b, "]")
+		return b.String()
+	}
+
+	go trackSomethingIndeterminate(pw, &Tracker{Message: "Indeterminate Tracker", Total: 0, Units: UnitsDefault})
+	renderAndWait(pw, false)
+
+	expectedOutPatterns := []*regexp.Regexp{
+		regexp.MustCompile(`Indeterminate Tracker \.\.\. done! \[\d+ in [\d.]+ms]`),
+	}
+	out := renderOutput.String()
+	for _, expectedOutPattern := range expectedOutPatterns {
+		if !expectedOutPattern.MatchString(out) {
+			assert.Fail(t, "Failed to find a pattern in the Output.", expectedOutPattern.String())
+		}
+	}
+	showOutputOnFailure(t, out)
+}

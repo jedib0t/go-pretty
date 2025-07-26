@@ -223,4 +223,9 @@ type StyleRenderer struct {
 	// maxLen is the number of characters available for the progress bar.
 	// return the complete progress bar string. E.g. [===----]
 	TrackerDeterminate func(value int64, total int64, maxLen int) string
+
+	// TrackerIndeterminate will override how the indeterminate progress bar is rendered.
+	// maxLen is the number of characters available for the progress bar.
+	// return the complete progress bar string. E.g. [<#>----]
+	TrackerIndeterminate func(maxLen int) string
 }

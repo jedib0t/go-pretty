@@ -146,6 +146,10 @@ func (p *Progress) generateTrackerStrDeterminate(value int64, total int64, maxLe
 // generateTrackerStrIndeterminate generates the tracker string for the case where
 // the Total value is unknown, and the progress percentage cannot be calculated.
 func (p *Progress) generateTrackerStrIndeterminate(maxLen int) string {
+	if p.style.Renderer.TrackerIndeterminate != nil {
+		return p.style.Renderer.TrackerIndeterminate(maxLen)
+	}
+
 	indicator := p.style.Chars.Indeterminate(maxLen)
 
 	pUnfinished := ""
