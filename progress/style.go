@@ -13,6 +13,7 @@ type Style struct {
 	Colors     StyleColors     // colors to use on the progress bar
 	Options    StyleOptions    // misc. options for the progress bar
 	Visibility StyleVisibility // show/hide components of the progress bar(s)
+	Renderer   StyleRenderer   // custom render functions for the progress bar
 }
 
 var (
@@ -214,4 +215,17 @@ var StyleVisibilityDefault = StyleVisibility{
 	Tracker:        true,
 	TrackerOverall: false,
 	Value:          true,
+}
+
+type StyleRenderer struct {
+	// TrackerDeterminate will override how the progress bar is rendered.
+	// value is the current value of the tracker out of total.
+	// maxLen is the number of characters available for the progress bar.
+	// return the complete progress bar string. E.g. [===----]
+	TrackerDeterminate func(value int64, total int64, maxLen int) string
+
+	// TrackerIndeterminate will override how the indeterminate progress bar is rendered.
+	// maxLen is the number of characters available for the progress bar.
+	// return the complete progress bar string. E.g. [<#>----]
+	TrackerIndeterminate func(maxLen int) string
 }
