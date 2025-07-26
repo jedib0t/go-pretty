@@ -27,6 +27,7 @@ var (
 	flagRandomDefer        = flag.Bool("rnd-defer", false, "Introduce random deferred starts")
 	flagRandomRemove       = flag.Bool("rnd-remove", false, "Introduce random remove of trackers on completion")
 	flagRandomLogs         = flag.Bool("rnd-logs", false, "Output random logs in the middle of tracking")
+	flagCustomRender       = flag.Bool("custom-render", false, "Use custom render function with rainbow colors")
 
 	messageColors = []text.Color{
 		text.FgRed,
@@ -120,6 +121,50 @@ func trackSomething(pw progress.Writer, idx int64, updateMessage bool) {
 	}
 }
 
+// customTrackerRender creates a progress bar using rainbow colors
+func customTrackerRender(value int64, total int64, maxLen int) string {
+	if total == 0 {
+		// For indeterminate progress, use rotating rainbow colors
+		colors := []text.Color{
+			text.FgRed,
+			text.FgYellow,
+			text.FgGreen,
+			text.FgCyan,
+			text.FgBlue,
+			text.FgMagenta,
+		}
+		idx := int(time.Now().UnixNano()/100000000) % len(colors)
+		return colors[idx].Sprint(strings.Repeat("█", maxLen))
+	}
+
+	progress := float64(value) / float64(total)
+	completed := int(progress * float64(maxLen))
+
+	var result strings.Builder
+	for i := 0; i < maxLen; i++ {
+		if i < completed {
+			// Use rainbow colors based on position in the progress bar
+			colorIdx := (i * 6) / maxLen // Map position to 6 rainbow colors
+			colors := []text.Color{
+				text.FgRed,
+				text.FgYellow,
+				text.FgGreen,
+				text.FgCyan,
+				text.FgBlue,
+				text.FgMagenta,
+			}
+			if colorIdx >= len(colors) {
+				colorIdx = len(colors) - 1
+			}
+			result.WriteString(colors[colorIdx].Sprint("█"))
+		} else {
+			result.WriteString(text.FgHiBlack.Sprint("░"))
+		}
+	}
+
+	return result.String()
+}
+
 func main() {
 	flag.Parse()
 	fmt.Printf("Tracking Progress of %d trackers ...\n\n", *flagNumTrackers)
@@ -146,32 +191,10 @@ func main() {
 	pw.Style().Visibility.Value = !*flagHideValue
 	pw.Style().Visibility.Pinned = *flagShowPinned
 
-	colors := []text.Colors{
-		{text.FgRed},
-		{text.FgGreen},
-		{text.FgYellow},
-		{text.FgBlue},
-		{text.FgMagenta},
-		{text.FgCyan},
-	}
-
-	pw.Style().CustomFuncs.TrackerDeterminate = func(value int64, total int64, maxLen int) string {
-		v := float64(value) / float64(total)
-		b := &strings.Builder{}
-		fmt.Fprintf(b, "[")
-		inner := maxLen - 2
-		for i := 0; i < inner; i++ {
-			delta := float64(i) / float64(inner)
-			colorIdx := delta * float64(len(colors))
-			color := colors[int(colorIdx)%len(colors)]
-			if delta < v {
-				fmt.Fprintf(b, "%s", color.Sprint("█"))
-			} else {
-				fmt.Fprintf(b, " ")
-			}
-		}
-		fmt.Fprintf(b, "]")
-		return b.String()
+	// set up custom render function if flag is enabled
+	if *flagCustomRender {
+		pw.Style().Renderer.TrackerDeterminate = customTrackerRender
+		fmt.Println("Using custom render function with rainbow colors!")
 	}
 
 	// call Render() in async mode; yes we don't have any trackers at the moment

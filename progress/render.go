@@ -107,8 +107,8 @@ func (p *Progress) generateTrackerStr(t *Tracker, maxLen int, hint renderHint) s
 // generateTrackerStrDeterminate generates the tracker string for the case where
 // the Total value is known, and the progress percentage can be calculated.
 func (p *Progress) generateTrackerStrDeterminate(value int64, total int64, maxLen int) string {
-	if p.style.CustomFuncs.TrackerDeterminate != nil {
-		return p.style.CustomFuncs.TrackerDeterminate(value, total, maxLen)
+	if p.style.Renderer.TrackerDeterminate != nil {
+		return p.style.Renderer.TrackerDeterminate(value, total, maxLen)
 	}
 
 	pFinishedDots, pFinishedDotsFraction := 0.0, 0.0
@@ -137,7 +137,7 @@ func (p *Progress) generateTrackerStrDeterminate(value int64, total int64, maxLe
 	if pFinishedStrLen < maxLen {
 		pUnfinished = strings.Repeat(p.style.Chars.Unfinished, maxLen-pFinishedStrLen)
 	}
-	
+
 	return p.style.Colors.Tracker.Sprintf("%s%s%s%s%s",
 		p.style.Chars.BoxLeft, pFinished, pInProgress, pUnfinished, p.style.Chars.BoxRight,
 	)
