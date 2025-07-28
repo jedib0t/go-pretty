@@ -13,6 +13,7 @@ import (
 
 var (
 	flagAutoStop           = flag.Bool("auto-stop", false, "Auto-stop rendering?")
+	flagCustomRenderer     = flag.Bool("custom-renderer", false, "Use custom render functions with rainbow colors")
 	flagHideETA            = flag.Bool("hide-eta", false, "Hide the ETA?")
 	flagHideETAOverall     = flag.Bool("hide-eta-overall", false, "Hide the ETA in the overall tracker?")
 	flagHideOverallTracker = flag.Bool("hide-overall", false, "Hide the Overall Tracker?")
@@ -27,7 +28,6 @@ var (
 	flagRandomDefer        = flag.Bool("rnd-defer", false, "Introduce random deferred starts")
 	flagRandomRemove       = flag.Bool("rnd-remove", false, "Introduce random remove of trackers on completion")
 	flagRandomLogs         = flag.Bool("rnd-logs", false, "Output random logs in the middle of tracking")
-	flagCustomRender       = flag.Bool("custom-render", false, "Use custom render functions with rainbow colors")
 
 	messageColors = []text.Color{
 		text.FgRed,
@@ -193,10 +193,9 @@ func main() {
 	pw.Style().Visibility.Pinned = *flagShowPinned
 
 	// set up custom render functions if flag is enabled
-	if *flagCustomRender {
+	if *flagCustomRenderer {
 		pw.Style().Renderer.TrackerDeterminate = customTrackerRender
 		pw.Style().Renderer.TrackerIndeterminate = customTrackerIndeterminateRender
-		fmt.Println("Using custom render functions with rainbow colors!")
 	}
 
 	// call Render() in async mode; yes we don't have any trackers at the moment
