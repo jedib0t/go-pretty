@@ -42,6 +42,51 @@ var (
 	timeStart = time.Now()
 )
 
+// customTrackerDeterminateRenderer creates a progress bar using rainbow colors for determinate progress
+func customTrackerDeterminateRenderer(value int64, total int64, maxLen int) string {
+	progress := float64(value) / float64(total)
+	completed := int(progress * float64(maxLen))
+
+	var result strings.Builder
+	for i := 0; i < maxLen; i++ {
+		if i < completed {
+			// Use rainbow colors based on position in the progress bar
+			colorIdx := (i * 6) / maxLen // Map position to 6 rainbow colors
+			colors := []text.Color{
+				text.FgRed,
+				text.FgYellow,
+				text.FgGreen,
+				text.FgCyan,
+				text.FgBlue,
+				text.FgMagenta,
+			}
+			if colorIdx >= len(colors) {
+				colorIdx = len(colors) - 1
+			}
+			result.WriteString(colors[colorIdx].Sprint("█"))
+		} else {
+			result.WriteString(text.FgHiBlack.Sprint("░"))
+		}
+	}
+
+	return result.String()
+}
+
+// customTrackerIndeterminateRenderer creates a progress bar using rotating rainbow colors for indeterminate progress
+func customTrackerIndeterminateRenderer(maxLen int) string {
+	// For indeterminate progress, use rotating rainbow colors
+	colors := []text.Color{
+		text.FgRed,
+		text.FgYellow,
+		text.FgGreen,
+		text.FgCyan,
+		text.FgBlue,
+		text.FgMagenta,
+	}
+	idx := int(time.Now().UnixNano()/100000000) % len(colors)
+	return colors[idx].Sprint(strings.Repeat("█", maxLen))
+}
+
 func getMessage(idx int64, units *progress.Units) string {
 	var message string
 	switch units {
@@ -121,51 +166,6 @@ func trackSomething(pw progress.Writer, idx int64, updateMessage bool) {
 	}
 }
 
-// customTrackerRender creates a progress bar using rainbow colors for determinate progress
-func customTrackerRender(value int64, total int64, maxLen int) string {
-	progress := float64(value) / float64(total)
-	completed := int(progress * float64(maxLen))
-
-	var result strings.Builder
-	for i := 0; i < maxLen; i++ {
-		if i < completed {
-			// Use rainbow colors based on position in the progress bar
-			colorIdx := (i * 6) / maxLen // Map position to 6 rainbow colors
-			colors := []text.Color{
-				text.FgRed,
-				text.FgYellow,
-				text.FgGreen,
-				text.FgCyan,
-				text.FgBlue,
-				text.FgMagenta,
-			}
-			if colorIdx >= len(colors) {
-				colorIdx = len(colors) - 1
-			}
-			result.WriteString(colors[colorIdx].Sprint("█"))
-		} else {
-			result.WriteString(text.FgHiBlack.Sprint("░"))
-		}
-	}
-
-	return result.String()
-}
-
-// customTrackerIndeterminateRender creates a progress bar using rotating rainbow colors for indeterminate progress
-func customTrackerIndeterminateRender(maxLen int) string {
-	// For indeterminate progress, use rotating rainbow colors
-	colors := []text.Color{
-		text.FgRed,
-		text.FgYellow,
-		text.FgGreen,
-		text.FgCyan,
-		text.FgBlue,
-		text.FgMagenta,
-	}
-	idx := int(time.Now().UnixNano()/100000000) % len(colors)
-	return colors[idx].Sprint(strings.Repeat("█", maxLen))
-}
-
 func main() {
 	flag.Parse()
 	fmt.Printf("Tracking Progress of %d trackers ...\n\n", *flagNumTrackers)
@@ -194,8 +194,8 @@ func main() {
 
 	// set up custom render functions if flag is enabled
 	if *flagCustomRenderer {
-		pw.Style().Renderer.TrackerDeterminate = customTrackerRender
-		pw.Style().Renderer.TrackerIndeterminate = customTrackerIndeterminateRender
+		pw.Style().Renderer.TrackerDeterminate = customTrackerDeterminateRenderer
+		pw.Style().Renderer.TrackerIndeterminate = customTrackerIndeterminateRenderer
 	}
 
 	// call Render() in async mode; yes we don't have any trackers at the moment
