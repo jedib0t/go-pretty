@@ -70,8 +70,6 @@ func IndeterminateIndicatorColoredDominoes(duration time.Duration, slashColor, b
 				colored.WriteString(text.Colors{slashColor}.Sprint(string(ch)))
 			case '\\':
 				colored.WriteString(text.Colors{backslashColor}.Sprint(string(ch)))
-			default:
-				colored.WriteRune(ch)
 			}
 		}
 		return IndeterminateIndicator{
