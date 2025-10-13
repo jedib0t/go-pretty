@@ -346,14 +346,13 @@ func (p *Progress) initForRender() {
 	// if not output write has been set, output to STDOUT
 	if p.outputWriter == nil {
 		p.outputWriter = os.Stdout
-		// pick a sane update frequency if none set
-		if p.updateFrequency <= 0 {
-			p.updateFrequency = DefaultUpdateFrequency
-		}
-
 		// get the current terminal size for preventing roll-overs, and do this in a
 		// background loop until end of render
 		go p.watchTerminalSize() // needs p.updateFrequency
+	}
+	// pick a sane update frequency if none set
+	if p.updateFrequency <= 0 {
+		p.updateFrequency = DefaultUpdateFrequency
 	}
 
 }
