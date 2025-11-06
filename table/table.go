@@ -307,12 +307,12 @@ func (t *Table) SetRowPainter(painter interface{}) {
 	t.rowPainterWithAttributes = nil
 
 	// if called as SetRowPainter(RowPainter(func...))
-	switch painter.(type) {
+	switch p := painter.(type) {
 	case RowPainter:
-		t.rowPainter = painter.(RowPainter)
+		t.rowPainter = p
 		return
 	case RowPainterWithAttributes:
-		t.rowPainterWithAttributes = painter.(RowPainterWithAttributes)
+		t.rowPainterWithAttributes = p
 		return
 	}
 
