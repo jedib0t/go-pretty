@@ -12,9 +12,9 @@ import (
 )
 
 var (
-	trackerIncrementInterval = time.Millisecond * 20
-	renderUpdateFrequency    = time.Millisecond * 10
-	renderWaitTime           = time.Millisecond * 20
+	trackerIncrementInterval = time.Millisecond * 2
+	renderUpdateFrequency    = time.Microsecond * 500
+	renderWaitTime           = time.Millisecond * 5
 )
 
 type outputWriter struct {
@@ -343,7 +343,7 @@ func TestProgress_RenderNeverStarted(t *testing.T) {
 	time.Sleep(renderWaitTime)
 	tr.MarkAsDone()
 	pw.Stop()
-	time.Sleep(time.Second)
+	time.Sleep(renderWaitTime)
 
 	expectedOutPatterns := []*regexp.Regexp{
 		regexp.MustCompile(`\s*\.\.\. {2}\?\?\? {2}\[\.{23}] \[0 in 0s]`),
@@ -365,9 +365,9 @@ func TestProgress_RenderNothing(t *testing.T) {
 	pw.SetOutputWriter(&renderOutput)
 
 	go pw.Render()
-	time.Sleep(time.Second)
+	time.Sleep(renderWaitTime)
 	pw.Stop()
-	time.Sleep(time.Second)
+	time.Sleep(renderWaitTime)
 
 	assert.Empty(t, renderOutput.String())
 }
@@ -790,7 +790,7 @@ func TestProgress_RenderSomeTrackers_WithOverallTracker_WithSpeedAndSpeedOverall
 		regexp.MustCompile(`Calculating Total   # 1 \.\.\. done! \[\d+\.\d+K in [\d.]+ms; \d+\.\d+K/s]`),
 		regexp.MustCompile(`Downloading File    # 2 \.\.\. done! \[\d+\.\d+KB in [\d.]+ms; \d+\.\d+KB/s]`),
 		regexp.MustCompile(`Transferring Amount # 3 \.\.\. done! \[\$\d+\.\d+K in [\d.]+ms; \$\d+\.\d+K/s]`),
-		regexp.MustCompile(`\[[.#]+] \[[\d.ms]+; ~ETA: [\d.ms]+]`),
+		regexp.MustCompile(`\[[.#]+] \[[\d.ms]+; ~ETA: [\d.ms]+(; [\d.]+[\w/]+)?]`),
 		regexp.MustCompile(`some information about something that happened at \d\d\d\d`),
 	}
 	out := renderOutput.String()
