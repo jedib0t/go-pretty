@@ -8,7 +8,7 @@ import (
 )
 
 func TestTracker_ETA(t *testing.T) {
-	timeDelayUnit := time.Millisecond
+	timeDelayUnit := time.Microsecond * 100
 	timeDelay := timeDelayUnit * 25
 
 	tracker := Tracker{}
