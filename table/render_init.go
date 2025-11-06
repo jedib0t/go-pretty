@@ -23,7 +23,7 @@ func (t *Table) analyzeAndStringify(row Row, hint renderHint) rowStr {
 	}
 
 	// convert each column to string and figure out if it has non-numeric data
-	rowOut := make(rowStr, len(row), len(row))
+	rowOut := make(rowStr, len(row))
 	for colIdx, col := range row {
 		// if the column is not a number, keep track of it
 		if !hint.isHeaderRow && !hint.isFooterRow && !t.columnIsNonNumeric[colIdx] && !isNumber(col) {

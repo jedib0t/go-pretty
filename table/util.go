@@ -30,6 +30,8 @@ func widthEnforcerNone(col string, _ int) string {
 
 // convertValueToString converts a value to string using fast type assertions
 // for common numeric types before falling back to fmt.Sprint.
+//
+//gocyclo:ignore
 func convertValueToString(v interface{}) string {
 	switch val := v.(type) {
 	case int:
@@ -61,6 +63,8 @@ func convertValueToString(v interface{}) string {
 			return "true"
 		}
 		return "false"
+	case string:
+		return val
 	default:
 		return fmt.Sprint(v)
 	}
