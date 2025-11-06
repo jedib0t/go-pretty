@@ -353,9 +353,11 @@ func (p *Progress) initForRender() {
 		p.updateFrequency = DefaultUpdateFrequency
 	}
 
-	// get the current terminal size for preventing roll-overs, and do this in a
-	// background loop until end of render
-	go p.watchTerminalSize() // needs p.updateFrequency
+	if p.outputWriter == os.Stdout {
+		// get the current terminal size for preventing roll-overs, and do this in a
+		// background loop until end of render. This only works if the output writer is STDOUT.
+		go p.watchTerminalSize() // needs p.updateFrequency
+	}
 }
 
 func (p *Progress) updateTerminalSize() {
