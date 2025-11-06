@@ -23,7 +23,7 @@ func (t *Table) analyzeAndStringify(row Row, hint renderHint) rowStr {
 	}
 
 	// convert each column to string and figure out if it has non-numeric data
-	rowOut := make(rowStr, len(row))
+	rowOut := make(rowStr, len(row), len(row))
 	for colIdx, col := range row {
 		// if the column is not a number, keep track of it
 		if !hint.isHeaderRow && !hint.isFooterRow && !t.columnIsNonNumeric[colIdx] && !isNumber(col) {
@@ -43,11 +43,15 @@ func (t *Table) analyzeAndStringifyColumn(colIdx int, col interface{}, hint rend
 	} else if colStrVal, ok := col.(string); ok {
 		colStr = colStrVal
 	} else {
-		colStr = fmt.Sprint(col)
+		colStr = convertValueToString(col)
 	}
 	colStr = strings.ReplaceAll(colStr, "\t", "    ")
 	colStr = text.ProcessCRLF(colStr)
-	return fmt.Sprintf("%s%s", t.style.Format.Direction.Modifier(), colStr)
+	// Avoid fmt.Sprintf when direction modifier is empty (most common case)
+	if t.directionModifier == "" {
+		return colStr
+	}
+	return t.directionModifier + colStr
 }
 
 func (t *Table) extractMaxColumnLengths(rows []rowStr, hint renderHint) {
@@ -155,6 +159,9 @@ func (t *Table) initForRender() {
 
 	// reset rendering state
 	t.reset()
+
+	// cache the direction modifier to avoid repeated calls
+	t.directionModifier = t.style.Format.Direction.Modifier()
 
 	// initialize the column configs and normalize them
 	t.initForRenderColumnConfigs()

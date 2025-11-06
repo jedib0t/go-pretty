@@ -28,6 +28,8 @@ type Table struct {
 	// columnConfigMap stores the custom-configuration by column
 	// number and is generated before rendering
 	columnConfigMap map[int]ColumnConfig
+	// directionModifier caches the direction modifier string to avoid repeated calls
+	directionModifier string
 	// firstRowOfPage tells if the renderer is on the first row of a page?
 	firstRowOfPage bool
 	// htmlCSSClass stores the HTML CSS Class to use on the <table> node
