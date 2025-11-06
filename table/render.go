@@ -68,14 +68,62 @@ func (t *Table) renderColumn(out *strings.Builder, row rowStr, colIdx int, maxCo
 
 	// extract the text, convert-case if not-empty and align horizontally
 	mergeVertically := t.shouldMergeCellsVerticallyAbove(colIdx, hint)
+	colStr := t.renderColumnExtractText(row, colIdx, mergeVertically, hint)
+	align := t.getAlign(colIdx, hint)
+
+	// if horizontal cell merges are enabled, look ahead and see how many cells
+	// have the same content and merge them all until a cell with a different
+	// content is found; override alignment to Center in this case
+	numColumnsRendered, maxColumnLength, align = t.renderColumnApplyAutoMerge(
+		colIdx, maxColumnLength, align, hint, numColumnsRendered)
+
+	colStr = align.Apply(colStr, maxColumnLength)
+
+	// pad both sides of the column
+	if !hint.isSeparatorRow || (hint.isSeparatorRow && mergeVertically) {
+		colStr = t.style.Box.PaddingLeft + colStr + t.style.Box.PaddingRight
+	}
+
+	t.renderColumnColorized(out, colIdx, colStr, hint)
+
+	return colIdx + numColumnsRendered
+}
+
+func (t *Table) renderColumnExtractText(row rowStr, colIdx int, mergeVertically bool, hint renderHint) string {
 	var colStr string
 	if mergeVertically {
 		// leave colStr empty; align will expand the column as necessary
+		// However, if we're rendering a wrapped row and this line number exceeds
+		// what the previous row had after wrapping, don't show empty padding for
+		// the merged cell - show the current row's content instead
+		if hint.rowLineNumber > 0 {
+			rowPrev := t.getRow(hint.rowNumber-2, hint)
+			if colIdx < len(rowPrev) {
+				prevColStr := rowPrev[colIdx]
+				widthEnforcer := t.columnConfigMap[colIdx].getWidthMaxEnforcer()
+				maxWidth := t.getColumnWidthMax(colIdx)
+				if maxWidth == 0 {
+					maxWidth = t.maxColumnLengths[colIdx]
+				}
+				prevColWrapped := widthEnforcer(prevColStr, maxWidth)
+				prevColNumLines := strings.Count(prevColWrapped, "\n") + 1
+				// If we're beyond the previous row's line count, show current row's content
+				if hint.rowLineNumber > prevColNumLines {
+					mergeVertically = false
+					if colIdx < len(row) {
+						colStr = t.getFormat(hint).Apply(row[colIdx])
+					}
+				}
+			}
+		}
+		// if mergeVertically is still true, leave colStr empty; align will expand the column as necessary
 	} else if colIdx < len(row) {
 		colStr = t.getFormat(hint).Apply(row[colIdx])
 	}
-	align := t.getAlign(colIdx, hint)
+	return colStr
+}
 
+func (t *Table) renderColumnApplyAutoMerge(colIdx int, maxColumnLength int, align text.Align, hint renderHint, numColumnsRendered int) (int, int, text.Align) {
 	// if horizontal cell merges are enabled, look ahead and see how many cells
 	// have the same content and merge them all until a cell with a different
 	// content is found; override alignment to Center in this case
@@ -93,16 +141,7 @@ func (t *Table) renderColumn(out *strings.Builder, row rowStr, colIdx int, maxCo
 			numColumnsRendered++
 		}
 	}
-	colStr = align.Apply(colStr, maxColumnLength)
-
-	// pad both sides of the column
-	if !hint.isSeparatorRow || (hint.isSeparatorRow && mergeVertically) {
-		colStr = t.style.Box.PaddingLeft + colStr + t.style.Box.PaddingRight
-	}
-
-	t.renderColumnColorized(out, colIdx, colStr, hint)
-
-	return colIdx + numColumnsRendered
+	return numColumnsRendered, maxColumnLength, align
 }
 
 func (t *Table) renderColumnAutoIndex(out *strings.Builder, hint renderHint) {
@@ -270,6 +309,10 @@ func (t *Table) renderRow(out *strings.Builder, row rowStr, hint renderHint) {
 		// this row
 		colMaxLines, rowWrapped := t.wrapRow(row)
 
+		// If this row has columns that are vertically merged with the previous row,
+		// adjust colMaxLines to avoid unnecessary empty lines in merged cells.
+		colMaxLines = t.renderRowAdjustMaxLines(rowWrapped, colMaxLines, hint)
+
 		// if there is just 1 line in all columns, add the row as such; else
 		// split each column into individual lines and render them one-by-one
 		if colMaxLines == 1 {
@@ -292,6 +335,81 @@ func (t *Table) renderRow(out *strings.Builder, row rowStr, hint renderHint) {
 			}
 		}
 	}
+}
+
+func (t *Table) renderRowAdjustMaxLines(rowWrapped rowStr, colMaxLines int, hint renderHint) int {
+	// If this row has columns that are vertically merged with the previous row,
+	// adjust colMaxLines to avoid unnecessary empty lines in merged cells.
+	// The issue: if colMaxLines is determined by a merged column, and the previous
+	// row already displayed that many lines, we should use the max of non-merged
+	// columns instead to avoid creating extra empty lines.
+	if hint.rowNumber > 1 && colMaxLines > 1 {
+		testHint := hint
+		testHint.rowLineNumber = 1
+
+		// Find the maximum line count among non-merged columns
+		maxNonMergedLines := t.renderRowAdjustMaxLinesFindMaxNonMerged(rowWrapped, testHint)
+		colMaxLinesFromMerged := t.renderRowAdjustMaxLinesCheckMergedContributor(
+			rowWrapped, colMaxLines, hint, testHint)
+
+		// If colMaxLines comes from a merged column that was already fully displayed,
+		// use the max of non-merged columns instead
+		if colMaxLinesFromMerged && maxNonMergedLines < colMaxLines {
+			return maxNonMergedLines
+		}
+	}
+	return colMaxLines
+}
+
+func (t *Table) renderRowAdjustMaxLinesCheckMergedContributor(rowWrapped rowStr, colMaxLines int, hint renderHint, testHint renderHint) bool {
+	for colIdx := 0; colIdx < len(rowWrapped) && colIdx < t.numColumns; colIdx++ {
+		wrappedColStr := rowWrapped[colIdx]
+		colNumLines := strings.Count(wrappedColStr, "\n") + 1
+
+		if colNumLines == colMaxLines {
+			// This column contributes to colMaxLines
+			if t.columnConfigMap[colIdx].AutoMerge && t.shouldMergeCellsVerticallyAbove(colIdx, testHint) {
+				// Check if previous row already had this many lines
+				if t.renderRowAdjustMaxLinesIsMergedColumnFullyDisplayed(colIdx, colMaxLines, hint) {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func (t *Table) renderRowAdjustMaxLinesFindMaxNonMerged(rowWrapped rowStr, testHint renderHint) int {
+	maxNonMergedLines := 1
+	for colIdx := 0; colIdx < len(rowWrapped) && colIdx < t.numColumns; colIdx++ {
+		if !t.columnConfigMap[colIdx].AutoMerge || !t.shouldMergeCellsVerticallyAbove(colIdx, testHint) {
+			wrappedColStr := rowWrapped[colIdx]
+			colNumLines := strings.Count(wrappedColStr, "\n") + 1
+			if colNumLines > maxNonMergedLines {
+				maxNonMergedLines = colNumLines
+			}
+		}
+	}
+	return maxNonMergedLines
+}
+
+func (t *Table) renderRowAdjustMaxLinesIsMergedColumnFullyDisplayed(colIdx int, colMaxLines int, hint renderHint) bool {
+	rowPrev := t.getRow(hint.rowNumber-2, hint)
+	if colIdx >= len(rowPrev) {
+		return false
+	}
+
+	prevColStr := rowPrev[colIdx]
+	widthEnforcer := t.columnConfigMap[colIdx].getWidthMaxEnforcer()
+	maxWidth := t.getColumnWidthMax(colIdx)
+	if maxWidth == 0 {
+		maxWidth = t.maxColumnLengths[colIdx]
+	}
+	prevColWrapped := widthEnforcer(prevColStr, maxWidth)
+	prevColNumLines := strings.Count(prevColWrapped, "\n") + 1
+	// If previous row already had this many lines, the merged column
+	// won't add new lines, so we should use max of non-merged columns
+	return prevColNumLines >= colMaxLines
 }
 
 func (t *Table) renderRowSeparator(out *strings.Builder, hint renderHint) {

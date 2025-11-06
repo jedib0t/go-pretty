@@ -853,7 +853,30 @@ func (t *Table) shouldMergeCellsVerticallyAbove(colIdx int, hint renderHint) boo
 			rowPrev := t.getRow(hint.rowNumber-2, hint)
 			rowCurr := t.getRow(hint.rowNumber-1, hint)
 			if colIdx < len(rowPrev) && colIdx < len(rowCurr) {
-				return rowPrev[colIdx] == rowCurr[colIdx]
+				// Check if the values match (for vertical merge)
+				if rowPrev[colIdx] != rowCurr[colIdx] {
+					return false
+				}
+				// If we're rendering a wrapped row (rowLineNumber > 0), check if the
+				// previous row actually has content at this line number after wrapping.
+				// If the previous row has fewer wrapped lines than the current line number,
+				// we shouldn't merge (to avoid unnecessary whitespace).
+				if hint.rowLineNumber > 0 {
+					// Wrap the previous row's column to see how many lines it has
+					prevColStr := rowPrev[colIdx]
+					widthEnforcer := t.columnConfigMap[colIdx].getWidthMaxEnforcer()
+					maxWidth := t.getColumnWidthMax(colIdx)
+					if maxWidth == 0 {
+						maxWidth = t.maxColumnLengths[colIdx]
+					}
+					prevColWrapped := widthEnforcer(prevColStr, maxWidth)
+					prevColNumLines := strings.Count(prevColWrapped, "\n") + 1
+					// Only merge if the previous row has content at this line number
+					if hint.rowLineNumber > prevColNumLines {
+						return false
+					}
+				}
+				return true
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 /.idea/
 /demo*
 /profile/
-coverage.*
+coverage*.*
 .coverprofile
 *.swp
