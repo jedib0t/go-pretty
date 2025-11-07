@@ -144,6 +144,16 @@ func TestNewJSONTransformer(t *testing.T) {
     ]
 }`
 	assert.Equal(t, expectedOutput, transformer(input))
+
+	// Test error case: object that cannot be marshaled (channel) - triggers error path in json.MarshalIndent
+	ch := make(chan int)
+	result := transformer(ch)
+	assert.Contains(t, result, "chan int")
+
+	// Test error case: function that cannot be marshaled - triggers error path in json.MarshalIndent
+	fn := func() {}
+	result = transformer(fn)
+	assert.Contains(t, result, "func()")
 }
 
 func TestNewTimeTransformer(t *testing.T) {
@@ -180,6 +190,15 @@ func TestNewTimeTransformer(t *testing.T) {
 	for _, possibleTimeLayout := range possibleTimeLayouts {
 		assert.Equal(t, expected, transformer(inTime.Format(possibleTimeLayout)), possibleTimeLayout)
 	}
+
+	// Test case where string doesn't match any time layout (returns original string)
+	transformer = NewTimeTransformer(time.RFC3339, nil)
+	nonTimeString := "not a time string"
+	assert.Equal(t, nonTimeString, transformer(nonTimeString))
+
+	// Test with nil location
+	transformer = NewTimeTransformer(time.RFC3339, nil)
+	assert.Equal(t, "2010-11-12T13:14:15-07:00", transformer(inTime))
 }
 
 func TestNewUnixTimeTransformer(t *testing.T) {
