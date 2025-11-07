@@ -49,9 +49,9 @@ func main() {
 	numRenders := 5
 	if len(os.Args) > 1 {
 		var err error
-		numRenders, err = strconv.Atoi(os.Args[2])
+		numRenders, err = strconv.Atoi(os.Args[1])
 		if err != nil {
-			fmt.Printf("Invalid Argument: '%s'\n", os.Args[2])
+			fmt.Printf("Invalid Argument: '%s'\n", os.Args[1])
 			os.Exit(1)
 		}
 	}

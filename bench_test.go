@@ -43,20 +43,22 @@ func BenchmarkProgress_Render(b *testing.B) {
 	trackSomething := func(pw progress.Writer, tracker *progress.Tracker) {
 		tracker.Reset()
 		pw.AppendTracker(tracker)
-		time.Sleep(time.Millisecond * 100)
-		tracker.Increment(tracker.Total / 2)
-		time.Sleep(time.Millisecond * 100)
-		tracker.Increment(tracker.Total / 2)
+		parts := 4
+		for i := 0; i < parts; i++ {
+			tracker.Increment(tracker.Total / int64(parts))
+		}
 	}
 
 	for i := 0; i < b.N; i++ {
 		pw := progress.NewWriter()
 		pw.SetAutoStop(true)
 		pw.SetOutputWriter(io.Discard)
+		// Set very short update frequency for faster benchmark execution
+		pw.SetUpdateFrequency(time.Millisecond)
 		go trackSomething(pw, &tracker1)
 		go trackSomething(pw, &tracker2)
 		go trackSomething(pw, &tracker3)
-		time.Sleep(time.Millisecond * 50)
+		// Render once to test rendering performance
 		pw.Render()
 	}
 }
