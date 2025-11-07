@@ -3,4 +3,5 @@
 /profile/
 coverage.*
 .coverprofile
+*.pprof
 *.swp

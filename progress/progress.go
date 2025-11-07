@@ -387,4 +387,5 @@ type renderHint struct {
 	hideTime         bool // hide the time
 	hideValue        bool // hide the value
 	isOverallTracker bool // is the Overall Progress tracker
+	terminalWidth    int  // cached terminal width for this render cycle
 }

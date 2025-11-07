@@ -45,14 +45,22 @@ func (p *Progress) beginRender() bool {
 }
 
 func (p *Progress) consumeQueuedTrackers() {
-	if p.LengthInQueue() > 0 {
-		p.trackersActiveMutex.Lock()
-		p.trackersInQueueMutex.Lock()
-		p.trackersActive = append(p.trackersActive, p.trackersInQueue...)
-		p.trackersInQueue = make([]*Tracker, 0)
+	p.trackersInQueueMutex.Lock()
+	queueLen := len(p.trackersInQueue)
+	if queueLen == 0 {
 		p.trackersInQueueMutex.Unlock()
-		p.trackersActiveMutex.Unlock()
+		return
 	}
+	// copy the slice to avoid race condition - another goroutine may append
+	// to p.trackersInQueue while we're appending to p.trackersActive
+	queued := make([]*Tracker, len(p.trackersInQueue))
+	copy(queued, p.trackersInQueue)
+	p.trackersInQueue = p.trackersInQueue[:0] // reuse slice capacity
+	p.trackersInQueueMutex.Unlock()
+
+	p.trackersActiveMutex.Lock()
+	p.trackersActive = append(p.trackersActive, queued...)
+	p.trackersActiveMutex.Unlock()
 }
 
 func (p *Progress) endRender() {
@@ -69,8 +77,18 @@ func (p *Progress) extractDoneAndActiveTrackers() ([]*Tracker, []*Tracker) {
 	// separate the active and done trackers
 	var trackersActive, trackersDone []*Tracker
 	var activeTrackersProgress int64
-	p.trackersActiveMutex.RLock()
 	var maxETA time.Duration
+	var lengthDone int
+
+	// Get lengthDone while we have access to trackersDone
+	p.trackersDoneMutex.RLock()
+	lengthDone = len(p.trackersDone)
+	p.trackersDoneMutex.RUnlock()
+
+	p.trackersActiveMutex.RLock()
+	// Pre-allocate slices with estimated capacity to reduce allocations
+	trackersActive = make([]*Tracker, 0, len(p.trackersActive))
+	trackersDone = make([]*Tracker, 0, len(p.trackersActive)/4) // estimate ~25% done
 	for _, tracker := range p.trackersActive {
 		if !tracker.IsDone() {
 			trackersActive = append(trackersActive, tracker)
@@ -87,7 +105,7 @@ func (p *Progress) extractDoneAndActiveTrackers() ([]*Tracker, []*Tracker) {
 	p.sortBy.Sort(trackersActive)
 
 	// calculate the overall tracker's progress value
-	p.overallTracker.value = int64(p.LengthDone()+len(trackersDone)) * 100
+	p.overallTracker.value = int64(lengthDone+len(trackersDone)) * 100
 	p.overallTracker.value += activeTrackersProgress
 	p.overallTracker.minETA = maxETA
 	if len(trackersActive) == 0 {
@@ -133,7 +151,13 @@ func (p *Progress) generateTrackerStrDeterminate(value int64, total int64, maxLe
 	} else if pFinishedDotsFraction == 0 {
 		pInProgress = ""
 	}
-	pFinishedStrLen := text.StringWidthWithoutEscSequences(pFinished + pInProgress)
+
+	// Use strings.Builder to avoid temporary string allocation
+	var combined strings.Builder
+	combined.Grow(len(pFinished) + len(pInProgress))
+	combined.WriteString(pFinished)
+	combined.WriteString(pInProgress)
+	pFinishedStrLen := text.StringWidthWithoutEscSequences(combined.String())
 	if pFinishedStrLen < maxLen {
 		pUnfinished = strings.Repeat(p.style.Chars.Unfinished, maxLen-pFinishedStrLen)
 	}
@@ -181,7 +205,7 @@ func (p *Progress) moveCursorToTheTop(out *strings.Builder) {
 	}
 }
 
-func (p *Progress) renderPinnedMessages(out *strings.Builder) {
+func (p *Progress) renderPinnedMessages(out *strings.Builder, hint renderHint) {
 	p.pinnedMessageMutex.RLock()
 	defer p.pinnedMessageMutex.RUnlock()
 
@@ -189,8 +213,8 @@ func (p *Progress) renderPinnedMessages(out *strings.Builder) {
 	for _, msg := range p.pinnedMessages {
 		msg = strings.TrimSpace(msg)
 		msg = p.style.Colors.Pinned.Sprint(msg)
-		if width := p.getTerminalWidth(); width > 0 {
-			msg = text.Trim(msg, width)
+		if hint.terminalWidth > 0 {
+			msg = text.Trim(msg, hint.terminalWidth)
 		}
 		out.WriteString(msg)
 		out.WriteRune('\n')
@@ -202,8 +226,11 @@ func (p *Progress) renderPinnedMessages(out *strings.Builder) {
 
 func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHint) {
 	message := t.message()
-	message = strings.ReplaceAll(message, "\t", "    ")
-	message = strings.ReplaceAll(message, "\r", "") // replace with text.ProcessCRLF?
+	// Optimize: only process if message contains tabs or carriage returns
+	if strings.ContainsAny(message, "\t\r") {
+		message = strings.ReplaceAll(message, "\t", "    ")
+		message = strings.ReplaceAll(message, "\r", "")
+	}
 	if p.lengthMessage > 0 {
 		messageLen := text.StringWidthWithoutEscSequences(message)
 		if messageLen < p.lengthMessage {
@@ -217,21 +244,21 @@ func (p *Progress) renderTracker(out *strings.Builder, t *Tracker, hint renderHi
 	tOut.Grow(p.lengthProgressOverall)
 	if hint.isOverallTracker {
 		if !t.IsDone() {
-			hint := renderHint{hideValue: true, isOverallTracker: true}
+			hint := renderHint{hideValue: true, isOverallTracker: true, terminalWidth: hint.terminalWidth}
 			p.renderTrackerProgress(tOut, t, message, p.generateTrackerStr(t, p.lengthProgressOverall, hint), hint)
 		}
 	} else {
 		if t.IsDone() {
 			p.renderTrackerDone(tOut, t, message)
 		} else {
-			hint := renderHint{hideTime: !p.style.Visibility.Time, hideValue: !p.style.Visibility.Value}
+			hint := renderHint{hideTime: !p.style.Visibility.Time, hideValue: !p.style.Visibility.Value, terminalWidth: hint.terminalWidth}
 			p.renderTrackerProgress(tOut, t, message, p.generateTrackerStr(t, p.lengthProgress, hint), hint)
 		}
 	}
 
 	outStr := tOut.String()
-	if width := p.getTerminalWidth(); width > 0 {
-		outStr = text.Trim(outStr, width)
+	if hint.terminalWidth > 0 {
+		outStr = text.Trim(outStr, hint.terminalWidth)
 	}
 	out.WriteString(outStr)
 	out.WriteRune('\n')
@@ -298,6 +325,10 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 		return 0
 	}
 
+	// Cache terminal width once per render cycle to avoid repeated mutex locks
+	terminalWidth := p.getTerminalWidth()
+	hint := renderHint{terminalWidth: terminalWidth}
+
 	// buffer all output into a strings.Builder object
 	var out strings.Builder
 	out.Grow(lastRenderLength)
@@ -308,11 +339,12 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 	}
 
 	// render the trackers that are done, and then the ones that are active
-	p.renderTrackersDoneAndActive(&out)
+	p.renderTrackersDoneAndActive(&out, hint)
 
 	// render the overall tracker
 	if p.style.Visibility.TrackerOverall {
-		p.renderTracker(&out, p.overallTracker, renderHint{isOverallTracker: true})
+		overallHint := renderHint{isOverallTracker: true, terminalWidth: terminalWidth}
+		p.renderTracker(&out, p.overallTracker, overallHint)
 	}
 
 	// write the text to the output writer
@@ -326,13 +358,13 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 	return out.Len()
 }
 
-func (p *Progress) renderTrackersDoneAndActive(out *strings.Builder) {
+func (p *Progress) renderTrackersDoneAndActive(out *strings.Builder, hint renderHint) {
 	// find the currently "active" and "done" trackers
 	trackersActive, trackersDone := p.extractDoneAndActiveTrackers()
 
 	// sort and render the done trackers
 	for _, tracker := range trackersDone {
-		p.renderTracker(out, tracker, renderHint{})
+		p.renderTracker(out, tracker, hint)
 	}
 	p.trackersDoneMutex.Lock()
 	p.trackersDone = append(p.trackersDone, trackersDone...)
@@ -350,12 +382,12 @@ func (p *Progress) renderTrackersDoneAndActive(out *strings.Builder) {
 
 	// render pinned messages
 	if len(trackersActive) > 0 && p.style.Visibility.Pinned {
-		p.renderPinnedMessages(out)
+		p.renderPinnedMessages(out, hint)
 	}
 
 	// sort and render the active trackers
 	for _, tracker := range trackersActive {
-		p.renderTracker(out, tracker, renderHint{})
+		p.renderTracker(out, tracker, hint)
 	}
 	p.trackersActiveMutex.Lock()
 	p.trackersActive = trackersActive
