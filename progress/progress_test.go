@@ -255,3 +255,36 @@ func TestProgress_OverallTrackerDisappearsCase(t *testing.T) {
 
 	assert.Equal(t, false, p.overallTracker.IsDone())
 }
+
+func TestProgress_watchTerminalSize(t *testing.T) {
+	p := &Progress{}
+	// Set up a cancellable context for watchTerminalSize
+	p.renderContext, p.renderContextCancel = context.WithCancel(context.Background())
+
+	// Call watchTerminalSize in a goroutine
+	done := make(chan bool)
+	go func() {
+		p.watchTerminalSize()
+		done <- true
+	}()
+
+	// Wait a bit to let the ticker fire at least once (covers case <-ticker.C)
+	time.Sleep(150 * time.Millisecond)
+	p.renderContextCancel()
+
+	// Wait for the goroutine to exit (with timeout)
+	select {
+	case <-done:
+		// Success: goroutine exited after context cancellation
+	case <-time.After(1 * time.Second):
+		t.Fatal("watchTerminalSize goroutine did not exit after context cancellation")
+	}
+
+	// Verify the context was cancelled
+	select {
+	case <-p.renderContext.Done():
+		// Context is cancelled, which is expected
+	default:
+		t.Fatal("Expected context to be cancelled")
+	}
+}
