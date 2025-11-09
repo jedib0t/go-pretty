@@ -5,25 +5,34 @@
 [![Coverage Status](https://coveralls.io/repos/github/jedib0t/go-pretty/badge.svg?branch=main)](https://coveralls.io/github/jedib0t/go-pretty?branch=main)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jedib0t/go-pretty/v6)](https://goreportcard.com/report/github.com/jedib0t/go-pretty/v6)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jedib0t_go-pretty&metric=alert_status)](https://sonarcloud.io/dashboard?id=jedib0t_go-pretty)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Utilities to prettify console output of tables, lists, progress-bars, text, etc.
-with a heavy emphasis on customization.
+Utilities to prettify console output of tables, lists, progress bars, text, and more
+with a heavy emphasis on customization and flexibility.
 
-## Usage
+## Quick Start
 
-The current major version of this package is __v6__, and it follows the standard
-outlined [here](https://go.dev/doc/modules/version-numbers#major-version).
+```bash
+go get github.com/jedib0t/go-pretty/v6
+```
 
-Run `go get github.com/jedib0t/go-pretty/v6` to add this as a dependency to your
-project, and import the packages in your code using one or more of these:
-* `github.com/jedib0t/go-pretty/v6/list`
-* `github.com/jedib0t/go-pretty/v6/progress`
-* `github.com/jedib0t/go-pretty/v6/table`
-* `github.com/jedib0t/go-pretty/v6/text`
+Import the packages you need:
+```go
+import (
+    "github.com/jedib0t/go-pretty/v6/table"
+    "github.com/jedib0t/go-pretty/v6/list"
+    "github.com/jedib0t/go-pretty/v6/progress"
+    "github.com/jedib0t/go-pretty/v6/text"
+)
+```
 
-## Table
+**Note**: Current major version is **v6**. See [Go modules versioning](https://go.dev/doc/modules/version-numbers#major-version) for details.
 
-Pretty-print tables in a terminal with colors, nested tables and more.
+## Packages
+
+### Table
+
+Pretty-print tables with colors, auto-merge, sorting, paging, and multiple output formats (ASCII, HTML, Markdown, CSV, TSV).
 
 ```
 +-----+------------+-----------+--------+-----------------------------+
@@ -37,24 +46,23 @@ Pretty-print tables in a terminal with colors, nested tables and more.
 +-----+------------+-----------+--------+-----------------------------+
 ```
 
-Execute `go run github.com/jedib0t/go-pretty/v6/cmd/demo-table@latest colors` to get:
+**Try it**: `go run github.com/jedib0t/go-pretty/v6/cmd/demo-table@latest colors`
 
-<img src="cmd/demo-table/demo-colors.png" alt="Tables with Colors within a Table in a Terminal"/>
+<img src="cmd/demo-table/demo-colors.png" alt="Tables with Colors within a Table in a Terminal" width="640px"/>
 
-More details can be found here: [table/](table)
+📖 [Full documentation →](table/)
 
-## Progress
+### Progress
 
-Track the Progress of one or more Tasks like downloading multiple files in
-parallel.
+Track progress of one or more tasks with ETA, speed calculation, indeterminate indicators, and customizable styles.
 
-<img src="progress/images/demo.gif" alt="Progress Demo in a Terminal"/>
+<img src="progress/images/demo.gif" alt="Progress Demo in a Terminal" width="640px"/>
 
-More details can be found here: [progress/](progress)
+📖 [Full documentation →](progress/)
 
-## List
+### List
 
-Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
+Pretty-print hierarchical lists with multiple levels, indentation, and multiple output formats (ASCII, HTML, Markdown).
 
 ```
 ╭─ Game Of Thrones
@@ -68,19 +76,12 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
    ╰─ The Gunslinger
 ```
 
-More details can be found here: [list/](list)
+📖 [Full documentation →](list/)
 
-## Text
+### Text
 
-Utility functions to manipulate text with or without ANSI escape sequences. Most
-of the functions available are used in one or more of the other packages here.
+Utility functions to manipulate strings/text with full ANSI escape sequence support. Used extensively by other packages in this repo.
 
-   - Align text [Horizontally](text/align.go) or [Vertically](text/valign.go)
-   - [Colorize](text/color.go) text
-   - Move [cursor](text/cursor.go)
-   - [Format](text/format.go) text (convert case)
-   - Manipulate [strings](text/string.go) (Pad, RepeatAndTrim, RuneCount, etc.)
-   - [Transform](text/transformer.go) text (UnixTime to human-readable-time, pretty-JSON, etc.)
-   - [Wrap](text/wrap.go) text
+**Features**: Alignment (horizontal/vertical), colors & formatting, cursor control, text transformation (case, JSON, time, URLs), string manipulation (pad, trim, wrap), and more.
 
-GoDoc has examples for all the available functions.
+📖 [Full documentation →](text/)
