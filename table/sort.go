@@ -72,7 +72,7 @@ func (t *Table) getSortedRowIndices() []int {
 	if len(t.sortBy) > 0 {
 		parsedSortBy := t.parseSortBy(t.sortBy)
 		sort.Slice(sortedIndices, func(i, j int) bool {
-			shouldContinue, returnValue := false, false
+			isEqual, isLess := false, false
 			realI, realJ := sortedIndices[i], sortedIndices[j]
 			for _, sortBy := range parsedSortBy {
 				// extract the values/cells from the rows for comparison
@@ -86,12 +86,14 @@ func (t *Table) getSortedRowIndices() []int {
 				}
 
 				// compare and choose whether to continue
-				shouldContinue, returnValue = less(iVal, jVal, sortBy)
-				if !shouldContinue {
-					break
+				isEqual, isLess = less(iVal, jVal, sortBy)
+				// if the values are not equal, return the result immediately
+				if !isEqual {
+					return isLess
 				}
+				// if the values are equal, continue to the next column
 			}
-			return returnValue
+			return isLess
 		})
 	}
 
