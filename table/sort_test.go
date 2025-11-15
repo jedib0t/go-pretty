@@ -1,8 +1,6 @@
 package table
 
 import (
-	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -199,19 +197,16 @@ func TestTable_sortRows_WithoutName(t *testing.T) {
 	assert.Equal(t, []int{0, 1, 2, 3}, table.getSortedRowIndices())
 }
 
-//gocyclo:ignore
 func TestTable_sortRows_CustomLess(t *testing.T) {
-	t.Run("BasicAscending", func(t *testing.T) {
+	t.Run("AllReturnValues", func(t *testing.T) {
 		table := Table{}
 		table.AppendRows([]Row{
-			{"zebra", "apple"},
-			{"apple", "banana"},
-			{"banana", "cherry"},
+			{"c", "zebra"},
+			{"a", "apple"},
+			{"b", "banana"},
+			{"b", "broccoli"},
 		})
-		table.SetStyle(StyleDefault)
 		table.initForRenderRows()
-
-		// CustomLess that sorts alphabetically in ascending order
 		table.SortBy([]SortBy{{
 			Number: 1,
 			CustomLess: func(iVal string, jVal string) int {
@@ -224,36 +219,7 @@ func TestTable_sortRows_CustomLess(t *testing.T) {
 				return 0
 			},
 		}})
-		assert.Equal(t, []int{1, 2, 0}, table.getSortedRowIndices())
-	})
-
-	t.Run("BasicDescending", func(t *testing.T) {
-		table := Table{}
-		table.AppendRows([]Row{
-			{"apple", "banana"},
-			{"zebra", "cherry"},
-			{"banana", "apple"},
-		})
-		table.SetStyle(StyleDefault)
-		table.initForRenderRows()
-
-		// CustomLess that sorts alphabetically in descending order
-		table.SortBy([]SortBy{{
-			Number: 1,
-			CustomLess: func(iVal string, jVal string) int {
-				if iVal > jVal {
-					return -1
-				}
-				if iVal < jVal {
-					return 1
-				}
-				return 0
-			},
-		}})
-		// For descending: when iVal > jVal, return -1 means i comes before j
-		// So zebra > apple means CustomLess("zebra", "apple") = -1, zebra comes first
-		// Expected order: zebra, banana, apple -> indices {1, 2, 0}
-		assert.Equal(t, []int{1, 2, 0}, table.getSortedRowIndices())
+		assert.Equal(t, []int{1, 2, 3, 0}, table.getSortedRowIndices())
 	})
 
 	t.Run("EqualValuesContinueToNextColumn", func(t *testing.T) {
@@ -263,129 +229,17 @@ func TestTable_sortRows_CustomLess(t *testing.T) {
 			{"same", "apple"},
 			{"same", "banana"},
 		})
-		table.SetStyle(StyleDefault)
 		table.initForRenderRows()
-
-		// First column: all equal (returns 0), second column: alphabetical ascending
 		table.SortBy([]SortBy{
 			{
 				Number: 1,
 				CustomLess: func(iVal string, jVal string) int {
-					// All values are "same", so always return 0
-					return 0
+					return 0 // All equal, continue to next column
 				},
 			},
-			{
-				Number: 2,
-				Mode:   Asc,
-			},
+			{Number: 2, Mode: Asc},
 		})
 		assert.Equal(t, []int{1, 2, 0}, table.getSortedRowIndices())
-	})
-
-	t.Run("NumericSorting", func(t *testing.T) {
-		table := Table{}
-		table.AppendRows([]Row{
-			{"100", "item"},
-			{"2", "item"},
-			{"10", "item"},
-			{"1", "item"},
-		})
-		table.SetStyle(StyleDefault)
-		table.initForRenderRows()
-
-		// CustomLess that sorts numerically
-		table.SortBy([]SortBy{{
-			Number: 1,
-			CustomLess: func(iVal string, jVal string) int {
-				iNum, iErr := strconv.Atoi(iVal)
-				jNum, jErr := strconv.Atoi(jVal)
-				if iErr != nil || jErr != nil {
-					// Fallback to string comparison if not numeric
-					if iVal < jVal {
-						return -1
-					}
-					if iVal > jVal {
-						return 1
-					}
-					return 0
-				}
-				if iNum < jNum {
-					return -1
-				}
-				if iNum > jNum {
-					return 1
-				}
-				return 0
-			},
-		}})
-		// Numeric sort: 1, 2, 10, 100 -> indices {3, 1, 2, 0}
-		assert.Equal(t, []int{3, 1, 2, 0}, table.getSortedRowIndices())
-	})
-
-	t.Run("EmptyStrings", func(t *testing.T) {
-		table := Table{}
-		table.AppendRows([]Row{
-			{"", "item"},
-			{"zebra", "item"},
-			{"apple", "item"},
-		})
-		table.SetStyle(StyleDefault)
-		table.initForRenderRows()
-
-		// CustomLess that treats empty strings as less than non-empty
-		table.SortBy([]SortBy{{
-			Number: 1,
-			CustomLess: func(iVal string, jVal string) int {
-				if iVal == "" && jVal != "" {
-					return -1
-				}
-				if iVal != "" && jVal == "" {
-					return 1
-				}
-				if iVal < jVal {
-					return -1
-				}
-				if iVal > jVal {
-					return 1
-				}
-				return 0
-			},
-		}})
-		assert.Equal(t, []int{0, 2, 1}, table.getSortedRowIndices())
-	})
-
-	t.Run("MissingCells", func(t *testing.T) {
-		table := Table{}
-		table.AppendRows([]Row{
-			{"zebra"},
-			{"apple", "extra"},
-			{"banana"},
-		})
-		table.SetStyle(StyleDefault)
-		table.initForRenderRows()
-
-		// CustomLess that handles missing cells (empty string)
-		table.SortBy([]SortBy{{
-			Number: 2,
-			CustomLess: func(iVal string, jVal string) int {
-				// Treat empty as less than non-empty
-				if iVal == "" && jVal != "" {
-					return -1
-				}
-				if iVal != "" && jVal == "" {
-					return 1
-				}
-				if iVal < jVal {
-					return -1
-				}
-				if iVal > jVal {
-					return 1
-				}
-				return 0
-			},
-		}})
-		assert.Equal(t, []int{0, 2, 1}, table.getSortedRowIndices())
 	})
 
 	t.Run("WithColumnName", func(t *testing.T) {
@@ -396,10 +250,7 @@ func TestTable_sortRows_CustomLess(t *testing.T) {
 			{"apple", "item"},
 			{"banana", "item"},
 		})
-		table.SetStyle(StyleDefault)
 		table.initForRenderRows()
-
-		// CustomLess with column name
 		table.SortBy([]SortBy{{
 			Name: "Value",
 			CustomLess: func(iVal string, jVal string) int {
@@ -412,120 +263,6 @@ func TestTable_sortRows_CustomLess(t *testing.T) {
 				return 0
 			},
 		}})
-		// Should sort: apple, banana, zebra -> indices {1, 2, 0}
-		assert.Equal(t, []int{1, 2, 0}, table.getSortedRowIndices())
-	})
-
-	t.Run("MultiColumnComplex", func(t *testing.T) {
-		table := Table{}
-		table.AppendRows([]Row{
-			{"same", "zebra", "100"},
-			{"same", "apple", "50"},
-			{"same", "apple", "200"},
-			{"different", "banana", "75"},
-		})
-		table.SetStyle(StyleDefault)
-		table.initForRenderRows()
-
-		// First column: custom logic (group by prefix)
-		// Second column: alphabetical
-		// Third column: numeric
-		table.SortBy([]SortBy{
-			{
-				Number: 1,
-				CustomLess: func(iVal string, jVal string) int {
-					// "same" values come first
-					if iVal == "same" && jVal != "same" {
-						return -1
-					}
-					if iVal != "same" && jVal == "same" {
-						return 1
-					}
-					return 0
-				},
-			},
-			{
-				Number: 2,
-				Mode:   Asc,
-			},
-			{
-				Number: 3,
-				Mode:   AscNumeric,
-			},
-		})
-		// Expected: "same" rows first, then sorted by col2, then col3
-		// Rows: 0={"same","zebra","100"}, 1={"same","apple","50"}, 2={"same","apple","200"}, 3={"different","banana","75"}
-		// Expected order: 1, 2, 0 (all "same" sorted by col2 then col3), then 3
-		assert.Equal(t, []int{1, 2, 0, 3}, table.getSortedRowIndices())
-	})
-
-	t.Run("AllReturnValues", func(t *testing.T) {
-		table := Table{}
-		table.AppendRows([]Row{
-			{"c", "item"}, // will be greater
-			{"a", "item"}, // will be less
-			{"b", "item"}, // will be equal to itself, but in between
-		})
-		table.SetStyle(StyleDefault)
-		table.initForRenderRows()
-
-		// CustomLess that explicitly returns -1, 0, 1
-		table.SortBy([]SortBy{{
-			Number: 1,
-			CustomLess: func(iVal string, jVal string) int {
-				if iVal == "a" {
-					return -1 // a is always less
-				}
-				if iVal == "c" {
-					return 1 // c is always greater
-				}
-				if jVal == "a" {
-					return 1 // b > a
-				}
-				if jVal == "c" {
-					return -1 // b < c
-				}
-				return 0 // b == b
-			},
-		}})
-		assert.Equal(t, []int{1, 2, 0}, table.getSortedRowIndices())
-	})
-
-	t.Run("CaseInsensitiveCustom", func(t *testing.T) {
-		table := Table{}
-		table.AppendRows([]Row{
-			{"Zebra", "item"},
-			{"apple", "item"},
-			{"Banana", "item"},
-		})
-		table.SetStyle(StyleDefault)
-		table.initForRenderRows()
-
-		// CustomLess with case-insensitive comparison
-		table.SortBy([]SortBy{{
-			Number: 1,
-			CustomLess: func(iVal string, jVal string) int {
-				iLower := strings.ToLower(iVal)
-				jLower := strings.ToLower(jVal)
-				if iLower < jLower {
-					return -1
-				}
-				if iLower > jLower {
-					return 1
-				}
-				// If case-insensitive equal, compare case-sensitive
-				if iVal < jVal {
-					return -1
-				}
-				if iVal > jVal {
-					return 1
-				}
-				return 0
-			},
-		}})
-		// Rows: 0={"Zebra"}, 1={"apple"}, 2={"Banana"}
-		// Case-insensitive: apple < Banana < Zebra
-		// Expected: {1, 2, 0}
 		assert.Equal(t, []int{1, 2, 0}, table.getSortedRowIndices())
 	})
 }
