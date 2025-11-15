@@ -77,8 +77,10 @@ If you want very specific examples, look at the [Examples](#examples) section.
 ### Sorting & Filtering
 
   - Sort by one or more Columns (`SortBy`)
-    - Ascending or Descending mode per column
     - Multiple column sorting support
+    - Various sort modes: alphabetical, numeric, alphanumeric, numeric-alpha
+    - Case-insensitive sorting option (`IgnoreCase`)
+    - Custom sorting functions (`CustomLess`) for advanced sorting logic
   - Suppress/hide columns with no content (`SuppressEmptyColumns`)
   - Hide specific columns (`ColumnConfig.Hidden`)
   - Suppress trailing spaces in the last column (`SuppressTrailingSpaces`)
@@ -374,6 +376,123 @@ rows be sorted first by "First Name" and then by "Last Name" (in case of similar
 	    {Name: "Last Name", Mode: table.Asc},
     })
 ```
+
+#### Sort Modes
+
+The `Mode` field in `SortBy` supports various sorting modes:
+- `Asc` / `Dsc` - Alphabetical ascending/descending
+- `AscNumeric` / `DscNumeric` - Numerical ascending/descending
+- `AscAlphaNumeric` / `DscAlphaNumeric` - Alphabetical first, then numerical
+- `AscNumericAlpha` / `DscNumericAlpha` - Numerical first, then alphabetical
+
+You can also make sorting case-insensitive by setting `IgnoreCase: true`:
+```golang
+    t.SortBy([]table.SortBy{
+	    {Name: "First Name", Mode: table.Asc, IgnoreCase: true},
+    })
+```
+
+#### Custom Sorting
+
+For advanced sorting requirements, you can provide a custom comparison function
+using `CustomLess`. This function overrides the `Mode` and `IgnoreCase` settings
+and gives you full control over the sorting logic.
+
+The `CustomLess` function receives two string values (the cell contents converted
+to strings) and must return:
+- `-1` when the first value should come before the second
+- `0` when the values are considered equal (sorting continues to the next column)
+- `1` when the first value should come after the second
+
+<details>
+<summary>Example: Custom numeric sorting that handles string numbers correctly</summary>
+
+```golang
+    t.SortBy([]table.SortBy{
+	    {
+		    Number: 1,
+		    CustomLess: func(iStr string, jStr string) int {
+			    iNum, iErr := strconv.Atoi(iStr)
+			    jNum, jErr := strconv.Atoi(jStr)
+			    if iErr != nil || jErr != nil {
+				    // Fallback to string comparison if not numeric
+				    if iStr < jStr {
+					    return -1
+				    }
+				    if iStr > jStr {
+					    return 1
+				    }
+				    return 0
+			    }
+			    if iNum < jNum {
+				    return -1
+			    }
+			    if iNum > jNum {
+				    return 1
+			    }
+			    return 0
+		    },
+	    },
+    })
+```
+
+</details>
+
+<details>
+<summary>Example: Custom case-insensitive sorting with fallback to case-sensitive</summary>
+
+```golang
+    t.SortBy([]table.SortBy{
+	    {
+		    Name: "Name",
+		    CustomLess: func(iStr string, jStr string) int {
+			    iLower := strings.ToLower(iStr)
+			    jLower := strings.ToLower(jStr)
+			    if iLower < jLower {
+				    return -1
+			    }
+			    if iLower > jLower {
+				    return 1
+			    }
+			    // If case-insensitive equal, compare case-sensitive
+			    if iStr < jStr {
+				    return -1
+			    }
+			    if iStr > jStr {
+				    return 1
+			    }
+			    return 0
+		    },
+	    },
+    })
+```
+
+</details>
+
+<details>
+<summary>Example: Combining custom sorting with default sorting modes</summary>
+
+```golang
+    t.SortBy([]table.SortBy{
+	    {
+		    Number: 1,
+		    CustomLess: func(iStr string, jStr string) int {
+			    // Custom logic: "same" values come first
+			    if iStr == "same" && jStr != "same" {
+				    return -1
+			    }
+			    if iStr != "same" && jStr == "same" {
+				    return 1
+			    }
+			    return 0 // Equal, continue to next column
+		    },
+	    },
+	    {Number: 2, Mode: table.Asc},        // Default alphabetical sort
+	    {Number: 3, Mode: table.AscNumeric}, // Default numeric sort
+    })
+```
+
+</details>
 
 ### Wrapping (or) Row/Column Width restrictions
 

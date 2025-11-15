@@ -201,7 +201,6 @@ func TestTable_sortRows_WithoutName(t *testing.T) {
 
 //gocyclo:ignore
 func TestTable_sortRows_CustomLess(t *testing.T) {
-	// Test basic CustomLess with ascending order
 	t.Run("BasicAscending", func(t *testing.T) {
 		table := Table{}
 		table.AppendRows([]Row{
@@ -228,7 +227,6 @@ func TestTable_sortRows_CustomLess(t *testing.T) {
 		assert.Equal(t, []int{1, 2, 0}, table.getSortedRowIndices())
 	})
 
-	// Test basic CustomLess with descending order
 	t.Run("BasicDescending", func(t *testing.T) {
 		table := Table{}
 		table.AppendRows([]Row{
@@ -258,7 +256,6 @@ func TestTable_sortRows_CustomLess(t *testing.T) {
 		assert.Equal(t, []int{1, 2, 0}, table.getSortedRowIndices())
 	})
 
-	// Test CustomLess returning 0 (equal values, should continue to next column)
 	t.Run("EqualValuesContinueToNextColumn", func(t *testing.T) {
 		table := Table{}
 		table.AppendRows([]Row{
@@ -286,7 +283,6 @@ func TestTable_sortRows_CustomLess(t *testing.T) {
 		assert.Equal(t, []int{1, 2, 0}, table.getSortedRowIndices())
 	})
 
-	// Test CustomLess with numeric sorting
 	t.Run("NumericSorting", func(t *testing.T) {
 		table := Table{}
 		table.AppendRows([]Row{
@@ -327,7 +323,6 @@ func TestTable_sortRows_CustomLess(t *testing.T) {
 		assert.Equal(t, []int{3, 1, 2, 0}, table.getSortedRowIndices())
 	})
 
-	// Test CustomLess with empty strings
 	t.Run("EmptyStrings", func(t *testing.T) {
 		table := Table{}
 		table.AppendRows([]Row{
@@ -360,7 +355,6 @@ func TestTable_sortRows_CustomLess(t *testing.T) {
 		assert.Equal(t, []int{0, 2, 1}, table.getSortedRowIndices())
 	})
 
-	// Test CustomLess with missing cells
 	t.Run("MissingCells", func(t *testing.T) {
 		table := Table{}
 		table.AppendRows([]Row{
@@ -394,7 +388,6 @@ func TestTable_sortRows_CustomLess(t *testing.T) {
 		assert.Equal(t, []int{0, 2, 1}, table.getSortedRowIndices())
 	})
 
-	// Test CustomLess with column names
 	t.Run("WithColumnName", func(t *testing.T) {
 		table := Table{}
 		table.AppendHeader(Row{"Value", "Other"})
@@ -423,7 +416,6 @@ func TestTable_sortRows_CustomLess(t *testing.T) {
 		assert.Equal(t, []int{1, 2, 0}, table.getSortedRowIndices())
 	})
 
-	// Test CustomLess with complex multi-column sorting
 	t.Run("MultiColumnComplex", func(t *testing.T) {
 		table := Table{}
 		table.AppendRows([]Row{
@@ -467,7 +459,6 @@ func TestTable_sortRows_CustomLess(t *testing.T) {
 		assert.Equal(t, []int{1, 2, 0, 3}, table.getSortedRowIndices())
 	})
 
-	// Test CustomLess returning all three values (-1, 0, 1)
 	t.Run("AllReturnValues", func(t *testing.T) {
 		table := Table{}
 		table.AppendRows([]Row{
@@ -500,7 +491,6 @@ func TestTable_sortRows_CustomLess(t *testing.T) {
 		assert.Equal(t, []int{1, 2, 0}, table.getSortedRowIndices())
 	})
 
-	// Test CustomLess with case-insensitive custom logic
 	t.Run("CaseInsensitiveCustom", func(t *testing.T) {
 		table := Table{}
 		table.AppendRows([]Row{
