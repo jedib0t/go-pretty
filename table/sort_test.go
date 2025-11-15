@@ -196,3 +196,73 @@ func TestTable_sortRows_WithoutName(t *testing.T) {
 	table.SortBy(nil)
 	assert.Equal(t, []int{0, 1, 2, 3}, table.getSortedRowIndices())
 }
+
+func TestTable_sortRows_CustomLess(t *testing.T) {
+	t.Run("AllReturnValues", func(t *testing.T) {
+		table := Table{}
+		table.AppendRows([]Row{
+			{"c", "zebra"},
+			{"a", "apple"},
+			{"b", "banana"},
+			{"b", "broccoli"},
+		})
+		table.initForRenderRows()
+		table.SortBy([]SortBy{{
+			Number: 1,
+			CustomLess: func(iVal string, jVal string) int {
+				if iVal < jVal {
+					return -1
+				}
+				if iVal > jVal {
+					return 1
+				}
+				return 0
+			},
+		}})
+		assert.Equal(t, []int{1, 2, 3, 0}, table.getSortedRowIndices())
+	})
+
+	t.Run("EqualValuesContinueToNextColumn", func(t *testing.T) {
+		table := Table{}
+		table.AppendRows([]Row{
+			{"same", "zebra"},
+			{"same", "apple"},
+			{"same", "banana"},
+		})
+		table.initForRenderRows()
+		table.SortBy([]SortBy{
+			{
+				Number: 1,
+				CustomLess: func(iVal string, jVal string) int {
+					return 0 // All equal, continue to next column
+				},
+			},
+			{Number: 2, Mode: Asc},
+		})
+		assert.Equal(t, []int{1, 2, 0}, table.getSortedRowIndices())
+	})
+
+	t.Run("WithColumnName", func(t *testing.T) {
+		table := Table{}
+		table.AppendHeader(Row{"Value", "Other"})
+		table.AppendRows([]Row{
+			{"zebra", "item"},
+			{"apple", "item"},
+			{"banana", "item"},
+		})
+		table.initForRenderRows()
+		table.SortBy([]SortBy{{
+			Name: "Value",
+			CustomLess: func(iVal string, jVal string) int {
+				if iVal < jVal {
+					return -1
+				}
+				if iVal > jVal {
+					return 1
+				}
+				return 0
+			},
+		}})
+		assert.Equal(t, []int{1, 2, 0}, table.getSortedRowIndices())
+	})
+}
