@@ -445,14 +445,30 @@ func TestTable_RenderHTML_ConvertColorsToSpans(t *testing.T) {
 	t.Run("disabled", func(t *testing.T) {
 		tw := NewWriter()
 		tw.Style().HTML.ConvertColorsToSpans = false
-		tw.Style().HTML.EscapeText = false // Disable text escaping to see raw output
+		tw.Style().HTML.EscapeText = true // Enable text escaping to test escape functionality
 		tw.AppendRow(Row{text.FgRed.Sprint("Red Text")})
 		result := tw.RenderHTML()
 		// Should NOT convert escape sequences to spans
+		assert.Contains(t, result, "\x1b[31m")
 		assert.Contains(t, result, "Red Text")
 		assert.NotContains(t, result, "<span class=\"fg-red\">")
-		// Escape sequences should be present in the output
-		assert.Contains(t, result, "\x1b[31m")
+		// Verify escape sequences are not converted to spans
+		assert.NotContains(t, result, "<span")
+	})
+
+	t.Run("disabled with HTML special chars", func(t *testing.T) {
+		tw := NewWriter()
+		tw.Style().HTML.ConvertColorsToSpans = false
+		tw.Style().HTML.EscapeText = true // Enable text escaping
+		tw.AppendRow(Row{"Text <bold> & \"quoted\""})
+		result := tw.RenderHTML()
+		// HTML special characters should be escaped
+		assert.Contains(t, result, "&lt;bold&gt;")
+		assert.Contains(t, result, "&amp;")
+		assert.Contains(t, result, "&#34;quoted&#34;")
+		// Should NOT contain unescaped HTML
+		assert.NotContains(t, result, "<bold>")
+		assert.NotContains(t, result, "\"quoted\"")
 	})
 }
 
