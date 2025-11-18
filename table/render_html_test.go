@@ -142,6 +142,130 @@ func TestTable_RenderHTML_AutoIndex(t *testing.T) {
 </table>`)
 }
 
+func TestTable_RenderHTML_AutoMergeColumn(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"A", "B", "C"})
+		tw.AppendRow(Row{"Y", "Y", 1})
+		tw.AppendRow(Row{"Y", "N", 2})
+		tw.AppendRow(Row{"Y", "N", 3})
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Name: "A", AutoMerge: true},
+			{Name: "B", AutoMerge: true},
+		})
+		compareOutput(t, tw.RenderHTML(), `
+<table class="go-pretty-table">
+  <thead>
+  <tr>
+    <th>A</th>
+    <th>B</th>
+    <th align="right">C</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td rowspan=3>Y</td>
+    <td>Y</td>
+    <td align="right">1</td>
+  </tr>
+  <tr>
+    <td rowspan=2>N</td>
+    <td align="right">2</td>
+  </tr>
+  <tr>
+    <td align="right">3</td>
+  </tr>
+  </tbody>
+</table>`)
+	})
+}
+
+func TestTable_RenderHTML_AutoMergeRow(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		rcAutoMerge := RowConfig{AutoMerge: true}
+		tw := NewWriter()
+		tw.AppendHeader(Row{"A", "B"})
+		tw.AppendRow(Row{"Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"Y", "N"}, rcAutoMerge)
+		compareOutput(t, tw.RenderHTML(), `
+<table class="go-pretty-table">
+  <thead>
+  <tr>
+    <th>A</th>
+    <th>B</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td align="center" colspan=2>Y</td>
+  </tr>
+  <tr>
+    <td>Y</td>
+    <td>N</td>
+  </tr>
+  </tbody>
+</table>`)
+	})
+
+	t.Run("merged and unmerged entries", func(t *testing.T) {
+		rcAutoMerge := RowConfig{AutoMerge: true}
+		tw := NewWriter()
+		tw.AppendHeader(Row{"A", "B", "C", "D"})
+		tw.AppendRow(Row{"Y", "Y", "0", "1"}, rcAutoMerge)
+		tw.AppendRow(Row{"0", "Y", "Y", "1"}, rcAutoMerge)
+		tw.AppendRow(Row{"0", "1", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"Y", "Y", "Y", "0"}, rcAutoMerge)
+		tw.AppendRow(Row{"0", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"Y", "Y", "Y", "Y"}, rcAutoMerge)
+		tw.AppendRow(Row{"0", "1", "2", "3"}, rcAutoMerge)
+		compareOutput(t, tw.RenderHTML(), `
+<table class="go-pretty-table">
+  <thead>
+  <tr>
+    <th>A</th>
+    <th>B</th>
+    <th>C</th>
+    <th>D</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td align="center" colspan=2>Y</td>
+    <td>0</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td>0</td>
+    <td align="center" colspan=2>Y</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td>0</td>
+    <td>1</td>
+    <td align="center" colspan=2>Y</td>
+  </tr>
+  <tr>
+    <td align="center" colspan=3>Y</td>
+    <td>0</td>
+  </tr>
+  <tr>
+    <td>0</td>
+    <td align="center" colspan=3>Y</td>
+  </tr>
+  <tr>
+    <td align="center" colspan=4>Y</td>
+  </tr>
+  <tr>
+    <td>0</td>
+    <td>1</td>
+    <td>2</td>
+    <td>3</td>
+  </tr>
+  </tbody>
+</table>`)
+	})
+}
+
 func TestTable_RenderHTML_Colored(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(testHeader)
@@ -305,6 +429,47 @@ func TestTable_RenderHTML_CustomStyle(t *testing.T) {
 func TestTable_RenderHTML_Empty(t *testing.T) {
 	tw := NewWriter()
 	assert.Empty(t, tw.RenderHTML())
+}
+
+func TestTable_RenderHTML_ConvertColorsToSpans(t *testing.T) {
+	t.Run("enabled (default)", func(t *testing.T) {
+		tw := NewWriter()
+		tw.Style().HTML.EscapeText = false // Disable text escaping to see the HTML tags
+		tw.AppendRow(Row{text.FgRed.Sprint("Red Text")})
+		result := tw.RenderHTML()
+		// Should convert escape sequences to spans
+		assert.Contains(t, result, "<span class=\"fg-red\">Red Text</span>")
+		assert.NotContains(t, result, "\x1b[31m")
+	})
+
+	t.Run("disabled", func(t *testing.T) {
+		tw := NewWriter()
+		tw.Style().HTML.ConvertColorsToSpans = false
+		tw.Style().HTML.EscapeText = true // Enable text escaping to test escape functionality
+		tw.AppendRow(Row{text.FgRed.Sprint("Red Text")})
+		result := tw.RenderHTML()
+		// Should NOT convert escape sequences to spans
+		assert.Contains(t, result, "\x1b[31m")
+		assert.Contains(t, result, "Red Text")
+		assert.NotContains(t, result, "<span class=\"fg-red\">")
+		// Verify escape sequences are not converted to spans
+		assert.NotContains(t, result, "<span")
+	})
+
+	t.Run("disabled with HTML special chars", func(t *testing.T) {
+		tw := NewWriter()
+		tw.Style().HTML.ConvertColorsToSpans = false
+		tw.Style().HTML.EscapeText = true // Enable text escaping
+		tw.AppendRow(Row{"Text <bold> & \"quoted\""})
+		result := tw.RenderHTML()
+		// HTML special characters should be escaped
+		assert.Contains(t, result, "&lt;bold&gt;")
+		assert.Contains(t, result, "&amp;")
+		assert.Contains(t, result, "&#34;quoted&#34;")
+		// Should NOT contain unescaped HTML
+		assert.NotContains(t, result, "<bold>")
+		assert.NotContains(t, result, "\"quoted\"")
+	})
 }
 
 func TestTable_RenderHTML_HiddenColumns(t *testing.T) {
@@ -516,128 +681,4 @@ func TestTable_RenderHTML_Sorted(t *testing.T) {
   </tr>
   </tfoot>
 </table>`)
-}
-
-func TestTable_RenderHTML_ColAutoMerge(t *testing.T) {
-	t.Run("simple", func(t *testing.T) {
-		tw := NewWriter()
-		tw.AppendHeader(Row{"A", "B", "C"})
-		tw.AppendRow(Row{"Y", "Y", 1})
-		tw.AppendRow(Row{"Y", "N", 2})
-		tw.AppendRow(Row{"Y", "N", 3})
-		tw.SetColumnConfigs([]ColumnConfig{
-			{Name: "A", AutoMerge: true},
-			{Name: "B", AutoMerge: true},
-		})
-		compareOutput(t, tw.RenderHTML(), `
-<table class="go-pretty-table">
-  <thead>
-  <tr>
-    <th>A</th>
-    <th>B</th>
-    <th align="right">C</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-    <td rowspan=3>Y</td>
-    <td>Y</td>
-    <td align="right">1</td>
-  </tr>
-  <tr>
-    <td rowspan=2>N</td>
-    <td align="right">2</td>
-  </tr>
-  <tr>
-    <td align="right">3</td>
-  </tr>
-  </tbody>
-</table>`)
-	})
-}
-
-func TestTable_RenderHTML_RowAutoMerge(t *testing.T) {
-	t.Run("simple", func(t *testing.T) {
-		rcAutoMerge := RowConfig{AutoMerge: true}
-		tw := NewWriter()
-		tw.AppendHeader(Row{"A", "B"})
-		tw.AppendRow(Row{"Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"Y", "N"}, rcAutoMerge)
-		compareOutput(t, tw.RenderHTML(), `
-<table class="go-pretty-table">
-  <thead>
-  <tr>
-    <th>A</th>
-    <th>B</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-    <td align="center" colspan=2>Y</td>
-  </tr>
-  <tr>
-    <td>Y</td>
-    <td>N</td>
-  </tr>
-  </tbody>
-</table>`)
-	})
-
-	t.Run("merged and unmerged entries", func(t *testing.T) {
-		rcAutoMerge := RowConfig{AutoMerge: true}
-		tw := NewWriter()
-		tw.AppendHeader(Row{"A", "B", "C", "D"})
-		tw.AppendRow(Row{"Y", "Y", "0", "1"}, rcAutoMerge)
-		tw.AppendRow(Row{"0", "Y", "Y", "1"}, rcAutoMerge)
-		tw.AppendRow(Row{"0", "1", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"Y", "Y", "Y", "0"}, rcAutoMerge)
-		tw.AppendRow(Row{"0", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"Y", "Y", "Y", "Y"}, rcAutoMerge)
-		tw.AppendRow(Row{"0", "1", "2", "3"}, rcAutoMerge)
-		compareOutput(t, tw.RenderHTML(), `
-<table class="go-pretty-table">
-  <thead>
-  <tr>
-    <th>A</th>
-    <th>B</th>
-    <th>C</th>
-    <th>D</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-    <td align="center" colspan=2>Y</td>
-    <td>0</td>
-    <td>1</td>
-  </tr>
-  <tr>
-    <td>0</td>
-    <td align="center" colspan=2>Y</td>
-    <td>1</td>
-  </tr>
-  <tr>
-    <td>0</td>
-    <td>1</td>
-    <td align="center" colspan=2>Y</td>
-  </tr>
-  <tr>
-    <td align="center" colspan=3>Y</td>
-    <td>0</td>
-  </tr>
-  <tr>
-    <td>0</td>
-    <td align="center" colspan=3>Y</td>
-  </tr>
-  <tr>
-    <td align="center" colspan=4>Y</td>
-  </tr>
-  <tr>
-    <td>0</td>
-    <td>1</td>
-    <td>2</td>
-    <td>3</td>
-  </tr>
-  </tbody>
-</table>`)
-	})
 }

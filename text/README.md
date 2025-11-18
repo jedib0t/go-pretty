@@ -73,6 +73,9 @@ Used heavily in the other packages in this repo ([list](../list),
     - All functions properly handle ANSI escape sequences
     - Escape sequences are preserved during transformations
     - Width calculations ignore escape sequences
+    - `EscSeqParser` - Parser for advanced escape sequence parsing and tracking
+      - Supports both CSI (Control Sequence Introducer) and OSI (Operating System Command) formats
+      - Tracks active formatting codes and can generate consolidated escape sequences
 
 ### Cursor Control
 
