@@ -106,110 +106,17 @@ func (t *Table) htmlRenderCaption(out *strings.Builder) {
 }
 
 func (t *Table) htmlRenderColumn(out *strings.Builder, colStr string) {
-	// Parse escape sequences and convert to HTML spans
-	colStr = t.htmlConvertEscSequencesToSpans(colStr)
-
-	if t.style.HTML.EscapeText {
+	// convertEscSequencesToSpans already escapes text content, so skip
+	// EscapeText if ConvertColorsToSpans is true
+	if t.style.HTML.ConvertColorsToSpans {
+		colStr = convertEscSequencesToSpans(colStr)
+	} else if t.style.HTML.EscapeText {
 		colStr = html.EscapeString(colStr)
 	}
 	if t.style.HTML.Newline != "\n" {
 		colStr = strings.ReplaceAll(colStr, "\n", t.style.HTML.Newline)
 	}
 	out.WriteString(colStr)
-}
-
-// htmlConvertEscSequencesToSpans converts ANSI escape sequences to HTML <span> tags with CSS classes.
-//
-//gocyclo:ignore
-func (t *Table) htmlConvertEscSequencesToSpans(str string) string {
-	var result strings.Builder
-	esp := text.EscSeqParser{}
-
-	// Track the current active colors to detect changes
-	currentColors := make(map[int]bool)
-
-	// Helper to convert codes to Colors and get CSS classes
-	getCSSClasses := func(codes map[int]bool) string {
-		var colors text.Colors
-		for code := range codes {
-			colors = append(colors, text.Color(code))
-		}
-		return colors.CSSClasses()
-	}
-
-	// Helper to check if colors changed
-	colorsChanged := func(newColors map[int]bool) bool {
-		if len(currentColors) != len(newColors) {
-			return true
-		}
-		for code := range newColors {
-			if !currentColors[code] {
-				return true
-			}
-		}
-		return false
-	}
-
-	// Helper to update span tags when colors change
-	updateSpan := func(newColors map[int]bool) {
-		if !colorsChanged(newColors) {
-			return
-		}
-
-		// Close previous span if it was open
-		if len(currentColors) > 0 {
-			result.WriteString("</span>")
-		}
-
-		// Open new span if there are colors with valid CSS classes
-		if len(newColors) > 0 {
-			class := getCSSClasses(newColors)
-			if class != "" {
-				result.WriteString("<span class=\"")
-				result.WriteString(class)
-				result.WriteString("\">")
-				// Only track colors if we actually opened a span
-				currentColors = make(map[int]bool)
-				for code := range newColors {
-					currentColors[code] = true
-				}
-			} else {
-				// No CSS classes, so don't track these colors
-				currentColors = make(map[int]bool)
-			}
-		} else {
-			// No colors, clear tracking
-			currentColors = make(map[int]bool)
-		}
-	}
-
-	// Process the string character by character
-	for _, char := range str {
-		wasInSequence := esp.InSequence()
-		esp.Consume(char)
-
-		if esp.InSequence() {
-			// We're inside an escape sequence, skip it (don't write to result)
-			continue
-		} else if wasInSequence {
-			// We just finished an escape sequence, update colors
-			newColors := make(map[int]bool)
-			for _, code := range esp.Codes() {
-				newColors[code] = true
-			}
-			updateSpan(newColors)
-		} else {
-			// Regular character, write it (will be inside current span if colors are active)
-			result.WriteRune(char)
-		}
-	}
-
-	// Close any open span
-	if len(currentColors) > 0 {
-		result.WriteString("</span>")
-	}
-
-	return result.String()
 }
 
 func (t *Table) htmlRenderColumnAttributes(out *strings.Builder, colIdx int, hint renderHint, alignOverride text.Align) {

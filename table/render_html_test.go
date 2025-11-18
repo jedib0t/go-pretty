@@ -431,6 +431,31 @@ func TestTable_RenderHTML_Empty(t *testing.T) {
 	assert.Empty(t, tw.RenderHTML())
 }
 
+func TestTable_RenderHTML_ConvertColorsToSpans(t *testing.T) {
+	t.Run("enabled (default)", func(t *testing.T) {
+		tw := NewWriter()
+		tw.Style().HTML.EscapeText = false // Disable text escaping to see the HTML tags
+		tw.AppendRow(Row{text.FgRed.Sprint("Red Text")})
+		result := tw.RenderHTML()
+		// Should convert escape sequences to spans
+		assert.Contains(t, result, "<span class=\"fg-red\">Red Text</span>")
+		assert.NotContains(t, result, "\x1b[31m")
+	})
+
+	t.Run("disabled", func(t *testing.T) {
+		tw := NewWriter()
+		tw.Style().HTML.ConvertColorsToSpans = false
+		tw.Style().HTML.EscapeText = false // Disable text escaping to see raw output
+		tw.AppendRow(Row{text.FgRed.Sprint("Red Text")})
+		result := tw.RenderHTML()
+		// Should NOT convert escape sequences to spans
+		assert.Contains(t, result, "Red Text")
+		assert.NotContains(t, result, "<span class=\"fg-red\">")
+		// Escape sequences should be present in the output
+		assert.Contains(t, result, "\x1b[31m")
+	})
+}
+
 func TestTable_RenderHTML_HiddenColumns(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(testHeader)
@@ -640,136 +665,4 @@ func TestTable_RenderHTML_Sorted(t *testing.T) {
   </tr>
   </tfoot>
 </table>`)
-}
-
-func TestTable_htmlConvertEscSequencesToSpans(t *testing.T) {
-	tbl := &Table{}
-
-	t.Run("no escape sequences", func(t *testing.T) {
-		input := "Hello World"
-		expected := "Hello World"
-		result := tbl.htmlConvertEscSequencesToSpans(input)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("single foreground color", func(t *testing.T) {
-		input := text.FgRed.Sprint("Red Text")
-		expected := "<span class=\"fg-red\">Red Text</span>"
-		result := tbl.htmlConvertEscSequencesToSpans(input)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("single background color", func(t *testing.T) {
-		input := text.BgBlue.Sprint("Blue Background")
-		expected := "<span class=\"bg-blue\">Blue Background</span>"
-		result := tbl.htmlConvertEscSequencesToSpans(input)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("multiple colors", func(t *testing.T) {
-		input := text.Colors{text.FgRed, text.Bold}.Sprint("Bold Red")
-		expected := "<span class=\"bold fg-red\">Bold Red</span>"
-		result := tbl.htmlConvertEscSequencesToSpans(input)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("color reset", func(t *testing.T) {
-		input := text.FgRed.Sprint("Red") + text.Reset.Sprint("Normal")
-		expected := "<span class=\"fg-red\">Red</span>Normal"
-		result := tbl.htmlConvertEscSequencesToSpans(input)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("multiple color changes", func(t *testing.T) {
-		input := "Start" + text.FgRed.Sprint("Red") + text.FgBlue.Sprint("Blue") + "End"
-		expected := "Start<span class=\"fg-red\">Red</span><span class=\"fg-blue\">Blue</span>End"
-		result := tbl.htmlConvertEscSequencesToSpans(input)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("text before and after colors", func(t *testing.T) {
-		input := "Before " + text.FgGreen.Sprint("Green") + " After"
-		expected := "Before <span class=\"fg-green\">Green</span> After"
-		result := tbl.htmlConvertEscSequencesToSpans(input)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("empty string", func(t *testing.T) {
-		input := ""
-		expected := ""
-		result := tbl.htmlConvertEscSequencesToSpans(input)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("only escape sequence with reset", func(t *testing.T) {
-		input := text.FgYellow.EscapeSeq() + text.Reset.EscapeSeq()
-		// When there's only escape sequences with no text, we get an empty span that gets closed
-		expected := "<span class=\"fg-yellow\"></span>"
-		result := tbl.htmlConvertEscSequencesToSpans(input)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("high intensity colors", func(t *testing.T) {
-		input := text.FgHiRed.Sprint("Hi Red")
-		expected := "<span class=\"fg-hi-red\">Hi Red</span>"
-		result := tbl.htmlConvertEscSequencesToSpans(input)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("background high intensity colors", func(t *testing.T) {
-		input := text.BgHiCyan.Sprint("Hi Cyan BG")
-		expected := "<span class=\"bg-hi-cyan\">Hi Cyan BG</span>"
-		result := tbl.htmlConvertEscSequencesToSpans(input)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("complex multiple colors and attributes", func(t *testing.T) {
-		input := text.Colors{text.FgCyan, text.Bold, text.Underline}.Sprint("Styled")
-		expected := "<span class=\"bold fg-cyan underline\">Styled</span>"
-		result := tbl.htmlConvertEscSequencesToSpans(input)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("nested color changes", func(t *testing.T) {
-		// Red text, then blue text, then back to red
-		input := text.FgRed.Sprint("Red1") + text.FgBlue.Sprint("Blue") + text.FgRed.Sprint("Red2")
-		expected := "<span class=\"fg-red\">Red1</span><span class=\"fg-blue\">Blue</span><span class=\"fg-red\">Red2</span>"
-		result := tbl.htmlConvertEscSequencesToSpans(input)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("color with newlines", func(t *testing.T) {
-		input := text.FgMagenta.Sprint("Line1\nLine2")
-		expected := "<span class=\"fg-magenta\">Line1\nLine2</span>"
-		result := tbl.htmlConvertEscSequencesToSpans(input)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("multiple attributes", func(t *testing.T) {
-		input := text.Colors{text.Bold, text.Italic, text.Underline}.Sprint("Bold Italic Underline")
-		expected := "<span class=\"bold italic underline\">Bold Italic Underline</span>"
-		result := tbl.htmlConvertEscSequencesToSpans(input)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("same colors set twice", func(t *testing.T) {
-		// Setting the same color twice should not create duplicate spans
-		// This tests the early return path when colors don't change
-		// We manually construct escape sequences to avoid resets between them
-		input := text.FgRed.EscapeSeq() + "Red1" + text.FgRed.EscapeSeq() + "Red2" + text.Reset.EscapeSeq()
-		expected := "<span class=\"fg-red\">Red1Red2</span>"
-		result := tbl.htmlConvertEscSequencesToSpans(input)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("unmapped color code", func(t *testing.T) {
-		// Test case where escape sequence has a code that doesn't map to CSS classes
-		// This tests the path where len(newColors) > 0 but class == ""
-		// Using code 99 which is not in the CSS class map
-		// Since no CSS class exists, no span is opened, and colors are not tracked
-		input := "\x1b[99mText\x1b[0m"
-		expected := "Text"
-		result := tbl.htmlConvertEscSequencesToSpans(input)
-		assert.Equal(t, expected, result)
-	})
 }
