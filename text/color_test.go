@@ -70,6 +70,23 @@ func TestColor_areColorsOnInTheEnv(t *testing.T) {
 	assert.True(t, areColorsOnInTheEnv())
 }
 
+func ExampleColor_CSSClasses() {
+	fmt.Printf("Bold: %#v\n", Bold.CSSClasses())
+	fmt.Printf("Black Background: %#v\n", BgBlack.CSSClasses())
+	fmt.Printf("Black Foreground: %#v\n", FgBlack.CSSClasses())
+
+	// Output: Bold: "bold"
+	// Black Background: "bg-black"
+	// Black Foreground: "fg-black"
+}
+
+func TestColor_CSSClasses(t *testing.T) {
+	assert.Equal(t, "bold", Bold.CSSClasses())
+	assert.Equal(t, "bg-black", BgBlack.CSSClasses())
+	assert.Equal(t, "fg-black", FgBlack.CSSClasses())
+	assert.Equal(t, "", Reset.CSSClasses()) // Reset has no CSS class
+}
+
 func ExampleColor_EscapeSeq() {
 	fmt.Printf("Black Background: %#v\n", BgBlack.EscapeSeq())
 	fmt.Printf("Black Foreground: %#v\n", FgBlack.EscapeSeq())
@@ -96,6 +113,7 @@ func TestColor_HTMLProperty(t *testing.T) {
 	assert.Equal(t, "class=\"bold\"", Bold.HTMLProperty())
 	assert.Equal(t, "class=\"bg-black\"", BgBlack.HTMLProperty())
 	assert.Equal(t, "class=\"fg-black\"", FgBlack.HTMLProperty())
+	assert.Equal(t, "", Reset.HTMLProperty()) // Reset has no CSS class mapping
 }
 
 func ExampleColor_Sprint() {
@@ -125,6 +143,26 @@ func ExampleColor_Sprintf() {
 
 func TestColor_Sprintf(t *testing.T) {
 	assert.Equal(t, "\x1b[31mtest true\x1b[0m", FgRed.Sprintf("test %s", "true"))
+}
+
+func ExampleColors_CSSClasses() {
+	fmt.Printf("Black Background: %#v\n", Colors{BgBlack}.CSSClasses())
+	fmt.Printf("Black Foreground: %#v\n", Colors{FgBlack}.CSSClasses())
+	fmt.Printf("Black Background, White Foreground: %#v\n", Colors{BgBlack, FgWhite}.CSSClasses())
+	fmt.Printf("Black Foreground, White Background: %#v\n", Colors{FgBlack, BgWhite}.CSSClasses())
+	fmt.Printf("Bold Italic Underline Red Text: %#v\n", Colors{Bold, Italic, Underline, FgRed}.CSSClasses())
+
+	// Output: Black Background: "bg-black"
+	// Black Foreground: "fg-black"
+	// Black Background, White Foreground: "bg-black fg-white"
+	// Black Foreground, White Background: "bg-white fg-black"
+	// Bold Italic Underline Red Text: "bold fg-red italic underline"
+}
+
+func TestColors_CSSClasses(t *testing.T) {
+	assert.Equal(t, "", Colors{}.CSSClasses())
+	assert.Equal(t, "bg-black fg-white", Colors{BgBlack, FgWhite}.CSSClasses())
+	assert.Equal(t, "bold fg-red", Colors{Bold, FgRed}.CSSClasses())
 }
 
 func ExampleColors_EscapeSeq() {
