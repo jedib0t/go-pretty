@@ -114,7 +114,7 @@ If you want very specific examples, look at the [Examples](#examples) section.
     - Render table with or without borders
     - Customize box-drawing characters
     - Title and caption styling options
-    - HTML rendering options (CSS class, escaping, newlines)
+    - HTML rendering options (CSS class, escaping, newlines, color conversion)
     - Bidirectional text support (`Style().Format.Direction`)
 
 ### Output Formats
@@ -574,10 +574,11 @@ to get:
 
 ```golang
     t.Style().HTML = table.HTMLOptions{
-        CSSClass:    "game-of-thrones",
-        EmptyColumn: "&nbsp;",
-        EscapeText:  true,
-        Newline:     "<br/>",
+        CSSClass:             "game-of-thrones",
+        EmptyColumn:          "&nbsp;",
+        EscapeText:           true,
+        Newline:              "<br/>",
+        ConvertColorsToSpans: true, // Convert ANSI escape sequences to HTML <span> tags with CSS classes
     }
     t.RenderHTML()
 ```
