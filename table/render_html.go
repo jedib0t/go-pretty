@@ -110,7 +110,7 @@ func (t *Table) htmlRenderColumn(out *strings.Builder, colStr string) {
 		colStr = html.EscapeString(colStr)
 	}
 	if t.style.HTML.Newline != "\n" {
-		colStr = strings.Replace(colStr, "\n", t.style.HTML.Newline, -1)
+		colStr = strings.ReplaceAll(colStr, "\n", t.style.HTML.Newline)
 	}
 	out.WriteString(colStr)
 }

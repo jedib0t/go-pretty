@@ -8,7 +8,7 @@ import (
 
 func Test_escSeqParser(t *testing.T) {
 	t.Run("extract csi", func(t *testing.T) {
-		es := escSeqParser{}
+		es := EscSeqParser{}
 
 		assert.Equal(t, "\x1b[1;3;4;5;7;9;91m", es.ParseString("\x1b[91m\x1b[1m\x1b[3m\x1b[4m\x1b[5m\x1b[7m\x1b[9m Spicy"))
 		assert.Equal(t, "\x1b[3;4;5;7;9;91m", es.ParseString("\x1b[22m No Bold"))
@@ -21,7 +21,7 @@ func Test_escSeqParser(t *testing.T) {
 	})
 
 	t.Run("extract osi", func(t *testing.T) {
-		es := escSeqParser{}
+		es := EscSeqParser{}
 
 		assert.Equal(t, "\x1b[1;3;4;5;7;9;91m", es.ParseString("\x1b]91\\\x1b]1\\\x1b]3\\\x1b]4\\\x1b]5\\\x1b]7\\\x1b]9\\ Spicy"))
 		assert.Equal(t, "\x1b[3;4;5;7;9;91m", es.ParseString("\x1b]22\\ No Bold"))
@@ -34,7 +34,7 @@ func Test_escSeqParser(t *testing.T) {
 	})
 
 	t.Run("parse csi", func(t *testing.T) {
-		es := escSeqParser{}
+		es := EscSeqParser{}
 
 		es.ParseSeq("\x1b[91m", escSeqKindCSI) // color
 		es.ParseSeq("\x1b[1m", escSeqKindCSI)  // bold
@@ -54,7 +54,7 @@ func Test_escSeqParser(t *testing.T) {
 	})
 
 	t.Run("parse osi", func(t *testing.T) {
-		es := escSeqParser{}
+		es := EscSeqParser{}
 
 		es.ParseSeq("\x1b]91\\", escSeqKindOSI) // color
 		es.ParseSeq("\x1b]1\\", escSeqKindOSI)  // bold
@@ -76,7 +76,7 @@ func Test_escSeqParser(t *testing.T) {
 	t.Run("osi hyperlink with bel", func(t *testing.T) {
 		// Test OSC 8 hyperlink termination with BEL character (\a)
 		// Format: \x1b]8;;url\x07label\x1b]8;;\x07
-		es := escSeqParser{}
+		es := EscSeqParser{}
 
 		// Simulate parsing an OSC 8 hyperlink that ends with BEL
 		for _, char := range "\x1b]8;;url\x07" {
@@ -89,14 +89,14 @@ func Test_escSeqParser(t *testing.T) {
 		assert.Contains(t, es.Codes(), 8)
 
 		// Test with a full hyperlink sequence
-		es = escSeqParser{} // fresh parser
+		es = EscSeqParser{} // fresh parser
 		result := es.ParseString("\x1b]8;;https://example.com\x07Click here\x1b]8;;\x07")
 		// Code 8 (conceal) will be parsed
 		assert.Equal(t, "\x1b[8m", result)
 	})
 
 	t.Run("consume directly", func(t *testing.T) {
-		es := escSeqParser{}
+		es := EscSeqParser{}
 
 		// Test entering escape sequence
 		es.Consume('\x1b')
@@ -131,7 +131,7 @@ func Test_escSeqParser(t *testing.T) {
 	})
 
 	t.Run("consume invalid escape sequence", func(t *testing.T) {
-		es := escSeqParser{}
+		es := EscSeqParser{}
 
 		// Test escape sequence that doesn't start with CSI or OSI
 		es.Consume('\x1b')
@@ -147,7 +147,7 @@ func Test_escSeqParser(t *testing.T) {
 	})
 
 	t.Run("parse seq with spaces and multiple codes", func(t *testing.T) {
-		es := escSeqParser{}
+		es := EscSeqParser{}
 
 		// Test parsing sequence with spaces
 		es.ParseSeq("\x1b[ 1 ; 3 ; 4 m", escSeqKindCSI)
@@ -166,7 +166,7 @@ func Test_escSeqParser(t *testing.T) {
 	})
 
 	t.Run("parse seq edge cases", func(t *testing.T) {
-		es := escSeqParser{}
+		es := EscSeqParser{}
 
 		// Test empty sequence after stripping
 		es.ParseSeq("\x1b[m", escSeqKindCSI)
