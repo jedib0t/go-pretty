@@ -157,19 +157,19 @@ func TestTable_ImportGrid(t *testing.T) {
 		table := Table{}
 
 		assert.False(t, table.ImportGrid(nil))
-		require.Len(t, table.rowsRaw, 0)
+		require.Len(t, table.rowsRawFiltered, 0)
 
 		assert.False(t, table.ImportGrid(123))
-		require.Len(t, table.rowsRaw, 0)
+		require.Len(t, table.rowsRawFiltered, 0)
 
 		assert.False(t, table.ImportGrid("abc"))
-		require.Len(t, table.rowsRaw, 0)
+		require.Len(t, table.rowsRawFiltered, 0)
 
 		assert.False(t, table.ImportGrid(Table{}))
-		require.Len(t, table.rowsRaw, 0)
+		require.Len(t, table.rowsRawFiltered, 0)
 
 		assert.False(t, table.ImportGrid(&Table{}))
-		require.Len(t, table.rowsRaw, 0)
+		require.Len(t, table.rowsRawFiltered, 0)
 	})
 
 	a, b, c := 1, 2, 3
@@ -307,10 +307,10 @@ func TestTable_ResetHeaders(t *testing.T) {
 func TestTable_ResetRows(t *testing.T) {
 	table := Table{}
 	table.AppendRows(testRows)
-	assert.NotEmpty(t, table.rowsRaw)
+	assert.NotEmpty(t, table.rowsRawFiltered)
 
 	table.ResetRows()
-	assert.Empty(t, table.rowsRaw)
+	assert.Empty(t, table.rowsRawFiltered)
 }
 
 func TestTable_SetAllowedRowLength(t *testing.T) {
