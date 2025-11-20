@@ -38,3 +38,13 @@ func (h *renderHint) isHeaderOrFooterSeparator() bool {
 func (h *renderHint) isLastLineOfLastRow() bool {
 	return h.isLastLineOfRow && h.isLastRow
 }
+
+type renderMode string
+
+const (
+	renderModeDefault  renderMode = "default"
+	renderModeCSV      renderMode = "csv"
+	renderModeMarkdown renderMode = "markdown"
+	renderModeTSV      renderMode = "tsv"
+	renderModeHTML     renderMode = "html"
+)

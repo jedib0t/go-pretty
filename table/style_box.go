@@ -9,7 +9,7 @@ type BoxStyle struct {
 	EmptySeparator   string
 	Left             string
 	LeftSeparator    string
-	MiddleHorizontal string //deprecated: use Horizontal instead
+	MiddleHorizontal string
 	MiddleSeparator  string
 	MiddleVertical   string
 	PaddingLeft      string
@@ -22,6 +22,9 @@ type BoxStyle struct {
 	TopSeparator     string
 	UnfinishedRow    string
 
+	// Horizontal lets you customize the horizontal lines for the Table
+	// in a more granular way than the MiddleHorizontal string. Setting
+	// this to a non-nil value will override MiddleHorizontal.
 	Horizontal *BoxStyleHorizontal
 }
 

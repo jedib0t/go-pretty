@@ -596,17 +596,17 @@ func TestTable_Render_Horizontal(t *testing.T) {
 	// Customize all BoxStyleHorizontal values with distinct characters
 	// This tests that all horizontal line customization options work correctly
 	tw.Style().Box.Horizontal = &BoxStyleHorizontal{
-		TitleTop:     "0", // Title top line (used when isTitleRow && isFirstRow)
-		TitleBottom:  "1", // Title bottom line (used when isTitleRow && !isFirstRow)
-		HeaderTop:    "2", // Header top line (used when isHeaderRow && isFirstRow)
-		HeaderMiddle: "3", // Header middle line (used when isHeaderRow && !isFirstRow && !isLastRow)
-		HeaderBottom: "4", // Header bottom line (used when isHeaderRow && isLastRow)
-		RowTop:       "5", // Row top line (used when regular row && isFirstRow)
-		RowMiddle:    "6", // Row middle line (used when regular row && !isFirstRow && !isLastRow) - visible in output
-		RowBottom:    "7", // Row bottom line (used when regular row && isLastRow)
-		FooterTop:    "8", // Footer top line (used when isFooterRow && isFirstRow)
-		FooterMiddle: "9", // Footer middle line (used when isFooterRow && !isFirstRow && !isLastRow)
-		FooterBottom: "A", // Footer bottom line (used when isFooterRow && isLastRow)
+		TitleTop:     "0",
+		TitleBottom:  "1",
+		HeaderTop:    "2",
+		HeaderMiddle: "3",
+		HeaderBottom: "4",
+		RowTop:       "5",
+		RowMiddle:    "6",
+		RowBottom:    "7",
+		FooterTop:    "8",
+		FooterMiddle: "9",
+		FooterBottom: "A",
 	}
 
 	t.Run("just rows", func(t *testing.T) {

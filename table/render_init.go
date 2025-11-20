@@ -153,7 +153,9 @@ func (t *Table) reBalanceMaxMergedColumnLengths() {
 	}
 }
 
-func (t *Table) initForRender() {
+func (t *Table) initForRender(mode renderMode) {
+	t.renderMode = mode
+
 	// pick a default style if none was set until now
 	t.Style()
 
@@ -348,10 +350,40 @@ func (t *Table) initForRenderRowPainterColors() {
 }
 
 func (t *Table) initForRenderRowSeparator() {
-	t.rowSeparators = make(map[separatorType]rowStr, separatorTypeCount)
-	for idx := separatorType(0); idx < separatorTypeCount; idx++ {
-		t.rowSeparators[idx] = make(rowStr, t.numColumns)
+	if t.renderMode != renderModeDefault {
+		return
 	}
+
+	t.rowSeparators = make(map[separatorType]rowStr, separatorTypeCount)
+
+	// allocate space only for the separators that are actually used
+	if t.title != "" {
+		t.rowSeparators[separatorTypeTitleTop] = make(rowStr, t.numColumns)
+		t.rowSeparators[separatorTypeTitleBottom] = make(rowStr, t.numColumns)
+	}
+	if len(t.rowsHeader) > 0 || t.autoIndex {
+		t.rowSeparators[separatorTypeHeaderTop] = make(rowStr, t.numColumns)
+		t.rowSeparators[separatorTypeHeaderBottom] = make(rowStr, t.numColumns)
+		if len(t.rowsHeader) > 1 {
+			t.rowSeparators[separatorTypeHeaderMiddle] = make(rowStr, t.numColumns)
+		}
+	}
+	if len(t.rows) > 0 {
+		t.rowSeparators[separatorTypeRowTop] = make(rowStr, t.numColumns)
+		t.rowSeparators[separatorTypeRowBottom] = make(rowStr, t.numColumns)
+		if len(t.rows) > 1 {
+			t.rowSeparators[separatorTypeRowMiddle] = make(rowStr, t.numColumns)
+		}
+	}
+	if len(t.rowsFooter) > 0 {
+		t.rowSeparators[separatorTypeFooterTop] = make(rowStr, t.numColumns)
+		t.rowSeparators[separatorTypeFooterBottom] = make(rowStr, t.numColumns)
+		if len(t.rowsFooter) > 1 {
+			t.rowSeparators[separatorTypeFooterMiddle] = make(rowStr, t.numColumns)
+		}
+	}
+
+	// fill in the separators with the appropriate characters
 	for separatorType := range t.rowSeparators {
 		middleHorizontal := t.style.Box.middleHorizontal(renderHint{separtorType: separatorType})
 		for colIdx, maxColumnLength := range t.maxColumnLengths {

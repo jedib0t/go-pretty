@@ -20,7 +20,7 @@ import (
 //	│     │            │ TOTAL     │  10000 │                             │
 //	└─────┴────────────┴───────────┴────────┴─────────────────────────────┘
 func (t *Table) Render() string {
-	t.initForRender()
+	t.initForRender(renderModeDefault)
 
 	var out strings.Builder
 	if t.numColumns > 0 {

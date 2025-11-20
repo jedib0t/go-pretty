@@ -52,6 +52,8 @@ type Table struct {
 	outputMirror io.Writer
 	// pager controls how the output is separated into pages
 	pager pager
+	// renderMode contains the type of table to render
+	renderMode renderMode
 	// rows stores the rows that make up the body (in string form)
 	rows []rowStr
 	// rowsColors stores the text.Colors over-rides for each row as defined by
