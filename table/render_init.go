@@ -350,6 +350,7 @@ func (t *Table) initForRenderRowPainterColors() {
 }
 
 func (t *Table) initForRenderRowSeparator() {
+	// this is needed only for default render mode
 	if t.renderMode != renderModeDefault {
 		return
 	}
@@ -375,6 +376,7 @@ func (t *Table) initForRenderRowSeparatorStrings() {
 		t.rowSeparatorStrings[st] = t.style.Box.middleHorizontal(st)
 	}
 
+	// for other render modes, we need all the separators
 	if t.title != "" {
 		addSeparatorType(separatorTypeTitleTop)
 		addSeparatorType(separatorTypeTitleBottom)

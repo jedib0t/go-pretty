@@ -47,19 +47,15 @@ func (t *Table) markdownRenderRow(out *strings.Builder, row rowStr, hint renderH
 	for colIdx := 0; colIdx < t.numColumns; colIdx++ {
 		t.markdownRenderRowAutoIndex(out, colIdx, hint)
 
-		if hint.isSeparatorRow {
-			out.WriteString(t.getAlign(colIdx, hint).MarkdownProperty())
-		} else {
-			var colStr string
-			if colIdx < len(row) {
-				colStr = row[colIdx]
-			}
-			out.WriteRune(' ')
-			colStr = strings.ReplaceAll(colStr, "|", "\\|")
-			colStr = strings.ReplaceAll(colStr, "\n", "<br/>")
-			out.WriteString(colStr)
-			out.WriteRune(' ')
+		var colStr string
+		if colIdx < len(row) {
+			colStr = row[colIdx]
 		}
+		out.WriteRune(' ')
+		colStr = strings.ReplaceAll(colStr, "|", "\\|")
+		colStr = strings.ReplaceAll(colStr, "\n", "<br/>")
+		out.WriteString(colStr)
+		out.WriteRune(' ')
 		out.WriteRune('|')
 	}
 }
@@ -78,13 +74,12 @@ func (t *Table) markdownRenderRowAutoIndex(out *strings.Builder, colIdx int, hin
 
 func (t *Table) markdownRenderRows(out *strings.Builder, rows []rowStr, hint renderHint) {
 	if len(rows) > 0 {
-		separator := t.rowSeparatorStrings[separatorTypeRowMiddle]
 		for idx, row := range rows {
 			hint.rowNumber = idx + 1
 			t.markdownRenderRow(out, row, hint)
 
 			if idx == len(rows)-1 && hint.isHeaderRow {
-				t.markdownRenderRow(out, t.rowSeparators[separator], renderHint{isSeparatorRow: true})
+				t.markdownRenderSeparator(out, renderHint{isSeparatorRow: true})
 			}
 		}
 	}
@@ -99,6 +94,21 @@ func (t *Table) markdownRenderRowsHeader(out *strings.Builder) {
 		t.markdownRenderRows(out, t.rowsHeader, renderHint{isHeaderRow: true})
 	} else if t.autoIndex {
 		t.markdownRenderRows(out, []rowStr{t.getAutoIndexColumnIDs()}, renderHint{isAutoIndexRow: true, isHeaderRow: true})
+	}
+}
+
+func (t *Table) markdownRenderSeparator(out *strings.Builder, hint renderHint) {
+	// when working on line number 2 or more, insert a newline first
+	if out.Len() > 0 {
+		out.WriteRune('\n')
+	}
+
+	out.WriteRune('|')
+	for colIdx := 0; colIdx < t.numColumns; colIdx++ {
+		t.markdownRenderRowAutoIndex(out, colIdx, hint)
+
+		out.WriteString(t.getAlign(colIdx, hint).MarkdownProperty())
+		out.WriteRune('|')
 	}
 }
 
