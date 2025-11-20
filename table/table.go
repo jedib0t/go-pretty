@@ -511,13 +511,13 @@ func (t *Table) getColumnSeparator(row rowStr, colIdx int, hint renderHint) stri
 	if hint.isSeparatorRow {
 		if hint.isBorderTop {
 			if t.shouldMergeCellsHorizontallyBelow(row, colIdx, hint) {
-				separator = t.style.Box.middleHorizontal(hint.separtorType)
+				separator = t.style.Box.middleHorizontal(hint.separatorType)
 			} else {
 				separator = t.style.Box.TopSeparator
 			}
 		} else if hint.isBorderBottom {
 			if t.shouldMergeCellsHorizontallyAbove(row, colIdx, hint) {
-				separator = t.style.Box.middleHorizontal(hint.separtorType)
+				separator = t.style.Box.middleHorizontal(hint.separatorType)
 			} else {
 				separator = t.style.Box.BottomSeparator
 			}
@@ -556,7 +556,7 @@ func (t *Table) getColumnSeparatorNonBorderNonAutoIndex(mergeCellsAbove bool, me
 	if mergeCellsAbove && mergeCellsBelow && mergeCurrCol && mergeNextCol {
 		return t.style.Box.EmptySeparator
 	} else if mergeCellsAbove && mergeCellsBelow {
-		return t.style.Box.middleHorizontal(hint.separtorType)
+		return t.style.Box.middleHorizontal(hint.separatorType)
 	} else if mergeCellsAbove {
 		return t.style.Box.TopSeparator
 	} else if mergeCellsBelow {

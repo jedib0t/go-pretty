@@ -15,7 +15,7 @@ type renderHint struct {
 	isTitleRow        bool // title row?
 	rowLineNumber     int  // the line number for a multi-line row
 	rowNumber         int  // the row number/index
-	separtorType      separatorType
+	separatorType     separatorType
 }
 
 func (h *renderHint) isBorderOrSeparator() bool {

@@ -360,11 +360,11 @@ func (t *Table) initForRenderRowSeparator() {
 
 	// init the separator-string -> separator-row map
 	t.rowSeparators = make(map[string]rowStr, len(t.rowSeparatorStrings))
+	paddingLength := text.StringWidthWithoutEscSequences(t.style.Box.PaddingLeft + t.style.Box.PaddingRight)
 	for _, separator := range t.rowSeparatorStrings {
 		t.rowSeparators[separator] = make(rowStr, t.numColumns)
 		for colIdx, maxColumnLength := range t.maxColumnLengths {
-			maxColumnLength += text.StringWidthWithoutEscSequences(t.style.Box.PaddingLeft + t.style.Box.PaddingRight)
-			t.rowSeparators[separator][colIdx] = text.RepeatAndTrim(separator, maxColumnLength)
+			t.rowSeparators[separator][colIdx] = text.RepeatAndTrim(separator, maxColumnLength+paddingLength)
 		}
 	}
 }
