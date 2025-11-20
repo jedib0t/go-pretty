@@ -748,6 +748,48 @@ func TestTable_Render_Horizontal(t *testing.T) {
 	})
 }
 
+func TestTable_Render_Horizontal2(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendFooter(testFooter)
+	tw.SetStyle(StyleDefault)
+	tw.SetTitle(testTitle1)
+	tw.Style().Box.Horizontal = &BoxStyleHorizontal{
+		TitleTop:     "-",
+		TitleBottom:  "-",
+		HeaderTop:    "-",
+		HeaderMiddle: "-",
+		HeaderBottom: "=",
+		RowTop:       "-",
+		RowMiddle:    "-",
+		RowBottom:    "-",
+		FooterTop:    "=",
+		FooterMiddle: "-",
+		FooterBottom: "-",
+	}
+	tw.Style().Options.DrawBorder = true
+	tw.Style().Options.SeparateColumns = true
+	tw.Style().Options.SeparateFooter = true
+	tw.Style().Options.SeparateHeader = true
+	tw.Style().Options.SeparateRows = true
+
+	compareOutput(t, tw.Render(), `
++---------------------------------------------------------------------+
+| Game of Thrones                                                     |
++-----+------------+-----------+--------+-----------------------------+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++=====+============+===========+========+=============================+
+|   1 | Arya       | Stark     |   3000 |                             |
++-----+------------+-----------+--------+-----------------------------+
+|  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
++-----+------------+-----------+--------+-----------------------------+
+| 300 | Tyrion     | Lannister |   5000 |                             |
++=====+============+===========+========+=============================+
+|     |            | TOTAL     |  10000 |                             |
++-----+------------+-----------+--------+-----------------------------+`)
+}
+
 func TestTable_Render_Colored(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		tw := NewWriter()
