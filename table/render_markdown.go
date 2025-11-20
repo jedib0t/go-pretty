@@ -83,7 +83,7 @@ func (t *Table) markdownRenderRows(out *strings.Builder, rows []rowStr, hint ren
 			t.markdownRenderRow(out, row, hint)
 
 			if idx == len(rows)-1 && hint.isHeaderRow {
-				t.markdownRenderRow(out, t.rowSeparator, renderHint{isSeparatorRow: true})
+				t.markdownRenderRow(out, t.rowSeparators[separatorTypeRowMiddle], renderHint{isSeparatorRow: true})
 			}
 		}
 	}

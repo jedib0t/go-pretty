@@ -348,10 +348,16 @@ func (t *Table) initForRenderRowPainterColors() {
 }
 
 func (t *Table) initForRenderRowSeparator() {
-	t.rowSeparator = make(rowStr, t.numColumns)
-	for colIdx, maxColumnLength := range t.maxColumnLengths {
-		maxColumnLength += text.StringWidthWithoutEscSequences(t.style.Box.PaddingLeft + t.style.Box.PaddingRight)
-		t.rowSeparator[colIdx] = text.RepeatAndTrim(t.style.Box.MiddleHorizontal, maxColumnLength)
+	t.rowSeparators = make(map[separatorType]rowStr, separatorTypeCount)
+	for idx := separatorType(0); idx < separatorTypeCount; idx++ {
+		t.rowSeparators[idx] = make(rowStr, t.numColumns)
+	}
+	for separatorType := range t.rowSeparators {
+		middleHorizontal := t.style.Box.middleHorizontal(renderHint{separtorType: separatorType})
+		for colIdx, maxColumnLength := range t.maxColumnLengths {
+			maxColumnLength += text.StringWidthWithoutEscSequences(t.style.Box.PaddingLeft + t.style.Box.PaddingRight)
+			t.rowSeparators[separatorType][colIdx] = text.RepeatAndTrim(middleHorizontal, maxColumnLength)
+		}
 	}
 }
 
@@ -409,7 +415,7 @@ func (t *Table) reset() {
 	t.maxRowLength = 0
 	t.numColumns = 0
 	t.numLinesRendered = 0
-	t.rowSeparator = nil
+	t.rowSeparators = nil
 	t.rows = nil
 	t.rowsColors = nil
 	t.rowsFooter = nil

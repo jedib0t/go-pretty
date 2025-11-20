@@ -573,6 +573,181 @@ func TestTable_Render_BorderAndSeparators_Colored(t *testing.T) {
 	)
 }
 
+func TestTable_Render_Horizontal(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendFooter(testFooter)
+	tw.AppendFooter(testFooter)
+	tw.SetStyle(StyleDefault)
+	tw.Style().Options.DrawBorder = true
+	tw.Style().Options.SeparateColumns = true
+	tw.Style().Options.SeparateFooter = true
+	tw.Style().Options.SeparateHeader = true
+	tw.Style().Options.SeparateRows = true
+
+	resetTable := func() {
+		tw.ResetHeaders()
+		tw.ResetRows()
+		tw.ResetFooters()
+	}
+
+	// Customize all BoxStyleHorizontal values with distinct characters
+	// This tests that all horizontal line customization options work correctly
+	tw.Style().Box.Horizontal = &BoxStyleHorizontal{
+		TitleTop:     "0", // Title top line (used when isTitleRow && isFirstRow)
+		TitleBottom:  "1", // Title bottom line (used when isTitleRow && !isFirstRow)
+		HeaderTop:    "2", // Header top line (used when isHeaderRow && isFirstRow)
+		HeaderMiddle: "3", // Header middle line (used when isHeaderRow && !isFirstRow && !isLastRow)
+		HeaderBottom: "4", // Header bottom line (used when isHeaderRow && isLastRow)
+		RowTop:       "5", // Row top line (used when regular row && isFirstRow)
+		RowMiddle:    "6", // Row middle line (used when regular row && !isFirstRow && !isLastRow) - visible in output
+		RowBottom:    "7", // Row bottom line (used when regular row && isLastRow)
+		FooterTop:    "8", // Footer top line (used when isFooterRow && isFirstRow)
+		FooterMiddle: "9", // Footer middle line (used when isFooterRow && !isFirstRow && !isLastRow)
+		FooterBottom: "A", // Footer bottom line (used when isFooterRow && isLastRow)
+	}
+
+	t.Run("just rows", func(t *testing.T) {
+		resetTable()
+
+		tw.AppendRows(testRows)
+		tw.SetTitle("")
+
+		compareOutput(t, tw.Render(), `
++55555+55555555+55555555555+555555+55555555555555555555555555555+
+|   1 | Arya   | Stark     | 3000 |                             |
++66666+66666666+66666666666+666666+66666666666666666666666666666+
+|  20 | Jon    | Snow      | 2000 | You know nothing, Jon Snow! |
++66666+66666666+66666666666+666666+66666666666666666666666666666+
+| 300 | Tyrion | Lannister | 5000 |                             |
++77777+77777777+77777777777+777777+77777777777777777777777777777+`)
+	})
+
+	t.Run("headers & rows", func(t *testing.T) {
+		resetTable()
+
+		tw.AppendHeader(testHeader)
+		tw.AppendHeader(testHeader)
+		tw.AppendRows(testRows)
+		tw.SetTitle("")
+
+		compareOutput(t, tw.Render(), `
++22222+222222222222+22222222222+22222222+22222222222222222222222222222+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++33333+333333333333+33333333333+33333333+33333333333333333333333333333+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++44444+444444444444+44444444444+44444444+44444444444444444444444444444+
+|   1 | Arya       | Stark     |   3000 |                             |
++66666+666666666666+66666666666+66666666+66666666666666666666666666666+
+|  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
++66666+666666666666+66666666666+66666666+66666666666666666666666666666+
+| 300 | Tyrion     | Lannister |   5000 |                             |
++77777+777777777777+77777777777+77777777+77777777777777777777777777777+`)
+	})
+
+	t.Run("headers & rows & footers", func(t *testing.T) {
+		resetTable()
+
+		tw.AppendHeader(testHeader)
+		tw.AppendHeader(testHeader)
+		tw.AppendRows(testRows)
+		tw.AppendFooter(testFooter)
+		tw.AppendFooter(testFooter)
+		tw.SetTitle("")
+
+		compareOutput(t, tw.Render(), `
++22222+222222222222+22222222222+22222222+22222222222222222222222222222+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++33333+333333333333+33333333333+33333333+33333333333333333333333333333+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++44444+444444444444+44444444444+44444444+44444444444444444444444444444+
+|   1 | Arya       | Stark     |   3000 |                             |
++66666+666666666666+66666666666+66666666+66666666666666666666666666666+
+|  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
++66666+666666666666+66666666666+66666666+66666666666666666666666666666+
+| 300 | Tyrion     | Lannister |   5000 |                             |
++88888+888888888888+88888888888+88888888+88888888888888888888888888888+
+|     |            | TOTAL     |  10000 |                             |
++99999+999999999999+99999999999+99999999+99999999999999999999999999999+
+|     |            | TOTAL     |  10000 |                             |
++AAAAA+AAAAAAAAAAAA+AAAAAAAAAAA+AAAAAAAA+AAAAAAAAAAAAAAAAAAAAAAAAAAAAA+`)
+	})
+
+	t.Run("title & headers & rows & footers", func(t *testing.T) {
+		resetTable()
+
+		tw.AppendHeader(testHeader)
+		tw.AppendHeader(testHeader)
+		tw.AppendRows(testRows)
+		tw.AppendFooter(testFooter)
+		tw.AppendFooter(testFooter)
+		tw.SetTitle(testTitle1)
+
+		compareOutput(t, tw.Render(), `
++000000000000000000000000000000000000000000000000000000000000000000000+
+| Game of Thrones                                                     |
++11111+111111111111+11111111111+11111111+11111111111111111111111111111+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++33333+333333333333+33333333333+33333333+33333333333333333333333333333+
+|   # | FIRST NAME | LAST NAME | SALARY |                             |
++44444+444444444444+44444444444+44444444+44444444444444444444444444444+
+|   1 | Arya       | Stark     |   3000 |                             |
++66666+666666666666+66666666666+66666666+66666666666666666666666666666+
+|  20 | Jon        | Snow      |   2000 | You know nothing, Jon Snow! |
++66666+666666666666+66666666666+66666666+66666666666666666666666666666+
+| 300 | Tyrion     | Lannister |   5000 |                             |
++88888+888888888888+88888888888+88888888+88888888888888888888888888888+
+|     |            | TOTAL     |  10000 |                             |
++99999+999999999999+99999999999+99999999+99999999999999999999999999999+
+|     |            | TOTAL     |  10000 |                             |
++AAAAA+AAAAAAAAAAAA+AAAAAAAAAAA+AAAAAAAA+AAAAAAAAAAAAAAAAAAAAAAAAAAAAA+`)
+	})
+
+	t.Run("title & rows & footers", func(t *testing.T) {
+		resetTable()
+
+		tw.AppendRows(testRows)
+		tw.AppendFooter(testFooter)
+		tw.AppendFooter(testFooter)
+		tw.SetTitle(testTitle1)
+
+		compareOutput(t, tw.Render(), `
++0000000000000000000000000000000000000000000000000000000000000000+
+| Game of Thrones                                                |
++11111+11111111+11111111111+1111111+11111111111111111111111111111+
+|   1 | Arya   | Stark     |  3000 |                             |
++66666+66666666+66666666666+6666666+66666666666666666666666666666+
+|  20 | Jon    | Snow      |  2000 | You know nothing, Jon Snow! |
++66666+66666666+66666666666+6666666+66666666666666666666666666666+
+| 300 | Tyrion | Lannister |  5000 |                             |
++88888+88888888+88888888888+8888888+88888888888888888888888888888+
+|     |        | TOTAL     | 10000 |                             |
++99999+99999999+99999999999+9999999+99999999999999999999999999999+
+|     |        | TOTAL     | 10000 |                             |
++AAAAA+AAAAAAAA+AAAAAAAAAAA+AAAAAAA+AAAAAAAAAAAAAAAAAAAAAAAAAAAAA+`)
+	})
+
+	t.Run("title & rows", func(t *testing.T) {
+		resetTable()
+
+		tw.AppendRows(testRows)
+		tw.SetTitle(testTitle1)
+
+		compareOutput(t, tw.Render(), `
++000000000000000000000000000000000000000000000000000000000000000+
+| Game of Thrones                                               |
++11111+11111111+11111111111+111111+11111111111111111111111111111+
+|   1 | Arya   | Stark     | 3000 |                             |
++66666+66666666+66666666666+666666+66666666666666666666666666666+
+|  20 | Jon    | Snow      | 2000 | You know nothing, Jon Snow! |
++66666+66666666+66666666666+666666+66666666666666666666666666666+
+| 300 | Tyrion | Lannister | 5000 |                             |
++77777+77777777+77777777777+777777+77777777777777777777777777777+`)
+	})
+}
+
 func TestTable_Render_Colored(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		tw := NewWriter()

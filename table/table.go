@@ -78,9 +78,9 @@ type Table struct {
 	rowPainter RowPainter
 	// rowPainterWithAttributes is same as rowPainter, but with attributes
 	rowPainterWithAttributes RowPainterWithAttributes
-	// rowSeparator is a dummy row that contains the separator columns (dashes
-	// that make up the separator between header/body/footer
-	rowSeparator rowStr
+	// rowSeparators contains the separator columns (dashes that make up the
+	// separators between title/header/body/footer
+	rowSeparators map[separatorType]rowStr
 	// separators is used to keep track of all rowIndices after which a
 	// separator has to be rendered
 	separators map[int]bool
@@ -507,13 +507,13 @@ func (t *Table) getColumnSeparator(row rowStr, colIdx int, hint renderHint) stri
 	if hint.isSeparatorRow {
 		if hint.isBorderTop {
 			if t.shouldMergeCellsHorizontallyBelow(row, colIdx, hint) {
-				separator = t.style.Box.MiddleHorizontal
+				separator = t.style.Box.middleHorizontal(hint)
 			} else {
 				separator = t.style.Box.TopSeparator
 			}
 		} else if hint.isBorderBottom {
 			if t.shouldMergeCellsHorizontallyAbove(row, colIdx, hint) {
-				separator = t.style.Box.MiddleHorizontal
+				separator = t.style.Box.middleHorizontal(hint)
 			} else {
 				separator = t.style.Box.BottomSeparator
 			}
@@ -533,7 +533,7 @@ func (t *Table) getColumnSeparatorNonBorder(mergeCellsAbove bool, mergeCellsBelo
 	}
 
 	mergeCurrCol := t.shouldMergeCellsVerticallyAbove(colIdx-1, hint)
-	return t.getColumnSeparatorNonBorderNonAutoIndex(mergeCellsAbove, mergeCellsBelow, mergeCurrCol, mergeNextCol)
+	return t.getColumnSeparatorNonBorderNonAutoIndex(mergeCellsAbove, mergeCellsBelow, mergeCurrCol, mergeNextCol, hint)
 }
 
 func (t *Table) getColumnSeparatorNonBorderAutoIndex(mergeNextCol bool, hint renderHint) string {
@@ -548,11 +548,11 @@ func (t *Table) getColumnSeparatorNonBorderAutoIndex(mergeNextCol bool, hint ren
 	return t.style.Box.MiddleSeparator
 }
 
-func (t *Table) getColumnSeparatorNonBorderNonAutoIndex(mergeCellsAbove bool, mergeCellsBelow bool, mergeCurrCol bool, mergeNextCol bool) string {
+func (t *Table) getColumnSeparatorNonBorderNonAutoIndex(mergeCellsAbove bool, mergeCellsBelow bool, mergeCurrCol bool, mergeNextCol bool, hint renderHint) string {
 	if mergeCellsAbove && mergeCellsBelow && mergeCurrCol && mergeNextCol {
 		return t.style.Box.EmptySeparator
 	} else if mergeCellsAbove && mergeCellsBelow {
-		return t.style.Box.MiddleHorizontal
+		return t.style.Box.middleHorizontal(hint)
 	} else if mergeCellsAbove {
 		return t.style.Box.TopSeparator
 	} else if mergeCellsBelow {
