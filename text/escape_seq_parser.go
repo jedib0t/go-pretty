@@ -73,13 +73,16 @@ const (
 	escCode256Color   = 5
 	escCodeResetFg    = 39
 	escCodeResetBg    = 49
+	escCode256Max     = 255
+)
 
-	// Internal encoding for 256-color codes
-	// Foreground 256-color: 1000 + colorIndex (1000-1255)
-	// Background 256-color: 2000 + colorIndex (2000-2255)
-	escCode256FgBase = 1000
-	escCode256BgBase = 2000
-	escCode256Max    = 255
+// Internal encoding for 256-color codes uses Fg256Start and Bg256Start from color.go
+// Private constants initialized from public constants to avoid repeated casting in hot paths
+// Foreground 256-color: Fg256Start + colorIndex (1000-1255)
+// Background 256-color: Bg256Start + colorIndex (2000-2255)
+const (
+	escCode256FgBase = int(Fg256Start) // 1000
+	escCode256BgBase = int(Bg256Start) // 2000
 )
 
 // Standard color code ranges
