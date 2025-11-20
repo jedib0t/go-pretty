@@ -233,9 +233,9 @@ func TestColors_Sprintf(t *testing.T) {
 
 func TestFg256Color(t *testing.T) {
 	// Valid indices
-	assert.Equal(t, Fg256Start+0, Fg256Color(0))
-	assert.Equal(t, Fg256Start+123, Fg256Color(123))
-	assert.Equal(t, Fg256Start+255, Fg256Color(255))
+	assert.Equal(t, fg256Start+0, Fg256Color(0))
+	assert.Equal(t, fg256Start+123, Fg256Color(123))
+	assert.Equal(t, fg256Start+255, Fg256Color(255))
 
 	// Invalid indices should return Reset
 	assert.Equal(t, Reset, Fg256Color(-1))
@@ -245,9 +245,9 @@ func TestFg256Color(t *testing.T) {
 
 func TestBg256Color(t *testing.T) {
 	// Valid indices
-	assert.Equal(t, Bg256Start+0, Bg256Color(0))
-	assert.Equal(t, Bg256Start+200, Bg256Color(200))
-	assert.Equal(t, Bg256Start+255, Bg256Color(255))
+	assert.Equal(t, bg256Start+0, Bg256Color(0))
+	assert.Equal(t, bg256Start+200, Bg256Color(200))
+	assert.Equal(t, bg256Start+255, Bg256Color(255))
 
 	// Invalid indices should return Reset
 	assert.Equal(t, Reset, Bg256Color(-1))
@@ -257,9 +257,9 @@ func TestBg256Color(t *testing.T) {
 
 func TestFg256RGB(t *testing.T) {
 	// Valid RGB values (0-5)
-	assert.Equal(t, Fg256Start+16, Fg256RGB(0, 0, 0))  // First color in cube
-	assert.Equal(t, Fg256Start+51, Fg256RGB(0, 5, 5))  // r=0, g=5, b=5
-	assert.Equal(t, Fg256Start+231, Fg256RGB(5, 5, 5)) // Last color in cube
+	assert.Equal(t, fg256Start+16, Fg256RGB(0, 0, 0))  // First color in cube
+	assert.Equal(t, fg256Start+51, Fg256RGB(0, 5, 5))  // r=0, g=5, b=5
+	assert.Equal(t, fg256Start+231, Fg256RGB(5, 5, 5)) // Last color in cube
 
 	// Invalid RGB values should return Reset
 	assert.Equal(t, Reset, Fg256RGB(-1, 0, 0))
@@ -272,9 +272,9 @@ func TestFg256RGB(t *testing.T) {
 
 func TestBg256RGB(t *testing.T) {
 	// Valid RGB values (0-5)
-	assert.Equal(t, Bg256Start+16, Bg256RGB(0, 0, 0))  // First color in cube
-	assert.Equal(t, Bg256Start+51, Bg256RGB(0, 5, 5))  // r=0, g=5, b=5
-	assert.Equal(t, Bg256Start+231, Bg256RGB(5, 5, 5)) // Last color in cube
+	assert.Equal(t, bg256Start+16, Bg256RGB(0, 0, 0))  // First color in cube
+	assert.Equal(t, bg256Start+51, Bg256RGB(0, 5, 5))  // r=0, g=5, b=5
+	assert.Equal(t, bg256Start+231, Bg256RGB(5, 5, 5)) // Last color in cube
 
 	// Invalid RGB values should return Reset
 	assert.Equal(t, Reset, Bg256RGB(-1, 0, 0))

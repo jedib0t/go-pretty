@@ -117,27 +117,27 @@ const (
 
 // 256-color support
 // Internal encoding for 256-color codes (used by escape_seq_parser.go):
-// Foreground 256-color: Fg256Start + colorIndex (1000-1255)
-// Background 256-color: Bg256Start + colorIndex (2000-2255)
+// Foreground 256-color: fg256Start + colorIndex (1000-1255)
+// Background 256-color: bg256Start + colorIndex (2000-2255)
 const (
-	// Fg256Start is the base value for 256-color foreground colors.
+	// fg256Start is the base value for 256-color foreground colors.
 	// Use Fg256Color(index) to create a 256-color foreground color.
-	Fg256Start Color = 1000
-	// Bg256Start is the base value for 256-color background colors.
+	fg256Start Color = 1000
+	// bg256Start is the base value for 256-color background colors.
 	// Use Bg256Color(index) to create a 256-color background color.
-	Bg256Start Color = 2000
+	bg256Start Color = 2000
 )
 
 // CSSClasses returns the CSS class names for the color.
 func (c Color) CSSClasses() string {
 	// Check for 256-color and convert to RGB-based class
-	if c >= Fg256Start && c < Fg256Start+256 {
-		colorIndex := int(c - Fg256Start)
+	if c >= fg256Start && c < fg256Start+256 {
+		colorIndex := int(c - fg256Start)
 		r, g, b := color256ToRGB(colorIndex)
 		return fmt.Sprintf("fg-256-%d-%d-%d", r, g, b)
 	}
-	if c >= Bg256Start && c < Bg256Start+256 {
-		colorIndex := int(c - Bg256Start)
+	if c >= bg256Start && c < bg256Start+256 {
+		colorIndex := int(c - bg256Start)
 		r, g, b := color256ToRGB(colorIndex)
 		return fmt.Sprintf("bg-256-%d-%d-%d", r, g, b)
 	}
@@ -151,13 +151,13 @@ func (c Color) CSSClasses() string {
 // EscapeSeq returns the ANSI escape sequence for the color.
 func (c Color) EscapeSeq() string {
 	// Check if it's a 256-color foreground (1000-1255)
-	if c >= Fg256Start && c < Fg256Start+256 {
-		colorIndex := int(c - Fg256Start)
+	if c >= fg256Start && c < fg256Start+256 {
+		colorIndex := int(c - fg256Start)
 		return fmt.Sprintf("%s38;5;%d%s", EscapeStart, colorIndex, EscapeStop)
 	}
 	// Check if it's a 256-color background (2000-2255)
-	if c >= Bg256Start && c < Bg256Start+256 {
-		colorIndex := int(c - Bg256Start)
+	if c >= bg256Start && c < bg256Start+256 {
+		colorIndex := int(c - bg256Start)
 		return fmt.Sprintf("%s48;5;%d%s", EscapeStart, colorIndex, EscapeStop)
 	}
 	// Regular color (existing behavior)
@@ -231,13 +231,13 @@ func (c Colors) EscapeSeq() string {
 // colorToCode converts a Color to its escape sequence code string.
 func (c Colors) colorToCode(color Color) string {
 	// Check if it's a 256-color foreground (1000-1255)
-	if color >= Fg256Start && color < Fg256Start+256 {
-		colorIndex := int(color - Fg256Start)
+	if color >= fg256Start && color < fg256Start+256 {
+		colorIndex := int(color - fg256Start)
 		return fmt.Sprintf("38;5;%d", colorIndex)
 	}
 	// Check if it's a 256-color background (2000-2255)
-	if color >= Bg256Start && color < Bg256Start+256 {
-		colorIndex := int(color - Bg256Start)
+	if color >= bg256Start && color < bg256Start+256 {
+		colorIndex := int(color - bg256Start)
 		return fmt.Sprintf("48;5;%d", colorIndex)
 	}
 	// Regular color
@@ -276,7 +276,7 @@ func Fg256Color(index int) Color {
 	if index < 0 || index > 255 {
 		return Reset
 	}
-	return Fg256Start + Color(index)
+	return fg256Start + Color(index)
 }
 
 // Bg256Color returns a background 256-color Color value.
@@ -285,7 +285,7 @@ func Bg256Color(index int) Color {
 	if index < 0 || index > 255 {
 		return Reset
 	}
-	return Bg256Start + Color(index)
+	return bg256Start + Color(index)
 }
 
 // Fg256RGB returns a foreground 256-color from RGB values in the 6x6x6 color cube.
