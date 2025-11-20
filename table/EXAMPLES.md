@@ -40,6 +40,7 @@ Running the above will result in:
 +-----+------------+-----------+--------+-----------------------------+
 ```
 
+---
 
 <details>
 <summary><strong>Ready-to-use Styles</strong></summary>
@@ -74,6 +75,8 @@ to get:
 <img src="images/table-StyleColoredBright.png" width="640px" alt="Colored Table"/>
 
 </details>
+
+---
 
 <details>
 <summary><strong>Roll your own Style</strong></summary>
@@ -133,6 +136,8 @@ Or you can use one of the ready-to-use Styles, and just make a few tweaks:
 
 </details>
 
+---
+
 <details>
 <summary><strong>Customize Horizontal Separators</strong></summary>
 
@@ -188,6 +193,8 @@ to get something like:
 When `BoxStyle.Horizontal` is set to a non-nil value, it overrides the `MiddleHorizontal` string for all horizontal separators. If `Horizontal` is nil, the table will automatically use `MiddleHorizontal` for all separator types.
 
 </details>
+
+---
 
 <details>
 <summary><strong>Auto-Merge</strong></summary>
@@ -249,6 +256,8 @@ to get:
 
 </details>
 
+---
+
 <details>
 <summary><strong>Paging</strong></summary>
 
@@ -299,6 +308,8 @@ to get:
 
 </details>
 
+---
+
 <details>
 <summary><strong>Sorting</strong></summary>
 
@@ -326,6 +337,8 @@ You can also make sorting case-insensitive by setting `IgnoreCase: true`:
 ```
 
 </details>
+
+---
 
 <details>
 <summary><strong>Sorting Customization</strong></summary>
@@ -392,6 +405,8 @@ Example: Combining custom sorting with default sorting modes.
 ```
 </details>
 
+---
+
 <details>
 <summary><strong>Wrapping (or) Row/Column Width restrictions</strong></summary>
 
@@ -415,6 +430,8 @@ to get:
 ```
 
 </details>
+
+---
 
 <details>
 <summary><strong>Column Control - Alignment, Colors, Width and more</strong></summary>
@@ -456,6 +473,8 @@ global properties/styles using the `SetColumnConfig()` interface:
 
 </details>
 
+---
+
 <details>
 <summary><strong>CSV</strong></summary>
 
@@ -472,6 +491,8 @@ to get:
 ```
 
 </details>
+
+---
 
 <details>
 <summary><strong>HTML Table</strong></summary>
@@ -535,6 +556,8 @@ to get:
 
 </details>
 
+---
+
 <details>
 <summary><strong>Markdown Table</strong></summary>
 
@@ -552,3 +575,5 @@ to get:
 ```
 
 </details>
+
+---

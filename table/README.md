@@ -22,7 +22,7 @@ Pretty-print tables into ASCII/Unicode strings.
 A demonstration of all the capabilities can be found here:
 [../cmd/demo-table](../cmd/demo-table)
 
-If you want very specific examples, look at the [Examples](EXAMPLES.md) file.
+If you want very specific examples, look at the [EXAMPLES.md](EXAMPLES.md) file.
 
 ## Features
 
