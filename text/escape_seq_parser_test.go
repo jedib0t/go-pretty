@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_escSeqParser(t *testing.T) {
+func TestEscSeqParser(t *testing.T) {
 	t.Run("extract csi", func(t *testing.T) {
 		es := EscSeqParser{}
 
@@ -163,6 +163,16 @@ func Test_escSeqParser(t *testing.T) {
 		assert.Len(t, es.Codes(), 2)
 		assert.Contains(t, es.Codes(), 1)
 		assert.Contains(t, es.Codes(), 3)
+
+		// Test parsing sequence with invalid code (non-numeric)
+		// Reset doesn't clear codes, so parse reset first
+		es.ParseSeq("\x1b[0m", escSeqKindCSI)
+		assert.Empty(t, es.Codes())
+		es.ParseSeq("\x1b[abc;1;3m", escSeqKindCSI)
+		// Should only have valid numeric codes (1 and 3, abc is skipped)
+		assert.Len(t, es.Codes(), 2)
+		assert.Contains(t, es.Codes(), 1)
+		assert.Contains(t, es.Codes(), 3)
 	})
 
 	t.Run("parse seq edge cases", func(t *testing.T) {
@@ -200,5 +210,202 @@ func Test_escSeqParser(t *testing.T) {
 		es.ParseSeq("\x1b[9m", escSeqKindCSI)
 		es.ParseSeq("\x1b[29m", escSeqKindCSI) // reset crossed out
 		assert.Empty(t, es.Codes())
+	})
+
+	t.Run("256-color foreground", func(t *testing.T) {
+		es := EscSeqParser{}
+
+		// Test parsing 256-color foreground sequence
+		es.ParseSeq("\x1b[38;5;123m", escSeqKindCSI)
+		assert.Len(t, es.Codes(), 1)
+		assert.True(t, es.IsOpen())
+		// Should have encoded value 1000 + 123 = 1123
+		assert.Contains(t, es.Codes(), escCode256FgBase+123)
+		assert.Equal(t, "\x1b[38;5;123m", es.Sequence())
+
+		// Test parsing from string
+		es = EscSeqParser{}
+		result := es.ParseString("\x1b[38;5;123m")
+		assert.Equal(t, "\x1b[38;5;123m", result)
+
+		// Test boundary values
+		es = EscSeqParser{}
+		es.ParseSeq("\x1b[38;5;0m", escSeqKindCSI)
+		assert.Contains(t, es.Codes(), escCode256FgBase+0)
+		assert.Equal(t, "\x1b[38;5;0m", es.Sequence())
+
+		es = EscSeqParser{}
+		es.ParseSeq("\x1b[38;5;255m", escSeqKindCSI)
+		assert.Contains(t, es.Codes(), escCode256FgBase+255)
+		assert.Equal(t, "\x1b[38;5;255m", es.Sequence())
+	})
+
+	t.Run("256-color background", func(t *testing.T) {
+		es := EscSeqParser{}
+
+		// Test parsing 256-color background sequence
+		es.ParseSeq("\x1b[48;5;200m", escSeqKindCSI)
+		assert.Len(t, es.Codes(), 1)
+		assert.True(t, es.IsOpen())
+		// Should have encoded value 2000 + 200 = 2200
+		assert.Contains(t, es.Codes(), escCode256BgBase+200)
+		assert.Equal(t, "\x1b[48;5;200m", es.Sequence())
+
+		// Test parsing from string
+		es = EscSeqParser{}
+		result := es.ParseString("\x1b[48;5;200m")
+		assert.Equal(t, "\x1b[48;5;200m", result)
+
+		// Test boundary values
+		es = EscSeqParser{}
+		es.ParseSeq("\x1b[48;5;0m", escSeqKindCSI)
+		assert.Contains(t, es.Codes(), escCode256BgBase+0)
+		assert.Equal(t, "\x1b[48;5;0m", es.Sequence())
+
+		es = EscSeqParser{}
+		es.ParseSeq("\x1b[48;5;255m", escSeqKindCSI)
+		assert.Contains(t, es.Codes(), escCode256BgBase+255)
+		assert.Equal(t, "\x1b[48;5;255m", es.Sequence())
+	})
+
+	t.Run("256-color with regular codes", func(t *testing.T) {
+		es := EscSeqParser{}
+
+		// Test mixing 256-color with regular formatting codes
+		es.ParseSeq("\x1b[38;5;100m", escSeqKindCSI)
+		es.ParseSeq("\x1b[1m", escSeqKindCSI) // bold
+		es.ParseSeq("\x1b[3m", escSeqKindCSI) // italic
+		assert.Len(t, es.Codes(), 3)
+		assert.Contains(t, es.Codes(), escCode256FgBase+100)
+		assert.Contains(t, es.Codes(), escCodeBold)
+		assert.Contains(t, es.Codes(), escCodeItalic)
+		// Sequence should include all codes
+		seq := es.Sequence()
+		assert.Equal(t, "\x1b[1;3;38;5;100m", seq)
+
+		// Test 256-color foreground and background together
+		es = EscSeqParser{}
+		es.ParseSeq("\x1b[38;5;50m", escSeqKindCSI)
+		es.ParseSeq("\x1b[48;5;150m", escSeqKindCSI)
+		assert.Len(t, es.Codes(), 2)
+		assert.Contains(t, es.Codes(), escCode256FgBase+50)
+		assert.Contains(t, es.Codes(), escCode256BgBase+150)
+		seq = es.Sequence()
+		assert.Contains(t, seq, "38;5;50")
+		assert.Contains(t, seq, "48;5;150")
+	})
+
+	t.Run("256-color replaces standard colors", func(t *testing.T) {
+		es := EscSeqParser{}
+
+		// Set standard foreground color
+		es.ParseSeq("\x1b[31m", escSeqKindCSI) // red
+		assert.Contains(t, es.Codes(), 31)
+		// Set 256-color foreground - should replace standard color
+		es.ParseSeq("\x1b[38;5;123m", escSeqKindCSI)
+		assert.NotContains(t, es.Codes(), 31)
+		assert.Contains(t, es.Codes(), escCode256FgBase+123)
+
+		// Set standard background color
+		es = EscSeqParser{}
+		es.ParseSeq("\x1b[41m", escSeqKindCSI) // red background
+		assert.Contains(t, es.Codes(), 41)
+		// Set 256-color background - should replace standard color
+		es.ParseSeq("\x1b[48;5;200m", escSeqKindCSI)
+		assert.NotContains(t, es.Codes(), 41)
+		assert.Contains(t, es.Codes(), escCode256BgBase+200)
+	})
+
+	t.Run("256-color reset codes", func(t *testing.T) {
+		es := EscSeqParser{}
+
+		// Set 256-color foreground
+		es.ParseSeq("\x1b[38;5;123m", escSeqKindCSI)
+		assert.Contains(t, es.Codes(), escCode256FgBase+123)
+		// Reset foreground (code 39)
+		es.ParseSeq("\x1b[39m", escSeqKindCSI)
+		assert.NotContains(t, es.Codes(), escCode256FgBase+123)
+		assert.Empty(t, es.Codes())
+
+		// Set 256-color background
+		es = EscSeqParser{}
+		es.ParseSeq("\x1b[48;5;200m", escSeqKindCSI)
+		assert.Contains(t, es.Codes(), escCode256BgBase+200)
+		// Reset background (code 49)
+		es.ParseSeq("\x1b[49m", escSeqKindCSI)
+		assert.NotContains(t, es.Codes(), escCode256BgBase+200)
+		assert.Empty(t, es.Codes())
+
+		// Test reset all (code 0) clears 256-color codes
+		es = EscSeqParser{}
+		es.ParseSeq("\x1b[38;5;123m", escSeqKindCSI)
+		es.ParseSeq("\x1b[48;5;200m", escSeqKindCSI)
+		assert.Len(t, es.Codes(), 2)
+		es.ParseSeq("\x1b[0m", escSeqKindCSI)
+		assert.Empty(t, es.Codes())
+	})
+
+	t.Run("256-color OSI format", func(t *testing.T) {
+		es := EscSeqParser{}
+
+		// Test parsing 256-color foreground in OSI format
+		es.ParseSeq("\x1b]38;5;123\\", escSeqKindOSI)
+		assert.Contains(t, es.Codes(), escCode256FgBase+123)
+		assert.Equal(t, "\x1b[38;5;123m", es.Sequence())
+
+		// Test parsing 256-color background in OSI format
+		es = EscSeqParser{}
+		es.ParseSeq("\x1b]48;5;200\\", escSeqKindOSI)
+		assert.Contains(t, es.Codes(), escCode256BgBase+200)
+		assert.Equal(t, "\x1b[48;5;200m", es.Sequence())
+	})
+
+	t.Run("256-color invalid sequences", func(t *testing.T) {
+		es := EscSeqParser{}
+
+		// Test incomplete 256-color sequence (missing color index)
+		es.ParseSeq("\x1b[38;5m", escSeqKindCSI)
+		// Should not have any 256-color codes
+		for code := range es.Codes() {
+			assert.False(t, code >= escCode256FgBase && code <= escCode256FgBase+escCode256Max)
+		}
+
+		// Test 256-color sequence with invalid color index (> 255)
+		es = EscSeqParser{}
+		es.ParseSeq("\x1b[38;5;256m", escSeqKindCSI)
+		// Should not have any 256-color codes
+		for code := range es.Codes() {
+			assert.False(t, code >= escCode256FgBase && code <= escCode256FgBase+escCode256Max)
+		}
+
+		// Test 256-color sequence with wrong middle code (not 5)
+		es = EscSeqParser{}
+		es.ParseSeq("\x1b[38;4;123m", escSeqKindCSI)
+		// Should not have any 256-color codes, but might have code 38 and 4
+		for code := range es.Codes() {
+			assert.False(t, code >= escCode256FgBase && code <= escCode256FgBase+escCode256Max)
+		}
+	})
+
+	t.Run("256-color with spaces", func(t *testing.T) {
+		es := EscSeqParser{}
+
+		// Test parsing 256-color sequence with spaces
+		es.ParseSeq("\x1b[ 38 ; 5 ; 123 m", escSeqKindCSI)
+		assert.Contains(t, es.Codes(), escCode256FgBase+123)
+		assert.Equal(t, "\x1b[38;5;123m", es.Sequence())
+	})
+
+	t.Run("256-color multiple replacements", func(t *testing.T) {
+		es := EscSeqParser{}
+
+		// Set first 256-color foreground
+		es.ParseSeq("\x1b[38;5;100m", escSeqKindCSI)
+		assert.Contains(t, es.Codes(), escCode256FgBase+100)
+		// Replace with different 256-color foreground
+		es.ParseSeq("\x1b[38;5;200m", escSeqKindCSI)
+		assert.NotContains(t, es.Codes(), escCode256FgBase+100)
+		assert.Contains(t, es.Codes(), escCode256FgBase+200)
+		assert.Len(t, es.Codes(), 1)
 	})
 }
