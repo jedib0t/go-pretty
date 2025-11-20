@@ -78,12 +78,13 @@ func (t *Table) markdownRenderRowAutoIndex(out *strings.Builder, colIdx int, hin
 
 func (t *Table) markdownRenderRows(out *strings.Builder, rows []rowStr, hint renderHint) {
 	if len(rows) > 0 {
+		separator := t.rowSeparatorStrings[separatorTypeRowMiddle]
 		for idx, row := range rows {
 			hint.rowNumber = idx + 1
 			t.markdownRenderRow(out, row, hint)
 
 			if idx == len(rows)-1 && hint.isHeaderRow {
-				t.markdownRenderRow(out, t.rowSeparators[separatorTypeRowMiddle], renderHint{isSeparatorRow: true})
+				t.markdownRenderRow(out, t.rowSeparators[separator], renderHint{isSeparatorRow: true})
 			}
 		}
 	}

@@ -82,7 +82,9 @@ type Table struct {
 	rowPainterWithAttributes RowPainterWithAttributes
 	// rowSeparators contains the separator columns (dashes that make up the
 	// separators between title/header/body/footer
-	rowSeparators map[separatorType]rowStr
+	rowSeparators map[string]rowStr
+	// rowSeparatorStrings contains the separator strings for each separator type
+	rowSeparatorStrings map[separatorType]string
 	// separators is used to keep track of all rowIndices after which a
 	// separator has to be rendered
 	separators map[int]bool
@@ -509,13 +511,13 @@ func (t *Table) getColumnSeparator(row rowStr, colIdx int, hint renderHint) stri
 	if hint.isSeparatorRow {
 		if hint.isBorderTop {
 			if t.shouldMergeCellsHorizontallyBelow(row, colIdx, hint) {
-				separator = t.style.Box.middleHorizontal(hint)
+				separator = t.style.Box.middleHorizontal(hint.separtorType)
 			} else {
 				separator = t.style.Box.TopSeparator
 			}
 		} else if hint.isBorderBottom {
 			if t.shouldMergeCellsHorizontallyAbove(row, colIdx, hint) {
-				separator = t.style.Box.middleHorizontal(hint)
+				separator = t.style.Box.middleHorizontal(hint.separtorType)
 			} else {
 				separator = t.style.Box.BottomSeparator
 			}
@@ -554,7 +556,7 @@ func (t *Table) getColumnSeparatorNonBorderNonAutoIndex(mergeCellsAbove bool, me
 	if mergeCellsAbove && mergeCellsBelow && mergeCurrCol && mergeNextCol {
 		return t.style.Box.EmptySeparator
 	} else if mergeCellsAbove && mergeCellsBelow {
-		return t.style.Box.middleHorizontal(hint)
+		return t.style.Box.middleHorizontal(hint.separtorType)
 	} else if mergeCellsAbove {
 		return t.style.Box.TopSeparator
 	} else if mergeCellsBelow {

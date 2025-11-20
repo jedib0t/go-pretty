@@ -354,41 +354,50 @@ func (t *Table) initForRenderRowSeparator() {
 		return
 	}
 
-	t.rowSeparators = make(map[separatorType]rowStr, separatorTypeCount)
+	// init the separatorType -> separator-string map
+	t.initForRenderRowSeparatorStrings()
 
-	// allocate space only for the separators that are actually used
+	// init the separator-string -> separator-row map
+	t.rowSeparators = make(map[string]rowStr, len(t.rowSeparatorStrings))
+	for _, separator := range t.rowSeparatorStrings {
+		t.rowSeparators[separator] = make(rowStr, t.numColumns)
+		for colIdx, maxColumnLength := range t.maxColumnLengths {
+			maxColumnLength += text.StringWidthWithoutEscSequences(t.style.Box.PaddingLeft + t.style.Box.PaddingRight)
+			t.rowSeparators[separator][colIdx] = text.RepeatAndTrim(separator, maxColumnLength)
+		}
+	}
+}
+
+func (t *Table) initForRenderRowSeparatorStrings() {
+	// allocate and init only the separators that are needed
+	t.rowSeparatorStrings = make(map[separatorType]string)
+	addSeparatorType := func(st separatorType) {
+		t.rowSeparatorStrings[st] = t.style.Box.middleHorizontal(st)
+	}
+
 	if t.title != "" {
-		t.rowSeparators[separatorTypeTitleTop] = make(rowStr, t.numColumns)
-		t.rowSeparators[separatorTypeTitleBottom] = make(rowStr, t.numColumns)
+		addSeparatorType(separatorTypeTitleTop)
+		addSeparatorType(separatorTypeTitleBottom)
 	}
 	if len(t.rowsHeader) > 0 || t.autoIndex {
-		t.rowSeparators[separatorTypeHeaderTop] = make(rowStr, t.numColumns)
-		t.rowSeparators[separatorTypeHeaderBottom] = make(rowStr, t.numColumns)
+		addSeparatorType(separatorTypeHeaderTop)
+		addSeparatorType(separatorTypeHeaderBottom)
 		if len(t.rowsHeader) > 1 {
-			t.rowSeparators[separatorTypeHeaderMiddle] = make(rowStr, t.numColumns)
+			addSeparatorType(separatorTypeHeaderMiddle)
 		}
 	}
 	if len(t.rows) > 0 {
-		t.rowSeparators[separatorTypeRowTop] = make(rowStr, t.numColumns)
-		t.rowSeparators[separatorTypeRowBottom] = make(rowStr, t.numColumns)
+		addSeparatorType(separatorTypeRowTop)
+		addSeparatorType(separatorTypeRowBottom)
 		if len(t.rows) > 1 {
-			t.rowSeparators[separatorTypeRowMiddle] = make(rowStr, t.numColumns)
+			addSeparatorType(separatorTypeRowMiddle)
 		}
 	}
-	if len(t.rowsFooter) > 0 {
-		t.rowSeparators[separatorTypeFooterTop] = make(rowStr, t.numColumns)
-		t.rowSeparators[separatorTypeFooterBottom] = make(rowStr, t.numColumns)
+	if len(t.rowsFooter) > 0 || t.autoIndex {
+		addSeparatorType(separatorTypeFooterTop)
+		addSeparatorType(separatorTypeFooterBottom)
 		if len(t.rowsFooter) > 1 {
-			t.rowSeparators[separatorTypeFooterMiddle] = make(rowStr, t.numColumns)
-		}
-	}
-
-	// fill in the separators with the appropriate characters
-	for separatorType := range t.rowSeparators {
-		middleHorizontal := t.style.Box.middleHorizontal(renderHint{separtorType: separatorType})
-		for colIdx, maxColumnLength := range t.maxColumnLengths {
-			maxColumnLength += text.StringWidthWithoutEscSequences(t.style.Box.PaddingLeft + t.style.Box.PaddingRight)
-			t.rowSeparators[separatorType][colIdx] = text.RepeatAndTrim(middleHorizontal, maxColumnLength)
+			addSeparatorType(separatorTypeFooterMiddle)
 		}
 	}
 }

@@ -28,37 +28,6 @@ type BoxStyle struct {
 	Horizontal *BoxStyleHorizontal
 }
 
-func (bs *BoxStyle) middleHorizontal(hint renderHint) string {
-	if bs.Horizontal == nil {
-		bs.Horizontal = NewBoxStyleHorizontal(bs.MiddleHorizontal)
-	}
-
-	switch hint.separtorType {
-	case separatorTypeTitleTop:
-		return bs.Horizontal.TitleTop
-	case separatorTypeTitleBottom:
-		return bs.Horizontal.TitleBottom
-	case separatorTypeHeaderTop:
-		return bs.Horizontal.HeaderTop
-	case separatorTypeHeaderMiddle:
-		return bs.Horizontal.HeaderMiddle
-	case separatorTypeHeaderBottom:
-		return bs.Horizontal.HeaderBottom
-	case separatorTypeRowTop:
-		return bs.Horizontal.RowTop
-	case separatorTypeRowBottom:
-		return bs.Horizontal.RowBottom
-	case separatorTypeFooterTop:
-		return bs.Horizontal.FooterTop
-	case separatorTypeFooterMiddle:
-		return bs.Horizontal.FooterMiddle
-	case separatorTypeFooterBottom:
-		return bs.Horizontal.FooterBottom
-	default:
-		return bs.Horizontal.RowMiddle
-	}
-}
-
 // BoxStyleHorizontal defines the characters/strings to use to render the
 // horizontal lines for the Table.
 type BoxStyleHorizontal struct {
@@ -297,3 +266,38 @@ const (
 	separatorTypeFooterBottom
 	separatorTypeCount // this should be the last value
 )
+
+func (bs *BoxStyle) ensureHorizontalInitialized() {
+	if bs.Horizontal == nil {
+		bs.Horizontal = NewBoxStyleHorizontal(bs.MiddleHorizontal)
+	}
+}
+
+func (bs *BoxStyle) middleHorizontal(st separatorType) string {
+	bs.ensureHorizontalInitialized()
+
+	switch st {
+	case separatorTypeTitleTop:
+		return bs.Horizontal.TitleTop
+	case separatorTypeTitleBottom:
+		return bs.Horizontal.TitleBottom
+	case separatorTypeHeaderTop:
+		return bs.Horizontal.HeaderTop
+	case separatorTypeHeaderMiddle:
+		return bs.Horizontal.HeaderMiddle
+	case separatorTypeHeaderBottom:
+		return bs.Horizontal.HeaderBottom
+	case separatorTypeRowTop:
+		return bs.Horizontal.RowTop
+	case separatorTypeRowBottom:
+		return bs.Horizontal.RowBottom
+	case separatorTypeFooterTop:
+		return bs.Horizontal.FooterTop
+	case separatorTypeFooterMiddle:
+		return bs.Horizontal.FooterMiddle
+	case separatorTypeFooterBottom:
+		return bs.Horizontal.FooterBottom
+	default:
+		return bs.Horizontal.RowMiddle
+	}
+}

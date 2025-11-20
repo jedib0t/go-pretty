@@ -112,7 +112,7 @@ func (t *Table) renderColumnAutoIndex(out *strings.Builder, hint renderHint) {
 	if hint.isSeparatorRow {
 		numChars := t.autoIndexVIndexMaxLength + utf8.RuneCountInString(t.style.Box.PaddingLeft) +
 			utf8.RuneCountInString(t.style.Box.PaddingRight)
-		chars := t.style.Box.middleHorizontal(hint)
+		chars := t.style.Box.middleHorizontal(hint.separtorType)
 		if hint.isAutoIndexColumn && hint.isHeaderOrFooterSeparator() {
 			chars = text.RepeatAndTrim(" ", len(chars))
 		}
@@ -306,7 +306,8 @@ func (t *Table) renderRowSeparator(out *strings.Builder, hint renderHint) {
 	}
 
 	hint.isSeparatorRow = true
-	t.renderLine(out, t.rowSeparators[hint.separtorType], hint)
+	separator := t.rowSeparatorStrings[hint.separtorType]
+	t.renderLine(out, t.rowSeparators[separator], hint)
 }
 
 func (t *Table) renderRows(out *strings.Builder, rows []rowStr, hint renderHint) {
@@ -424,7 +425,7 @@ func (t *Table) renderTitle(out *strings.Builder) {
 		}
 		if t.style.Options.DrawBorder {
 			lenBorder := rowLength - text.StringWidthWithoutEscSequences(t.style.Box.TopLeft+t.style.Box.TopRight)
-			middleHorizontal := t.style.Box.middleHorizontal(renderHint{separtorType: separatorTypeTitleTop})
+			middleHorizontal := t.style.Box.middleHorizontal(separatorTypeTitleTop)
 			out.WriteString(colorsBorder.Sprint(t.style.Box.TopLeft))
 			out.WriteString(colorsBorder.Sprint(text.RepeatAndTrim(middleHorizontal, lenBorder)))
 			out.WriteString(colorsBorder.Sprint(t.style.Box.TopRight))
