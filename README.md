@@ -46,7 +46,10 @@ Pretty-print tables with colors, auto-merge, sorting, paging, and multiple outpu
 +-----+------------+-----------+--------+-----------------------------+
 ```
 
-**Try it**: `go run github.com/jedib0t/go-pretty/v6/cmd/demo-table@latest colors`
+Try the nested colored tables demo:
+```bash
+go run github.com/jedib0t/go-pretty/v6/cmd/demo-table@latest colors
+```
 
 <img src="cmd/demo-table/demo-colors.png" alt="Tables with Colors within a Table in a Terminal" width="640px"/>
 
