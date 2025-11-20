@@ -9,6 +9,7 @@ import (
 	"sync"
 )
 
+// colorsEnabled is true if colors are enabled and supported by the terminal.
 var colorsEnabled = areColorsOnInTheEnv() && areANSICodesSupported()
 
 // DisableColors (forcefully) disables color coding globally.
@@ -21,17 +22,24 @@ func EnableColors() {
 	colorsEnabled = true
 }
 
-// areColorsOnInTheEnv returns true is colors are not disable using
+// areColorsOnInTheEnv returns true if colors are not disabled using
 // well known environment variables.
 func areColorsOnInTheEnv() bool {
-	if os.Getenv("FORCE_COLOR") == "1" {
+	// FORCE_COLOR takes precedence - if set to a truthy value, enable colors
+	forceColor := os.Getenv("FORCE_COLOR")
+	if forceColor != "" && forceColor != "0" && forceColor != "false" {
 		return true
 	}
-	if os.Getenv("NO_COLOR") == "" || os.Getenv("NO_COLOR") == "0" {
-		return os.Getenv("TERM") != "dumb"
+
+	// NO_COLOR: if set to any non-empty value (except "0"), disable colors
+	// Note: "0" is treated as "not set" to allow explicit enabling via NO_COLOR=0
+	noColor := os.Getenv("NO_COLOR")
+	if noColor != "" && noColor != "0" {
+		return false
 	}
 
-	return false
+	// Default: check TERM - if not "dumb", assume colors are supported
+	return os.Getenv("TERM") != "dumb"
 }
 
 // The logic here is inspired from github.com/fatih/color; the following is
