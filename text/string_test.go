@@ -94,19 +94,33 @@ func TestOverrideRuneWidthEastAsianWidth(t *testing.T) {
 		rwCondition.EastAsianWidth = originalValue
 	}()
 
+	// Box drawing characters (U+2500-U+257F) are now always reported as width 1,
+	// regardless of the EastAsianWidth setting. This fixes alignment issues
+	// that previously occurred when LANG was set to something like 'zh_CN.UTF-8'.
+	// Previously, '╋' would be reported as width 2 when EastAsianWidth was true.
 	OverrideRuneWidthEastAsianWidth(true)
-	assert.Equal(t, 2, StringWidthWithoutEscSequences("╋"))
+	assert.Equal(t, 1, StringWidthWithoutEscSequences("╋"), "Box drawing character should always be width 1, even when EastAsianWidth is true")
 	OverrideRuneWidthEastAsianWidth(false)
-	assert.Equal(t, 1, StringWidthWithoutEscSequences("╋"))
+	assert.Equal(t, 1, StringWidthWithoutEscSequences("╋"), "Box drawing character should always be width 1, even when EastAsianWidth is false")
 
-	// Note for posterity. We want the length of the box drawing character to
-	// be reported as 1. However, with an environment where LANG is set to
-	// something like 'zh_CN.UTF-8', the value being returned is 2, which breaks
-	// text alignment/padding logic in this library.
-	//
-	// If a future version of runewidth is able to address this internally and
-	// return 1 for the above, the function being tested can be marked for
-	// deprecation.
+	// Verify that block elements (U+2580-U+259F) are also handled correctly.
+	// These are used in progress indicators and should always be width 1.
+	OverrideRuneWidthEastAsianWidth(true)
+	assert.Equal(t, 1, StringWidthWithoutEscSequences("█"), "Block element should always be width 1, even when EastAsianWidth is true")
+	assert.Equal(t, 1, StringWidthWithoutEscSequences("▒"), "Block element should always be width 1, even when EastAsianWidth is true")
+	assert.Equal(t, 1, StringWidthWithoutEscSequences("▓"), "Block element should always be width 1, even when EastAsianWidth is true")
+	OverrideRuneWidthEastAsianWidth(false)
+	assert.Equal(t, 1, StringWidthWithoutEscSequences("█"), "Block element should always be width 1, even when EastAsianWidth is false")
+	assert.Equal(t, 1, StringWidthWithoutEscSequences("▒"), "Block element should always be width 1, even when EastAsianWidth is false")
+	assert.Equal(t, 1, StringWidthWithoutEscSequences("▓"), "Block element should always be width 1, even when EastAsianWidth is false")
+
+	// Verify that actual East Asian characters are still handled correctly.
+	// Note: The runewidth library reports 'ツ' as width 2 regardless of the
+	// EastAsianWidth setting, as it's inherently a full-width character.
+	OverrideRuneWidthEastAsianWidth(true)
+	assert.Equal(t, 2, StringWidthWithoutEscSequences("ツ"), "East Asian character should be width 2")
+	OverrideRuneWidthEastAsianWidth(false)
+	assert.Equal(t, 2, StringWidthWithoutEscSequences("ツ"), "East Asian character should be width 2")
 }
 
 func ExamplePad() {
