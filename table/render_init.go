@@ -289,11 +289,11 @@ func (t *Table) initForRenderPaddedColumns() {
 }
 
 func (t *Table) initForRenderRows() {
-	// auto-index: calc the index column's max length
-	t.autoIndexVIndexMaxLength = len(fmt.Sprint(len(t.rowsRawFiltered)))
-
 	// filter the rows as requested (before stringification and sorting)
 	t.initForRenderFilterRows()
+
+	// auto-index: calc the index column's max length
+	t.autoIndexVIndexMaxLength = len(fmt.Sprint(len(t.rowsRawFiltered)))
 
 	// stringify the filtered rows
 	t.numColumns = 0
