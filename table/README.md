@@ -85,7 +85,11 @@ If you want very specific examples, look at the [EXAMPLES.md](EXAMPLES.md) file.
   - **Filtering**
     - Filter by one or more Columns (`FilterBy`)
     - Multiple filters with AND logic (all must match)
-    - Various filter operators: Equal, NotEqual, GreaterThan, LessThan, Contains, StartsWith, EndsWith, RegexMatch
+    - Various filter operators:
+      - Equality: Equal, NotEqual
+      - Numeric: GreaterThan, GreaterThanOrEqual, LessThan, LessThanOrEqual
+      - String: Contains, NotContains, StartsWith, EndsWith
+      - Regex: RegexMatch, RegexNotMatch
     - Case-insensitive filtering option (`IgnoreCase`)
     - Custom filter functions (`CustomFilter`) for advanced filtering logic
     - Filters are applied before sorting
