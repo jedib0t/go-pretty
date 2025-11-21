@@ -5,7 +5,6 @@
 [![Coverage Status](https://coveralls.io/repos/github/jedib0t/go-pretty/badge.svg?branch=main)](https://coveralls.io/github/jedib0t/go-pretty?branch=main)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jedib0t/go-pretty/v6)](https://goreportcard.com/report/github.com/jedib0t/go-pretty/v6)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jedib0t_go-pretty&metric=alert_status)](https://sonarcloud.io/dashboard?id=jedib0t_go-pretty)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Utilities to prettify console output of tables, lists, progress bars, text, and more
 with a heavy emphasis on customization and flexibility.

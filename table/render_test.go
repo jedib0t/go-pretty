@@ -1114,6 +1114,73 @@ func TestTable_Render_Empty(t *testing.T) {
 	assert.Empty(t, tw.Render())
 }
 
+func TestTable_Render_Filtered(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendRow(Row{11, "Sansa", "Stark", 6000})
+	tw.AppendFooter(testFooter)
+	tw.SetStyle(StyleLight)
+
+	tw.FilterBy([]FilterBy{
+		{Name: "Salary", Operator: GreaterThan, Value: 2000},
+	})
+	compareOutput(t, tw.Render(), `
+┌─────┬────────────┬───────────┬────────┐
+│   # │ FIRST NAME │ LAST NAME │ SALARY │
+├─────┼────────────┼───────────┼────────┤
+│   1 │ Arya       │ Stark     │   3000 │
+│ 300 │ Tyrion     │ Lannister │   5000 │
+│  11 │ Sansa      │ Stark     │   6000 │
+├─────┼────────────┼───────────┼────────┤
+│     │            │ TOTAL     │  10000 │
+└─────┴────────────┴───────────┴────────┘`)
+
+	tw.FilterBy([]FilterBy{
+		{Number: 3, Operator: Contains, Value: "Stark"},
+	})
+	compareOutput(t, tw.Render(), `
+┌────┬────────────┬───────────┬────────┐
+│  # │ FIRST NAME │ LAST NAME │ SALARY │
+├────┼────────────┼───────────┼────────┤
+│  1 │ Arya       │ Stark     │   3000 │
+│ 11 │ Sansa      │ Stark     │   6000 │
+├────┼────────────┼───────────┼────────┤
+│    │            │ TOTAL     │  10000 │
+└────┴────────────┴───────────┴────────┘`)
+
+	tw.FilterBy([]FilterBy{
+		{Number: 4, Operator: GreaterThan, Value: 3000},
+		{Number: 3, Operator: Contains, Value: "Stark"},
+	})
+	compareOutput(t, tw.Render(), `
+┌────┬────────────┬───────────┬────────┐
+│  # │ FIRST NAME │ LAST NAME │ SALARY │
+├────┼────────────┼───────────┼────────┤
+│ 11 │ Sansa      │ Stark     │   6000 │
+├────┼────────────┼───────────┼────────┤
+│    │            │ TOTAL     │  10000 │
+└────┴────────────┴───────────┴────────┘`)
+
+	// Test filtering with sorting
+	tw.FilterBy([]FilterBy{
+		{Number: 4, Operator: GreaterThan, Value: 2000},
+	})
+	tw.SortBy([]SortBy{
+		{Name: "Salary", Mode: DscNumeric},
+	})
+	compareOutput(t, tw.Render(), `
+┌─────┬────────────┬───────────┬────────┐
+│   # │ FIRST NAME │ LAST NAME │ SALARY │
+├─────┼────────────┼───────────┼────────┤
+│  11 │ Sansa      │ Stark     │   6000 │
+│ 300 │ Tyrion     │ Lannister │   5000 │
+│   1 │ Arya       │ Stark     │   3000 │
+├─────┼────────────┼───────────┼────────┤
+│     │            │ TOTAL     │  10000 │
+└─────┴────────────┴───────────┴────────┘`)
+}
+
 func TestTable_Render_HiddenColumns(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(testHeader)
@@ -1350,6 +1417,46 @@ func TestTable_Render_RowPainter(t *testing.T) {
 	t.Run("RowPainterWithAttributes 2", func(t *testing.T) {
 		runTestWithRowPainter(t, RowPainterWithAttributes(rowPainterWithAttributes))
 	})
+}
+
+func TestTable_Render_RowPainter_NoSorting(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(Row{"#", "FIRST NAME", "LAST NAME", "SALARY"})
+	tw.AppendRows([]Row{
+		{1, "Arya", "Stark", 3000},
+		{20, "Jon", "Snow", 2000},
+		{300, "Tyrion", "Lannister", 5000},
+	})
+	tw.AppendFooter(Row{"", "", "TOTAL", 10000})
+	tw.SetStyle(StyleLight)
+
+	// Row painter: color rows based on salary (no sorting)
+	rowPainter := func(row Row) text.Colors {
+		if salary, ok := row[3].(int); ok {
+			if salary > 3000 {
+				return text.Colors{text.BgYellow, text.FgBlack}
+			} else if salary < 2000 {
+				return text.Colors{text.BgRed, text.FgBlack}
+			}
+		}
+		return nil
+	}
+	tw.SetRowPainter(rowPainter)
+
+	// Rows should appear in original order (not sorted)
+	expectedOutLines := []string{
+		"┌─────┬────────────┬───────────┬────────┐",
+		"│   # │ FIRST NAME │ LAST NAME │ SALARY │",
+		"├─────┼────────────┼───────────┼────────┤",
+		"│   1 │ Arya       │ Stark     │   3000 │",
+		"│  20 │ Jon        │ Snow      │   2000 │",
+		"│\x1b[43;30m 300 \x1b[0m│\x1b[43;30m Tyrion     \x1b[0m│\x1b[43;30m Lannister \x1b[0m│\x1b[43;30m   5000 \x1b[0m│",
+		"├─────┼────────────┼───────────┼────────┤",
+		"│     │            │ TOTAL     │  10000 │",
+		"└─────┴────────────┴───────────┴────────┘",
+	}
+	expectedOut := strings.Join(expectedOutLines, "\n")
+	assert.Equal(t, expectedOut, tw.Render())
 }
 
 func TestTable_Render_Sorted(t *testing.T) {
