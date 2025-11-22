@@ -52,7 +52,7 @@ go run github.com/jedib0t/go-pretty/v6/cmd/demo-table@latest colors
 
 <img src="cmd/demo-table/demo-colors.png" alt="Tables with Colors within a Table in a Terminal" width="640px"/>
 
-📖 [Full documentation →](table/)
+📖 [Full documentation →](table/README.md)
 
 ### Progress
 
@@ -60,7 +60,7 @@ Track progress of one or more tasks with ETA, speed calculation, indeterminate i
 
 <img src="progress/images/demo.gif" alt="Progress Demo in a Terminal" width="640px"/>
 
-📖 [Full documentation →](progress/)
+📖 [Full documentation →](progress/README.md)
 
 ### List
 
@@ -78,7 +78,7 @@ Pretty-print hierarchical lists with multiple levels, indentation, and multiple 
    ╰─ The Gunslinger
 ```
 
-📖 [Full documentation →](list/)
+📖 [Full documentation →](list/README.md)
 
 ### Text
 
@@ -86,4 +86,4 @@ Utility functions to manipulate strings/text with full ANSI escape sequence supp
 
 **Features**: Alignment (horizontal/vertical), colors & formatting, cursor control, text transformation (case, JSON, time, URLs), string manipulation (pad, trim, wrap), and more.
 
-📖 [Full documentation →](text/)
+📖 [Full documentation →](text/README.md)
