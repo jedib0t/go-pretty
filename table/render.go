@@ -411,12 +411,8 @@ func (t *Table) renderRowsHeader(out *strings.Builder) {
 			hintSeparator.rowNumber = 1
 		}
 
-		// Only add separator after header if there are data rows or footer rows.
-		// Otherwise, the bottom border is rendered directly.
-		if len(t.rows) > 0 || len(t.rowsFooter) > 0 {
-			hintSeparator.separatorType = separatorTypeHeaderBottom
-			t.renderRowSeparator(out, hintSeparator)
-		}
+		hintSeparator.separatorType = separatorTypeHeaderBottom
+		t.renderRowSeparator(out, hintSeparator)
 	}
 }
 

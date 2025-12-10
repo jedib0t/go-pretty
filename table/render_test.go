@@ -1123,6 +1123,7 @@ func TestTable_Render_EmptyWithHeaders(t *testing.T) {
 	compareOutput(t, tw.Render(), `
 ╭────┬────────┬──────────┬─────────────┬─────────────┬─────────────┬───────┬────────┬───────────┬─────────────╮
 │ ID │ DIALER │ ACCEPTOR │ STATIC COST │ SRC LATENCY │ DST LATENCY │ STATE │ STATUS │ FULL COST │ CONNECTIONS │
+├────┼────────┼──────────┼─────────────┼─────────────┼─────────────┼───────┼────────┼───────────┼─────────────┤
 ╰────┴────────┴──────────┴─────────────┴─────────────┴─────────────┴───────┴────────┴───────────┴─────────────╯`)
 
 	// Test with headers and footers but no data rows
