@@ -1114,6 +1114,31 @@ func TestTable_Render_Empty(t *testing.T) {
 	assert.Empty(t, tw.Render())
 }
 
+func TestTable_Render_EmptyWithHeaders(t *testing.T) {
+	// Test case for issue #395: empty tables with headers should render bottom border correctly
+	tw := NewWriter()
+	tw.AppendHeader(Row{"ID", "DIALER", "ACCEPTOR", "STATIC COST", "SRC LATENCY", "DST LATENCY", "STATE", "STATUS", "FULL COST", "CONNECTIONS"})
+	tw.SetStyle(StyleRounded)
+
+	compareOutput(t, tw.Render(), `
+╭────┬────────┬──────────┬─────────────┬─────────────┬─────────────┬───────┬────────┬───────────┬─────────────╮
+│ ID │ DIALER │ ACCEPTOR │ STATIC COST │ SRC LATENCY │ DST LATENCY │ STATE │ STATUS │ FULL COST │ CONNECTIONS │
+╰────┴────────┴──────────┴─────────────┴─────────────┴─────────────┴───────┴────────┴───────────┴─────────────╯`)
+
+	// Test with headers and footers but no data rows
+	tw2 := NewWriter()
+	tw2.AppendHeader(testHeader)
+	tw2.AppendFooter(testFooter)
+	tw2.SetStyle(StyleRounded)
+
+	compareOutput(t, tw2.Render(), `
+╭───┬────────────┬───────────┬────────╮
+│ # │ FIRST NAME │ LAST NAME │ SALARY │
+├───┼────────────┼───────────┼────────┤
+│   │            │     TOTAL │  10000 │
+╰───┴────────────┴───────────┴────────╯`)
+}
+
 func TestTable_Render_Filtered(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(testHeader)

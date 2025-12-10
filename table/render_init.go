@@ -457,6 +457,10 @@ func (t *Table) initForRenderRowSeparatorStrings() {
 		if len(t.rows) > 1 {
 			addSeparatorType(separatorTypeRowMiddle)
 		}
+	} else if len(t.rowsHeader) > 0 || t.autoIndex {
+		// When there are headers but no data rows, we still need separatorTypeRowBottom
+		// for the bottom border.
+		addSeparatorType(separatorTypeRowBottom)
 	}
 	if len(t.rowsFooter) > 0 || t.autoIndex {
 		addSeparatorType(separatorTypeFooterTop)
