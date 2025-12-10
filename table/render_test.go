@@ -1119,11 +1119,17 @@ func TestTable_Render_EmptyWithHeaders(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(Row{"ID", "DIALER", "ACCEPTOR", "STATIC COST", "SRC LATENCY", "DST LATENCY", "STATE", "STATUS", "FULL COST", "CONNECTIONS"})
 	tw.SetStyle(StyleRounded)
-
+	tw.Style().Options.DoNotRenderEmptyRows = false
 	compareOutput(t, tw.Render(), `
 ╭────┬────────┬──────────┬─────────────┬─────────────┬─────────────┬───────┬────────┬───────────┬─────────────╮
 │ ID │ DIALER │ ACCEPTOR │ STATIC COST │ SRC LATENCY │ DST LATENCY │ STATE │ STATUS │ FULL COST │ CONNECTIONS │
 ├────┼────────┼──────────┼─────────────┼─────────────┼─────────────┼───────┼────────┼───────────┼─────────────┤
+╰────┴────────┴──────────┴─────────────┴─────────────┴─────────────┴───────┴────────┴───────────┴─────────────╯`)
+
+	tw.Style().Options.DoNotRenderEmptyRows = true
+	compareOutput(t, tw.Render(), `
+╭────┬────────┬──────────┬─────────────┬─────────────┬─────────────┬───────┬────────┬───────────┬─────────────╮
+│ ID │ DIALER │ ACCEPTOR │ STATIC COST │ SRC LATENCY │ DST LATENCY │ STATE │ STATUS │ FULL COST │ CONNECTIONS │
 ╰────┴────────┴──────────┴─────────────┴─────────────┴─────────────┴───────┴────────┴───────────┴─────────────╯`)
 
 	// Test with headers and footers but no data rows
@@ -1131,7 +1137,6 @@ func TestTable_Render_EmptyWithHeaders(t *testing.T) {
 	tw2.AppendHeader(testHeader)
 	tw2.AppendFooter(testFooter)
 	tw2.SetStyle(StyleRounded)
-
 	compareOutput(t, tw2.Render(), `
 ╭───┬────────────┬───────────┬────────╮
 │ # │ FIRST NAME │ LAST NAME │ SALARY │
