@@ -1120,11 +1120,10 @@ func TestTable_Render_EmptyWithHeaders(t *testing.T) {
 	tw.AppendHeader(Row{"ID", "DIALER", "ACCEPTOR", "STATIC COST", "SRC LATENCY", "DST LATENCY", "STATE", "STATUS", "FULL COST", "CONNECTIONS"})
 	tw.SetStyle(StyleRounded)
 
-	expected := `╭────┬────────┬──────────┬─────────────┬─────────────┬─────────────┬───────┬────────┬───────────┬─────────────╮
+	compareOutput(t, tw.Render(), `
+╭────┬────────┬──────────┬─────────────┬─────────────┬─────────────┬───────┬────────┬───────────┬─────────────╮
 │ ID │ DIALER │ ACCEPTOR │ STATIC COST │ SRC LATENCY │ DST LATENCY │ STATE │ STATUS │ FULL COST │ CONNECTIONS │
-╰────┴────────┴──────────┴─────────────┴─────────────┴─────────────┴───────┴────────┴───────────┴─────────────╯`
-
-	compareOutput(t, tw.Render(), expected)
+╰────┴────────┴──────────┴─────────────┴─────────────┴─────────────┴───────┴────────┴───────────┴─────────────╯`)
 
 	// Test with headers and footers but no data rows
 	tw2 := NewWriter()
@@ -1132,13 +1131,12 @@ func TestTable_Render_EmptyWithHeaders(t *testing.T) {
 	tw2.AppendFooter(testFooter)
 	tw2.SetStyle(StyleRounded)
 
-	expected2 := `╭───┬────────────┬───────────┬────────╮
+	compareOutput(t, tw2.Render(), `
+╭───┬────────────┬───────────┬────────╮
 │ # │ FIRST NAME │ LAST NAME │ SALARY │
 ├───┼────────────┼───────────┼────────┤
 │   │            │     TOTAL │  10000 │
-╰───┴────────────┴───────────┴────────╯`
-
-	compareOutput(t, tw2.Render(), expected2)
+╰───┴────────────┴───────────┴────────╯`)
 }
 
 func TestTable_Render_Filtered(t *testing.T) {
