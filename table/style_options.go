@@ -7,6 +7,11 @@ type Options struct {
 	// or column separators.
 	DoNotColorBordersAndSeparators bool
 
+	// DoNotRenderSeparatorWhenEmpty disables rendering the separator row after
+	// headers when there are no data rows (for example when only headers and/or
+	// footers are present).
+	DoNotRenderSeparatorWhenEmpty bool
+
 	// DrawBorder enables or disables drawing the border around the Table.
 	// Example of a table where it is disabled:
 	//     # │ FIRST NAME │ LAST NAME │ SALARY │
