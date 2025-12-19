@@ -21,13 +21,14 @@ var (
 	flagHideTime           = flag.Bool("hide-time", false, "Hide the time taken?")
 	flagHideValue          = flag.Bool("hide-value", false, "Hide the tracker value?")
 	flagNumTrackers        = flag.Int("num-trackers", 13, "Number of Trackers")
-	flagShowSpeed          = flag.Bool("show-speed", false, "Show the tracker speed?")
-	flagShowSpeedOverall   = flag.Bool("show-speed-overall", false, "Show the overall tracker speed?")
-	flagShowPinned         = flag.Bool("show-pinned", false, "Show a pinned message?")
 	flagRandomFail         = flag.Bool("rnd-fail", false, "Introduce random failures in tracking")
 	flagRandomDefer        = flag.Bool("rnd-defer", false, "Introduce random deferred starts")
 	flagRandomRemove       = flag.Bool("rnd-remove", false, "Introduce random remove of trackers on completion")
 	flagRandomLogs         = flag.Bool("rnd-logs", false, "Output random logs in the middle of tracking")
+	flagSortBy             = flag.String("sort-by", "percent-dsc", "Sort trackers by? (none, index, index-dsc, message, message-dsc, percent, percent-dsc, value, value-dsc)")
+	flagShowSpeed          = flag.Bool("show-speed", false, "Show the tracker speed?")
+	flagShowSpeedOverall   = flag.Bool("show-speed-overall", false, "Show the overall tracker speed?")
+	flagShowPinned         = flag.Bool("show-pinned", false, "Show a pinned message?")
 
 	messageColors = []text.Color{
 		text.FgRed,
@@ -100,6 +101,31 @@ func getMessage(idx int64, units *progress.Units) string {
 	return message
 }
 
+func getSortBy() progress.SortBy {
+	switch *flagSortBy {
+	case "none":
+		return progress.SortByNone
+	case "index":
+		return progress.SortByIndex
+	case "index-dsc":
+		return progress.SortByIndexDsc
+	case "message":
+		return progress.SortByMessage
+	case "message-dsc":
+		return progress.SortByMessageDsc
+	case "percent":
+		return progress.SortByPercent
+	case "percent-dsc":
+		return progress.SortByPercentDsc
+	case "value":
+		return progress.SortByValue
+	case "value-dsc":
+		return progress.SortByValueDsc
+	default:
+		return progress.SortByPercentDsc
+	}
+}
+
 func getUnits(idx int64) *progress.Units {
 	var units *progress.Units
 	switch {
@@ -123,6 +149,7 @@ func trackSomething(pw progress.Writer, idx int64, updateMessage bool) {
 	message := getMessage(idx, units)
 	tracker := progress.Tracker{
 		DeferStart:         *flagRandomDefer && rng.Float64() < 0.5,
+		Index:              uint64(idx),
 		Message:            message,
 		RemoveOnCompletion: *flagRandomRemove && rng.Float64() < 0.25,
 		Total:              total,
@@ -175,7 +202,7 @@ func main() {
 	pw.SetAutoStop(*flagAutoStop)
 	pw.SetMessageLength(24)
 	pw.SetNumTrackersExpected(*flagNumTrackers)
-	pw.SetSortBy(progress.SortByPercentDsc)
+	pw.SetSortBy(getSortBy())
 	pw.SetStyle(progress.StyleDefault)
 	pw.SetTrackerLength(25)
 	pw.SetTrackerPosition(progress.PositionRight)

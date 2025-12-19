@@ -451,7 +451,7 @@ func TestTable_SetHTMLCSSClass(t *testing.T) {
 
 	table.SetHTMLCSSClass(testCSSClass)
 	assert.Equal(t, testCSSClass, table.htmlCSSClass)
-	assert.Equal(t, strings.Replace(expectedHTML, DefaultHTMLCSSClass, testCSSClass, -1), table.RenderHTML())
+	assert.Equal(t, strings.ReplaceAll(expectedHTML, DefaultHTMLCSSClass, testCSSClass), table.RenderHTML())
 }
 
 func TestTable_SetOutputMirror(t *testing.T) {

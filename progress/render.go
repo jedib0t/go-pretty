@@ -44,6 +44,43 @@ func (p *Progress) beginRender() bool {
 	return true
 }
 
+func (p *Progress) collectActiveTrackers() ([]*Tracker, int64, time.Duration) {
+	var allTrackers []*Tracker
+	var activeTrackersProgress int64
+	var maxETA time.Duration
+
+	p.trackersDoneMutex.RLock()
+	lengthDone := len(p.trackersDone)
+	p.trackersDoneMutex.RUnlock()
+
+	p.trackersActiveMutex.RLock()
+	allTrackers = make([]*Tracker, 0, len(p.trackersActive)+lengthDone)
+	for _, tracker := range p.trackersActive {
+		if !tracker.IsDone() || !tracker.RemoveOnCompletion {
+			allTrackers = append(allTrackers, tracker)
+			if !tracker.IsDone() {
+				activeTrackersProgress += int64(tracker.PercentDone())
+				if eta := tracker.ETA(); eta > maxETA {
+					maxETA = eta
+				}
+			}
+		}
+	}
+	p.trackersActiveMutex.RUnlock()
+
+	return allTrackers, activeTrackersProgress, maxETA
+}
+
+func (p *Progress) collectDoneTrackers(allTrackers *[]*Tracker) {
+	p.trackersDoneMutex.RLock()
+	for _, tracker := range p.trackersDone {
+		if !tracker.RemoveOnCompletion {
+			*allTrackers = append(*allTrackers, tracker)
+		}
+	}
+	p.trackersDoneMutex.RUnlock()
+}
+
 func (p *Progress) consumeQueuedTrackers() {
 	p.trackersInQueueMutex.Lock()
 	queueLen := len(p.trackersInQueue)
@@ -70,48 +107,24 @@ func (p *Progress) endRender() {
 	p.renderInProgress = false
 }
 
-func (p *Progress) extractDoneAndActiveTrackers() ([]*Tracker, []*Tracker) {
+// extractAllTrackersInOrder extracts all trackers (both active and done) and
+// sorts them together when SortByIndex is used. This allows maintaining a fixed
+// order regardless of completion status.
+func (p *Progress) extractAllTrackersInOrder() []*Tracker {
 	// move trackers waiting in queue to the active list
 	p.consumeQueuedTrackers()
 
-	// separate the active and done trackers
-	var trackersActive, trackersDone []*Tracker
-	var activeTrackersProgress int64
-	var maxETA time.Duration
-	var lengthDone int
+	allTrackers, activeTrackersProgress, maxETA := p.collectActiveTrackers()
+	p.collectDoneTrackers(&allTrackers)
 
-	// Get lengthDone while we have access to trackersDone
-	p.trackersDoneMutex.RLock()
-	lengthDone = len(p.trackersDone)
-	p.trackersDoneMutex.RUnlock()
-
-	p.trackersActiveMutex.RLock()
-	// Pre-allocate slices with estimated capacity to reduce allocations
-	trackersActive = make([]*Tracker, 0, len(p.trackersActive))
-	trackersDone = make([]*Tracker, 0, len(p.trackersActive)/4) // estimate ~25% done
-	for _, tracker := range p.trackersActive {
-		if !tracker.IsDone() {
-			trackersActive = append(trackersActive, tracker)
-			activeTrackersProgress += int64(tracker.PercentDone())
-			if eta := tracker.ETA(); eta > maxETA {
-				maxETA = eta
-			}
-		} else if !tracker.RemoveOnCompletion {
-			trackersDone = append(trackersDone, tracker)
-		}
+	// Sort by Index (ascending or descending)
+	if p.sortBy == SortByIndex || p.sortBy == SortByIndexDsc {
+		p.sortBy.Sort(allTrackers)
 	}
-	p.trackersActiveMutex.RUnlock()
-	p.sortBy.Sort(trackersDone)
-	p.sortBy.Sort(trackersActive)
 
-	// calculate the overall tracker's progress value
-	p.overallTracker.value = int64(lengthDone+len(trackersDone)) * 100
-	p.overallTracker.value += activeTrackersProgress
-	p.overallTracker.minETA = maxETA
-	if len(trackersActive) == 0 {
-		p.overallTracker.MarkAsDone()
-	}
-	return trackersActive, trackersDone
+	p.updateOverallTrackerProgress(allTrackers, activeTrackersProgress, maxETA)
+
+	return allTrackers
 }
 
 func (p *Progress) generateTrackerStr(t *Tracker, maxLen int, hint renderHint) string {
@@ -191,7 +204,28 @@ func (p *Progress) generateTrackerStrIndeterminate(maxLen int) string {
 }
 
 func (p *Progress) moveCursorToTheTop(out *strings.Builder) {
-	numLinesToMoveUp := len(p.trackersActive)
+	// Count all trackers that will be rendered (both done and active)
+	var numTrackersToRender int
+
+	// Count active trackers (excluding those with RemoveOnCompletion)
+	p.trackersActiveMutex.RLock()
+	for _, tracker := range p.trackersActive {
+		if !tracker.RemoveOnCompletion {
+			numTrackersToRender++
+		}
+	}
+	p.trackersActiveMutex.RUnlock()
+
+	// Count done trackers (excluding those with RemoveOnCompletion)
+	p.trackersDoneMutex.RLock()
+	for _, tracker := range p.trackersDone {
+		if !tracker.RemoveOnCompletion {
+			numTrackersToRender++
+		}
+	}
+	p.trackersDoneMutex.RUnlock()
+
+	numLinesToMoveUp := numTrackersToRender
 	if p.style.Visibility.TrackerOverall && p.overallTracker != nil && !p.overallTracker.IsDone() {
 		numLinesToMoveUp++
 	}
@@ -359,16 +393,37 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 }
 
 func (p *Progress) renderTrackersDoneAndActive(out *strings.Builder, hint renderHint) {
-	// find the currently "active" and "done" trackers
-	trackersActive, trackersDone := p.extractDoneAndActiveTrackers()
+	// Extract all trackers (both active and done)
+	allTrackers := p.extractAllTrackersInOrder()
 
-	// sort and render the done trackers
-	for _, tracker := range trackersDone {
+	// Separate done and active trackers for sorting and state management
+	trackersDone, trackersActive := p.separateDoneAndActiveTrackers(allTrackers)
+
+	// Sort trackers based on sortBy setting
+	trackersToRender := p.sortTrackersForRendering(allTrackers, trackersDone, trackersActive)
+
+	// Render all trackers in the determined order
+	for _, tracker := range trackersToRender {
 		p.renderTracker(out, tracker, hint)
 	}
+
+	// Update internal state
 	p.trackersDoneMutex.Lock()
-	p.trackersDone = append(p.trackersDone, trackersDone...)
+	// Only add newly done trackers that aren't already in trackersDone
+	existingDone := make(map[*Tracker]bool)
+	for _, t := range p.trackersDone {
+		existingDone[t] = true
+	}
+	for _, t := range trackersDone {
+		if !existingDone[t] {
+			p.trackersDone = append(p.trackersDone, t)
+		}
+	}
 	p.trackersDoneMutex.Unlock()
+
+	p.trackersActiveMutex.Lock()
+	p.trackersActive = trackersActive
+	p.trackersActiveMutex.Unlock()
 
 	// render all the logs received and flush them out
 	p.logsToRenderMutex.Lock()
@@ -384,14 +439,6 @@ func (p *Progress) renderTrackersDoneAndActive(out *strings.Builder, hint render
 	if len(trackersActive) > 0 && p.style.Visibility.Pinned {
 		p.renderPinnedMessages(out, hint)
 	}
-
-	// sort and render the active trackers
-	for _, tracker := range trackersActive {
-		p.renderTracker(out, tracker, hint)
-	}
-	p.trackersActiveMutex.Lock()
-	p.trackersActive = trackersActive
-	p.trackersActiveMutex.Unlock()
 }
 
 func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker, hint renderHint) {
@@ -417,6 +464,23 @@ func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker, hint ren
 		outStats.WriteRune(']')
 
 		out.WriteString(p.style.Colors.Stats.Sprint(outStats.String()))
+	}
+}
+
+func (p *Progress) renderTrackerStatsETA(out *strings.Builder, t *Tracker, hint renderHint) {
+	if hint.isOverallTracker && !p.style.Visibility.ETAOverall {
+		return
+	}
+	if !hint.isOverallTracker && !p.style.Visibility.ETA {
+		return
+	}
+
+	tpETA := p.style.Options.ETAPrecision
+	if eta := t.ETA().Round(tpETA); hint.isOverallTracker || eta > tpETA {
+		out.WriteString("; ")
+		out.WriteString(p.style.Options.ETAString)
+		out.WriteString(": ")
+		out.WriteString(p.style.Colors.Time.Sprint(eta))
 	}
 }
 
@@ -483,19 +547,43 @@ func (p *Progress) renderTrackerStatsTime(outStats *strings.Builder, t *Tracker,
 	p.renderTrackerStatsETA(outStats, t, hint)
 }
 
-func (p *Progress) renderTrackerStatsETA(out *strings.Builder, t *Tracker, hint renderHint) {
-	if hint.isOverallTracker && !p.style.Visibility.ETAOverall {
-		return
+func (p *Progress) separateDoneAndActiveTrackers(allTrackers []*Tracker) ([]*Tracker, []*Tracker) {
+	var trackersDone, trackersActive []*Tracker
+	for _, tracker := range allTrackers {
+		if tracker.IsDone() {
+			if !tracker.RemoveOnCompletion {
+				trackersDone = append(trackersDone, tracker)
+			}
+		} else {
+			trackersActive = append(trackersActive, tracker)
+		}
 	}
-	if !hint.isOverallTracker && !p.style.Visibility.ETA {
-		return
-	}
+	return trackersDone, trackersActive
+}
 
-	tpETA := p.style.Options.ETAPrecision
-	if eta := t.ETA().Round(tpETA); hint.isOverallTracker || eta > tpETA {
-		out.WriteString("; ")
-		out.WriteString(p.style.Options.ETAString)
-		out.WriteString(": ")
-		out.WriteString(p.style.Colors.Time.Sprint(eta))
+func (p *Progress) sortTrackersForRendering(allTrackers []*Tracker, trackersDone []*Tracker, trackersActive []*Tracker) []*Tracker {
+	if p.sortBy == SortByIndex || p.sortBy == SortByIndexDsc {
+		// For explicit index ordering (ascending or descending), all trackers are already sorted together
+		return allTrackers
+	}
+	// For other sort methods, sort done and active separately, then combine
+	p.sortBy.Sort(trackersDone)
+	p.sortBy.Sort(trackersActive)
+	// Combine: done first, then active
+	return append(trackersDone, trackersActive...)
+}
+
+func (p *Progress) updateOverallTrackerProgress(allTrackers []*Tracker, activeTrackersProgress int64, maxETA time.Duration) {
+	doneCount := 0
+	for _, tracker := range allTrackers {
+		if tracker.IsDone() {
+			doneCount++
+		}
+	}
+	p.overallTracker.value = int64(doneCount) * 100
+	p.overallTracker.value += activeTrackersProgress
+	p.overallTracker.minETA = maxETA
+	if len(allTrackers) > 0 && doneCount == len(allTrackers) {
+		p.overallTracker.MarkAsDone()
 	}
 }

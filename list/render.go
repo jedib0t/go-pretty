@@ -46,7 +46,7 @@ func (l *List) renderItem(out *strings.Builder, idx int, item *listItem, hint re
 
 	// convert newlines if newlines are not "\n" in l.style
 	if strings.Contains(itemStr, "\n") && l.style.CharNewline != "\n" {
-		itemStr = strings.Replace(itemStr, "\n", l.style.CharNewline, -1)
+		itemStr = strings.ReplaceAll(itemStr, "\n", l.style.CharNewline)
 	}
 
 	// render the item.Text line by line

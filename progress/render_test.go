@@ -1022,3 +1022,113 @@ func TestProgress_RenderSomeTrackers_WithCustomTrackerIndeterminate(t *testing.T
 	}
 	showOutputOnFailure(t, out)
 }
+
+func TestProgress_RenderWithSortByIndex(t *testing.T) {
+	renderOutput := outputWriter{}
+
+	pw := generateWriter()
+	pw.SetOutputWriter(&renderOutput)
+	pw.SetSortBy(SortByIndex)
+	pw.SetTrackerPosition(PositionRight)
+
+	// Create trackers with explicit indices, added out of order
+	tracker1 := &Tracker{Message: "Layer 1", Total: 1000, Units: UnitsDefault, Index: 1}
+	tracker2 := &Tracker{Message: "Layer 2", Total: 1000, Units: UnitsBytes, Index: 2}
+	tracker3 := &Tracker{Message: "Layer 3", Total: 1000, Units: UnitsCurrencyDollar, Index: 3}
+
+	// Add trackers out of order
+	go trackSomething(pw, tracker3)
+	go trackSomething(pw, tracker1)
+	go trackSomething(pw, tracker2)
+	renderAndWait(pw, false)
+	out := renderOutput.String()
+
+	// Trackers should appear in index order (1, 2, 3) regardless of completion status
+	// Find positions of each layer in the output
+	pos1 := strings.Index(out, "Layer 1")
+	pos2 := strings.Index(out, "Layer 2")
+	pos3 := strings.Index(out, "Layer 3")
+
+	assert.Greater(t, pos1, -1, "Layer 1 should be in output")
+	assert.Greater(t, pos2, -1, "Layer 2 should be in output")
+	assert.Greater(t, pos3, -1, "Layer 3 should be in output")
+
+	// Layer 1 should appear before Layer 2, and Layer 2 before Layer 3
+	assert.Less(t, pos1, pos2, "Layer 1 should appear before Layer 2")
+	assert.Less(t, pos2, pos3, "Layer 2 should appear before Layer 3")
+
+	showOutputOnFailure(t, out)
+}
+
+func TestProgress_RenderWithSortByIndex_OutOfOrderCompletion(t *testing.T) {
+	renderOutput := outputWriter{}
+
+	pw := generateWriter()
+	pw.SetOutputWriter(&renderOutput)
+	pw.SetSortBy(SortByIndex)
+	pw.SetTrackerPosition(PositionRight)
+
+	// Create trackers with explicit indices
+	tracker1 := &Tracker{Message: "Layer 1", Total: 100, Units: UnitsDefault, Index: 1}
+	tracker2 := &Tracker{Message: "Layer 2", Total: 50, Units: UnitsBytes, Index: 2} // Smaller total, completes faster
+	tracker3 := &Tracker{Message: "Layer 3", Total: 200, Units: UnitsCurrencyDollar, Index: 3}
+
+	// Add trackers and let them complete at different rates
+	go trackSomething(pw, tracker1)
+	go trackSomething(pw, tracker2)
+	go trackSomething(pw, tracker3)
+	renderAndWait(pw, false)
+	out := renderOutput.String()
+
+	// Even though Layer 2 completes first (smaller total), it should still appear
+	// in index order (1, 2, 3) in the output
+	pos1 := strings.Index(out, "Layer 1")
+	pos2 := strings.Index(out, "Layer 2")
+	pos3 := strings.Index(out, "Layer 3")
+
+	assert.Greater(t, pos1, -1, "Layer 1 should be in output")
+	assert.Greater(t, pos2, -1, "Layer 2 should be in output")
+	assert.Greater(t, pos3, -1, "Layer 3 should be in output")
+
+	// Order should be maintained by index, not completion time
+	assert.Less(t, pos1, pos2, "Layer 1 should appear before Layer 2 (by index)")
+	assert.Less(t, pos2, pos3, "Layer 2 should appear before Layer 3 (by index)")
+
+	showOutputOnFailure(t, out)
+}
+
+func TestProgress_RenderWithSortByIndex_MixedIndexedAndUnindexed(t *testing.T) {
+	renderOutput := outputWriter{}
+
+	pw := generateWriter()
+	pw.SetOutputWriter(&renderOutput)
+	pw.SetSortBy(SortByIndex)
+	pw.SetTrackerPosition(PositionRight)
+
+	// Create trackers with different indices, including Index=0
+	tracker0 := &Tracker{Message: "Layer 0", Total: 1000, Units: UnitsCurrencyDollar, Index: 0}
+	tracker1 := &Tracker{Message: "Layer 1", Total: 1000, Units: UnitsDefault, Index: 1}
+	tracker2 := &Tracker{Message: "Layer 2", Total: 1000, Units: UnitsBytes, Index: 2}
+
+	// Add trackers
+	go trackSomething(pw, tracker2)
+	go trackSomething(pw, tracker0)
+	go trackSomething(pw, tracker1)
+	renderAndWait(pw, false)
+	out := renderOutput.String()
+
+	// Trackers should appear in index order: 0, 1, 2
+	pos0 := strings.Index(out, "Layer 0")
+	pos1 := strings.Index(out, "Layer 1")
+	pos2 := strings.Index(out, "Layer 2")
+
+	assert.Greater(t, pos0, -1, "Layer 0 should be in output")
+	assert.Greater(t, pos1, -1, "Layer 1 should be in output")
+	assert.Greater(t, pos2, -1, "Layer 2 should be in output")
+
+	// Index 0 should come before 1, and 1 before 2
+	assert.Less(t, pos0, pos1, "Layer 0 should appear before Layer 1")
+	assert.Less(t, pos1, pos2, "Layer 1 should appear before Layer 2")
+
+	showOutputOnFailure(t, out)
+}

@@ -30,14 +30,19 @@ jobs:
       # Download all the tools used in the steps that follow
       - name: Set up Tools
         run: |
-          go install github.com/fzipp/gocyclo/cmd/gocyclo@v0.6.0
-          go install github.com/mattn/goveralls@v0.0.12
-          go install github.com/rinchsan/gosimports/cmd/gosimports@v0.3.8
+          make tools-ci
+
+      # Run golangci-lint
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.7.2
+          args: --timeout=5m
 
       # Run all the unit-tests
-      - name: Test
+      - name: Test (no lint)
         run: |
-          make test
+          make test-no-lint
 
       # Run some tests to ensure no race conditions exist
       - name: Test for Race Conditions

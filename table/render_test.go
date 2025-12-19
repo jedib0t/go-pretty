@@ -1011,7 +1011,7 @@ func TestTable_Render_ColumnConfigs(t *testing.T) {
 		if valInt, ok := val.(int); ok {
 			return fmt.Sprintf("$ %.2f", float64(valInt)+0.03)
 		}
-		return strings.Replace(fmt.Sprint(val), "ry", "riii", -1)
+		return strings.ReplaceAll(fmt.Sprint(val), "ry", "riii")
 	})
 
 	tw := NewWriter()

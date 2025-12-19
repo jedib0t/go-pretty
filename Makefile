@@ -1,12 +1,11 @@
 # Declare all phony targets (targets that don't create files)
-.PHONY: all bench cyclo default demo-colors demo-list demo-progress demo-table fmt help profile test test-race tools vet
+.PHONY: all bench cyclo default demo-colors demo-list demo-progress demo-table fmt help lint profile test test-race tools vet
+
+default: help
 
 # ============================================================================
 # Main targets
 # ============================================================================
-
-## default: Run tests (default target)
-default: test
 
 ## all: Run all checks: tests and benchmarks
 all: test bench
@@ -19,8 +18,12 @@ all: test bench
 bench:
 	go test -bench=. -benchmem
 
-## test: Run tests with coverage (runs fmt, vet, and cyclo first)
-test: fmt vet cyclo
+## test: Run tests with coverage (runs fmt, vet, lint, and cyclo first)
+test: fmt vet lint cyclo
+	go test -cover -coverprofile=.coverprofile ./...
+
+## test-no-lint: Run tests with coverage (runs fmt, vet, and cyclo first)
+test-no-lint: fmt vet cyclo
 	go test -cover -coverprofile=.coverprofile ./...
 
 ## test-race: Run progress demo with race detector
@@ -39,6 +42,10 @@ cyclo:
 fmt:
 	go fmt ./...
 	gosimports -w .
+
+## lint: Run golangci-lint static analysis
+lint:
+	golangci-lint run ./...
 
 ## vet: Run go vet static analysis
 vet:
@@ -78,7 +85,11 @@ profile:
 	sh profile.sh
 
 ## tools: Install required development tools
-tools:
-	go install github.com/fzipp/gocyclo/cmd/gocyclo@v0.5.1
-	go install github.com/rinchsan/gosimports/cmd/gosimports@v0.3.8
+tools: tools-ci
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.7.2
 
+## tools-ci: Install required development tools for CI
+tools-ci:
+	go install github.com/fzipp/gocyclo/cmd/gocyclo@v0.6.0
+	go install github.com/mattn/goveralls@v0.0.12
+	go install github.com/rinchsan/gosimports/cmd/gosimports@v0.3.8
