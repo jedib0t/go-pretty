@@ -16,11 +16,6 @@ type Tracker struct {
 	// the value goes beyond the total (if set). Note that this means that a
 	// manual call to MarkAsDone or MarkAsErrored is expected.
 	AutoStopDisabled bool
-	// Message should contain a short description of the "task"; please note
-	// that this should NOT be updated in the middle of progress - you should
-	// instead use UpdateMessage() to do this safely without hitting any race
-	// conditions
-	Message string
 	// DeferStart prevents the tracker from starting immediately when appended.
 	// It will be rendered but remain dormant until Start, Increment,
 	// IncrementWithError or SetValue is called.
@@ -28,6 +23,15 @@ type Tracker struct {
 	// ExpectedDuration tells how long this task is expected to take; and will
 	// be used in calculation of the ETA value
 	ExpectedDuration time.Duration
+	// Index specifies the explicit order for this tracker. When SortByIndex
+	// is used, trackers are sorted by this value regardless of completion status.
+	// Lower values appear first, with 0 being the first index.
+	Index uint64
+	// Message should contain a short description of the "task"; please note
+	// that this should NOT be updated in the middle of progress - you should
+	// instead use UpdateMessage() to do this safely without hitting any race
+	// conditions
+	Message string
 	// RemoveOnCompletion tells the Progress Bar to remove this tracker when
 	// it is done, instead of rendering a "completed" line
 	RemoveOnCompletion bool

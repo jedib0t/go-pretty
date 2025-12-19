@@ -27,34 +27,34 @@ func TestColor_EnableAndDisable(t *testing.T) {
 
 func TestColor_areColorsOnInTheEnv(t *testing.T) {
 	// Default: TERM matters when FORCE_COLOR and NO_COLOR are not set
-	os.Setenv("FORCE_COLOR", "0")
-	os.Setenv("NO_COLOR", "0")
-	os.Setenv("TERM", "xterm")
+	_ = os.Setenv("FORCE_COLOR", "0")
+	_ = os.Setenv("NO_COLOR", "0")
+	_ = os.Setenv("TERM", "xterm")
 	assert.True(t, areColorsOnInTheEnv())
 
-	os.Setenv("TERM", "dumb")
+	_ = os.Setenv("TERM", "dumb")
 	assert.False(t, areColorsOnInTheEnv())
 
 	// NO_COLOR disables colors (overrides TERM)
-	os.Setenv("FORCE_COLOR", "0")
-	os.Setenv("NO_COLOR", "1")
-	os.Setenv("TERM", "xterm")
+	_ = os.Setenv("FORCE_COLOR", "0")
+	_ = os.Setenv("NO_COLOR", "1")
+	_ = os.Setenv("TERM", "xterm")
 	assert.False(t, areColorsOnInTheEnv())
 
 	// FORCE_COLOR enables colors (overrides NO_COLOR and TERM)
-	os.Setenv("FORCE_COLOR", "1")
-	os.Setenv("NO_COLOR", "1")
-	os.Setenv("TERM", "dumb")
+	_ = os.Setenv("FORCE_COLOR", "1")
+	_ = os.Setenv("NO_COLOR", "1")
+	_ = os.Setenv("TERM", "dumb")
 	assert.True(t, areColorsOnInTheEnv())
 
 	// FORCE_COLOR alternative values
-	os.Setenv("FORCE_COLOR", "true")
+	_ = os.Setenv("FORCE_COLOR", "true")
 	assert.True(t, areColorsOnInTheEnv())
 
 	// FORCE_COLOR=false is treated as falsy
-	os.Setenv("FORCE_COLOR", "false")
-	os.Setenv("NO_COLOR", "0")
-	os.Setenv("TERM", "xterm")
+	_ = os.Setenv("FORCE_COLOR", "false")
+	_ = os.Setenv("NO_COLOR", "0")
+	_ = os.Setenv("TERM", "xterm")
 	assert.True(t, areColorsOnInTheEnv())
 }
 

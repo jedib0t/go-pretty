@@ -160,8 +160,8 @@ func (l *List) hasMoreItemsInLevel(levelIdx int, fromItemIdx int) bool {
 func (l *List) render(out *strings.Builder) string {
 	outStr := out.String()
 	if l.outputMirror != nil && len(outStr) > 0 {
-		l.outputMirror.Write([]byte(outStr))
-		l.outputMirror.Write([]byte("\n"))
+		_, _ = l.outputMirror.Write([]byte(outStr))
+		_, _ = l.outputMirror.Write([]byte("\n"))
 	}
 	return outStr
 }

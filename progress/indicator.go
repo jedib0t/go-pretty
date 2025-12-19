@@ -155,9 +155,10 @@ func indeterminateIndicatorDominoes() IndeterminateIndicatorGenerator {
 	return func(maxLen int) IndeterminateIndicator {
 		currentPosition := nextPosition
 
-		if currentPosition == 0 {
+		switch currentPosition {
+		case 0:
 			direction = 1
-		} else if currentPosition == maxLen {
+		case maxLen:
 			direction = -1
 		}
 		nextPosition += direction
