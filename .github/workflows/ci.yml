@@ -30,7 +30,7 @@ jobs:
       # Download all the tools used in the steps that follow
       - name: Set up Tools
         run: |
-          make tools
+          make tools-ci
 
       # Run golangci-lint
       - name: Run golangci-lint

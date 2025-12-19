@@ -85,8 +85,10 @@ profile:
 	sh profile.sh
 
 ## tools: Install required development tools
-tools:
-	go install github.com/fzipp/gocyclo/cmd/gocyclo@v0.6.0
-	go install github.com/rinchsan/gosimports/cmd/gosimports@v0.3.8
+tools: tools-ci
 	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.7.2
 
+## tools-ci: Install required development tools for CI
+tools-ci:
+	go install github.com/fzipp/gocyclo/cmd/gocyclo@v0.6.0
+	go install github.com/rinchsan/gosimports/cmd/gosimports@v0.3.8
