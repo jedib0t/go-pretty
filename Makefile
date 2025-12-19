@@ -22,6 +22,10 @@ bench:
 test: fmt vet lint cyclo
 	go test -cover -coverprofile=.coverprofile ./...
 
+## test-no-lint: Run tests with coverage (runs fmt, vet, and cyclo first)
+test-no-lint: fmt vet cyclo
+	go test -cover -coverprofile=.coverprofile ./...
+
 ## test-race: Run progress demo with race detector
 test-race:
 	go run -race ./cmd/demo-progress/demo.go

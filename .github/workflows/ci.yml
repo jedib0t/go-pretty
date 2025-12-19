@@ -32,10 +32,17 @@ jobs:
         run: |
           make tools
 
+      # Run golangci-lint
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.7.2
+          args: --timeout=5m
+
       # Run all the unit-tests
-      - name: Test
+      - name: Test (no lint)
         run: |
-          make test
+          make test-no-lint
 
       # Run some tests to ensure no race conditions exist
       - name: Test for Race Conditions
