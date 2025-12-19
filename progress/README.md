@@ -26,11 +26,17 @@ A demonstration of all the capabilities can be found here:
 ### Tracker Management
 
   - Dynamically add one or more Task Trackers while `Render()` is in progress
-  - Sort trackers by Message, Percentage, or Value (ascending/descending)
+  - Sort trackers by Index (ascending/descending), Message, Percentage, or Value
+    - `SortByIndex` / `SortByIndexDsc` - Sort by explicit Index field, maintaining
+      order regardless of completion status (done and active trackers are merged
+      and sorted together)
+    - For other sorting methods, done and active trackers are sorted separately,
+      with done trackers always rendered before active trackers
   - Tracker options
-    - `DeferStart` - Delay tracker start until manually triggered
-    - `RemoveOnCompletion` - Hide tracker when done instead of showing completion
     - `AutoStopDisabled` - Prevent auto-completion when value exceeds total
+    - `DeferStart` - Delay tracker start until manually triggered
+    - `Index` - Explicit ordering value for trackers (used with `SortByIndex`)
+    - `RemoveOnCompletion` - Hide tracker when done instead of showing completion
 
 ### Display & Rendering
 
