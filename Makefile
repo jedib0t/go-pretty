@@ -91,4 +91,5 @@ tools: tools-ci
 ## tools-ci: Install required development tools for CI
 tools-ci:
 	go install github.com/fzipp/gocyclo/cmd/gocyclo@v0.6.0
+	go install github.com/mattn/goveralls@v0.0.12
 	go install github.com/rinchsan/gosimports/cmd/gosimports@v0.3.8
