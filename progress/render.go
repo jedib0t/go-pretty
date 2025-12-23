@@ -388,7 +388,11 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 
 	// stop if auto stop is enabled and there are no more active trackers
 	if p.autoStop && p.LengthActive() == 0 {
-		p.renderContextCancel()
+		p.renderContextCancelMutex.Lock()
+		if p.renderContextCancel != nil {
+			p.renderContextCancel()
+		}
+		p.renderContextCancelMutex.Unlock()
 	}
 
 	return out.Len()
