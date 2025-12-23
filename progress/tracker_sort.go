@@ -69,7 +69,7 @@ func (sb sortByIndex) Swap(i, j int) { sb[i], sb[j] = sb[j], sb[i] }
 func (sb sortByIndex) Less(i, j int) bool {
 	if sb[i].Index == sb[j].Index {
 		// Same index: maintain insertion order (use timeStart as tiebreaker)
-		return sb[i].timeStart.Before(sb[j].timeStart)
+		return sb[i].timeStartValue().Before(sb[j].timeStartValue())
 	}
 	return sb[i].Index < sb[j].Index
 }
@@ -81,7 +81,7 @@ func (sb sortByIndexDsc) Swap(i, j int) { sb[i], sb[j] = sb[j], sb[i] }
 func (sb sortByIndexDsc) Less(i, j int) bool {
 	if sb[i].Index == sb[j].Index {
 		// Same index: maintain insertion order (earlier timeStart first)
-		return sb[i].timeStart.Before(sb[j].timeStart)
+		return sb[i].timeStartValue().Before(sb[j].timeStartValue())
 	}
 	// Reverse: higher index comes first
 	return sb[i].Index > sb[j].Index
@@ -100,7 +100,7 @@ func (sb sortByPercent) Swap(i, j int) { sb[i], sb[j] = sb[j], sb[i] }
 func (sb sortByPercent) Less(i, j int) bool {
 	if sb[i].PercentDone() == sb[j].PercentDone() {
 		// When percentages are equal, preserve insertion order (earlier timeStart first)
-		return sb[i].timeStart.Before(sb[j].timeStart)
+		return sb[i].timeStartValue().Before(sb[j].timeStartValue())
 	}
 	return sb[i].PercentDone() < sb[j].PercentDone()
 }
@@ -112,7 +112,7 @@ func (sb sortByPercentDsc) Swap(i, j int) { sb[i], sb[j] = sb[j], sb[i] }
 func (sb sortByPercentDsc) Less(i, j int) bool {
 	if sb[i].PercentDone() == sb[j].PercentDone() {
 		// When percentages are equal, preserve insertion order (earlier timeStart first)
-		return sb[i].timeStart.Before(sb[j].timeStart)
+		return sb[i].timeStartValue().Before(sb[j].timeStartValue())
 	}
 	// Reverse: higher percentage comes first
 	return sb[i].PercentDone() > sb[j].PercentDone()
@@ -123,10 +123,12 @@ type sortByValue []*Tracker
 func (sb sortByValue) Len() int      { return len(sb) }
 func (sb sortByValue) Swap(i, j int) { sb[i], sb[j] = sb[j], sb[i] }
 func (sb sortByValue) Less(i, j int) bool {
-	if sb[i].value == sb[j].value {
-		return sb[i].timeStart.Before(sb[j].timeStart)
+	valueI := sb[i].Value()
+	valueJ := sb[j].Value()
+	if valueI == valueJ {
+		return sb[i].timeStartValue().Before(sb[j].timeStartValue())
 	}
-	return sb[i].value < sb[j].value
+	return valueI < valueJ
 }
 
 type sortByValueDsc []*Tracker
@@ -134,12 +136,14 @@ type sortByValueDsc []*Tracker
 func (sb sortByValueDsc) Len() int      { return len(sb) }
 func (sb sortByValueDsc) Swap(i, j int) { sb[i], sb[j] = sb[j], sb[i] }
 func (sb sortByValueDsc) Less(i, j int) bool {
-	if sb[i].value == sb[j].value {
+	valueI := sb[i].Value()
+	valueJ := sb[j].Value()
+	if valueI == valueJ {
 		// When values are equal, preserve insertion order (earlier timeStart first)
-		return sb[i].timeStart.Before(sb[j].timeStart)
+		return sb[i].timeStartValue().Before(sb[j].timeStartValue())
 	}
 	// Reverse: higher value comes first
-	return sb[i].value > sb[j].value
+	return valueI > valueJ
 }
 
 type sortDsc struct{ sort.Interface }
