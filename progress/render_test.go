@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -19,13 +20,18 @@ var (
 
 type outputWriter struct {
 	Text strings.Builder
+	mu   sync.Mutex
 }
 
 func (w *outputWriter) Write(p []byte) (n int, err error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
 	return w.Text.Write(p)
 }
 
 func (w *outputWriter) String() string {
+	w.mu.Lock()
+	defer w.mu.Unlock()
 	return w.Text.String()
 }
 
@@ -331,7 +337,7 @@ func TestProgress_generateTrackerStr_Indeterminate(t *testing.T) {
 }
 
 func TestProgress_RenderNeverStarted(t *testing.T) {
-	renderOutput := strings.Builder{}
+	renderOutput := outputWriter{}
 
 	pw := generateWriter()
 	pw.SetOutputWriter(&renderOutput)

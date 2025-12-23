@@ -382,11 +382,17 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 	}
 
 	// write the text to the output writer
+	p.outputWriterMutex.Lock()
 	_, _ = p.outputWriter.Write([]byte(out.String()))
+	p.outputWriterMutex.Unlock()
 
 	// stop if auto stop is enabled and there are no more active trackers
 	if p.autoStop && p.LengthActive() == 0 {
-		p.renderContextCancel()
+		p.renderContextCancelMutex.Lock()
+		if p.renderContextCancel != nil {
+			p.renderContextCancel()
+		}
+		p.renderContextCancelMutex.Unlock()
 	}
 
 	return out.Len()
@@ -498,8 +504,9 @@ func (p *Progress) renderTrackerStatsSpeed(out *strings.Builder, t *Tracker, hin
 
 		p.trackersActiveMutex.RLock()
 		for _, tracker := range p.trackersActive {
-			if !tracker.timeStart.IsZero() {
-				speed += float64(tracker.Value()) / time.Since(tracker.timeStart).Round(speedPrecision).Seconds()
+			timeStart := tracker.timeStartValue()
+			if !timeStart.IsZero() {
+				speed += float64(tracker.Value()) / time.Since(timeStart).Round(speedPrecision).Seconds()
 			}
 		}
 		p.trackersActiveMutex.RUnlock()
@@ -507,10 +514,13 @@ func (p *Progress) renderTrackerStatsSpeed(out *strings.Builder, t *Tracker, hin
 		if speed > 0 {
 			p.renderTrackerStatsSpeedInternal(out, p.style.Options.SpeedOverallFormatter(int64(speed)))
 		}
-	} else if !t.timeStart.IsZero() {
-		timeTaken := time.Since(t.timeStart)
-		if timeTakenRounded := timeTaken.Round(speedPrecision); timeTakenRounded > speedPrecision {
-			p.renderTrackerStatsSpeedInternal(out, t.Units.Sprint(int64(float64(t.Value())/timeTakenRounded.Seconds())))
+	} else {
+		timeStart := t.timeStartValue()
+		if !timeStart.IsZero() {
+			timeTaken := time.Since(timeStart)
+			if timeTakenRounded := timeTaken.Round(speedPrecision); timeTakenRounded > speedPrecision {
+				p.renderTrackerStatsSpeedInternal(out, t.Units.Sprint(int64(float64(t.Value())/timeTakenRounded.Seconds())))
+			}
 		}
 	}
 }
@@ -528,11 +538,12 @@ func (p *Progress) renderTrackerStatsSpeedInternal(out *strings.Builder, speed s
 
 func (p *Progress) renderTrackerStatsTime(outStats *strings.Builder, t *Tracker, hint renderHint) {
 	var td, tp time.Duration
-	if !t.timeStart.IsZero() {
+	timeStart, timeStop := t.timeStartAndStop()
+	if !timeStart.IsZero() {
 		if t.IsDone() {
-			td = t.timeStop.Sub(t.timeStart)
+			td = timeStop.Sub(timeStart)
 		} else {
-			td = time.Since(t.timeStart)
+			td = time.Since(timeStart)
 		}
 	}
 	if hint.isOverallTracker {

@@ -26,9 +26,10 @@ test: fmt vet lint cyclo
 test-no-lint: fmt vet cyclo
 	go test -cover -coverprofile=.coverprofile ./...
 
-## test-race: Run progress demo with race detector
+## test-race: Run tests and progress demo with race detector
 test-race:
-	go run -race ./cmd/demo-progress/demo.go
+	go test -race ./...
+	go run -race ./cmd/demo-progress
 
 # ============================================================================
 # Code quality targets

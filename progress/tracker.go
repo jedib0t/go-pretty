@@ -264,3 +264,20 @@ func (t *Tracker) valueAndTotal() (int64, int64) {
 	t.mutex.RUnlock()
 	return value, total
 }
+
+// timeStartAndStop returns the start and stop times safely.
+func (t *Tracker) timeStartAndStop() (time.Time, time.Time) {
+	t.mutex.RLock()
+	timeStart := t.timeStart
+	timeStop := t.timeStop
+	t.mutex.RUnlock()
+	return timeStart, timeStop
+}
+
+// timeStartValue returns the start time safely.
+func (t *Tracker) timeStartValue() time.Time {
+	t.mutex.RLock()
+	timeStart := t.timeStart
+	t.mutex.RUnlock()
+	return timeStart
+}

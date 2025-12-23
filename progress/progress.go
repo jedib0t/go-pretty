@@ -32,6 +32,7 @@ type Progress struct {
 	logsToRenderMutex        sync.RWMutex
 	numTrackersExpected      int64
 	outputWriter             io.Writer
+	outputWriterMutex        sync.RWMutex
 	overallTracker           *Tracker
 	overallTrackerMutex      sync.RWMutex
 	pinnedMessages           []string
@@ -199,7 +200,9 @@ func (p *Progress) SetNumTrackersExpected(numTrackers int) {
 // os.Stdout or os.Stderr or a file. Warning: redirecting the output to a file
 // may not work well as the Render() logic moves the cursor around a lot.
 func (p *Progress) SetOutputWriter(writer io.Writer) {
+	p.outputWriterMutex.Lock()
 	p.outputWriter = writer
+	p.outputWriterMutex.Unlock()
 }
 
 // SetPinnedMessages sets message(s) pinned above all the trackers of the
@@ -344,16 +347,19 @@ func (p *Progress) initForRender() {
 	}
 
 	// if not output write has been set, output to STDOUT
+	p.outputWriterMutex.RLock()
 	if p.outputWriter == nil {
 		p.outputWriter = os.Stdout
 	}
+	outputWriter := p.outputWriter
+	p.outputWriterMutex.RUnlock()
 
 	// pick a sane update frequency if none set
 	if p.updateFrequency <= 0 {
 		p.updateFrequency = DefaultUpdateFrequency
 	}
 
-	if p.outputWriter == os.Stdout {
+	if outputWriter == os.Stdout {
 		// get the current terminal size for preventing roll-overs, and do this in a
 		// background loop until end of render. This only works if the output writer is STDOUT.
 		go p.watchTerminalSize() // needs p.updateFrequency
