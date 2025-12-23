@@ -13,6 +13,8 @@ import (
 // those that are added dynamically while render is in progress.
 func (p *Progress) Render() {
 	if p.beginRender() {
+		// Once rendering is started, we register that the outermost wait should be stopped when rendering finishes.
+		defer p.wg.Done() // Opposite: NewWriter()
 		p.initForRender()
 
 		lastRenderLength := 0
@@ -40,6 +42,7 @@ func (p *Progress) beginRender() bool {
 	if p.renderInProgress {
 		return false
 	}
+	p.wg.Add(1) // Opposite: p.endRender()
 	p.renderInProgress = true
 	return true
 }
@@ -105,6 +108,7 @@ func (p *Progress) endRender() {
 	defer p.renderInProgressMutex.Unlock()
 
 	p.renderInProgress = false
+	p.wg.Done() // Opposite: p.beginRender()
 }
 
 // extractAllTrackersInOrder extracts all trackers (both active and done) and
@@ -493,11 +497,15 @@ func (p *Progress) renderTrackerStatsSpeed(out *strings.Builder, t *Tracker, hin
 	}
 
 	speedPrecision := p.style.Options.SpeedPrecision
+	t.mutex.RLock()
+	defer t.mutex.RUnlock()
 	if hint.isOverallTracker {
 		speed := float64(0)
 
 		p.trackersActiveMutex.RLock()
 		for _, tracker := range p.trackersActive {
+			tracker.mutex.RLock()
+			defer tracker.mutex.RUnlock()
 			if !tracker.timeStart.IsZero() {
 				speed += float64(tracker.Value()) / time.Since(tracker.timeStart).Round(speedPrecision).Seconds()
 			}

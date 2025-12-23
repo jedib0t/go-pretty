@@ -49,5 +49,7 @@ type Writer interface {
 
 // NewWriter initializes and returns a Writer.
 func NewWriter() Writer {
-	return &Progress{}
+	p := &Progress{}
+	p.wg.Add(1) // Opposite: p.Render()
+	return p
 }

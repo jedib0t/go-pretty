@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -19,13 +20,18 @@ var (
 
 type outputWriter struct {
 	Text strings.Builder
+	m    sync.Mutex
 }
 
 func (w *outputWriter) Write(p []byte) (n int, err error) {
+	w.m.Lock()
+	defer w.m.Unlock()
 	return w.Text.Write(p)
 }
 
 func (w *outputWriter) String() string {
+	w.m.Lock()
+	defer w.m.Unlock()
 	return w.Text.String()
 }
 

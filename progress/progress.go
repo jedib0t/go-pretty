@@ -55,6 +55,7 @@ type Progress struct {
 	trackersInQueue          []*Tracker
 	trackersInQueueMutex     sync.RWMutex
 	updateFrequency          time.Duration
+	wg                       sync.WaitGroup
 }
 
 // Position defines the position of the Tracker with respect to the Tracker's
@@ -288,8 +289,15 @@ func (p *Progress) Stop() {
 	p.renderContextCancelMutex.Lock()
 	defer p.renderContextCancelMutex.Unlock()
 
+	// Save the state of renderInProgress to decide whether we need to wait for
+	// the render goroutine to finish.
+	rip := p.renderInProgress
 	if p.renderContextCancel != nil {
 		p.renderContextCancel()
+	}
+	// If render was in progress, wait for it to finish.
+	if rip {
+		p.wg.Wait()
 	}
 }
 
