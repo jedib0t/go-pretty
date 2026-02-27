@@ -151,3 +151,16 @@ func TestAlign_MarkdownProperty(t *testing.T) {
 		assert.Contains(t, align.MarkdownProperty(), markdownSeparator)
 	}
 }
+
+func TestAlign_MarkdownProperty_WithMinLength(t *testing.T) {
+	assert.Equal(t, " ---------- ", AlignDefault.MarkdownProperty(10))
+	assert.Equal(t, ":---------- ", AlignLeft.MarkdownProperty(10))
+	assert.Equal(t, ":----------:", AlignCenter.MarkdownProperty(10))
+	assert.Equal(t, " ---------- ", AlignJustify.MarkdownProperty(10))
+	assert.Equal(t, " ----------:", AlignRight.MarkdownProperty(10))
+
+	// minimum width of 3
+	assert.Equal(t, " --- ", AlignDefault.MarkdownProperty(1))
+	assert.Equal(t, " --- ", AlignDefault.MarkdownProperty(3))
+	assert.Equal(t, " ---- ", AlignDefault.MarkdownProperty(4))
+}
