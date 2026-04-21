@@ -67,6 +67,21 @@ func TestAlign_Apply(t *testing.T) {
 	assert.Equal(t, "+5.43x      ", AlignAuto.Apply("+5.43x", 12))
 }
 
+func TestAlign_Apply_JustifyCJKOverflow(t *testing.T) {
+	// U+4222 (䈢) has display width 2; the string below has display width 42,
+	// which exceeds maxLength=40. AlignJustify.Apply must not panic.
+	cell := "0000000000000000000000000000000000 0000䈢0"
+	assert.NotPanics(t, func() {
+		assert.Equal(t, cell, AlignJustify.Apply(cell, 40))
+	})
+
+	// Further sanity checks: any CJK-only cell whose display width exceeds
+	// maxLength must also be returned unchanged without panicking.
+	assert.NotPanics(t, func() {
+		assert.Equal(t, "中文", AlignJustify.Apply("中文", 3))
+	})
+}
+
 func TestAlign_Apply_ColoredText(t *testing.T) {
 	// AlignDefault & AlignLeft are the same
 	assert.Equal(t, "\x1b[33mJon Snow\x1b[0m    ", AlignDefault.Apply("\x1b[33mJon Snow\x1b[0m", 12))
@@ -163,4 +178,30 @@ func TestAlign_MarkdownProperty_WithMinLength(t *testing.T) {
 	assert.Equal(t, " --- ", AlignDefault.MarkdownProperty(1))
 	assert.Equal(t, " --- ", AlignDefault.MarkdownProperty(3))
 	assert.Equal(t, " ---- ", AlignDefault.MarkdownProperty(4))
+}
+
+// FuzzAlign_Apply exercises Align.Apply across all alignment modes with
+// arbitrary UTF-8 input (including wide Unicode characters) and arbitrary
+// maxLength values. It guards against panics such as the "strings: negative
+// Repeat count" crash in justifyText when the display width of the cell
+// exceeds maxLength.
+func FuzzAlign_Apply(f *testing.F) {
+	f.Add("Jon Snow", 12)
+	f.Add("0000000000000000000000000000000000 0000䈢0", 40)
+	f.Add("中文 字符", 3)
+	f.Add("", 5)
+	f.Add("a b c", 0)
+	f.Add("\x1b[33mJon Snow\x1b[0m", 12)
+
+	aligns := []Align{AlignDefault, AlignLeft, AlignCenter, AlignJustify, AlignRight, AlignAuto}
+	f.Fuzz(func(t *testing.T, s string, maxLength int) {
+		// keep maxLength in a sane range; negative/huge values are not the
+		// concern of this fuzz target.
+		if maxLength < 0 || maxLength > 1024 {
+			t.Skip()
+		}
+		for _, a := range aligns {
+			a.Apply(s, maxLength)
+		}
+	})
 }
