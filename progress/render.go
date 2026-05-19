@@ -372,6 +372,9 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 		p.moveCursorToTheTop(&out)
 	}
 
+	// flush logs above the rewindable region; moveCursorToTheTop does not count them
+	p.renderLogs(&out)
+
 	// render the trackers that are done, and then the ones that are active
 	p.renderTrackersDoneAndActive(&out, hint)
 
@@ -431,20 +434,21 @@ func (p *Progress) renderTrackersDoneAndActive(out *strings.Builder, hint render
 	p.trackersActive = trackersActive
 	p.trackersActiveMutex.Unlock()
 
-	// render all the logs received and flush them out
+	// render pinned messages
+	if len(trackersActive) > 0 && p.style.Visibility.Pinned {
+		p.renderPinnedMessages(out, hint)
+	}
+}
+
+func (p *Progress) renderLogs(out *strings.Builder) {
 	p.logsToRenderMutex.Lock()
+	defer p.logsToRenderMutex.Unlock()
 	for _, log := range p.logsToRender {
 		out.WriteString(text.EraseLine.Sprint())
 		out.WriteString(log)
 		out.WriteRune('\n')
 	}
 	p.logsToRender = nil
-	p.logsToRenderMutex.Unlock()
-
-	// render pinned messages
-	if len(trackersActive) > 0 && p.style.Visibility.Pinned {
-		p.renderPinnedMessages(out, hint)
-	}
 }
 
 func (p *Progress) renderTrackerStats(out *strings.Builder, t *Tracker, hint renderHint) {
@@ -515,9 +519,14 @@ func (p *Progress) renderTrackerStatsSpeed(out *strings.Builder, t *Tracker, hin
 			p.renderTrackerStatsSpeedInternal(out, p.style.Options.SpeedOverallFormatter(int64(speed)))
 		}
 	} else {
-		timeStart := t.timeStartValue()
+		timeStart, timeStop, done := t.timeStartStopAndDone()
 		if !timeStart.IsZero() {
-			timeTaken := time.Since(timeStart)
+			var timeTaken time.Duration
+			if done {
+				timeTaken = timeStop.Sub(timeStart)
+			} else {
+				timeTaken = time.Since(timeStart)
+			}
 			if timeTakenRounded := timeTaken.Round(speedPrecision); timeTakenRounded > speedPrecision {
 				p.renderTrackerStatsSpeedInternal(out, t.Units.Sprint(int64(float64(t.Value())/timeTakenRounded.Seconds())))
 			}
@@ -538,9 +547,9 @@ func (p *Progress) renderTrackerStatsSpeedInternal(out *strings.Builder, speed s
 
 func (p *Progress) renderTrackerStatsTime(outStats *strings.Builder, t *Tracker, hint renderHint) {
 	var td, tp time.Duration
-	timeStart, timeStop := t.timeStartAndStop()
+	timeStart, timeStop, done := t.timeStartStopAndDone()
 	if !timeStart.IsZero() {
-		if t.IsDone() {
+		if done {
 			td = timeStop.Sub(timeStart)
 		} else {
 			td = time.Since(timeStart)
@@ -548,7 +557,7 @@ func (p *Progress) renderTrackerStatsTime(outStats *strings.Builder, t *Tracker,
 	}
 	if hint.isOverallTracker {
 		tp = p.style.Options.TimeOverallPrecision
-	} else if t.IsDone() {
+	} else if done {
 		tp = p.style.Options.TimeDonePrecision
 	} else {
 		tp = p.style.Options.TimeInProgressPrecision

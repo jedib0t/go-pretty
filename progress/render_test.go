@@ -1138,3 +1138,47 @@ func TestProgress_RenderWithSortByIndex_MixedIndexedAndUnindexed(t *testing.T) {
 
 	showOutputOnFailure(t, out)
 }
+
+func TestProgress_renderTrackerStatsSpeed_DoneTrackerStable(t *testing.T) {
+	pw := &Progress{}
+	pw.Style().Visibility.Speed = true
+
+	tracker := &Tracker{Total: 100, Units: UnitsDefault}
+	tracker.mutex.Lock()
+	tracker.timeStart = time.Now().Add(-2 * time.Second)
+	tracker.timeStop = time.Now().Add(-1 * time.Second)
+	tracker.value = 100
+	tracker.done = true
+	tracker.mutex.Unlock()
+
+	var out1, out2 strings.Builder
+	pw.renderTrackerStatsSpeed(&out1, tracker, renderHint{})
+	time.Sleep(50 * time.Millisecond)
+	pw.renderTrackerStatsSpeed(&out2, tracker, renderHint{})
+
+	assert.NotEmpty(t, out1.String(), "expected non-empty speed output for a done tracker")
+	assert.Equal(t, out1.String(), out2.String(),
+		"speed display for a done tracker must not change between renders")
+}
+
+func TestProgress_renderTrackers_LogsAppearAboveTrackers(t *testing.T) {
+	renderOutput := outputWriter{}
+	pw := generateWriter()
+	pw.SetOutputWriter(&renderOutput)
+
+	pw.Log("log-message-marker")
+	tracker := &Tracker{Message: "tracker-message-marker", Total: 100, Units: UnitsDefault}
+	go trackSomething(pw, tracker)
+	renderAndWait(pw, false)
+
+	out := renderOutput.String()
+	logPos := strings.Index(out, "log-message-marker")
+	trackerPos := strings.Index(out, "tracker-message-marker")
+
+	assert.Greater(t, logPos, -1, "log message should appear in output")
+	assert.Greater(t, trackerPos, -1, "tracker message should appear in output")
+	assert.Less(t, logPos, trackerPos,
+		"log must be rendered above the tracker block so subsequent ticks don't overwrite it")
+
+	showOutputOnFailure(t, out)
+}
