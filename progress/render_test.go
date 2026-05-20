@@ -1161,24 +1161,75 @@ func TestProgress_renderTrackerStatsSpeed_DoneTrackerStable(t *testing.T) {
 		"speed display for a done tracker must not change between renders")
 }
 
-func TestProgress_renderTrackers_LogsAppearAboveTrackers(t *testing.T) {
-	renderOutput := outputWriter{}
+// Default (StyleOptions.KeepTrackersTogether=false) preserves the pre-v6.7.8
+// scrollback layout: newly-done -> log -> active.
+func TestProgress_renderTrackers_DefaultMode_LogsBetweenNewlyDoneAndActive(t *testing.T) {
+	out := &outputWriter{}
 	pw := generateWriter()
-	pw.SetOutputWriter(&renderOutput)
+	pw.SetOutputWriter(out)
 
-	pw.Log("log-message-marker")
-	tracker := &Tracker{Message: "tracker-message-marker", Total: 100, Units: UnitsDefault}
-	go trackSomething(pw, tracker)
-	renderAndWait(pw, false)
+	newlyDone := &Tracker{Message: "NEWLY-DONE-MARKER", Total: 100, Units: UnitsDefault}
+	pw.AppendTracker(newlyDone)
+	newlyDone.Increment(100)
 
-	out := renderOutput.String()
-	logPos := strings.Index(out, "log-message-marker")
-	trackerPos := strings.Index(out, "tracker-message-marker")
+	active := &Tracker{Message: "ACTIVE-MARKER", Total: 100, Units: UnitsDefault}
+	pw.AppendTracker(active)
+	active.Increment(50)
 
-	assert.Greater(t, logPos, -1, "log message should appear in output")
-	assert.Greater(t, trackerPos, -1, "tracker message should appear in output")
-	assert.Less(t, logPos, trackerPos,
-		"log must be rendered above the tracker block so subsequent ticks don't overwrite it")
+	pw.Log("LOG-MARKER")
 
-	showOutputOnFailure(t, out)
+	pwImpl := pw.(*Progress)
+	pwImpl.initForRender()
+	pwImpl.renderTrackers(0)
+
+	output := out.String()
+	newlyDonePos := strings.Index(output, "NEWLY-DONE-MARKER")
+	logPos := strings.Index(output, "LOG-MARKER")
+	activePos := strings.Index(output, "ACTIVE-MARKER")
+
+	assert.Greater(t, newlyDonePos, -1, "newly-done tracker must appear")
+	assert.Greater(t, logPos, -1, "log must appear")
+	assert.Greater(t, activePos, -1, "active tracker must appear")
+
+	assert.Less(t, newlyDonePos, logPos, "newly-done must render above log")
+	assert.Less(t, logPos, activePos, "log must render above active tracker")
+
+	showOutputOnFailure(t, output)
+}
+
+// Opt-in (StyleOptions.KeepTrackersTogether=true) keeps the post-v6.7.8 layout
+// needed for SortByIndex to reorder done trackers: log -> done -> active.
+func TestProgress_renderTrackers_KeepTrackersTogetherMode_LogsAboveAll(t *testing.T) {
+	out := &outputWriter{}
+	pw := generateWriter()
+	pw.SetOutputWriter(out)
+	pw.Style().Options.KeepTrackersTogether = true
+
+	done := &Tracker{Message: "DONE-MARKER", Total: 100, Units: UnitsDefault}
+	pw.AppendTracker(done)
+	done.Increment(100)
+
+	active := &Tracker{Message: "ACTIVE-MARKER", Total: 100, Units: UnitsDefault}
+	pw.AppendTracker(active)
+	active.Increment(50)
+
+	pw.Log("LOG-MARKER")
+
+	pwImpl := pw.(*Progress)
+	pwImpl.initForRender()
+	pwImpl.renderTrackers(0)
+
+	output := out.String()
+	donePos := strings.Index(output, "DONE-MARKER")
+	logPos := strings.Index(output, "LOG-MARKER")
+	activePos := strings.Index(output, "ACTIVE-MARKER")
+
+	assert.Greater(t, donePos, -1, "done tracker must appear")
+	assert.Greater(t, logPos, -1, "log must appear")
+	assert.Greater(t, activePos, -1, "active tracker must appear")
+
+	assert.Less(t, logPos, donePos, "log must render above the entire rewindable region")
+	assert.Less(t, donePos, activePos, "done must render above active (default sort order)")
+
+	showOutputOnFailure(t, output)
 }

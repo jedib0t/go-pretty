@@ -107,9 +107,52 @@ func (p *Progress) endRender() {
 	p.renderInProgress = false
 }
 
+// extractDoneAndActiveTrackers walks p.trackersActive and partitions it into
+// (stillActive, newlyDone). Used by the default scrollback render path; mirrors
+// the pre-v6.7.8 behavior where done trackers exit the rewindable region on
+// completion.
+func (p *Progress) extractDoneAndActiveTrackers() ([]*Tracker, []*Tracker) {
+	p.consumeQueuedTrackers()
+
+	var trackersActive, trackersNewlyDone []*Tracker
+	var activeTrackersProgress int64
+	var maxETA time.Duration
+
+	p.trackersDoneMutex.RLock()
+	lengthDone := len(p.trackersDone)
+	p.trackersDoneMutex.RUnlock()
+
+	p.trackersActiveMutex.RLock()
+	trackersActive = make([]*Tracker, 0, len(p.trackersActive))
+	trackersNewlyDone = make([]*Tracker, 0, len(p.trackersActive)/4)
+	for _, tracker := range p.trackersActive {
+		if !tracker.IsDone() {
+			trackersActive = append(trackersActive, tracker)
+			activeTrackersProgress += int64(tracker.PercentDone())
+			if eta := tracker.ETA(); eta > maxETA {
+				maxETA = eta
+			}
+		} else if !tracker.RemoveOnCompletion {
+			trackersNewlyDone = append(trackersNewlyDone, tracker)
+		}
+	}
+	p.trackersActiveMutex.RUnlock()
+	p.sortBy.Sort(trackersNewlyDone)
+	p.sortBy.Sort(trackersActive)
+
+	p.overallTracker.value = int64(lengthDone+len(trackersNewlyDone)) * 100
+	p.overallTracker.value += activeTrackersProgress
+	p.overallTracker.minETA = maxETA
+	if len(trackersActive) == 0 {
+		p.overallTracker.MarkAsDone()
+	}
+
+	return trackersActive, trackersNewlyDone
+}
+
 // extractAllTrackersInOrder extracts all trackers (both active and done) and
 // sorts them together when SortByIndex is used. This allows maintaining a fixed
-// order regardless of completion status.
+// order regardless of completion status. Used by the KeepTrackersTogether path.
 func (p *Progress) extractAllTrackersInOrder() []*Tracker {
 	// move trackers waiting in queue to the active list
 	p.consumeQueuedTrackers()
@@ -204,10 +247,11 @@ func (p *Progress) generateTrackerStrIndeterminate(maxLen int) string {
 }
 
 func (p *Progress) moveCursorToTheTop(out *strings.Builder) {
-	// Count all trackers that will be rendered (both done and active)
+	// Count trackers that occupy the rewindable region. In the default
+	// scrollback mode, that's just active trackers; with KeepTrackersTogether,
+	// done trackers are also re-rendered each tick.
 	var numTrackersToRender int
 
-	// Count active trackers (excluding those with RemoveOnCompletion)
 	p.trackersActiveMutex.RLock()
 	for _, tracker := range p.trackersActive {
 		if !tracker.RemoveOnCompletion {
@@ -216,14 +260,15 @@ func (p *Progress) moveCursorToTheTop(out *strings.Builder) {
 	}
 	p.trackersActiveMutex.RUnlock()
 
-	// Count done trackers (excluding those with RemoveOnCompletion)
-	p.trackersDoneMutex.RLock()
-	for _, tracker := range p.trackersDone {
-		if !tracker.RemoveOnCompletion {
-			numTrackersToRender++
+	if p.style.Options.KeepTrackersTogether {
+		p.trackersDoneMutex.RLock()
+		for _, tracker := range p.trackersDone {
+			if !tracker.RemoveOnCompletion {
+				numTrackersToRender++
+			}
 		}
+		p.trackersDoneMutex.RUnlock()
 	}
-	p.trackersDoneMutex.RUnlock()
 
 	numLinesToMoveUp := numTrackersToRender
 	if p.style.Visibility.TrackerOverall && p.overallTracker != nil && !p.overallTracker.IsDone() {
@@ -372,11 +417,13 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 		p.moveCursorToTheTop(&out)
 	}
 
-	// flush logs above the rewindable region; moveCursorToTheTop does not count them
-	p.renderLogs(&out)
-
-	// render the trackers that are done, and then the ones that are active
-	p.renderTrackersDoneAndActive(&out, hint)
+	if p.style.Options.KeepTrackersTogether {
+		// flush logs above the rewindable region; moveCursorToTheTop does not count them
+		p.renderLogs(&out)
+		p.renderTrackersDoneAndActive(&out, hint)
+	} else {
+		p.renderTrackersScrollback(&out, hint)
+	}
 
 	// render the overall tracker
 	if p.style.Visibility.TrackerOverall {
@@ -399,6 +446,37 @@ func (p *Progress) renderTrackers(lastRenderLength int) int {
 	}
 
 	return out.Len()
+}
+
+// renderTrackersScrollback emits newly-done trackers and logs as one-shot
+// scrollback above the rewindable region (pinned + still-active). This is the
+// pre-v6.7.8 layout used when StyleOptions.KeepTrackersTogether is false.
+func (p *Progress) renderTrackersScrollback(out *strings.Builder, hint renderHint) {
+	trackersActive, trackersNewlyDone := p.extractDoneAndActiveTrackers()
+
+	// newly-done trackers -> scrollback
+	for _, tracker := range trackersNewlyDone {
+		p.renderTracker(out, tracker, hint)
+	}
+	p.trackersDoneMutex.Lock()
+	p.trackersDone = append(p.trackersDone, trackersNewlyDone...)
+	p.trackersDoneMutex.Unlock()
+
+	// logs -> scrollback, between newly-done and the rewindable region
+	p.renderLogs(out)
+
+	// pinned (part of rewindable region)
+	if len(trackersActive) > 0 && p.style.Visibility.Pinned {
+		p.renderPinnedMessages(out, hint)
+	}
+
+	// active trackers (part of rewindable region)
+	for _, tracker := range trackersActive {
+		p.renderTracker(out, tracker, hint)
+	}
+	p.trackersActiveMutex.Lock()
+	p.trackersActive = trackersActive
+	p.trackersActiveMutex.Unlock()
 }
 
 func (p *Progress) renderTrackersDoneAndActive(out *strings.Builder, hint renderHint) {

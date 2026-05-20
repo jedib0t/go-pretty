@@ -9,14 +9,16 @@ const (
 	// SortByNone doesn't do any sorting == sort by insertion order.
 	SortByNone SortBy = iota
 
-	// SortByIndex sorts by the Index field in ascending order. When this is used,
-	// trackers are rendered in Index order regardless of completion status (done
-	// and active trackers are merged and sorted together). Index 0 comes first.
+	// SortByIndex sorts by the Index field in ascending order. Index 0 comes
+	// first. To reorder done trackers as well, set
+	// StyleOptions.KeepTrackersTogether = true; otherwise done trackers stay
+	// frozen in completion order and only active trackers are sorted by Index.
 	SortByIndex
 
-	// SortByIndexDsc sorts by the Index field in descending order. When this is used,
-	// trackers are rendered in Index order regardless of completion status (done
-	// and active trackers are merged and sorted together). Higher indices come first.
+	// SortByIndexDsc sorts by the Index field in descending order. Higher
+	// indices come first. To reorder done trackers as well, set
+	// StyleOptions.KeepTrackersTogether = true; otherwise done trackers stay
+	// frozen in completion order and only active trackers are sorted by Index.
 	SortByIndexDsc
 
 	// SortByMessage sorts by the Message alphabetically in ascending order.
