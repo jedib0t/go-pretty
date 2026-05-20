@@ -1138,3 +1138,98 @@ func TestProgress_RenderWithSortByIndex_MixedIndexedAndUnindexed(t *testing.T) {
 
 	showOutputOnFailure(t, out)
 }
+
+func TestProgress_renderTrackerStatsSpeed_DoneTrackerStable(t *testing.T) {
+	pw := &Progress{}
+	pw.Style().Visibility.Speed = true
+
+	tracker := &Tracker{Total: 100, Units: UnitsDefault}
+	tracker.mutex.Lock()
+	tracker.timeStart = time.Now().Add(-2 * time.Second)
+	tracker.timeStop = time.Now().Add(-1 * time.Second)
+	tracker.value = 100
+	tracker.done = true
+	tracker.mutex.Unlock()
+
+	var out1, out2 strings.Builder
+	pw.renderTrackerStatsSpeed(&out1, tracker, renderHint{})
+	time.Sleep(50 * time.Millisecond)
+	pw.renderTrackerStatsSpeed(&out2, tracker, renderHint{})
+
+	assert.NotEmpty(t, out1.String(), "expected non-empty speed output for a done tracker")
+	assert.Equal(t, out1.String(), out2.String(),
+		"speed display for a done tracker must not change between renders")
+}
+
+// Default (StyleOptions.KeepTrackersTogether=false) preserves the pre-v6.7.8
+// scrollback layout: newly-done -> log -> active.
+func TestProgress_renderTrackers_DefaultMode_LogsBetweenNewlyDoneAndActive(t *testing.T) {
+	out := &outputWriter{}
+	pw := generateWriter()
+	pw.SetOutputWriter(out)
+
+	newlyDone := &Tracker{Message: "NEWLY-DONE-MARKER", Total: 100, Units: UnitsDefault}
+	pw.AppendTracker(newlyDone)
+	newlyDone.Increment(100)
+
+	active := &Tracker{Message: "ACTIVE-MARKER", Total: 100, Units: UnitsDefault}
+	pw.AppendTracker(active)
+	active.Increment(50)
+
+	pw.Log("LOG-MARKER")
+
+	pwImpl := pw.(*Progress)
+	pwImpl.initForRender()
+	pwImpl.renderTrackers(0)
+
+	output := out.String()
+	newlyDonePos := strings.Index(output, "NEWLY-DONE-MARKER")
+	logPos := strings.Index(output, "LOG-MARKER")
+	activePos := strings.Index(output, "ACTIVE-MARKER")
+
+	assert.Greater(t, newlyDonePos, -1, "newly-done tracker must appear")
+	assert.Greater(t, logPos, -1, "log must appear")
+	assert.Greater(t, activePos, -1, "active tracker must appear")
+
+	assert.Less(t, newlyDonePos, logPos, "newly-done must render above log")
+	assert.Less(t, logPos, activePos, "log must render above active tracker")
+
+	showOutputOnFailure(t, output)
+}
+
+// Opt-in (StyleOptions.KeepTrackersTogether=true) keeps the post-v6.7.8 layout
+// needed for SortByIndex to reorder done trackers: log -> done -> active.
+func TestProgress_renderTrackers_KeepTrackersTogetherMode_LogsAboveAll(t *testing.T) {
+	out := &outputWriter{}
+	pw := generateWriter()
+	pw.SetOutputWriter(out)
+	pw.Style().Options.KeepTrackersTogether = true
+
+	done := &Tracker{Message: "DONE-MARKER", Total: 100, Units: UnitsDefault}
+	pw.AppendTracker(done)
+	done.Increment(100)
+
+	active := &Tracker{Message: "ACTIVE-MARKER", Total: 100, Units: UnitsDefault}
+	pw.AppendTracker(active)
+	active.Increment(50)
+
+	pw.Log("LOG-MARKER")
+
+	pwImpl := pw.(*Progress)
+	pwImpl.initForRender()
+	pwImpl.renderTrackers(0)
+
+	output := out.String()
+	donePos := strings.Index(output, "DONE-MARKER")
+	logPos := strings.Index(output, "LOG-MARKER")
+	activePos := strings.Index(output, "ACTIVE-MARKER")
+
+	assert.Greater(t, donePos, -1, "done tracker must appear")
+	assert.Greater(t, logPos, -1, "log must appear")
+	assert.Greater(t, activePos, -1, "active tracker must appear")
+
+	assert.Less(t, logPos, donePos, "log must render above the entire rewindable region")
+	assert.Less(t, donePos, activePos, "done must render above active (default sort order)")
+
+	showOutputOnFailure(t, output)
+}

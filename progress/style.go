@@ -156,6 +156,7 @@ type StyleOptions struct {
 	ErrorString             string         // "error!" string
 	ETAPrecision            time.Duration  // precision for ETA
 	ETAString               string         // string for ETA
+	KeepTrackersTogether    bool           // keep done and active trackers together in one repainted frame (needed for SortByIndex to reorder done trackers)
 	Separator               string         // text between message and tracker
 	SnipIndicator           string         // text denoting message snipping
 	PercentFormat           string         // formatting to use for percentage
@@ -176,6 +177,7 @@ var StyleOptionsDefault = StyleOptions{
 	ErrorString:             "fail!",
 	ETAPrecision:            time.Second,
 	ETAString:               "~ETA",
+	KeepTrackersTogether:    false,
 	PercentFormat:           "%5.2f%%",
 	PercentIndeterminate:    " ??? ",
 	Separator:               " ... ",

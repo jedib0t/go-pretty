@@ -265,13 +265,17 @@ func (t *Tracker) valueAndTotal() (int64, int64) {
 	return value, total
 }
 
-// timeStartAndStop returns the start and stop times safely.
-func (t *Tracker) timeStartAndStop() (time.Time, time.Time) {
+// timeStartStopAndDone returns timeStart, timeStop, and done under a single
+// RLock so callers see a consistent snapshot — needed because an active→done
+// transition between separate reads would yield a non-zero timeStart with a
+// zero timeStop while done is true, breaking timeStop.Sub(timeStart).
+func (t *Tracker) timeStartStopAndDone() (time.Time, time.Time, bool) {
 	t.mutex.RLock()
 	timeStart := t.timeStart
 	timeStop := t.timeStop
+	done := t.done
 	t.mutex.RUnlock()
-	return timeStart, timeStop
+	return timeStart, timeStop, done
 }
 
 // timeStartValue returns the start time safely.
