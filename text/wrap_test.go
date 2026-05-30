@@ -68,6 +68,9 @@ func TestWrapHard(t *testing.T) {
 	assert.Equal(t, expectedUnBold, WrapHard(textUnBold, 23))
 	assert.Equal(t, expectedWide, WrapHard(textWide, 10))
 	assert.Equal(t, expectedWideColored, WrapHard(textWideColored, 10))
+	// wide runes (width 2) must still wrap when wrapLen is odd: the line length
+	// steps over wrapLen instead of landing on it exactly.
+	assert.Equal(t, "世世\n世世\n世世", WrapHard("世世世世世世", 3))
 }
 
 func TestFoo(t *testing.T) {
