@@ -2,6 +2,7 @@ package table
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -681,4 +682,26 @@ func TestTable_RenderHTML_Sorted(t *testing.T) {
   </tr>
   </tfoot>
 </table>`)
+}
+
+func TestTable_RenderHTML_Escaped(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendRow(Row{"Arya"})
+	tw.SetCaption("</caption><script>alert(1)</script>")
+	tw.SetTitle("<script>alert(2)</script>")
+	tw.SetHTMLCSSClass("x\" onmouseover=\"alert(3)")
+
+	// title, caption and the CSS class are escaped like the cell content
+	out := tw.RenderHTML()
+	assert.NotContains(t, strings.ToLower(out), "<script")
+	assert.NotContains(t, out, "onmouseover=\"")
+	assert.Contains(t, out, "&lt;script&gt;")
+	assert.Contains(t, out, "class=\"x&#34; onmouseover=&#34;alert(3)\"")
+
+	// disabling EscapeText opts out for title/caption like it does for cell
+	// content, but attributes stay escaped
+	tw.Style().HTML.EscapeText = false
+	out = tw.RenderHTML()
+	assert.Contains(t, out, "</caption><script>alert(1)</script>")
+	assert.Contains(t, out, "class=\"x&#34; onmouseover=&#34;alert(3)\"")
 }

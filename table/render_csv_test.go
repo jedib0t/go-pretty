@@ -1,7 +1,9 @@
 package table
 
 import (
+	"encoding/csv"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,7 +23,7 @@ func TestTable_RenderCSV(t *testing.T) {
 Game of Thrones
 #,First Name,Last Name,Salary,
 1,Arya,Stark,3000,
-20,Jon,Snow,2000,"You know nothing\, Jon Snow!"
+20,Jon,Snow,2000,"You know nothing, Jon Snow!"
 300,Tyrion,Lannister,5000,
 0,Winter,Is,0,"Coming.
 The North Remembers!
@@ -94,7 +96,7 @@ func TestTable_RenderCSV_HiddenColumns(t *testing.T) {
 First Name,Last Name,Salary,
 >>Tyrion,Lannister<<,5013,
 >>Arya,Stark<<,3013,
->>Jon,Snow<<,2013,"~You know nothing\, Jon Snow!~"
+>>Jon,Snow<<,2013,"~You know nothing, Jon Snow!~"
 ,Total,10000,`)
 	})
 
@@ -105,7 +107,7 @@ First Name,Last Name,Salary,
 #,Last Name,Salary,
 307,Lannister<<,5013,
 8,Stark<<,3013,
-27,Snow<<,2013,"~You know nothing\, Jon Snow!~"
+27,Snow<<,2013,"~You know nothing, Jon Snow!~"
 ,Total,10000,`)
 	})
 
@@ -132,8 +134,69 @@ func TestTable_RenderCSV_Sorted(t *testing.T) {
 	compareOutput(t, tw.RenderCSV(), `
 #,First Name,Last Name,Salary,
 300,Tyrion,Lannister,5000,
-20,Jon,Snow,2000,"You know nothing\, Jon Snow!"
+20,Jon,Snow,2000,"You know nothing, Jon Snow!"
 1,Arya,Stark,3000,
 11,Sansa,Stark,6000,
 ,,Total,10000,`)
+}
+
+func TestTable_RenderCSV_DoubleQuotes(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(Row{"Name", "Quote"})
+	tw.AppendRow(Row{"Jaime", `she said "hi" to me`})
+
+	// double-quotes inside a quoted field are escaped per RFC 4180
+	compareOutput(t, tw.RenderCSV(), `
+Name,Quote
+Jaime,"she said ""hi"" to me"`)
+}
+
+func TestTable_RenderCSV_FieldProtection(t *testing.T) {
+	tw := NewWriter()
+	tw.AppendHeader(Row{"Name", "Formula"})
+	tw.AppendRow(Row{"Petyr", "=cmd|'/c calc'!A1"})
+	tw.AppendRow(Row{"Varys", "@SUM(A1)"})
+	tw.AppendRow(Row{"Bran", "+1234"})
+	tw.AppendRow(Row{"Sansa", "-1234"})
+	tw.AppendRow(Row{"Tormund", "1234"})
+
+	// disabled by default
+	compareOutput(t, tw.RenderCSV(), `
+Name,Formula
+Petyr,=cmd|'/c calc'!A1
+Varys,@SUM(A1)
+Bran,+1234
+Sansa,-1234
+Tormund,1234`)
+
+	// formula triggers get neutralized with a single-quote prefix
+	tw.Style().CSV.FieldProtection = true
+	compareOutput(t, tw.RenderCSV(), `
+Name,Formula
+Petyr,'=cmd|'/c calc'!A1
+Varys,'@SUM(A1)
+Bran,'+1234
+Sansa,'-1234
+Tormund,1234`)
+}
+
+func TestTable_RenderCSV_RoundTrip(t *testing.T) {
+	rows := []Row{
+		{"Jon", `quoted "text" here`},
+		{"Arya", "comma, separated"},
+		{"Bran", "multi\nline"},
+	}
+	tw := NewWriter()
+	tw.AppendHeader(Row{"Name", "Value"})
+	tw.AppendRows(rows)
+
+	// the output should be parseable by a standards-compliant CSV reader
+	records, err := csv.NewReader(strings.NewReader(tw.RenderCSV())).ReadAll()
+	assert.NoError(t, err)
+	if assert.Len(t, records, len(rows)+1) {
+		for idx, row := range rows {
+			assert.Equal(t, fmt.Sprint(row[0]), records[idx+1][0])
+			assert.Equal(t, fmt.Sprint(row[1]), records[idx+1][1])
+		}
+	}
 }
