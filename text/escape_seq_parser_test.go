@@ -409,3 +409,24 @@ func TestEscSeqParser(t *testing.T) {
 		assert.Len(t, es.Codes(), 1)
 	})
 }
+
+func TestEscSeqParser_ConsumeMalformedSequence(t *testing.T) {
+	es := EscSeqParser{}
+
+	// an unterminated sequence should get discarded once it crosses
+	// escSeqMaxLength instead of accumulating without limit
+	es.Consume(EscapeStartRune)
+	es.Consume(EscapeStartRuneCSI)
+	for idx := 0; idx < 1000000; idx++ {
+		es.Consume('1')
+	}
+	assert.False(t, es.InSequence())
+	assert.LessOrEqual(t, len(es.escapeSeq), escSeqMaxLength+4)
+	assert.Empty(t, es.Codes())
+
+	// the parser should recover and parse well-formed sequences that follow
+	for _, char := range "\x1b[1m" {
+		es.Consume(char)
+	}
+	assert.Equal(t, []int{1}, es.Codes())
+}
