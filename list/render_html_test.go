@@ -105,3 +105,16 @@ func TestList_RenderHTML_Complex(t *testing.T) {
 
 	assert.Equal(t, expectedOut, lw.RenderHTML())
 }
+
+func TestList_RenderHTML_EscapedCSSClass(t *testing.T) {
+	lw := NewWriter()
+	lw.AppendItem("Game Of Thrones")
+	lw.SetHTMLCSSClass("x\" onmouseover=\"alert(1)")
+
+	// the CSS class is escaped to keep it from breaking out of the attribute
+	expectedOut := `<ul class="x&#34; onmouseover=&#34;alert(1)">
+  <li>Game Of Thrones</li>
+</ul>`
+
+	assert.Equal(t, expectedOut, lw.RenderHTML())
+}

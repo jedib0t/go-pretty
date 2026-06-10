@@ -40,7 +40,7 @@ func (l *List) htmlRenderRecursively(out *strings.Builder, idx int, item *listIt
 
 	out.WriteString(linePrefix)
 	out.WriteString("<ul class=\"")
-	out.WriteString(l.htmlCSSClass)
+	out.WriteString(html.EscapeString(l.htmlCSSClass))
 	if item.Level > 0 {
 		out.WriteRune('-')
 		out.WriteString(strconv.Itoa(item.Level))
