@@ -64,6 +64,7 @@ func (t *Table) RenderHTML() string {
 
 	var out strings.Builder
 	if t.numColumns > 0 {
+		out.Grow(t.estimatedRenderLength())
 		out.WriteString("<table class=\"")
 		if t.htmlCSSClass != "" {
 			out.WriteString(html.EscapeString(t.htmlCSSClass))

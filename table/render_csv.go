@@ -18,6 +18,7 @@ func (t *Table) RenderCSV() string {
 
 	var out strings.Builder
 	if t.numColumns > 0 {
+		out.Grow(t.estimatedRenderLength())
 		if t.title != "" {
 			out.WriteString(t.title)
 		}
