@@ -3,6 +3,7 @@
 /demo*
 /profile/
 coverage.*
+.benchprofile
 .coverprofile
 *.pprof
 *.swp

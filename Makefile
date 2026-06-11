@@ -14,9 +14,10 @@ all: test bench
 # Testing targets
 # ============================================================================
 
-## bench: Run benchmark tests with memory profiling
+## bench: Run all package benchmarks with memory stats; report saved to .benchprofile
 bench:
-	go test -bench=. -benchmem
+	go test -bench=. -benchmem -run='^$$' ./list/ ./progress/ ./table/ ./text/ | tee .benchprofile
+	@echo "\nBenchmark report saved to .benchprofile"
 
 ## test: Run tests with coverage (runs fmt, vet, lint, and cyclo first)
 test: fmt vet lint cyclo

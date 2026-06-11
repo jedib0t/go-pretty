@@ -122,7 +122,7 @@ func appendWord(word string, lineIdx *int, lastSeenEscSeq string, wrapLen int, o
 			inEscSeq = true
 			lastSeenEscSeq = ""
 		}
-		if inEscSeq {
+		if inEscSeq && len(lastSeenEscSeq) < escSeqMaxLength {
 			lastSeenEscSeq += string(char)
 		}
 

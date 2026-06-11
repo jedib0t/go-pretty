@@ -1233,3 +1233,64 @@ func TestProgress_renderTrackers_KeepTrackersTogetherMode_LogsAboveAll(t *testin
 
 	showOutputOnFailure(t, output)
 }
+
+func TestProgress_RenderTinyTrackerLength(t *testing.T) {
+	// tracker lengths this small leave little or no room for the bar between
+	// the default box characters; rendering should still not panic
+	for _, trackerLength := range []int{2, 3} {
+		renderOutput := outputWriter{}
+
+		pw := generateWriter()
+		pw.SetOutputWriter(&renderOutput)
+		pw.SetTrackerLength(trackerLength)
+		pw.Style().Chars.Indeterminate = IndeterminateIndicatorPacManChomp(time.Millisecond)
+		go trackSomethingIndeterminate(pw, &Tracker{Message: "Tiny", Total: 1000, Units: UnitsDefault})
+		renderAndWait(pw, false)
+	}
+}
+
+// Once a tracker moves into the done list in KeepTrackersTogether mode, it is
+// re-rendered (and re-sorted) along with the active trackers on every
+// subsequent frame until the writer is stopped.
+func TestProgress_renderTrackers_KeepTrackersTogetherMode_RetainedDoneTrackers(t *testing.T) {
+	out := &outputWriter{}
+	pw := generateWriter()
+	pw.SetOutputWriter(out)
+	pw.SetSortBy(SortByIndex)
+	pw.Style().Options.KeepTrackersTogether = true
+
+	first := &Tracker{Message: "FIRST-MARKER", Total: 100, Units: UnitsDefault, Index: 1}
+	second := &Tracker{Message: "SECOND-MARKER", Total: 100, Units: UnitsDefault, Index: 2}
+	pw.AppendTracker(first)
+	pw.AppendTracker(second)
+
+	pwImpl := pw.(*Progress)
+	pwImpl.initForRender()
+
+	// frame 1: first tracker is done, second is still active
+	first.Increment(100)
+	second.Increment(50)
+	renderLength := pwImpl.renderTrackers(0)
+	output := out.String()
+	assert.Contains(t, output, "FIRST-MARKER")
+	assert.Contains(t, output, "SECOND-MARKER")
+	assert.Less(t, strings.Index(output, "FIRST-MARKER"), strings.Index(output, "SECOND-MARKER"),
+		"trackers must be ordered by index")
+	assert.False(t, pwImpl.overallTracker.IsDone())
+
+	// frame 2: the done tracker is now retained in the done list, and gets
+	// re-rendered together with the still-active tracker
+	renderLength = pwImpl.renderTrackers(renderLength)
+	output = out.String()
+	assert.Greater(t, strings.Count(output, "FIRST-MARKER"), 1,
+		"done tracker must be re-rendered on the next frame")
+	assert.Less(t, strings.LastIndex(output, "FIRST-MARKER"), strings.LastIndex(output, "SECOND-MARKER"),
+		"trackers must remain ordered by index")
+
+	// frame 3: all trackers done; the overall tracker gets marked done too
+	second.Increment(50)
+	pwImpl.renderTrackers(renderLength)
+	assert.True(t, pwImpl.overallTracker.IsDone())
+
+	showOutputOnFailure(t, out.String())
+}

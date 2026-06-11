@@ -22,6 +22,11 @@ func ExampleVAlign_Apply() {
 }
 
 func TestVAlign_Apply(t *testing.T) {
+	// invalid inputs should not panic
+	assert.Equal(t, []string(nil), VAlignDefault.Apply(nil, -1))
+	assert.Equal(t, []string{}, VAlignMiddle.Apply([]string{}, -5))
+	assert.Equal(t, []string{"Game"}, VAlignBottom.Apply([]string{"Game"}, -5))
+
 	assert.Equal(t, []string{"Game", "Of", "Thrones"},
 		VAlignDefault.Apply([]string{"Game", "Of", "Thrones"}, 1))
 	assert.Equal(t, []string{"Game", "Of", "Thrones"},

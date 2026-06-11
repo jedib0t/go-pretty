@@ -89,9 +89,17 @@ func indeterminateIndicatorPacManChomp() IndeterminateIndicatorGenerator {
 	var frame int64
 
 	return func(maxLen int) IndeterminateIndicator {
+		if maxLen < 1 {
+			return IndeterminateIndicator{}
+		}
+
 		i := atomic.AddInt64(&frame, 1)
-		cycle := i / int64(maxLen-1)
-		pos := int(i % int64(maxLen-1))
+		span := int64(maxLen - 1)
+		if span < 1 { // a 1-char bar has no room to move around in
+			span = 1
+		}
+		cycle := i / span
+		pos := int(i % span)
 
 		leftToRight := cycle%2 == 0
 		if !leftToRight {
@@ -100,44 +108,51 @@ func indeterminateIndicatorPacManChomp() IndeterminateIndicatorGenerator {
 
 		// Alternate between open and closed mouth
 		mouthOpen := (i/3)%2 == 0
-		pac := "c"
-		if !leftToRight {
-			pac = "ɔ"
-		}
-		if !mouthOpen {
-			pac = "●"
-		}
-
-		trail := make([]string, maxLen)
-		for j := 0; j < maxLen; j++ {
-			trail[j] = "·"
-		}
-
-		for j := 0; j < maxLen; j++ {
-			if (leftToRight && j < pos) || (!leftToRight && j > pos) {
-				trail[j] = " "
-			}
-		}
-
-		trail[pos] = pac
-
-		var line string
-		for j := 0; j < maxLen; j++ {
-			switch {
-			case j == pos:
-				line += text.Colors{text.FgHiYellow}.Sprint(trail[j])
-			case trail[j] == "·":
-				line += text.Colors{text.FgWhite}.Sprint(trail[j])
-			default:
-				line += trail[j]
-			}
-		}
 
 		return IndeterminateIndicator{
 			Position: 0,
-			Text:     line,
+			Text:     pacManChompFrame(maxLen, pos, leftToRight, mouthOpen),
 		}
 	}
+}
+
+// pacManChompFrame draws a single frame of the Pac-Man chomp animation with
+// the character at pos moving over a trail of maxLen dots.
+func pacManChompFrame(maxLen int, pos int, leftToRight bool, mouthOpen bool) string {
+	pac := "c"
+	if !leftToRight {
+		pac = "ɔ"
+	}
+	if !mouthOpen {
+		pac = "●"
+	}
+
+	trail := make([]string, maxLen)
+	for j := 0; j < maxLen; j++ {
+		trail[j] = "·"
+	}
+
+	for j := 0; j < maxLen; j++ {
+		if (leftToRight && j < pos) || (!leftToRight && j > pos) {
+			trail[j] = " "
+		}
+	}
+
+	trail[pos] = pac
+
+	var line strings.Builder
+	line.Grow(maxLen * 4)
+	for j := 0; j < maxLen; j++ {
+		switch {
+		case j == pos:
+			line.WriteString(text.Colors{text.FgHiYellow}.Sprint(trail[j]))
+		case trail[j] == "·":
+			line.WriteString(text.Colors{text.FgWhite}.Sprint(trail[j]))
+		default:
+			line.WriteString(trail[j])
+		}
+	}
+	return line.String()
 }
 
 func indeterminateIndicatorDominoes() IndeterminateIndicatorGenerator {

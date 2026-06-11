@@ -1989,3 +1989,37 @@ func TestTable_Render_WidthEnforcer(t *testing.T) {
 +---+------------+------------+------------+`)
 	})
 }
+
+func TestTable_Render_AutoIndex_EdgeCases(t *testing.T) {
+	// degenerate tables with auto-index should render without panicking
+	assert.NotPanics(t, func() {
+		tw := NewWriter()
+		tw.SetAutoIndex(true)
+		assert.Empty(t, tw.Render())
+	})
+	assert.NotPanics(t, func() {
+		tw := NewWriter()
+		tw.AppendSeparator()
+		tw.SetAutoIndex(true)
+		tw.Render()
+	})
+	assert.NotPanics(t, func() {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"A", "B"})
+		tw.AppendRow(Row{"1", "2"})
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 1, Hidden: true},
+			{Number: 2, Hidden: true},
+		})
+		tw.SetAutoIndex(true)
+		tw.Render()
+	})
+	assert.NotPanics(t, func() {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"A"})
+		tw.AppendRow(Row{""})
+		tw.SuppressEmptyColumns()
+		tw.SetAutoIndex(true)
+		tw.Render()
+	})
+}
