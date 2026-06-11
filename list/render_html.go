@@ -30,6 +30,7 @@ func (l *List) RenderHTML() string {
 
 	var out strings.Builder
 	if len(l.items) > 0 {
+		out.Grow(l.approxSize)
 		l.htmlRenderRecursively(&out, 0, l.items[0])
 	}
 	return l.render(&out)

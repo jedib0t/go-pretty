@@ -25,6 +25,9 @@ type listItem struct {
 type List struct {
 	// approxSize stores the approximate output length/size
 	approxSize int
+	// charVerticalSpaces stores spaces matching the width of the style's
+	// CharItemVertical; computed once per render
+	charVerticalSpaces string
 	// htmlCSSClass stores the HTML CSS Class to use on the <ul> node
 	htmlCSSClass string
 	// items contains the list of items to render
@@ -125,6 +128,10 @@ func (l *List) UnIndentAll() {
 func (l *List) initForRender() {
 	// pick a default style
 	l.Style()
+
+	// pre-compute the whitespace stand-in for the vertical connector used
+	// in every line rendered for nested or multi-line items
+	l.charVerticalSpaces = strings.Repeat(" ", utf8.RuneCountInString(l.style.CharItemVertical))
 
 	// calculate the approximate size needed by looking at all entries
 	l.approxSize = 0

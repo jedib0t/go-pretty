@@ -2,7 +2,6 @@ package list
 
 import (
 	"strings"
-	"unicode/utf8"
 )
 
 // Render renders the List in a human-readable "pretty" format. Example:
@@ -68,7 +67,7 @@ func (l *List) renderItemBullet(out *strings.Builder, lineIdx int, hint renderHi
 	if lineIdx > 0 {
 		// multi-line item.Text
 		if hint.isLastItem {
-			out.WriteString(strings.Repeat(" ", utf8.RuneCountInString(l.style.CharItemVertical)))
+			out.WriteString(l.charVerticalSpaces)
 		} else {
 			out.WriteString(l.style.CharItemVertical)
 		}
@@ -108,7 +107,7 @@ func (l *List) renderItemBulletPrefix(out *strings.Builder, itemIdx int, itemLev
 		if l.hasMoreItemsInLevel(levelIdx, itemIdx) {
 			out.WriteString(l.style.CharItemVertical)
 		} else {
-			out.WriteString(strings.Repeat(" ", utf8.RuneCountInString(l.style.CharItemVertical)))
+			out.WriteString(l.charVerticalSpaces)
 		}
 	}
 }
