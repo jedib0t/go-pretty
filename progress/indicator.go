@@ -140,18 +140,19 @@ func pacManChompFrame(maxLen int, pos int, leftToRight bool, mouthOpen bool) str
 
 	trail[pos] = pac
 
-	var line string
+	var line strings.Builder
+	line.Grow(maxLen * 4)
 	for j := 0; j < maxLen; j++ {
 		switch {
 		case j == pos:
-			line += text.Colors{text.FgHiYellow}.Sprint(trail[j])
+			line.WriteString(text.Colors{text.FgHiYellow}.Sprint(trail[j]))
 		case trail[j] == "·":
-			line += text.Colors{text.FgWhite}.Sprint(trail[j])
+			line.WriteString(text.Colors{text.FgWhite}.Sprint(trail[j]))
 		default:
-			line += trail[j]
+			line.WriteString(trail[j])
 		}
 	}
-	return line
+	return line.String()
 }
 
 func indeterminateIndicatorDominoes() IndeterminateIndicatorGenerator {
