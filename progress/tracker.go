@@ -33,7 +33,10 @@ type Tracker struct {
 	// conditions
 	Message string
 	// RemoveOnCompletion tells the Progress Bar to remove this tracker when
-	// it is done, instead of rendering a "completed" line
+	// it is done, instead of rendering a "completed" line. Note that done
+	// trackers are otherwise retained in memory until the Progress Writer is
+	// stopped; set this in long-running processes that append a very large
+	// number of trackers to avoid unbounded memory growth
 	RemoveOnCompletion bool
 	// Total should be set to the (expected) Total/Final value to be reached
 	Total int64
@@ -181,6 +184,16 @@ func (t *Tracker) SetValue(value int64) {
 	t.timeStop = time.Time{}
 	t.value = 0
 	t.incrementWithoutLock(value)
+	t.mutex.Unlock()
+}
+
+// setProgress updates the value and the minimum ETA in a single locked
+// operation; used by the render loop to update the overall tracker without
+// racing against readers like Value() and ETA().
+func (t *Tracker) setProgress(value int64, minETA time.Duration) {
+	t.mutex.Lock()
+	t.value = value
+	t.minETA = minETA
 	t.mutex.Unlock()
 }
 

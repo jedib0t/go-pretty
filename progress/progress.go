@@ -337,6 +337,9 @@ func (p *Progress) initForRender() {
 	p.lengthProgress = p.lengthTracker -
 		text.StringWidthWithoutEscSequences(p.style.Chars.BoxLeft) -
 		text.StringWidthWithoutEscSequences(p.style.Chars.BoxRight)
+	if p.lengthProgress < 1 { // wide box chars can leave no room for the bar
+		p.lengthProgress = 1
+	}
 	p.lengthProgressOverall = p.lengthMessage +
 		text.StringWidthWithoutEscSequences(p.style.Options.Separator) +
 		p.lengthProgress + 1
@@ -378,6 +381,7 @@ func (p *Progress) watchTerminalSize() {
 	p.updateTerminalSize()
 	// until end of time
 	ticker := time.NewTicker(time.Second / 10)
+	defer ticker.Stop()
 	for {
 		select {
 		case <-ticker.C:

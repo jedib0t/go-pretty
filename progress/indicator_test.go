@@ -396,3 +396,16 @@ func TestIndeterminateIndicatorPacManChomp(t *testing.T) {
 		fmt.Println(out.String())
 	}
 }
+
+func TestIndeterminateIndicatorPacManChomp_TinyMaxLen(t *testing.T) {
+	generator := IndeterminateIndicatorPacManChomp(time.Duration(0))
+
+	// bar lengths too small to animate in should not cause a panic
+	for _, maxLen := range []int{-1, 0, 1, 2} {
+		for idx := 0; idx < 5; idx++ {
+			assert.NotPanics(t, func() {
+				generator(maxLen)
+			}, "maxLen=%d", maxLen)
+		}
+	}
+}

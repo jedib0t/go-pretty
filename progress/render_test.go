@@ -1233,3 +1233,16 @@ func TestProgress_renderTrackers_KeepTrackersTogetherMode_LogsAboveAll(t *testin
 
 	showOutputOnFailure(t, output)
 }
+
+func TestProgress_RenderTinyTrackerLength(t *testing.T) {
+	renderOutput := outputWriter{}
+
+	// a tracker length of 3 leaves no room for the bar between the default
+	// box characters; rendering should still not panic
+	pw := generateWriter()
+	pw.SetOutputWriter(&renderOutput)
+	pw.SetTrackerLength(3)
+	pw.Style().Chars.Indeterminate = IndeterminateIndicatorPacManChomp(time.Millisecond)
+	go trackSomethingIndeterminate(pw, &Tracker{Message: "Tiny", Total: 1000, Units: UnitsDefault})
+	renderAndWait(pw, false)
+}

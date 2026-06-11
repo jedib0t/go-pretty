@@ -140,9 +140,8 @@ func (p *Progress) extractDoneAndActiveTrackers() ([]*Tracker, []*Tracker) {
 	p.sortBy.Sort(trackersNewlyDone)
 	p.sortBy.Sort(trackersActive)
 
-	p.overallTracker.value = int64(lengthDone+len(trackersNewlyDone)) * 100
-	p.overallTracker.value += activeTrackersProgress
-	p.overallTracker.minETA = maxETA
+	overallProgress := int64(lengthDone+len(trackersNewlyDone))*100 + activeTrackersProgress
+	p.overallTracker.setProgress(overallProgress, maxETA)
 	if len(trackersActive) == 0 {
 		p.overallTracker.MarkAsDone()
 	}
@@ -678,9 +677,8 @@ func (p *Progress) updateOverallTrackerProgress(allTrackers []*Tracker, activeTr
 			doneCount++
 		}
 	}
-	p.overallTracker.value = int64(doneCount) * 100
-	p.overallTracker.value += activeTrackersProgress
-	p.overallTracker.minETA = maxETA
+	overallProgress := int64(doneCount)*100 + activeTrackersProgress
+	p.overallTracker.setProgress(overallProgress, maxETA)
 	if len(allTrackers) > 0 && doneCount == len(allTrackers) {
 		p.overallTracker.MarkAsDone()
 	}
