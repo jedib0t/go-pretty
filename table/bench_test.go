@@ -25,6 +25,43 @@ func benchGenerateTable(numRows int, numCols int) Writer {
 	return tw
 }
 
+func benchGenerateTableSmall() Writer {
+	tw := NewWriter()
+	tw.AppendHeader(testHeader)
+	tw.AppendRows(testRows)
+	tw.AppendFooter(testFooter)
+	tw.SetCaption(testCaption)
+	return tw
+}
+
+func BenchmarkTable_Render(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		benchResultStr = benchGenerateTableSmall().Render()
+	}
+}
+
+func BenchmarkTable_RenderCSV(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		benchResultStr = benchGenerateTableSmall().RenderCSV()
+	}
+}
+
+func BenchmarkTable_RenderHTML(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		benchResultStr = benchGenerateTableSmall().RenderHTML()
+	}
+}
+
+func BenchmarkTable_RenderMarkdown(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		benchResultStr = benchGenerateTableSmall().RenderMarkdown()
+	}
+}
+
 func BenchmarkTable_RenderLarge(b *testing.B) {
 	tw := benchGenerateTable(1000, 10)
 
