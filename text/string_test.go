@@ -294,6 +294,9 @@ func TestSnip(t *testing.T) {
 	assert.Equal(t, "\x1b]8;;http://example.com\x1b\\Ghost\x1b]8;;\x1b\\", Snip("\x1b]8;;http://example.com\x1b\\Ghost\x1b]8;;\x1b\\", 7, "~"))
 	assert.Equal(t, "\x1b]8;;http://example.com\x1b\\Gh\x1b]8;;\x1b\\~", Snip("\x1b]8;;http://example.com\x1b\\Ghost\x1b]8;;\x1b\\", 3, "~"))
 	assert.Equal(t, "\x1b[33m\x1b]8;;http://example.com\x1b\\Gh\x1b]8;;\x1b\\\x1b[0m~", Snip("\x1b[33m\x1b]8;;http://example.com\x1b\\Ghost\x1b]8;;\x1b\\\x1b[0m", 3, "~"))
+	// wide East Asian characters count as two columns
+	assert.Equal(t, "生命~", Snip("生命生命生命", 5, "~"))
+	assert.Equal(t, "生命生命", Snip("生命生命", 8, "~"))
 }
 
 func ExampleStringWidth() {
@@ -361,6 +364,12 @@ func TestTrim(t *testing.T) {
 	assert.Equal(t, "\x1b[33mGho\x1b[0m", Trim("\x1b[33mGhost\x1b[0m", 3))
 	assert.Equal(t, "\x1b[33mGhost\x1b[0m", Trim("\x1b[33mGhost\x1b[0m", 6))
 	assert.Equal(t, "\x1b]8;;http://example.com\x1b\\Gho\x1b]8;;\x1b\\", Trim("\x1b]8;;http://example.com\x1b\\Ghost\x1b]8;;\x1b\\", 3))
+	// wide East Asian characters count as two columns
+	assert.Equal(t, "生", Trim("生命生命", 3))
+	assert.Equal(t, "生命", Trim("生命生命", 4))
+	assert.Equal(t, "aツ", Trim("aツb", 3))
+	assert.Equal(t, "", Trim("ツ", 1))
+	assert.Equal(t, "\x1b[33m生命\x1b[0m", Trim("\x1b[33m生命生命\x1b[0m", 4))
 }
 
 func ExampleWiden() {
