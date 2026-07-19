@@ -157,6 +157,39 @@ func TestTable_Render_AutoMerge_Wrap(t *testing.T) {
 +----------+----+----+`)
 	})
 
+	t.Run("nested merge across five columns", func(t *testing.T) {
+		tw := NewWriter()
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Name: "C1", AutoMerge: true, WidthMax: 8, WidthMaxEnforcer: text.WrapSoft},
+			{Name: "C2", AutoMerge: true},
+			{Name: "C3", AutoMerge: true},
+			{Name: "C4", AutoMerge: true},
+			{Name: "C5", AutoMerge: true},
+			{Name: "V"},
+		})
+		tw.AppendHeader(Row{"C1", "C2", "C3", "C4", "C5", "V"})
+		tw.AppendRow(Row{"alpha beta gamma delta", "B1", "C1", "D1", "E1", "v1"})
+		tw.AppendRow(Row{"alpha beta gamma delta", "B1", "C1", "D1", "E2", "v2"})
+		tw.AppendRow(Row{"alpha beta gamma delta", "B1", "C1", "D2", "E3", "v3"})
+		tw.AppendRow(Row{"alpha beta gamma delta", "B1", "C2", "D3", "E4", "v4"})
+		tw.AppendRow(Row{"alpha beta gamma delta", "B2", "C3", "D4", "E5", "v5"})
+		tw.AppendRow(Row{"alpha beta gamma delta", "B2", "C3", "D4", "E6", "v6"})
+
+		// C1 spans the whole block; every inner merged column does its own
+		// vertical merge within it, forming a nested tree.
+		compareOutput(t, tw.Render(), `
++----------+----+----+----+----+----+
+| C1       | C2 | C3 | C4 | C5 | V  |
++----------+----+----+----+----+----+
+| alpha    | B1 | C1 | D1 | E1 | v1 |
+| beta     |    |    |    | E2 | v2 |
+| gamma    |    |    | D2 | E3 | v3 |
+| delta    |    | C2 | D3 | E4 | v4 |
+|          | B2 | C3 | D4 | E5 | v5 |
+|          |    |    |    | E6 | v6 |
++----------+----+----+----+----+----+`)
+	})
+
 	t.Run("merged cell that wraps then changes is not stacked", func(t *testing.T) {
 		tw := NewWriter()
 		tw.SetColumnConfigs([]ColumnConfig{

@@ -3,7 +3,6 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/jedib0t/go-pretty/v6.svg)](https://pkg.go.dev/github.com/jedib0t/go-pretty/v6)
 [![Build Status](https://github.com/jedib0t/go-pretty/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jedib0t/go-pretty/actions?query=workflow%3ACI+event%3Apush+branch%3Amain)
 [![Coverage Status](https://coveralls.io/repos/github/jedib0t/go-pretty/badge.svg?branch=main)](https://coveralls.io/github/jedib0t/go-pretty?branch=main)
-[![Go Report Card](https://goreportcard.com/badge/github.com/jedib0t/go-pretty/v6)](https://goreportcard.com/report/github.com/jedib0t/go-pretty/v6)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jedib0t_go-pretty&metric=alert_status)](https://sonarcloud.io/dashboard?id=jedib0t_go-pretty)
 
 Utilities to prettify console output of tables, lists, progress bars, text, and more
@@ -52,7 +51,7 @@ go run github.com/jedib0t/go-pretty/v6/cmd/demo-table@latest colors
 
 <img src="cmd/demo-table/demo-colors.png" alt="Tables with Colors within a Table in a Terminal" width="640px"/>
 
-📖 [Full documentation →](table/README.md)
+More on tables [here](table/README.md).
 
 ### Progress
 
@@ -60,7 +59,7 @@ Track progress of one or more tasks with ETA, speed calculation, indeterminate i
 
 <img src="progress/images/demo.gif" alt="Progress Demo in a Terminal" width="640px"/>
 
-📖 [Full documentation →](progress/README.md)
+More on progress [here](progress/README.md).
 
 ### List
 
@@ -78,7 +77,7 @@ Pretty-print hierarchical lists with multiple levels, indentation, and multiple 
    ╰─ The Gunslinger
 ```
 
-📖 [Full documentation →](list/README.md)
+More on lists [here](list/README.md).
 
 ### Text
 
@@ -86,4 +85,4 @@ Utility functions to manipulate strings/text with full ANSI escape sequence supp
 
 **Features**: Alignment (horizontal/vertical), colors & formatting, cursor control, text transformation (case, JSON, time, URLs), string manipulation (pad, trim, wrap), and more.
 
-📖 [Full documentation →](text/README.md)
+More on text [here](text/README.md).
