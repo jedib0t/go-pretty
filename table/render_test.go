@@ -1934,6 +1934,68 @@ func TestTable_Render_SuppressTrailingSpaces(t *testing.T) {
  R123  Small name                              2021-04-19 13:37  Abcdefghijklmnopqrstuvwxyz`)
 }
 
+func TestTable_Render_DoNotRenderEmptyRowsWhenClipped(t *testing.T) {
+	newTable := func() Writer {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"ID", "Description"})
+		tw.AppendRow(Row{"1", "alpha beta gamma delta epsilon zeta"})
+		tw.AppendRow(Row{"2", "short"})
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 2, WidthMax: 10, WidthMaxEnforcer: text.WrapSoft},
+		})
+		// clip the row so that the entire second (wrapped) column falls off the
+		// right edge; the wrapped continuation lines then render as blanks
+		tw.SetAllowedRowLength(8)
+		return tw
+	}
+
+	t.Run("disabled (default) keeps the clipped blank lines", func(t *testing.T) {
+		tw := newTable()
+		compareOutput(t, tw.Render(), `
++----+ ~
+| ID | ~
+|    | ~
++----+ ~
+| 1  | ~
+|    | ~
+|    | ~
+|    | ~
+|    | ~
+| 2  | ~
++----+ ~`)
+	})
+
+	t.Run("enabled suppresses the clipped blank data lines", func(t *testing.T) {
+		tw := newTable()
+		tw.Style().Options.DoNotRenderEmptyRowsWhenClipped = true
+		compareOutput(t, tw.Render(), `
++----+ ~
+| ID | ~
+|    | ~
++----+ ~
+| 1  | ~
+| 2  | ~
++----+ ~`)
+	})
+
+	t.Run("enabled leaves un-clipped tables untouched", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"ID", "Description"})
+		tw.AppendRow(Row{"1", "alpha"})
+		tw.AppendRow(Row{"", ""}) // a genuinely empty row is not the result of clipping
+		tw.AppendRow(Row{"2", "beta"})
+		tw.Style().Options.DoNotRenderEmptyRowsWhenClipped = true
+		compareOutput(t, tw.Render(), `
++----+-------------+
+| ID | DESCRIPTION |
++----+-------------+
+| 1  | alpha       |
+|    |             |
+| 2  | beta        |
++----+-------------+`)
+	})
+}
+
 func TestTable_Render_WidthEnforcer(t *testing.T) {
 	t.Run("regular characters", func(t *testing.T) {
 		tw := NewWriter()
