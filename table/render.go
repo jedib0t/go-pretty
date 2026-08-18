@@ -214,9 +214,7 @@ func (t *Table) renderLine(out *strings.Builder, row rowStr, hint renderHint) {
 		visibleStr := t.trimLineToAllowedLength(lineStr)
 		// suppress a data-row line that lost all of its content to clipping,
 		// leaving behind only borders/separators/padding
-		if t.style.Options.DoNotRenderEmptyRowsWhenClipped &&
-			hint.isRegularNonSeparatorRow() &&
-			visibleStr != lineStr && !t.lineHasVisibleContent(visibleStr) {
+		if t.shouldSuppressClippedRow(lineStr, visibleStr, hint) {
 			return
 		}
 		if out.Len() > 0 {
@@ -240,6 +238,18 @@ func (t *Table) renderLine(out *strings.Builder, row rowStr, hint renderHint) {
 			t.firstRowOfPage = true
 		}
 	}
+}
+
+// shouldSuppressClippedRow reports whether a data-row line should be dropped
+// entirely because clipping (style.Size.WidthMax) stripped away all of its
+// content, leaving behind only borders/separators/padding. This only applies
+// when the DoNotRenderEmptyRowsWhenClipped option is enabled and the line was
+// actually trimmed (visibleStr != lineStr).
+func (t *Table) shouldSuppressClippedRow(lineStr, visibleStr string, hint renderHint) bool {
+	return t.style.Options.DoNotRenderEmptyRowsWhenClipped &&
+		hint.isRegularNonSeparatorRow() &&
+		visibleStr != lineStr &&
+		!t.lineHasVisibleContent(visibleStr)
 }
 
 // trimLineToAllowedLength returns the portion of a rendered line that is
