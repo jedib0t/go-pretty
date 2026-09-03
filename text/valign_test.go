@@ -2,6 +2,7 @@ package text
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -54,6 +55,19 @@ func TestVAlign_Apply(t *testing.T) {
 		VAlignBottom.Apply([]string{"Game", "Of", "Thrones"}, 3))
 	assert.Equal(t, []string{"", "", "Game", "Of", "Thrones"},
 		VAlignBottom.Apply([]string{"Game", "Of", "Thrones"}, 5))
+}
+
+func TestVAlign_Apply_HugeMaxLines(t *testing.T) {
+	lines := []string{"Game", "Of", "Thrones"}
+	for _, va := range []VAlign{VAlignDefault, VAlignTop, VAlignMiddle, VAlignBottom} {
+		va := va
+		assert.NotPanics(t, func() {
+			assert.Equal(t, lines, va.Apply(lines, math.MaxInt))
+		}, "valign %v MaxInt", va)
+		assert.NotPanics(t, func() {
+			assert.Equal(t, lines, va.Apply(lines, 1<<40))
+		}, "valign %v 1<<40", va)
+	}
 }
 
 func ExampleVAlign_ApplyStr() {

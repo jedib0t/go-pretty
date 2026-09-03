@@ -30,6 +30,9 @@ func (va VAlign) Apply(lines []string, maxLines int) []string {
 	if maxLines < 1 { // no lines and a negative maxLines
 		return lines
 	}
+	if maxLines > maxAllocatedPad {
+		return lines
+	}
 
 	var insertIdx int
 	switch va {

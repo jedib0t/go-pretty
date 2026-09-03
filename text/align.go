@@ -18,6 +18,11 @@ const (
 	AlignAuto                 // AlignRight for numbers, AlignLeft for the rest
 )
 
+// maxAllocatedPad is the largest pad, width, or extra line count we will
+// allocate. Beyond this, strings.Builder.Grow and strings.Repeat can panic
+// or abort the process (see #414). Wider than any realistic table or terminal.
+const maxAllocatedPad = 1 << 20
+
 // Apply aligns the text as directed. For ex.:
 //   - AlignDefault.Apply("Jon Snow", 12) returns "Jon Snow    "
 //   - AlignLeft.Apply("Jon Snow",    12) returns "Jon Snow    "
@@ -54,9 +59,13 @@ func (a Align) Apply(text string, maxLength int) string {
 }
 
 // padText returns the text with the given number of spaces on either side;
-// non-positive counts add nothing.
+// non-positive counts add nothing. Counts above maxAllocatedPad are treated
+// like the non-positive case so a huge maxLength cannot OOM the process.
 func padText(text string, left int, right int) string {
 	if left <= 0 && right <= 0 {
+		return text
+	}
+	if left > maxAllocatedPad || right > maxAllocatedPad {
 		return text
 	}
 
@@ -129,6 +138,10 @@ func (a Align) trimString(text string) string {
 }
 
 func justifyText(text string, textLength int, maxLength int) string {
+	if maxLength < 0 || maxLength > maxAllocatedPad {
+		return text
+	}
+
 	// split the text into individual words
 	words := Filter(strings.Split(text, " "), func(item string) bool {
 		return item != ""

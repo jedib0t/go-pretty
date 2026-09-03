@@ -2,6 +2,7 @@ package text
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -80,6 +81,28 @@ func TestAlign_Apply_JustifyCJKOverflow(t *testing.T) {
 	assert.NotPanics(t, func() {
 		assert.Equal(t, "中文", AlignJustify.Apply("中文", 3))
 	})
+}
+
+func TestAlign_Apply_HugeMaxLength(t *testing.T) {
+	// Negatives already skip padding. A huge maxLength used to panic
+	// (makeslice) or abort with an unrecoverable OOM. Treat it the same.
+	aligns := []Align{AlignDefault, AlignLeft, AlignCenter, AlignJustify, AlignRight, AlignAuto}
+	for _, a := range aligns {
+		a := a
+		assert.NotPanics(t, func() {
+			assert.Equal(t, "hi", a.Apply("hi", math.MaxInt))
+		}, "align %v MaxInt", a)
+		assert.NotPanics(t, func() {
+			assert.Equal(t, "hi", a.Apply("hi", 1<<40))
+		}, "align %v 1<<40", a)
+		assert.NotPanics(t, func() {
+			assert.Equal(t, "hi", a.Apply("hi", -5))
+		}, "align %v negative", a)
+	}
+
+	assert.Equal(t, "hi   ", AlignLeft.Apply("hi", 5))
+	assert.Equal(t, "   hi", AlignRight.Apply("hi", 5))
+	assert.Equal(t, "            ", AlignJustify.Apply("", 12))
 }
 
 func TestAlign_Apply_ColoredText(t *testing.T) {
