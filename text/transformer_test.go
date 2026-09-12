@@ -240,17 +240,6 @@ func TestNewUnixTimeTransformer(t *testing.T) {
 	assert.Equal(t, "0.123456", transformer(float32(0.123456)))
 }
 
-func TestNewURLTransformer(t *testing.T) {
-	url := "https://winter.is.coming"
-
-	transformer := NewURLTransformer()
-	assert.Equal(t, colorsURL.Sprint(url), transformer(url))
-
-	transformer2 := NewURLTransformer(FgRed, BgWhite, Bold)
-	assert.Equal(t, Colors{FgRed, BgWhite, Bold}.Sprint(url), transformer2(url))
-	assert.Equal(t, colorsURL.Sprint(url), transformer(url))
-}
-
 func TestNewUnixTimeTransformerSubseconds(t *testing.T) {
 	instant := time.Date(2010, time.November, 12, 20, 14, 15, 123456789, time.UTC)
 	transformer := NewUnixTimeTransformer(time.RFC3339Nano, time.UTC)
@@ -262,4 +251,15 @@ func TestNewUnixTimeTransformerSubseconds(t *testing.T) {
 			assert.Equal(t, expected, transformer(fmt.Sprint(timestamp)))
 		})
 	}
+}
+
+func TestNewURLTransformer(t *testing.T) {
+	url := "https://winter.is.coming"
+
+	transformer := NewURLTransformer()
+	assert.Equal(t, colorsURL.Sprint(url), transformer(url))
+
+	transformer2 := NewURLTransformer(FgRed, BgWhite, Bold)
+	assert.Equal(t, Colors{FgRed, BgWhite, Bold}.Sprint(url), transformer2(url))
+	assert.Equal(t, colorsURL.Sprint(url), transformer(url))
 }
