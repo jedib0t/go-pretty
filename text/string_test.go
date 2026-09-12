@@ -386,6 +386,23 @@ func TestWiden(t *testing.T) {
 	assert.Equal(t, "\x1b[33mＧｈｏｓｔ　生命\x1b[0m", Widen("\x1b[33mGhost 生命\x1b[0m"))
 }
 
+func TestRepeatAndTrimANSI(t *testing.T) {
+	red, reset := "\x1b[31m", "\x1b[0m"
+	for _, tc := range []struct {
+		name, input, want string
+		limit             int
+	}{
+		{"repeat colored text", red + "x" + reset, strings.Repeat(red+"x"+reset, 5), 5},
+		{"trim colored text", red + "xyz" + reset, red + "xy" + reset, 2},
+		{"exact colored width", red + "x" + reset, red + "x" + reset, 1},
+		{"escape sequences only", red + reset, red + reset, 5},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, RepeatAndTrim(tc.input, tc.limit))
+		})
+	}
+}
+
 func TestRepeatAndTrimDisplayWidth(t *testing.T) {
 	for _, tc := range []struct {
 		name, input string
@@ -399,7 +416,7 @@ func TestRepeatAndTrimDisplayWidth(t *testing.T) {
 		{"wide character repetitions", "界", 5, "界界"},
 		{"combining marks", "e\u0301", 4, "e\u0301e\u0301e\u0301e\u0301"},
 		{"escape sequences only", "\x1b[31m\x1b[0m", 5, ""},
-		{"zero width only", "\u0301", 5, ""},
+		{"zero width only", "\u0301", 5, "\u0301"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			result := RepeatAndTrim(tc.input, tc.limit)

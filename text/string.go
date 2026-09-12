@@ -170,7 +170,7 @@ func RepeatAndTrim(str string, maxRunes int) string {
 	}
 	strWidth := StringWidthWithoutEscSequences(str)
 	if strWidth == 0 {
-		return ""
+		return str
 	} else if maxRunes == strWidth {
 		return str
 	}
