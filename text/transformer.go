@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -53,6 +54,9 @@ func NewNumberTransformer(format string) Transformer {
 	negFormat := "-" + format
 
 	transformInt64 := func(val int64) string {
+		if val == math.MinInt64 {
+			return colorsNumberNegative.Sprintf(negFormat, uint64(1)<<63)
+		}
 		if val < 0 {
 			return colorsNumberNegative.Sprintf(negFormat, -val)
 		}
