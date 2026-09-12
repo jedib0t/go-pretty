@@ -84,6 +84,22 @@ func TestNewNumberTransformer(t *testing.T) {
 	assert.Equal(t, "foo", NewNumberTransformer("%05d")("foo"))
 }
 
+func TestNewNumberTransformerMinInt(t *testing.T) {
+	assert.Equal(t, colorsNumberNegative.Sprint(fmt.Sprint(math.MinInt)), NewNumberTransformer("%d")(int(math.MinInt)))
+}
+
+func TestNewNumberTransformerMinInt64(t *testing.T) {
+	for _, tc := range []struct{ format, want string }{
+		{"%d", "-9223372036854775808"},
+		{"%020d", "-09223372036854775808"},
+		{"%x", "-8000000000000000"},
+	} {
+		t.Run(tc.format, func(t *testing.T) {
+			assert.Equal(t, colorsNumberNegative.Sprint(tc.want), NewNumberTransformer(tc.format)(int64(math.MinInt64)))
+		})
+	}
+}
+
 type jsonTest struct {
 	Foo string       `json:"foo"`
 	Bar int32        `json:"bar"`
@@ -250,16 +266,4 @@ func TestNewURLTransformer(t *testing.T) {
 	transformer2 := NewURLTransformer(FgRed, BgWhite, Bold)
 	assert.Equal(t, Colors{FgRed, BgWhite, Bold}.Sprint(url), transformer2(url))
 	assert.Equal(t, colorsURL.Sprint(url), transformer(url))
-}
-
-func TestNewNumberTransformerMinInt64(t *testing.T) {
-	for _, tc := range []struct{ format, want string }{
-		{"%d", "-9223372036854775808"},
-		{"%020d", "-09223372036854775808"},
-		{"%x", "-8000000000000000"},
-	} {
-		t.Run(tc.format, func(t *testing.T) {
-			assert.Equal(t, colorsNumberNegative.Sprint(tc.want), NewNumberTransformer(tc.format)(int64(math.MinInt64)))
-		})
-	}
 }
