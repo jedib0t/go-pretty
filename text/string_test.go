@@ -2,6 +2,7 @@ package text
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -383,4 +384,31 @@ func ExampleWiden() {
 func TestWiden(t *testing.T) {
 	assert.Equal(t, "Ｇｈｏｓｔ　生命", Widen("Ghost 生命"))
 	assert.Equal(t, "\x1b[33mＧｈｏｓｔ　生命\x1b[0m", Widen("\x1b[33mGhost 生命\x1b[0m"))
+}
+
+func TestRepeatAndTrimDisplayWidth(t *testing.T) {
+	for _, tc := range []struct {
+		name, input string
+		limit       int
+		want        string
+	}{
+		{"colored", "\x1b[31mx\x1b[0m", 5, "xxxxx"},
+		{"colored rune count boundary", "\x1b[31mx\x1b[0m", 10, "xxxxxxxxxx"},
+		{"wide character does not fit", "界", 1, ""},
+		{"wide character fits", "界", 2, "界"},
+		{"wide character repetitions", "界", 5, "界界"},
+		{"combining marks", "e\u0301", 4, "e\u0301e\u0301e\u0301e\u0301"},
+		{"escape sequences only", "\x1b[31m\x1b[0m", 5, ""},
+		{"zero width only", "\u0301", 5, ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			result := RepeatAndTrim(tc.input, tc.limit)
+			assert.Equal(t, tc.want, StripEscape(result))
+			assert.LessOrEqual(t, StringWidthWithoutEscSequences(result), tc.limit)
+			if strings.Contains(tc.input, "\x1b") && tc.want != "" {
+				assert.Contains(t, result, "\x1b[31m")
+				assert.True(t, strings.HasSuffix(result, "\x1b[0m"))
+			}
+		})
+	}
 }

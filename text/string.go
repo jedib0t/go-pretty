@@ -2,7 +2,6 @@ package text
 
 import (
 	"strings"
-	"unicode/utf8"
 
 	"github.com/mattn/go-runewidth"
 	"golang.org/x/text/width"
@@ -156,7 +155,8 @@ func ProcessCRLF(str string) string {
 	return strings.Join(lines, "\n")
 }
 
-// RepeatAndTrim repeats the given string until it is as long as maxRunes.
+// RepeatAndTrim repeats the given string and trims it to at most maxRunes
+// display columns, ignoring escape sequences when measuring its width.
 // For ex.:
 //
 //	RepeatAndTrim("", 5) == ""
@@ -165,12 +165,16 @@ func ProcessCRLF(str string) string {
 //	RepeatAndTrim("Ghost", 7) == "GhostGh"
 //	RepeatAndTrim("Ghost", 10) == "GhostGhost"
 func RepeatAndTrim(str string, maxRunes int) string {
-	if str == "" || maxRunes == 0 {
+	if maxRunes <= 0 {
 		return ""
-	} else if maxRunes == utf8.RuneCountInString(str) {
+	}
+	strWidth := StringWidthWithoutEscSequences(str)
+	if strWidth == 0 {
+		return ""
+	} else if maxRunes == strWidth {
 		return str
 	}
-	repeatedS := strings.Repeat(str, int(maxRunes/utf8.RuneCountInString(str))+1)
+	repeatedS := strings.Repeat(str, (maxRunes-1)/strWidth+1)
 	return Trim(repeatedS, maxRunes)
 }
 
