@@ -240,6 +240,19 @@ func TestNewUnixTimeTransformer(t *testing.T) {
 	assert.Equal(t, "0.123456", transformer(float32(0.123456)))
 }
 
+func TestNewUnixTimeTransformerSubseconds(t *testing.T) {
+	instant := time.Date(2010, time.November, 12, 20, 14, 15, 123456789, time.UTC)
+	transformer := NewUnixTimeTransformer(time.RFC3339Nano, time.UTC)
+	for _, unit := range []time.Duration{time.Second, time.Millisecond, time.Microsecond, time.Nanosecond} {
+		timestamp := instant.UnixNano() / int64(unit)
+		expected := instant.Truncate(unit).Format(time.RFC3339Nano)
+		t.Run(unit.String(), func(t *testing.T) {
+			assert.Equal(t, expected, transformer(timestamp))
+			assert.Equal(t, expected, transformer(fmt.Sprint(timestamp)))
+		})
+	}
+}
+
 func TestNewURLTransformer(t *testing.T) {
 	url := "https://winter.is.coming"
 
