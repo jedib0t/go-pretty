@@ -3,6 +3,7 @@ package table
 import (
 	"fmt"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -179,17 +180,18 @@ func (t *Table) renderColumnSeparator(out *strings.Builder, row rowStr, colIdx i
 }
 
 func (t *Table) renderLine(out *strings.Builder, row rowStr, hint renderHint) {
-	// if the output has content, it means that this call is working on line
-	// number 2 or more; separate them with a newline
-	if out.Len() > 0 {
-		out.WriteRune('\n')
-	}
-
-	// use a brand-new strings.Builder if a row length limit has been set
+	// use a brand-new strings.Builder if a row length limit has been set; this
+	// lets the fully-rendered line be trimmed (and inspected) before being
+	// committed to the output
 	var outLine *strings.Builder
 	if t.style.Size.WidthMax > 0 {
 		outLine = &strings.Builder{}
 	} else {
+		// no row length limit: render straight into the output; separate lines
+		// number 2 or more with a newline
+		if out.Len() > 0 {
+			out.WriteRune('\n')
+		}
 		outLine = out
 	}
 	// grow the strings.Builder to the maximum possible row length
@@ -205,9 +207,20 @@ func (t *Table) renderLine(out *strings.Builder, row rowStr, hint renderHint) {
 	}
 	t.renderMarginRight(outLine, hint)
 
-	// merge the strings.Builder objects if a new one was created earlier
+	// commit the line if a brand-new strings.Builder was created earlier,
+	// trimming it to the allowed row length in the process
 	if outLine != out {
-		t.renderLineMergeOutputs(out, outLine)
+		lineStr := outLine.String()
+		visibleStr := t.trimLineToAllowedLength(lineStr)
+		// suppress a data-row line that lost all of its content to clipping,
+		// leaving behind only borders/separators/padding
+		if t.shouldSuppressClippedRow(lineStr, visibleStr, hint) {
+			return
+		}
+		if out.Len() > 0 {
+			out.WriteRune('\n')
+		}
+		out.WriteString(visibleStr)
 	}
 	t.firstRowOfPage = false
 
@@ -227,17 +240,68 @@ func (t *Table) renderLine(out *strings.Builder, row rowStr, hint renderHint) {
 	}
 }
 
-func (t *Table) renderLineMergeOutputs(out *strings.Builder, outLine *strings.Builder) {
-	outLineStr := outLine.String()
+// shouldSuppressClippedRow reports whether a data-row line should be dropped
+// entirely because clipping (style.Size.WidthMax) stripped away all of its
+// content, leaving behind only borders/separators/padding. This only applies
+// when the DoNotRenderEmptyRowsWhenClipped option is enabled and the line was
+// actually trimmed (visibleStr != lineStr).
+func (t *Table) shouldSuppressClippedRow(lineStr, visibleStr string, hint renderHint) bool {
+	return t.style.Options.DoNotRenderEmptyRowsWhenClipped &&
+		hint.isRegularNonSeparatorRow() &&
+		visibleStr != lineStr &&
+		!t.lineHasVisibleContent(visibleStr)
+}
+
+// trimLineToAllowedLength returns the portion of a rendered line that is
+// visible after enforcing the allowed row length (style.Size.WidthMax). Lines
+// that fit are returned unchanged; lines that overflow are trimmed and suffixed
+// with the UnfinishedRow indicator. If not even the indicator fits, an empty
+// string is returned.
+func (t *Table) trimLineToAllowedLength(outLineStr string) string {
 	if text.StringWidthWithoutEscSequences(outLineStr) > t.style.Size.WidthMax {
 		trimLength := t.style.Size.WidthMax - utf8.RuneCountInString(t.style.Box.UnfinishedRow)
 		if trimLength > 0 {
-			out.WriteString(text.Trim(outLineStr, trimLength))
-			out.WriteString(t.style.Box.UnfinishedRow)
+			return text.Trim(outLineStr, trimLength) + t.style.Box.UnfinishedRow
 		}
-	} else {
-		out.WriteString(outLineStr)
+		return ""
 	}
+	return outLineStr
+}
+
+// lineHasVisibleContent reports whether a rendered line carries any content
+// beyond the structural runes (borders, separators, padding, and the
+// UnfinishedRow indicator) and whitespace. Escape sequences are ignored.
+func (t *Table) lineHasVisibleContent(line string) bool {
+	structural := map[rune]bool{}
+	for _, s := range []string{
+		t.style.Box.Left,
+		t.style.Box.Right,
+		t.style.Box.MiddleVertical,
+		t.style.Box.PaddingLeft,
+		t.style.Box.PaddingRight,
+		t.style.Box.UnfinishedRow,
+		t.directionModifier,
+	} {
+		for _, r := range s {
+			structural[r] = true
+		}
+	}
+
+	esp := text.EscSeqParser{}
+	for _, r := range line {
+		if esp.InSequence() {
+			esp.Consume(r)
+			continue
+		}
+		esp.Consume(r)
+		if esp.InSequence() {
+			continue
+		}
+		if !unicode.IsSpace(r) && !structural[r] {
+			return true
+		}
+	}
+	return false
 }
 
 func (t *Table) renderMarginLeft(out *strings.Builder, hint renderHint) {
