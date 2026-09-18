@@ -36,15 +36,31 @@ func ExampleInsertEveryN() {
 }
 
 func TestInsertEveryN(t *testing.T) {
+	// zero-width runes (combining marks, newlines) never get a separator
 	assert.Equal(t, "a-b-c\u0301", InsertEveryN("abc\u0301", '-', 1))
 	assert.Equal(t, "a\u0301-b-c", InsertEveryN("a\u0301bc", '-', 1))
 	assert.Equal(t, "a-b-c\n", InsertEveryN("abc\n", '-', 1))
-	assert.Equal(t, "a-b\n-c", InsertEveryN("ab\nc", '-', 1))
 	assert.Equal(t, "\u0301\n", InsertEveryN("\u0301\n", '-', 1))
+	// the count restarts on every line
+	assert.Equal(t, "a-b\nc", InsertEveryN("ab\nc", '-', 1))
+	assert.Equal(t, "ab-c\nab-c", InsertEveryN("abc\nabc", '-', 2))
+	assert.Equal(t, "ab-c\r\nab-c", InsertEveryN("abc\r\nabc", '-', 2))
+	assert.Equal(t, "\x1b[31mab-c\x1b[0m\nab-c", InsertEveryN("\x1b[31mabc\x1b[0m\nabc", '-', 2))
+	// multi-byte runes
 	assert.Equal(t, "é-a-b", InsertEveryN("éab", '-', 1))
 	assert.Equal(t, "éa-b", InsertEveryN("éab", '-', 2))
+	// wide runes; one crossing the N-th column gets the separator after it
 	assert.Equal(t, "界-ab-c", InsertEveryN("界abc", '-', 2))
+	assert.Equal(t, "a界-b", InsertEveryN("a界b", '-', 2))
+	assert.Equal(t, "a界-bc-d", InsertEveryN("a界bcd", '-', 2))
+	assert.Equal(t, "界-界", InsertEveryN("界界", '-', 1))
+	// grapheme clusters are never split
+	assert.Equal(t, "👨\u200d👩-x", InsertEveryN("👨\u200d👩x", '-', 2))
+	assert.Equal(t, "👍🏽-x", InsertEveryN("👍🏽x", '-', 2))
+	assert.Equal(t, "🇺🇸-🇯🇵", InsertEveryN("🇺🇸🇯🇵", '-', 1))
+	// escape sequences
 	assert.Equal(t, "\x1b[31mA-B-C-D-E-F\x1b[0m", InsertEveryN("\x1b[31mABCDEF\x1b[0m", '-', 1))
+	assert.Equal(t, "\x1b[31m\u0301a-b\x1b[0m", InsertEveryN("\x1b[31m\u0301ab\x1b[0m", '-', 1))
 
 	assert.Equal(t, "Ghost", InsertEveryN("Ghost", '-', 0))
 	assert.Equal(t, "Gツhツoツsツt", InsertEveryN("Ghost", 'ツ', 1))
