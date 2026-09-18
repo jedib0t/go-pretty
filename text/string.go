@@ -29,19 +29,20 @@ func InsertEveryN(str string, runeToInsert rune, n int) string {
 	var out strings.Builder
 	out.Grow(sLen + (sLen / n))
 	outLen, esp := 0, EscSeqParser{}
-	for idx, c := range str {
+	for _, c := range str {
 		if esp.InSequence() {
 			esp.Consume(c)
 			out.WriteRune(c)
 			continue
 		}
 		esp.Consume(c)
-		if !esp.InSequence() && outLen > 0 && (outLen%n) == 0 && idx != sLen {
+		cWidth := RuneWidth(c)
+		if !esp.InSequence() && cWidth > 0 && outLen > 0 && (outLen%n) == 0 {
 			out.WriteRune(runeToInsert)
 		}
 		out.WriteRune(c)
 		if !esp.InSequence() {
-			outLen += RuneWidth(c)
+			outLen += cWidth
 		}
 	}
 	return out.String()

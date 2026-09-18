@@ -36,6 +36,16 @@ func ExampleInsertEveryN() {
 }
 
 func TestInsertEveryN(t *testing.T) {
+	assert.Equal(t, "a-b-c\u0301", InsertEveryN("abc\u0301", '-', 1))
+	assert.Equal(t, "a\u0301-b-c", InsertEveryN("a\u0301bc", '-', 1))
+	assert.Equal(t, "a-b-c\n", InsertEveryN("abc\n", '-', 1))
+	assert.Equal(t, "a-b\n-c", InsertEveryN("ab\nc", '-', 1))
+	assert.Equal(t, "\u0301\n", InsertEveryN("\u0301\n", '-', 1))
+	assert.Equal(t, "é-a-b", InsertEveryN("éab", '-', 1))
+	assert.Equal(t, "éa-b", InsertEveryN("éab", '-', 2))
+	assert.Equal(t, "界-ab-c", InsertEveryN("界abc", '-', 2))
+	assert.Equal(t, "\x1b[31mA-B-C-D-E-F\x1b[0m", InsertEveryN("\x1b[31mABCDEF\x1b[0m", '-', 1))
+
 	assert.Equal(t, "Ghost", InsertEveryN("Ghost", '-', 0))
 	assert.Equal(t, "Gツhツoツsツt", InsertEveryN("Ghost", 'ツ', 1))
 	assert.Equal(t, "G-h-o-s-t", InsertEveryN("Ghost", '-', 1))
