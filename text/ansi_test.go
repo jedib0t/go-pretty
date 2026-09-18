@@ -35,6 +35,27 @@ func TestStripEscape(t *testing.T) {
 	assert.Equal(t, "Nymeria Ghost Lady", StripEscape("Nymeria "+FgHiBlue.Sprint("Ghost")+" Lady"))
 }
 
+func TestStripEscape_Hyperlinks(t *testing.T) {
+	for _, test := range []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"ST terminator", Hyperlink("https://go.dev/Docs", "Go docs"), "Go docs"},
+		{"URL containing m", Hyperlink("https://example.com/Docs", "Go docs"), "Go docs"},
+		{"BEL terminator", "\x1b]8;;https://go.dev/Docs\aGo docs\x1b]8;;\a", "Go docs"},
+		{"surrounding text", "See " + Hyperlink("https://go.dev/Docs", "Go docs") + " here", "See Go docs here"},
+		{"adjacent links", Hyperlink("https://go.dev/Docs", "Go") + Hyperlink("https://go.dev/Tour", " tour"), "Go tour"},
+		{"colored label", Hyperlink("https://go.dev/Docs", "\x1b[31mGo docs\x1b[0m"), "Go docs"},
+		{"Unicode label", Hyperlink("https://go.dev/Docs", "文档"), "文档"},
+		{"backslash in URL", Hyperlink("C:\\Windows\\Docs", "Docs"), "Docs"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			assert.Equal(t, test.want, StripEscape(test.input))
+		})
+	}
+}
+
 func ExampleStripEscape() {
 	fmt.Printf("StripEscape(%#v) == %#v\n", "Ghost", StripEscape("Ghost"))
 	fmt.Printf("StripEscape(%#v) == %#v\n", "\x1b[91mGhost\x1b[0m", StripEscape("\x1b[91mGhost\x1b[0m"))

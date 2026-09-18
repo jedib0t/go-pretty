@@ -45,16 +45,15 @@ func StripEscape(str string) string {
 	var out strings.Builder
 	out.Grow(StringWidthWithoutEscSequences(str))
 
-	isEscSeq := false
+	esp := EscSeqParser{}
 	for _, sChr := range str {
-		if sChr == EscapeStartRune {
-			isEscSeq = true
+		if esp.InSequence() {
+			esp.Consume(sChr)
+			continue
 		}
-		if !isEscSeq {
+		esp.Consume(sChr)
+		if !esp.InSequence() {
 			out.WriteRune(sChr)
-		}
-		if isEscSeq && sChr == EscapeStopRune {
-			isEscSeq = false
 		}
 	}
 	return out.String()
