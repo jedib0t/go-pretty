@@ -5,6 +5,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/mattn/go-runewidth"
+	"github.com/rivo/uniseg"
 	"golang.org/x/text/width"
 )
 
@@ -20,29 +21,49 @@ var (
 //	InsertEveryN("Ghost", '-', 3) == "Gho-st"
 //	InsertEveryN("Ghost", '-', 4) == "Ghos-t"
 //	InsertEveryN("Ghost", '-', 5) == "Ghost"
+//
+// The count restarts on every line, and the rune is never inserted in the
+// middle of a grapheme cluster (like an emoji built with zero-width joiners),
+// or in the middle of a wide character; a wide character that crosses the
+// N-th column gets the rune inserted after it.
 func InsertEveryN(str string, runeToInsert rune, n int) string {
 	if n <= 0 {
 		return str
 	}
 
-	sLen := StringWidthWithoutEscSequences(str)
 	var out strings.Builder
-	out.Grow(sLen + (sLen / n))
-	outLen, esp := 0, EscSeqParser{}
-	for _, c := range str {
-		if esp.InSequence() {
+	out.Grow(len(str) + utf8.RuneLen(runeToInsert)*(len(str)/n))
+	lineLen, esp, state := 0, EscSeqParser{}, -1
+	for len(str) > 0 {
+		var cluster string
+		cluster, str, _, state = uniseg.StepString(str, state)
+		for idx, c := range cluster {
+			if esp.InSequence() {
+				esp.Consume(c)
+				out.WriteRune(c)
+				continue
+			}
 			esp.Consume(c)
-			out.WriteRune(c)
-			continue
-		}
-		esp.Consume(c)
-		cWidth := RuneWidth(c)
-		if !esp.InSequence() && cWidth > 0 && outLen > 0 && (outLen%n) == 0 {
-			out.WriteRune(runeToInsert)
-		}
-		out.WriteRune(c)
-		if !esp.InSequence() {
-			outLen += cWidth
+			if esp.InSequence() {
+				out.WriteRune(c)
+				continue
+			}
+
+			// c starts the visible part of the cluster; ESC is a control
+			// character, which always forms a cluster of its own, so no
+			// escape sequence can start further inside this cluster
+			visible := cluster[idx:]
+			if strings.ContainsAny(visible, "\r\n") {
+				lineLen = 0
+			} else if vWidth := StringWidthWithoutEscSequences(visible); vWidth > 0 {
+				if lineLen >= n {
+					out.WriteRune(runeToInsert)
+					lineLen = 0
+				}
+				lineLen += vWidth
+			}
+			out.WriteString(visible)
+			break
 		}
 	}
 	return out.String()
