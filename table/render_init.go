@@ -116,7 +116,8 @@ func (t *Table) reBalanceMaxMergedColumnLengths() {
 				mapReduced := false
 				for mergedColumn := range columnBalanceMap {
 					maxColumnLength := t.maxColumnLengths[mergedColumn]
-					if maxColumnLength >= maxLengthSplitAcrossColumns {
+					// Keep columns at the rounded-down average so they can share the remainder.
+					if maxColumnLength > maxLengthSplitAcrossColumns {
 						mapReduced = true
 						mergedColumnLength -= maxColumnLength
 						delete(columnBalanceMap, mergedColumn)

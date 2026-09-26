@@ -5,7 +5,55 @@ import (
 	"testing"
 
 	"github.com/jedib0t/go-pretty/v6/text"
+	"github.com/stretchr/testify/require"
 )
+
+func TestTable_Render_AutoMergeWidthRemainder(t *testing.T) {
+	for _, test := range []struct {
+		name   string
+		header Row
+		value  string
+	}{
+		{"exact width", Row{"abc", "def"}, "1234567"},
+		{"two equal columns", Row{"abc", "def"}, "12345678"},
+		{"three equal columns, one extra", Row{"abc", "def", "ghi"}, "123456789012"},
+		{"three equal columns, two extra", Row{"abc", "def", "ghi"}, "1234567890123"},
+		{"one wider column", Row{"abcdefg", "hij", "klm"}, "1234567890123456"},
+		{"empty columns", Row{"", "", ""}, "123"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			for _, section := range []string{"header", "row", "footer"} {
+				t.Run(section, func(t *testing.T) {
+					tw := NewWriter()
+					merged := make(Row, len(test.header))
+					for colIdx := range merged {
+						merged[colIdx] = test.value
+					}
+					switch section {
+					case "header":
+						tw.AppendHeader(merged, RowConfig{AutoMerge: true})
+						tw.AppendRow(test.header)
+					case "row":
+						tw.AppendHeader(test.header)
+						tw.AppendRow(merged, RowConfig{AutoMerge: true})
+					case "footer":
+						tw.AppendRow(test.header)
+						tw.AppendFooter(merged, RowConfig{AutoMerge: true})
+					}
+
+					var output string
+					require.NotPanics(t, func() { output = tw.Render() })
+					require.Equal(t, 1, strings.Count(output, test.value))
+					lines := strings.Split(output, "\n")
+					for _, line := range lines {
+						require.Equal(t, len(lines[0]), len(line), "table lines should have the same width")
+					}
+					require.Equal(t, output, tw.Render())
+				})
+			}
+		})
+	}
+}
 
 func TestTable_Render_AutoMerge(t *testing.T) {
 	rcAutoMerge := RowConfig{AutoMerge: true}
