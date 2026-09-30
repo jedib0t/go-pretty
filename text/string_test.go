@@ -147,6 +147,25 @@ func TestOverrideRuneWidthEastAsianWidth(t *testing.T) {
 	assert.Equal(t, 2, StringWidthWithoutEscSequences("ツ"), "East Asian character should be width 2")
 	OverrideRuneWidthEastAsianWidth(false)
 	assert.Equal(t, 2, StringWidthWithoutEscSequences("ツ"), "East Asian character should be width 2")
+
+	// StringWidth has to agree with RuneWidth and StringWidthWithoutEscSequences
+	// on box drawing and block element characters.
+	for _, eastAsianWidth := range []bool{true, false} {
+		OverrideRuneWidthEastAsianWidth(eastAsianWidth)
+		for _, str := range []string{"╋", "█", "▒", "▓", "┌──┐", "│ツ│"} {
+			assert.Equal(t, StringWidthWithoutEscSequences(str), StringWidth(str),
+				"StringWidth(%q) should match StringWidthWithoutEscSequences with EastAsianWidth=%v", str, eastAsianWidth)
+		}
+		assert.Equal(t, 4, StringWidth("┌──┐"), "Box drawing characters should always be width 1")
+		assert.Equal(t, 4, StringWidth("│ツ│"), "East Asian characters should still be width 2")
+
+		// A Prepend character joins the box drawing character after it into one
+		// grapheme cluster. Counting per cluster keeps the two in one cell
+		// rather than charging for each separately.
+		assert.Equal(t, 4, StringWidth("aツ\u0600─"),
+			"a Prepend before a box drawing character should still be one cluster with EastAsianWidth=%v", eastAsianWidth)
+	}
+	OverrideRuneWidthEastAsianWidth(false)
 }
 
 func ExamplePad() {
@@ -343,6 +362,7 @@ func ExampleStringWidth() {
 func TestStringWidth(t *testing.T) {
 	assert.Equal(t, 10, StringWidth("Ghost 生命"))
 	assert.Equal(t, 17, StringWidth("\x1b[33mGhost 生命\x1b[0m"))
+	assert.Equal(t, 4, StringWidth("┌──┐"))
 }
 
 func ExampleStringWidthWithoutEscSequences() {
