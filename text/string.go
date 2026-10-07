@@ -310,7 +310,8 @@ func StringWidthWithoutEscSequences(str string) int {
 
 // Trim trims a string to the given display width (maxLen columns) while
 // ignoring escape sequences. Wide East Asian characters count as two columns,
-// so the result never exceeds maxLen columns. For ex.:
+// so the result never exceeds maxLen columns, and a grapheme cluster is never
+// cut in the middle. For ex.:
 //
 //	Trim("Ghost", 3) == "Gho"
 //	Trim("Ghost", 6) == "Ghost"
@@ -326,29 +327,74 @@ func Trim(str string, maxLen int) string {
 	var out strings.Builder
 	out.Grow(maxLen)
 
-	outLen, full, esp := 0, false, EscSeqParser{}
-	for _, sChr := range str {
-		if esp.InSequence() {
-			esp.Consume(sChr)
-			out.WriteRune(sChr)
-			continue
+	// every byte of an ASCII string is a grapheme cluster of its own (except
+	// "\r\n", which is zero-width and so can never be split by the width
+	// check below), which makes it possible to skip the slower segmentation
+	outLen, esp, state, ascii := 0, EscSeqParser{}, -1, isASCII(str)
+	for len(str) > 0 {
+		var cluster string
+		if ascii {
+			cluster, str = str[:1], str[1:]
+		} else {
+			cluster, str, _, state = uniseg.StepString(str, state)
 		}
-		esp.Consume(sChr)
-		if esp.InSequence() {
-			out.WriteRune(sChr)
-			continue
-		}
-		// Count the display width of the rune (wide East Asian characters
-		// occupy two columns) instead of counting runes, so the result never
-		// exceeds maxLen columns. Once a rune no longer fits, stop emitting
-		// visible runes but keep copying any trailing escape sequences.
-		if !full {
-			if w := RuneWidth(sChr); outLen+w <= maxLen {
-				outLen += w
+		for idx, sChr := range cluster {
+			if esp.InSequence() {
+				esp.Consume(sChr)
 				out.WriteRune(sChr)
 				continue
 			}
-			full = true
+			esp.Consume(sChr)
+			if esp.InSequence() {
+				out.WriteRune(sChr)
+				continue
+			}
+			// sChr starts the visible part of the cluster; ESC is a control
+			// character, which always forms a cluster of its own, so no
+			// escape sequence can start further inside this cluster.
+			//
+			// Count the display width of the whole cluster (wide East Asian
+			// characters occupy two columns) instead of counting runes, so the
+			// result never exceeds maxLen columns and never ends in the middle
+			// of a grapheme cluster (like an emoji built with zero-width
+			// joiners).
+			visible := cluster[idx:]
+			if w := StringWidthWithoutEscSequences(visible); outLen+w <= maxLen {
+				outLen += w
+				out.WriteString(visible)
+				break
+			}
+			// The cluster no longer fits: stop emitting visible text, but
+			// keep copying any trailing escape sequences.
+			return out.String() + trailingEscSequences(str, &esp)
+		}
+	}
+	return out.String()
+}
+
+func isASCII(str string) bool {
+	for i := 0; i < len(str); i++ {
+		if str[i] >= utf8.RuneSelf {
+			return false
+		}
+	}
+	return true
+}
+
+// trailingEscSequences returns only the escape sequences found in str, in
+// order, dropping all the visible text. esp carries the state of the escape
+// sequence parser from the text preceding str.
+func trailingEscSequences(str string, esp *EscSeqParser) string {
+	var out strings.Builder
+	for _, c := range str {
+		if esp.InSequence() {
+			esp.Consume(c)
+			out.WriteRune(c)
+			continue
+		}
+		esp.Consume(c)
+		if esp.InSequence() {
+			out.WriteRune(c)
 		}
 	}
 	return out.String()
