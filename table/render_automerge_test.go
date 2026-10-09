@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/jedib0t/go-pretty/v6/text"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -861,4 +862,58 @@ func TestTable_Render_AutoMergeLongColumns(t *testing.T) {
 └────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘`)
 	})
 
+	t.Run("merged cell wider than columns", func(t *testing.T) {
+		// Length 7 (exact fit: 3 + 1 + 3 = 7)
+		tw1 := NewWriter()
+		tw1.AppendHeader(Row{"abc", "def"})
+		tw1.AppendRow(Row{"1234567", "1234567"}, RowConfig{AutoMerge: true})
+		compareOutput(t, tw1.Render(), `
++-----+-----+
+| ABC | DEF |
++-----+-----+
+|  1234567  |
++-----------+`)
+
+		// Length 8 (wider by 1 character: col 1 expands to 4)
+		tw2 := NewWriter()
+		tw2.AppendHeader(Row{"abc", "def"})
+		tw2.AppendRow(Row{"12345678", "12345678"}, RowConfig{AutoMerge: true})
+		compareOutput(t, tw2.Render(), `
++-----+------+
+| ABC | DEF  |
++-----+------+
+|  12345678  |
++------------+`)
+
+		// Length 9 (wider by 2 characters: both col 0 and col 1 expand to 4)
+		tw3 := NewWriter()
+		tw3.AppendHeader(Row{"abc", "def"})
+		tw3.AppendRow(Row{"123456789", "123456789"}, RowConfig{AutoMerge: true})
+		compareOutput(t, tw3.Render(), `
++------+------+
+| ABC  | DEF  |
++------+------+
+|  123456789  |
++-------------+`)
+
+		// Spanning 3 columns: merged cell wider than all 3 columns combined
+		tw4 := NewWriter()
+		tw4.AppendHeader(Row{"a", "b", "c"})
+		tw4.AppendRow(Row{"1234567890", "1234567890", "1234567890"}, RowConfig{AutoMerge: true})
+		compareOutput(t, tw4.Render(), `
++----+-----+-----+
+| A  | B   | C   |
++----+-----+-----+
+|   1234567890   |
++----------------+`)
+
+		// Merged row with empty header columns
+		tw5 := NewWriter()
+		tw5.AppendHeader(Row{"", ""})
+		tw5.AppendRow(Row{"test", "test"}, RowConfig{AutoMerge: true})
+		assert.NotPanics(t, func() {
+			out := tw5.Render()
+			assert.NotEmpty(t, out)
+		})
+	})
 }

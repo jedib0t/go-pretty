@@ -101,6 +101,9 @@ func (t *Table) reBalanceMaxMergedColumnLengths() {
 			for index := startIndexKey; index <= endIndexKey; index++ {
 				columnBalanceMap[index] = struct{}{}
 			}
+			if len(columnBalanceMap) == 0 {
+				continue
+			}
 			mergedColumnLength := t.maxMergedColumnLengths[endIndexKey][startIndexKey] -
 				((len(columnBalanceMap) - 1) * middleSepLen)
 
@@ -112,6 +115,9 @@ func (t *Table) reBalanceMaxMergedColumnLengths() {
 					break
 				}
 				numMergedColumns := len(columnBalanceMap)
+				if numMergedColumns == 0 {
+					break
+				}
 				maxLengthSplitAcrossColumns := mergedColumnLength / numMergedColumns
 				mapReduced := false
 				for mergedColumn := range columnBalanceMap {
@@ -143,6 +149,9 @@ func (t *Table) reBalanceMaxMergedColumnLengths() {
 				columnLengthRemaining := mergedColumnLength
 				columnsRemaining := numRebalancedColumns
 				for index := 0; index < numRebalancedColumns; index++ {
+					if columnsRemaining <= 0 {
+						break
+					}
 					balancedSpace := columnLengthRemaining / columnsRemaining
 					balanceColumn := balanceColumns[index]
 					t.maxColumnLengths[balanceColumn] += balancedSpace
