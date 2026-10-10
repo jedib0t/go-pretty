@@ -68,9 +68,46 @@ func TestWrapHard(t *testing.T) {
 	assert.Equal(t, expectedUnBold, WrapHard(textUnBold, 23))
 	assert.Equal(t, expectedWide, WrapHard(textWide, 10))
 	assert.Equal(t, expectedWideColored, WrapHard(textWideColored, 10))
-	// wide runes (width 2) must still wrap when wrapLen is odd: the line length
-	// steps over wrapLen instead of landing on it exactly.
-	assert.Equal(t, "世世\n世世\n世世", WrapHard("世世世世世世", 3))
+	// wide runes (width 2) must still wrap when wrapLen is odd, without any
+	// line exceeding wrapLen: a rune that doesn't fit moves to the next line.
+	assert.Equal(t, "世\n世\n世\n世\n世\n世", WrapHard("世世世世世世", 3))
+}
+
+func TestWrap_WideRunesNeverExceedWrapLen(t *testing.T) {
+	wrapFuncs := map[string]func(string, int) string{
+		"WrapHard": WrapHard,
+		"WrapSoft": WrapSoft,
+		"WrapText": WrapText,
+	}
+	for name, wrap := range wrapFuncs {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, "生\n命\n生\n命\n生\n命", wrap("生命生命生命", 3))
+			assert.Equal(t, "a\n世\nb\n世", wrap("a世b世", 2))
+			assert.Equal(t, "ab世\n世", wrap("ab世世", 4))
+			assert.Equal(t, "\x1b[31m生\x1b[0m\n\x1b[31m命\x1b[0m\n\x1b[31m生\x1b[0m\n\x1b[31m命\x1b[0m",
+				wrap("\x1b[31m生命生命\x1b[0m", 3))
+			// a zero-width combining mark stays with its base rune
+			assert.Equal(t, "abe\u0301\nd", wrap("abe\u0301d", 3))
+			// a wide rune that can never fit is placed on a line of its own
+			assert.Equal(t, "生\n命", wrap("生命", 1))
+
+			for _, tc := range []struct {
+				str     string
+				wrapLen int
+			}{
+				{"生命生命生命", 3},
+				{"ab 生命生命 cd", 3},
+				{"生命 生命 生命", 5},
+				{"abcd甲乙丙丁abcd", 5},
+				{"\x1b[33m甲乙丙 丁 abc\x1b[0m", 3},
+			} {
+				for _, line := range strings.Split(wrap(tc.str, tc.wrapLen), "\n") {
+					assert.LessOrEqual(t, StringWidthWithoutEscSequences(line), tc.wrapLen,
+						"str=%q wrapLen=%d line=%q", tc.str, tc.wrapLen, line)
+				}
+			}
+		})
+	}
 }
 
 func TestFoo(t *testing.T) {
