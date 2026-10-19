@@ -96,61 +96,81 @@ func (t *Table) reBalanceMaxMergedColumnLengths() {
 	for _, endIndexKey := range endIndexKeys {
 		startIndexKeys := startIndexKeysMap[endIndexKey]
 		for idx := len(startIndexKeys) - 1; idx >= 0; idx-- {
-			startIndexKey := startIndexKeys[idx]
-			columnBalanceMap := map[int]struct{}{}
-			for index := startIndexKey; index <= endIndexKey; index++ {
-				columnBalanceMap[index] = struct{}{}
-			}
-			mergedColumnLength := t.maxMergedColumnLengths[endIndexKey][startIndexKey] -
-				((len(columnBalanceMap) - 1) * middleSepLen)
+			t.reBalanceMergedColumnRange(startIndexKeys[idx], endIndexKey, middleSepLen)
+		}
+	}
+}
 
-			// keep reducing the set of columns until the remainder are the ones less than
-			// the average of the remaining length (total merged length - all lengths > average)
-			for {
-				if mergedColumnLength <= 0 { // already exceeded the merged length
-					columnBalanceMap = map[int]struct{}{}
-					break
-				}
-				numMergedColumns := len(columnBalanceMap)
-				maxLengthSplitAcrossColumns := mergedColumnLength / numMergedColumns
-				mapReduced := false
-				for mergedColumn := range columnBalanceMap {
-					maxColumnLength := t.maxColumnLengths[mergedColumn]
-					// Keep columns at the rounded-down average so they can share the remainder.
-					if maxColumnLength > maxLengthSplitAcrossColumns {
-						mapReduced = true
-						mergedColumnLength -= maxColumnLength
-						delete(columnBalanceMap, mergedColumn)
-					}
-				}
-				if !mapReduced {
-					break
-				}
-			}
+func (t *Table) reBalanceMergedColumnRange(startIndexKey, endIndexKey, middleSepLen int) {
+	columnBalanceMap := map[int]struct{}{}
+	for index := startIndexKey; index <= endIndexKey; index++ {
+		columnBalanceMap[index] = struct{}{}
+	}
+	if len(columnBalanceMap) == 0 {
+		return
+	}
+	mergedColumnLength := t.maxMergedColumnLengths[endIndexKey][startIndexKey] -
+		((len(columnBalanceMap) - 1) * middleSepLen)
 
-			// act on any remaining columns that need balancing
-			if len(columnBalanceMap) > 0 {
-				// remove the max column sizes from the remaining amount to balance, then
-				// share out the remainder amongst the columns.
-				numRebalancedColumns := len(columnBalanceMap)
-				balanceColumns := make([]int, 0, numRebalancedColumns)
-				for balanceColumn := range columnBalanceMap {
-					mergedColumnLength -= t.maxColumnLengths[balanceColumn]
-					balanceColumns = append(balanceColumns, balanceColumn)
-				}
-				// pad out the columns one by one
-				sort.Ints(balanceColumns)
-				columnLengthRemaining := mergedColumnLength
-				columnsRemaining := numRebalancedColumns
-				for index := 0; index < numRebalancedColumns; index++ {
-					balancedSpace := columnLengthRemaining / columnsRemaining
-					balanceColumn := balanceColumns[index]
-					t.maxColumnLengths[balanceColumn] += balancedSpace
-					columnLengthRemaining -= balancedSpace
-					columnsRemaining--
-				}
+	columnBalanceMap, mergedColumnLength = t.filterColumnsToBalance(columnBalanceMap, mergedColumnLength)
+
+	// act on any remaining columns that need balancing
+	if len(columnBalanceMap) > 0 {
+		t.distributeMergedLength(columnBalanceMap, mergedColumnLength)
+	}
+}
+
+func (t *Table) filterColumnsToBalance(columnBalanceMap map[int]struct{}, mergedColumnLength int) (map[int]struct{}, int) {
+	// keep reducing the set of columns until the remainder are the ones less than
+	// the average of the remaining length (total merged length - all lengths > average)
+	for {
+		if mergedColumnLength <= 0 { // already exceeded the merged length
+			return nil, 0
+		}
+		numMergedColumns := len(columnBalanceMap)
+		if numMergedColumns == 0 {
+			break
+		}
+		maxLengthSplitAcrossColumns := mergedColumnLength / numMergedColumns
+		mapReduced := false
+		for mergedColumn := range columnBalanceMap {
+			maxColumnLength := t.maxColumnLengths[mergedColumn]
+			// Keep columns at the rounded-down average so they can share the remainder.
+			if maxColumnLength > maxLengthSplitAcrossColumns {
+				mapReduced = true
+				mergedColumnLength -= maxColumnLength
+				delete(columnBalanceMap, mergedColumn)
 			}
 		}
+		if !mapReduced {
+			break
+		}
+	}
+	return columnBalanceMap, mergedColumnLength
+}
+
+func (t *Table) distributeMergedLength(columnBalanceMap map[int]struct{}, mergedColumnLength int) {
+	// remove the max column sizes from the remaining amount to balance, then
+	// share out the remainder amongst the columns.
+	numRebalancedColumns := len(columnBalanceMap)
+	balanceColumns := make([]int, 0, numRebalancedColumns)
+	for balanceColumn := range columnBalanceMap {
+		mergedColumnLength -= t.maxColumnLengths[balanceColumn]
+		balanceColumns = append(balanceColumns, balanceColumn)
+	}
+	// pad out the columns one by one
+	sort.Ints(balanceColumns)
+	columnLengthRemaining := mergedColumnLength
+	columnsRemaining := numRebalancedColumns
+	for index := 0; index < numRebalancedColumns; index++ {
+		if columnsRemaining <= 0 {
+			break
+		}
+		balancedSpace := columnLengthRemaining / columnsRemaining
+		balanceColumn := balanceColumns[index]
+		t.maxColumnLengths[balanceColumn] += balancedSpace
+		columnLengthRemaining -= balancedSpace
+		columnsRemaining--
 	}
 }
 
