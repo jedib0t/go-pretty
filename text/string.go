@@ -228,10 +228,17 @@ func RuneCount(str string) int {
 // * https://github.com/jedib0t/go-pretty/issues/220
 // * https://github.com/jedib0t/go-pretty/issues/204
 func RuneWidth(r rune) int {
-	if (r >= 0x2500 && r <= 0x257F) || (r >= 0x2580 && r <= 0x259F) {
+	if isSingleCellRune(r) {
 		return 1
 	}
 	return rwCondition.RuneWidth(r)
+}
+
+// isSingleCellRune returns true for box drawing (U+2500-U+257F) and block
+// element (U+2580-U+259F) characters, which are always treated as width 1
+// regardless of locale.
+func isSingleCellRune(r rune) bool {
+	return (r >= 0x2500 && r <= 0x257F) || (r >= 0x2580 && r <= 0x259F)
 }
 
 // RuneWidthWithoutEscSequences is similar to RuneWidth, except for the fact
@@ -271,8 +278,20 @@ func Snip(str string, length int, snipIndicator string) string {
 //
 //	StringWidth("Ghost 生命"): 10
 //	StringWidth("\x1b[33mGhost 生命\x1b[0m"): 19
+//	StringWidth("┌──┐"): 4
 func StringWidth(str string) int {
-	return rwCondition.StringWidth(str)
+	width := rwCondition.StringWidth(str)
+	if rwCondition.EastAsianWidth {
+		// runewidth counts box drawing and block element characters as 2 cells
+		// wide in East Asian locales; RuneWidth treats them as 1 cell, so apply
+		// the same correction here to keep both functions in agreement.
+		for _, r := range str {
+			if isSingleCellRune(r) {
+				width -= rwCondition.RuneWidth(r) - 1
+			}
+		}
+	}
+	return width
 }
 
 // StringWidthWithoutEscSequences is similar to RuneWidth, except for the fact
