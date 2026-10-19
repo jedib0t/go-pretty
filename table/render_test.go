@@ -2023,3 +2023,176 @@ func TestTable_Render_AutoIndex_EdgeCases(t *testing.T) {
 		tw.Render()
 	})
 }
+
+func TestTable_Render_WrappedAndClipped(t *testing.T) {
+	t.Run("wrapped column clipped away completely", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"#", "Name", "Bio"})
+		tw.AppendRows([]Row{
+			{1, "Arya", "A girl has no name"},
+			{2, "Jon", "Line 1\nLine 2\nLine 3"},
+			{3, "Tyrion", "A Lannister always pays his debts"},
+		})
+		tw.SetAllowedRowLength(16)
+
+		expectedOut := []string{
+			"+---+--------+ ~",
+			"| # | NAME   | ~",
+			"+---+--------+ ~",
+			"| 1 | Arya   | ~",
+			"| 2 | Jon    | ~",
+			"| 3 | Tyrion | ~",
+			"+---+--------+ ~",
+		}
+		assert.Equal(t, strings.Join(expectedOut, "\n"), tw.Render())
+	})
+
+	t.Run("wrapped column partially clipped with visible text retained", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"#", "Name", "Notes"})
+		tw.AppendRows([]Row{
+			{1, "Jon", "First line\nSecond line"},
+		})
+		tw.SetAllowedRowLength(20)
+
+		expectedOut := []string{
+			"+---+------+------ ~",
+			"| # | NAME | NOTES ~",
+			"+---+------+------ ~",
+			"| 1 | Jon  | First ~",
+			"|   |      | Secon ~",
+			"+---+------+------ ~",
+		}
+		assert.Equal(t, strings.Join(expectedOut, "\n"), tw.Render())
+	})
+
+	t.Run("wrapped column partially clipped with only spaces omitted", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"#", "Name", "Notes"})
+		tw.AppendRows([]Row{
+			{1, "Jon", "First line\nSecond line"},
+		})
+		tw.SetAllowedRowLength(13)
+
+		expectedOut := []string{
+			"+---+------ ~",
+			"| # | NAME  ~",
+			"+---+------ ~",
+			"| 1 | Jon   ~",
+			"+---+------ ~",
+		}
+		assert.Equal(t, strings.Join(expectedOut, "\n"), tw.Render())
+	})
+
+	t.Run("multiple wrapped columns where one column is clipped", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"#", "ColA", "ColB"})
+		tw.AppendRows([]Row{
+			{1, "A1\nA2", "B1\nB2\nB3\nB4"},
+		})
+		// Set allowed row length to 13 so ColB is clipped completely
+		// ColA has 2 lines (both visible), ColB has 4 lines (lines 3 & 4 only exist in ColB)
+		tw.SetAllowedRowLength(13)
+
+		expectedOut := []string{
+			"+---+------ ~",
+			"| # | COLA  ~",
+			"+---+------ ~",
+			"| 1 | A1    ~",
+			"|   | A2    ~",
+			"+---+------ ~",
+		}
+		assert.Equal(t, strings.Join(expectedOut, "\n"), tw.Render())
+	})
+
+	t.Run("auto index with wrapped and clipped content", func(t *testing.T) {
+		tw := NewWriter()
+		tw.SetAutoIndex(true)
+		tw.AppendHeader(Row{"Name", "Bio"})
+		tw.AppendRows([]Row{
+			{"Arya", "A girl has no name"},
+			{"Jon", "Line 1\nLine 2\nLine 3"},
+		})
+		tw.SetAllowedRowLength(12)
+
+		expectedOut := []string{
+			"+---+----- ~",
+			"|   | NAME ~",
+			"+---+----- ~",
+			"| 1 | Arya ~",
+			"| 2 | Jon  ~",
+			"+---+----- ~",
+		}
+		assert.Equal(t, strings.Join(expectedOut, "\n"), tw.Render())
+	})
+
+	t.Run("column config wrapping with table size WidthMax", func(t *testing.T) {
+		tw := NewWriter()
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Number: 3, WidthMax: 10, WidthMaxEnforcer: text.WrapSoft},
+		})
+		tw.AppendHeader(Row{"#", "Name", "Description"})
+		tw.AppendRows([]Row{
+			{1, "Arya", "Short note"},
+			{2, "Jon", "A very long description that wraps across multiple lines"},
+		})
+		tw.Style().Size.WidthMax = 12
+
+		expectedOut := []string{
+			"+---+----- ~",
+			"| # | NAME ~",
+			"+---+----- ~",
+			"| 1 | Arya ~",
+			"| 2 | Jon  ~",
+			"+---+----- ~",
+		}
+		assert.Equal(t, strings.Join(expectedOut, "\n"), tw.Render())
+	})
+
+	t.Run("separate rows with wrapped and clipped rows", func(t *testing.T) {
+		tw := NewWriter()
+		tw.Style().Options.SeparateRows = true
+		tw.AppendHeader(Row{"#", "Name", "Details"})
+		tw.AppendRows([]Row{
+			{1, "Arya", "Stark"},
+			{2, "Jon", "Line 1\nLine 2\nLine 3"},
+			{3, "Tyrion", "Lannister"},
+		})
+		tw.SetAllowedRowLength(16)
+
+		expectedOut := []string{
+			"+---+--------+ ~",
+			"| # | NAME   | ~",
+			"+---+--------+ ~",
+			"| 1 | Arya   | ~",
+			"+---+--------+ ~",
+			"| 2 | Jon    | ~",
+			"+---+--------+ ~",
+			"| 3 | Tyrion | ~",
+			"+---+--------+ ~",
+		}
+		assert.Equal(t, strings.Join(expectedOut, "\n"), tw.Render())
+	})
+
+	t.Run("unwrapped rows remain unaffected", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendHeader(Row{"#", "Name", "Title"})
+		tw.AppendRows([]Row{
+			{1, "Arya", ""},
+			{2, "", ""},
+			{3, "Tyrion", "Hand"},
+		})
+		tw.SetAllowedRowLength(16)
+
+		expectedOut := []string{
+			"+---+--------+ ~",
+			"| # | NAME   | ~",
+			"+---+--------+ ~",
+			"| 1 | Arya   | ~",
+			"| 2 |        | ~",
+			"| 3 | Tyrion | ~",
+			"+---+--------+ ~",
+		}
+		assert.Equal(t, strings.Join(expectedOut, "\n"), tw.Render())
+	})
+}

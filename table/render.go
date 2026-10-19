@@ -283,17 +283,164 @@ func (t *Table) renderRow(out *strings.Builder, row rowStr, hint renderHint) {
 			for colIdx, colStr := range rowWrapped {
 				rowLines[colIdx] = t.getVAlign(colIdx, hint).ApplyStr(colStr, colMaxLines)
 			}
+			var validLineIndices []int
 			for colLineIdx := 0; colLineIdx < colMaxLines; colLineIdx++ {
 				rowLine := make(rowStr, len(rowLines))
 				for colIdx, colLines := range rowLines {
 					rowLine[colIdx] = colLines[colLineIdx]
 				}
-				hint.isLastLineOfRow = colLineIdx == colMaxLines-1
-				hint.rowLineNumber = colLineIdx + 1
-				t.renderLine(out, rowLine, hint)
+				hintLine := hint
+				hintLine.rowLineNumber = colLineIdx + 1
+				if !t.isRowLineEmptyDueToClipping(rowLine, hintLine) {
+					validLineIndices = append(validLineIndices, colLineIdx)
+				}
+			}
+			numValidLines := len(validLineIndices)
+			for idx, colLineIdx := range validLineIndices {
+				rowLine := make(rowStr, len(rowLines))
+				for colIdx, colLines := range rowLines {
+					rowLine[colIdx] = colLines[colLineIdx]
+				}
+				hintLine := hint
+				hintLine.isLastLineOfRow = idx == numValidLines-1
+				hintLine.rowLineNumber = colLineIdx + 1
+				t.renderLine(out, rowLine, hintLine)
 			}
 		}
 	}
+}
+
+func isCellSliceVisibleAndNonEmpty(colStr string, align text.Align, maxColLen int, colContentStart int, trimLength int) bool {
+	if colStr == "" || colContentStart >= trimLength {
+		return false
+	}
+	alignedStr := align.Apply(colStr, maxColLen)
+	visLen := trimLength - colContentStart
+	if visLen > maxColLen {
+		visLen = maxColLen
+	}
+	visStr := text.Trim(alignedStr, visLen)
+	return strings.TrimSpace(text.StripEscape(visStr)) != ""
+}
+
+func (t *Table) checkAutoIndexVisible(hint renderHint, currX int, trimLength int) (int, bool) {
+	padL := text.StringWidthWithoutEscSequences(t.style.Box.PaddingLeft)
+	padR := text.StringWidthWithoutEscSequences(t.style.Box.PaddingRight)
+	autoIndexWidth := padL + t.autoIndexVIndexMaxLength + padR
+
+	if hint.rowLineNumber == 1 && !hint.isHeaderRow && !hint.isFooterRow {
+		rowNumStr := fmt.Sprint(hint.rowNumber)
+		if isCellSliceVisibleAndNonEmpty(rowNumStr, text.AlignRight, t.autoIndexVIndexMaxLength, currX+padL, trimLength) {
+			return autoIndexWidth, true
+		}
+	}
+	return autoIndexWidth, false
+}
+
+func (t *Table) getHorizontalAutoMerge(hint renderHint, colIdx int, baseLen int) (text.Align, int, int) {
+	rowConfig := t.getRowConfig(hint)
+	if !rowConfig.AutoMerge || hint.isSeparatorRow {
+		return t.getAlign(colIdx, hint), baseLen, 1
+	}
+	align := rowConfig.getAutoMergeAlign()
+	maxColLen := baseLen
+	numCols := 1
+	rowUnwrapped := t.getRow(hint.rowNumber-1, hint)
+	for idx := colIdx + 1; idx < len(rowUnwrapped); idx++ {
+		if rowUnwrapped[colIdx] != rowUnwrapped[idx] {
+			break
+		}
+		maxColLen += t.getMaxColumnLengthForMerging(idx)
+		numCols++
+	}
+	return align, maxColLen, numCols
+}
+
+func (t *Table) processAutoIndexForClipping(row rowStr, hint renderHint, currX int, trimLength int) (int, bool) {
+	if !t.autoIndex {
+		return currX, false
+	}
+	width, visible := t.checkAutoIndexVisible(hint, currX, trimLength)
+	if visible {
+		return currX, true
+	}
+	currX += width
+	if t.style.Options.SeparateColumns {
+		currX += text.StringWidthWithoutEscSequences(t.getColumnSeparator(row, 0, hint))
+	}
+	return currX, false
+}
+
+func (t *Table) isCellVisible(row rowStr, hint renderHint, colIdx int, align text.Align, maxColLen int, colContentStart int, trimLength int) bool {
+	if t.shouldMergeCellsVerticallyAbove(colIdx, hint) || colIdx >= len(row) {
+		return false
+	}
+	colStr := t.getFormat(hint).Apply(row[colIdx])
+	return isCellSliceVisibleAndNonEmpty(colStr, align, maxColLen, colContentStart, trimLength)
+}
+
+func (t *Table) hasVisibleRowContent(row rowStr, hint renderHint, trimLength int) (int, bool) {
+	currX := text.StringWidthWithoutEscSequences(t.directionModifier)
+	if t.style.Options.DrawBorder {
+		currX += text.StringWidthWithoutEscSequences(t.getBorderLeft(hint))
+	}
+
+	padL := text.StringWidthWithoutEscSequences(t.style.Box.PaddingLeft)
+	padR := text.StringWidthWithoutEscSequences(t.style.Box.PaddingRight)
+
+	nextColIdx := 0
+	for colIdx, maxColumnLength := range t.maxColumnLengths {
+		if colIdx != nextColIdx {
+			continue
+		}
+
+		if colIdx == 0 {
+			var visible bool
+			currX, visible = t.processAutoIndexForClipping(row, hint, currX, trimLength)
+			if visible {
+				return 0, true
+			}
+		}
+
+		if colIdx > 0 && t.style.Options.SeparateColumns {
+			currX += text.StringWidthWithoutEscSequences(t.getColumnSeparator(row, colIdx, hint))
+		}
+
+		align, maxColLen, numCols := t.getHorizontalAutoMerge(hint, colIdx, maxColumnLength)
+		nextColIdx = colIdx + numCols
+
+		colContentStart := currX + padL
+		currX = colContentStart + maxColLen + padR
+
+		if t.isCellVisible(row, hint, colIdx, align, maxColLen, colContentStart, trimLength) {
+			return 0, true
+		}
+	}
+
+	if t.style.Options.DrawBorder {
+		currX += text.StringWidthWithoutEscSequences(t.getBorderRight(hint))
+	}
+	return currX, false
+}
+
+func (t *Table) isRowLineEmptyDueToClipping(row rowStr, hint renderHint) bool {
+	if t.style.Size.WidthMax <= 0 {
+		return false
+	}
+	trimLength := t.style.Size.WidthMax - utf8.RuneCountInString(t.style.Box.UnfinishedRow)
+	if trimLength <= 0 {
+		return true
+	}
+
+	totalWidth, visible := t.hasVisibleRowContent(row, hint, trimLength)
+	if visible {
+		return false
+	}
+	if totalWidth <= t.style.Size.WidthMax {
+		return false
+	}
+
+	return true
 }
 
 func (t *Table) renderRowSeparator(out *strings.Builder, hint renderHint) {
