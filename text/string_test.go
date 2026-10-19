@@ -323,6 +323,9 @@ func TestSnip(t *testing.T) {
 	// wide East Asian characters count as two columns
 	assert.Equal(t, "生命~", Snip("生命生命生命", 5, "~"))
 	assert.Equal(t, "生命生命", Snip("生命生命", 8, "~"))
+	// grapheme clusters are never cut in the middle
+	assert.Equal(t, "~", Snip("\U0001F468\u200D\U0001F469\u200D\U0001F467", 3, "~"))
+	assert.Equal(t, "a~", Snip("a\U0001F468\u200D\U0001F469\u200D\U0001F467", 3, "~"))
 }
 
 func ExampleStringWidth() {
@@ -396,6 +399,16 @@ func TestTrim(t *testing.T) {
 	assert.Equal(t, "aツ", Trim("aツb", 3))
 	assert.Equal(t, "", Trim("ツ", 1))
 	assert.Equal(t, "\x1b[33m生命\x1b[0m", Trim("\x1b[33m生命生命\x1b[0m", 4))
+	// grapheme clusters are never cut in the middle
+	family := "\U0001F468\u200D\U0001F469\u200D\U0001F467"
+	assert.Equal(t, "", Trim(family, 2))
+	assert.Equal(t, "", Trim(family, 5))
+	assert.Equal(t, family, Trim(family, 6))
+	assert.Equal(t, "a", Trim("a"+family, 3))
+	assert.Equal(t, "a"+family, Trim("a"+family+"b", 7))
+	assert.Equal(t, "e\u0301", Trim("e\u0301x", 1))
+	assert.Equal(t, "\x1b[33m\x1b[0m", Trim("\x1b[33m"+family+"\x1b[0m", 2))
+	assert.Equal(t, "\x1b[33m"+family+"\x1b[0m", Trim("\x1b[33m"+family+"\x1b[0m", 6))
 }
 
 func ExampleWiden() {
