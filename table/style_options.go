@@ -12,6 +12,14 @@ type Options struct {
 	// footers are present).
 	DoNotRenderSeparatorWhenEmpty bool
 
+	// DoNotRenderEmptyRowsWhenClipped suppresses data-row lines that end up
+	// without any visible content because SetAllowedRowLength (or WidthMax)
+	// clipped the content away. This avoids surprising blank lines that appear
+	// when wrapped cells overflow the allowed row length and only borders,
+	// separators, and padding remain visible. Rows that are genuinely empty
+	// (not the result of clipping) are left untouched.
+	DoNotRenderEmptyRowsWhenClipped bool
+
 	// DrawBorder enables or disables drawing the border around the Table.
 	// Example of a table where it is disabled:
 	//     # │ FIRST NAME │ LAST NAME │ SALARY │
