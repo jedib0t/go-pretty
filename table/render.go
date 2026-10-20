@@ -112,8 +112,8 @@ func (t *Table) renderColumnAutoIndex(out *strings.Builder, hint renderHint) {
 	}
 
 	if hint.isSeparatorRow {
-		numChars := t.autoIndexVIndexMaxLength + utf8.RuneCountInString(t.style.Box.PaddingLeft) +
-			utf8.RuneCountInString(t.style.Box.PaddingRight)
+		numChars := t.autoIndexVIndexMaxLength + text.StringWidthWithoutEscSequences(t.style.Box.PaddingLeft) +
+			text.StringWidthWithoutEscSequences(t.style.Box.PaddingRight)
 		chars := t.style.Box.middleHorizontal(hint.separatorType)
 		if hint.isAutoIndexColumn && hint.isHeaderOrFooterSeparator() {
 			chars = text.RepeatAndTrim(" ", len(chars))
