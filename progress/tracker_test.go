@@ -1,6 +1,7 @@
 package progress
 
 import (
+	"sync"
 	"testing"
 	"time"
 
@@ -187,6 +188,27 @@ func TestTracker_SetValue(t *testing.T) {
 	tracker.SetValue(tracker.Total)
 	assert.Equal(t, tracker.Total, tracker.value)
 	assert.True(t, tracker.done)
+}
+
+func TestTracker_Start_Concurrent(t *testing.T) {
+	tracker := Tracker{Total: 100}
+
+	var wg sync.WaitGroup
+	for i := 0; i < 2; i++ {
+		wg.Add(2)
+		go func() {
+			defer wg.Done()
+			tracker.Start()
+		}()
+		go func() {
+			defer wg.Done()
+			tracker.Increment(1)
+		}()
+	}
+	wg.Wait()
+
+	assert.True(t, tracker.IsStarted())
+	assert.Equal(t, int64(2), tracker.Value())
 }
 
 func TestTracker_Value(t *testing.T) {
