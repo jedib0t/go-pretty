@@ -316,6 +316,13 @@ func TestSnip(t *testing.T) {
 	assert.Equal(t, "Gh~", Snip("Ghost", 3, "~"))
 	assert.Equal(t, "Ghost", Snip("Ghost", 5, "~"))
 	assert.Equal(t, "Ghost", Snip("Ghost", 7, "~"))
+	// indicators wider than the target must also be trimmed
+	assert.Equal(t, ".", Snip("Ghost", 1, "..."))
+	assert.Equal(t, "..", Snip("Ghost", 2, "..."))
+	assert.Equal(t, "\x1b[33m..\x1b[0m", Snip("Ghost", 2, "\x1b[33m...\x1b[0m"))
+	assert.Equal(t, "G", Snip("Ghost", 1, "生命"))
+	assert.Equal(t, "G生", Snip("Ghost", 3, "生命"))
+	assert.Equal(t, "Ghost", Snip("Ghost", 5, "......"))
 	assert.Equal(t, "\x1b[33mGhost\x1b[0m", Snip("\x1b[33mGhost\x1b[0m", 7, "~"))
 	assert.Equal(t, "\x1b]8;;http://example.com\x1b\\Ghost\x1b]8;;\x1b\\", Snip("\x1b]8;;http://example.com\x1b\\Ghost\x1b]8;;\x1b\\", 7, "~"))
 	assert.Equal(t, "\x1b]8;;http://example.com\x1b\\Gh\x1b]8;;\x1b\\~", Snip("\x1b]8;;http://example.com\x1b\\Ghost\x1b]8;;\x1b\\", 3, "~"))
