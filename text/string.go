@@ -259,6 +259,7 @@ func Snip(str string, length int, snipIndicator string) string {
 	if length > 0 {
 		lenStr := StringWidthWithoutEscSequences(str)
 		if lenStr > length {
+			snipIndicator = Trim(snipIndicator, length)
 			lenStrFinal := length - StringWidthWithoutEscSequences(snipIndicator)
 			return Trim(str, lenStrFinal) + snipIndicator
 		}
