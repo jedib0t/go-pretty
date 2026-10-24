@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -1293,4 +1294,36 @@ func TestProgress_renderTrackers_KeepTrackersTogetherMode_RetainedDoneTrackers(t
 	assert.True(t, pwImpl.overallTracker.IsDone())
 
 	showOutputOnFailure(t, out.String())
+}
+
+// An in-progress tracker with RemoveOnCompletion=true is still drawn on every
+// frame, so the next frame must move the cursor back over it.
+func TestProgress_renderTrackers_RemoveOnCompletion_ActiveTrackerIsRewound(t *testing.T) {
+	for _, keepTogether := range []bool{false, true} {
+		t.Run(fmt.Sprintf("KeepTrackersTogether=%v", keepTogether), func(t *testing.T) {
+			out := &outputWriter{}
+			pw := generateWriter()
+			pw.SetOutputWriter(out)
+			pw.Style().Options.KeepTrackersTogether = keepTogether
+
+			tracker := &Tracker{Message: "ACTIVE-MARKER", Total: 100, Units: UnitsDefault, RemoveOnCompletion: true}
+			pw.AppendTracker(tracker)
+			tracker.Increment(10)
+
+			pwImpl := pw.(*Progress)
+			pwImpl.initForRender()
+			renderLength := pwImpl.renderTrackers(0)
+
+			before := len(out.String())
+			tracker.Increment(10)
+			pwImpl.renderTrackers(renderLength)
+			secondFrame := out.String()[before:]
+
+			assert.Equal(t, 1, strings.Count(secondFrame, "ACTIVE-MARKER"))
+			assert.Equal(t, 1, strings.Count(secondFrame, text.CursorUp.Sprint()),
+				"cursor must move up over the tracker rendered in the previous frame")
+
+			showOutputOnFailure(t, out.String())
+		})
+	}
 }

@@ -252,11 +252,7 @@ func (p *Progress) moveCursorToTheTop(out *strings.Builder) {
 	var numTrackersToRender int
 
 	p.trackersActiveMutex.RLock()
-	for _, tracker := range p.trackersActive {
-		if !tracker.RemoveOnCompletion {
-			numTrackersToRender++
-		}
-	}
+	numTrackersToRender += len(p.trackersActive)
 	p.trackersActiveMutex.RUnlock()
 
 	if p.style.Options.KeepTrackersTogether {
