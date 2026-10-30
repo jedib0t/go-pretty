@@ -1,6 +1,7 @@
 package progress
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,6 +15,11 @@ func TestFormatBytes(t *testing.T) {
 	assert.Equal(t, "1.50TB", FormatBytes(1500000000000))
 	assert.Equal(t, "1.50PB", FormatBytes(1500000000000000))
 	assert.Equal(t, "1500.00PB", FormatBytes(1500000000000000000))
+	assert.Equal(t, "999B", FormatBytes(999))
+	assert.Equal(t, "999.99KB", FormatBytes(999994))
+	assert.Equal(t, "1.00MB", FormatBytes(999995))
+	assert.Equal(t, "1.00MB", FormatBytes(999999))
+	assert.Equal(t, "1.00GB", FormatBytes(999999999))
 }
 
 func TestFormatNumber(t *testing.T) {
@@ -24,6 +30,13 @@ func TestFormatNumber(t *testing.T) {
 	assert.Equal(t, "1.50T", FormatNumber(1500000000000))
 	assert.Equal(t, "1.50Q", FormatNumber(1500000000000000))
 	assert.Equal(t, "1500.00Q", FormatNumber(1500000000000000000))
+	assert.Equal(t, "1.00M", FormatNumber(999999))
+	assert.Equal(t, "1.00B", FormatNumber(999999999))
+	assert.Equal(t, "-1", FormatNumber(-1))
+	assert.Equal(t, "-1.50K", FormatNumber(-1500))
+	assert.Equal(t, "-1.50M", FormatNumber(-1500000))
+	assert.Equal(t, "-1.00M", FormatNumber(-999999))
+	assert.Equal(t, "-9223.37Q", FormatNumber(math.MinInt64))
 }
 
 func TestUnits_Sprint(t *testing.T) {

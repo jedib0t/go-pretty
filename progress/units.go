@@ -2,6 +2,7 @@ package progress
 
 import (
 	"fmt"
+	"math"
 )
 
 // UnitsNotationPosition determines notation position relative to unit value.
@@ -118,8 +119,13 @@ var unitScales = []int64{
 }
 
 func formatNumber(value int64, notations map[int64]string) string {
-	for _, unitScale := range unitScales {
-		if value >= unitScale {
+	absValue := math.Abs(float64(value))
+	for idx, unitScale := range unitScales {
+		if absValue >= float64(unitScale) {
+			// move up a unit if rounding to 2 decimals would print "1000.00"
+			if idx > 0 && math.Round(absValue/float64(unitScale)*100) >= 100000 {
+				unitScale = unitScales[idx-1]
+			}
 			return fmt.Sprintf("%.2f%s", float64(value)/float64(unitScale), notations[unitScale])
 		}
 	}
