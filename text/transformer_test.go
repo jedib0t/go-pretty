@@ -199,6 +199,15 @@ func TestNewTimeTransformer(t *testing.T) {
 	// Test with nil location
 	transformer = NewTimeTransformer(time.RFC3339, nil)
 	assert.Equal(t, "2010-11-12T13:14:15-07:00", transformer(inTime))
+
+	// pre-epoch timestamps
+	transformer = NewTimeTransformer(time.RFC3339, time.UTC)
+	assert.Equal(t, "1969-12-31T23:59:59Z", transformer(time.Unix(-1, 0)))
+	assert.Equal(t, "1955-02-24T10:30:00Z", transformer("1955-02-24T10:30:00Z"))
+
+	// zero value and epoch are rendered as empty
+	assert.Equal(t, "", transformer(time.Time{}))
+	assert.Equal(t, "", transformer(time.Unix(0, 0)))
 }
 
 func TestNewUnixTimeTransformer(t *testing.T) {
@@ -238,6 +247,17 @@ func TestNewUnixTimeTransformer(t *testing.T) {
 	assert.Equal(t, expected, transformer(inUnixTime*1000000000), "nanoseconds")
 
 	assert.Equal(t, "0.123456", transformer(float32(0.123456)))
+
+	// pre-epoch timestamps in all units
+	transformer = NewUnixTimeTransformer(time.RFC3339, time.UTC)
+	preEpoch := time.Date(1955, 2, 24, 10, 30, 0, 0, time.UTC).Unix()
+	expected = "1955-02-24T10:30:00Z"
+	assert.Equal(t, expected, transformer(fmt.Sprint(preEpoch)), "seconds in string")
+	assert.Equal(t, expected, transformer(preEpoch), "seconds")
+	assert.Equal(t, expected, transformer(preEpoch*1000), "milliseconds")
+	assert.Equal(t, expected, transformer(preEpoch*1000000), "microseconds")
+	assert.Equal(t, expected, transformer(preEpoch*1000000000), "nanoseconds")
+	assert.Equal(t, "", transformer(int64(0)))
 }
 
 func TestNewURLTransformer(t *testing.T) {

@@ -194,7 +194,8 @@ func NewURLTransformer(colors ...Color) Transformer {
 
 func formatTime(t time.Time, layout string, location *time.Location) string {
 	rsp := ""
-	if t.Unix() > 0 {
+	// zero values and the epoch itself are treated as "not set"
+	if !t.IsZero() && t.Unix() != 0 {
 		if location != nil {
 			t = t.In(location)
 		}
@@ -204,12 +205,18 @@ func formatTime(t time.Time, layout string, location *time.Location) string {
 }
 
 func formatTimeUnix(unixTime int64, timeTransformer Transformer) string {
+	// detect the unit based on the magnitude so that pre-epoch (negative)
+	// timestamps are handled the same way as positive ones
+	absUnixTime := unixTime
+	if absUnixTime < 0 {
+		absUnixTime = -absUnixTime
+	}
 	// Use pre-computed constants instead of repeated time.Second.Nanoseconds() calls
-	if unixTime >= unixTimeMinNanoSeconds {
+	if absUnixTime >= unixTimeMinNanoSeconds {
 		unixTime = unixTime / nanosPerSecond
-	} else if unixTime >= unixTimeMinMicroseconds {
+	} else if absUnixTime >= unixTimeMinMicroseconds {
 		unixTime = unixTime / microsPerSecond
-	} else if unixTime >= unixTimeMinMilliseconds {
+	} else if absUnixTime >= unixTimeMinMilliseconds {
 		unixTime = unixTime / millisPerSecond
 	}
 	return timeTransformer(time.Unix(unixTime, 0))
