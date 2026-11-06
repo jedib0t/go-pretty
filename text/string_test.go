@@ -410,3 +410,18 @@ func TestWiden(t *testing.T) {
 	assert.Equal(t, "Ｇｈｏｓｔ　生命", Widen("Ghost 生命"))
 	assert.Equal(t, "\x1b[33mＧｈｏｓｔ　生命\x1b[0m", Widen("\x1b[33mGhost 生命\x1b[0m"))
 }
+
+func TestRuneWidthASCII(t *testing.T) {
+	originalValue := rwCondition.EastAsianWidth
+	defer func() {
+		rwCondition.EastAsianWidth = originalValue
+	}()
+
+	for _, eastAsian := range []bool{false, true} {
+		OverrideRuneWidthEastAsianWidth(eastAsian)
+		for r := rune(0); r < 0x80; r++ {
+			assert.Equal(t, rwCondition.RuneWidth(r), RuneWidth(r),
+				"rune %#x, EastAsianWidth=%v", r, eastAsian)
+		}
+	}
+}

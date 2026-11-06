@@ -134,6 +134,10 @@ type EscSeqParser struct {
 	// escapeSeq accumulates the current escape sequence being parsed; it is
 	// bounded by escSeqMaxLength and reused across sequences.
 	escapeSeq []byte
+
+	// skipParse makes Consume only track sequence boundaries, not the codes;
+	// for callers that just measure or cut text.
+	skipParse bool
 }
 
 func (s *EscSeqParser) Codes() []int {
@@ -176,13 +180,13 @@ func (s *EscSeqParser) Consume(char rune) {
 			bytes.HasPrefix(s.escapeSeq, escapeStartConcealOSIBytes) &&
 			char == escRuneBEL { // BEL
 
-			s.ParseSeq(string(s.escapeSeq), s.escSeqKind)
+			s.parseCurrent()
 			s.Reset()
 			return
 		}
 
 		if s.isEscapeStopRune(char) {
-			s.ParseSeq(string(s.escapeSeq), s.escSeqKind)
+			s.parseCurrent()
 			s.Reset()
 		}
 	}
@@ -443,4 +447,10 @@ func (s *EscSeqParser) stripEscapeSequence(seq string, seqKind escSeqKind) strin
 		seq = strings.Replace(seq, EscapeStopCSI, "", 1)
 	}
 	return seq
+}
+
+func (s *EscSeqParser) parseCurrent() {
+	if !s.skipParse {
+		s.ParseSeq(string(s.escapeSeq), s.escSeqKind)
+	}
 }

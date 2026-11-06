@@ -74,7 +74,7 @@ func InsertEveryN(str string, runeToInsert rune, n int) string {
 //
 //	LongestLineLen("Ghost!\nCome back here!\nRight now!") == 15
 func LongestLineLen(str string) int {
-	maxLength, currLength, esp := 0, 0, EscSeqParser{}
+	maxLength, currLength, esp := 0, 0, EscSeqParser{skipParse: true}
 	//fmt.Println(str)
 	for _, c := range str {
 		//fmt.Printf("%03d | %03d | %c | %5v | %v | %#v\n", idx, c, c, esp.inEscSeq, esp.Codes(), esp.escapeSeq)
@@ -228,6 +228,13 @@ func RuneCount(str string) int {
 // * https://github.com/jedib0t/go-pretty/issues/220
 // * https://github.com/jedib0t/go-pretty/issues/204
 func RuneWidth(r rune) int {
+	// ASCII is the common case; skip the runewidth table lookup.
+	if r < utf8.RuneSelf {
+		if r >= 0x20 && r < 0x7f {
+			return 1
+		}
+		return 0
+	}
 	if (r >= 0x2500 && r <= 0x257F) || (r >= 0x2580 && r <= 0x259F) {
 		return 1
 	}
@@ -294,7 +301,7 @@ func StringWidthWithoutEscSequences(str string) int {
 		return count
 	}
 
-	count, esp := 0, EscSeqParser{}
+	count, esp := 0, EscSeqParser{skipParse: true}
 	for _, c := range str {
 		if esp.InSequence() {
 			esp.Consume(c)
@@ -326,7 +333,7 @@ func Trim(str string, maxLen int) string {
 	var out strings.Builder
 	out.Grow(maxLen)
 
-	outLen, full, esp := 0, false, EscSeqParser{}
+	outLen, full, esp := 0, false, EscSeqParser{skipParse: true}
 	for _, sChr := range str {
 		if esp.InSequence() {
 			esp.Consume(sChr)

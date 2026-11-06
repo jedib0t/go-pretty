@@ -1,6 +1,7 @@
 package text
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -429,4 +430,27 @@ func TestEscSeqParser_ConsumeMalformedSequence(t *testing.T) {
 		es.Consume(char)
 	}
 	assert.Equal(t, []int{1}, es.Codes())
+}
+
+func TestEscSeqParser_SkipParse(t *testing.T) {
+	inputs := []string{
+		"",
+		"plain text",
+		"\x1b[33mGhost\x1b[0m",
+		"\x1b[38;5;208mOrange\x1b[0m and \x1b[48;5;21mBlue\x1b[0m",
+		"\x1b]8;;http://example.com\x07label\x1b]8;;\x07",
+		"\x1b]8;;http://example.com\x1b\\label\x1b]8;;\x1b\\",
+		"\x1b[33mUnterminated\x1b[0",
+		"\x1b[" + strings.Repeat("1;", 2048) + "m overflow",
+		"\x1b\x1b[1m生命\x1b[22m",
+	}
+	for _, input := range inputs {
+		full, skip := EscSeqParser{}, EscSeqParser{skipParse: true}
+		for idx, c := range input {
+			full.Consume(c)
+			skip.Consume(c)
+			assert.Equal(t, full.InSequence(), skip.InSequence(), "input %q, byte %d", input, idx)
+		}
+		assert.False(t, skip.IsOpen(), "input %q", input)
+	}
 }
