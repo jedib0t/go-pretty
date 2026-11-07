@@ -362,30 +362,48 @@ func (p *Progress) initForRender() {
 		p.updateFrequency = DefaultUpdateFrequency
 	}
 
-	if outputWriter == os.Stdout {
-		// get the current terminal size for preventing roll-overs, and do this in a
-		// background loop until end of render. This only works if the output writer is STDOUT.
-		go p.watchTerminalSize() // needs p.updateFrequency
+	// get the current terminal size for preventing roll-overs, and do this in a
+	// background loop until end of render. This only works if the output writer
+	// is a terminal (like STDOUT or STDERR) that exposes its file descriptor.
+	if fd, ok := terminalFd(outputWriter); ok {
+		go p.watchTerminalSize(fd) // needs p.updateFrequency
 	}
 }
 
-func (p *Progress) updateTerminalSize() {
+// fileDescriptor is implemented by writers backed by a file, like *os.File.
+type fileDescriptor interface {
+	Fd() uintptr
+}
+
+// terminalFd returns the file descriptor of w if w is a terminal. As a side
+// effect, calling Fd puts the file into blocking mode, which should not be an
+// issue in practice.
+func terminalFd(w io.Writer) (int, bool) {
+	f, ok := w.(fileDescriptor)
+	if !ok {
+		return 0, false
+	}
+	fd := int(f.Fd())
+	return fd, term.IsTerminal(fd)
+}
+
+func (p *Progress) updateTerminalSize(fd int) {
 	p.terminalWidthMutex.Lock()
 	defer p.terminalWidthMutex.Unlock()
 
-	p.terminalWidth, _, _ = term.GetSize(int(os.Stdout.Fd()))
+	p.terminalWidth, _, _ = term.GetSize(fd)
 }
 
-func (p *Progress) watchTerminalSize() {
+func (p *Progress) watchTerminalSize(fd int) {
 	// once
-	p.updateTerminalSize()
+	p.updateTerminalSize(fd)
 	// until end of time
 	ticker := time.NewTicker(time.Second / 10)
 	defer ticker.Stop()
 	for {
 		select {
 		case <-ticker.C:
-			p.updateTerminalSize()
+			p.updateTerminalSize(fd)
 		case <-p.renderContext.Done():
 			return
 		}
