@@ -1,6 +1,7 @@
 package progress
 
 import (
+	"sync"
 	"testing"
 	"time"
 
@@ -88,6 +89,36 @@ func TestTracker_IsStarted(t *testing.T) {
 	assert.False(t, tracker.IsStarted())
 	tracker.SetValue(1)
 	assert.True(t, tracker.IsStarted())
+}
+
+func TestTracker_Start(t *testing.T) {
+	tracker := Tracker{DeferStart: true, Total: 100}
+	assert.False(t, tracker.IsStarted())
+
+	tracker.Start()
+	assert.True(t, tracker.IsStarted())
+	startTime := tracker.timeStartValue()
+	assert.False(t, startTime.IsZero())
+
+	// calling Start again must be a no-op and not overwrite startTime
+	time.Sleep(10 * time.Millisecond)
+	tracker.Start()
+	assert.Equal(t, startTime, tracker.timeStartValue())
+
+	// concurrent Start and Increment calls must be safe
+	tracker2 := Tracker{DeferStart: true, Total: 100}
+	var wg sync.WaitGroup
+	for i := 0; i < 50; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			tracker2.Start()
+			tracker2.Increment(1)
+		}()
+	}
+	wg.Wait()
+	assert.True(t, tracker2.IsStarted())
+	assert.Equal(t, int64(50), tracker2.Value())
 }
 
 func TestTracker_IsDone(t *testing.T) {
