@@ -48,6 +48,10 @@ func TestAlign_Apply(t *testing.T) {
 	assert.Equal(t, "JonSnow     ", AlignJustify.Apply("JonSnow", 12))
 	assert.Equal(t, "JonSnow     ", AlignJustify.Apply("  JonSnow", 12))
 	assert.Equal(t, "            ", AlignJustify.Apply("", 12))
+	assert.Equal(t, "", AlignJustify.Apply("", 0))
+	assert.Equal(t, "", AlignJustify.Apply("", -1))
+	assert.Equal(t, "Jon Snow", AlignJustify.Apply("Jon Snow", -1))
+	assert.Equal(t, "\x1b]8;;http://a.test/a b\x07 \x1b]8;;\x07", AlignJustify.Apply("\x1b]8;;http://a.test/a b\x07 \x1b]8;;\x07", -1))
 
 	// Align Right
 	assert.Equal(t, "    Jon Snow", AlignRight.Apply("Jon Snow", 12))

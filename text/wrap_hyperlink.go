@@ -79,43 +79,47 @@ func expandHyperlinkTabs(str string) string {
 func (w *hyperlinkWrapper) word(word string) {
 	for len(word) > 0 {
 		token, rest, escape := hyperlinkToken(word)
-		word = rest
-		if escape {
-			// A new link after a full line belongs to the following line. A closing
-			// link is consumed first so the following text stays outside that link.
-			if strings.HasPrefix(token, escapeStartConcealOSI) {
-				uri, end, complete := hyperlinkTarget(token)
-				if complete {
-					if uri != "" && w.overflows(hyperlinkRuneWidth(word)) {
-						w.newline(false)
-					}
-					if uri == "" {
-						w.link, w.linkEnd = "", ""
-					} else {
-						w.link, w.linkEnd = token, "\x1b]8;;"+end
-					}
-				}
-			} else {
-				w.colors.ParseString(token)
+		if !escape {
+			// text is written out a grapheme cluster at a time, so that a
+			// cluster is not split between two lines
+			size, clusterWidth := wrapCluster(word, w.width)
+			if w.overflows(clusterWidth) {
+				w.newline(false)
 			}
-			w.out.WriteString(token)
+			w.out.WriteString(word[:size])
+			w.lineLen += clusterWidth
+			word = word[size:]
 			continue
 		}
-		r, _ := utf8.DecodeRuneInString(token)
-		runeWidth := RuneWidth(r)
-		if w.overflows(runeWidth) {
-			w.newline(false)
+		word = rest
+
+		// A new link after a full line belongs to the following line. A closing
+		// link is consumed first so the following text stays outside that link.
+		if strings.HasPrefix(token, escapeStartConcealOSI) {
+			uri, end, complete := hyperlinkTarget(token)
+			if complete {
+				if uri != "" && w.overflows(hyperlinkClusterWidth(word, w.width)) {
+					w.newline(false)
+				}
+				if uri == "" {
+					w.link, w.linkEnd = "", ""
+				} else {
+					w.link, w.linkEnd = token, "\x1b]8;;"+end
+				}
+			}
+		} else {
+			w.colors.ParseString(token)
 		}
 		w.out.WriteString(token)
-		w.lineLen += runeWidth
 	}
 }
 
-// overflows returns true if a rune of the given width does not fit in what is
-// left of the line. A rune that is wider than a whole line can never fit, so it
-// is left to overflow a line of its own; and a zero-width rune always fits.
-func (w *hyperlinkWrapper) overflows(runeWidth int) bool {
-	return runeWidth > 0 && w.lineLen > 0 && w.lineLen+runeWidth > w.width
+// overflows returns true if a grapheme cluster of the given width does not fit
+// in what is left of the line. One that is wider than a whole line can never
+// fit, so it is left to overflow a line of its own; and a zero-width one always
+// fits.
+func (w *hyperlinkWrapper) overflows(clusterWidth int) bool {
+	return clusterWidth > 0 && w.lineLen > 0 && w.lineLen+clusterWidth > w.width
 }
 
 func (w *hyperlinkWrapper) closeFormatting() {
@@ -213,14 +217,14 @@ func hyperlinkWordWidth(word string) int {
 	return width
 }
 
-// hyperlinkRuneWidth returns the width of the first visible rune in word, or 0
-// if there is none.
-func hyperlinkRuneWidth(word string) int {
+// hyperlinkClusterWidth returns the width of the first visible grapheme cluster
+// in word, or 0 if there is none.
+func hyperlinkClusterWidth(word string, wrapLen int) int {
 	for len(word) > 0 {
-		token, rest, escape := hyperlinkToken(word)
+		_, rest, escape := hyperlinkToken(word)
 		if !escape {
-			r, _ := utf8.DecodeRuneInString(token)
-			return RuneWidth(r)
+			_, clusterWidth := wrapCluster(word, wrapLen)
+			return clusterWidth
 		}
 		word = rest
 	}

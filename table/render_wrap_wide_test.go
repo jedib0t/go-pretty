@@ -8,6 +8,38 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestTable_Render_WidthMax_GraphemeClusters ensures that a grapheme cluster
+// is not split between two lines of a cell when it fits in one.
+func TestTable_Render_WidthMax_GraphemeClusters(t *testing.T) {
+	thumbsUp := "\U0001F44D\U0001F3FD" // 4 columns
+	for _, enforcer := range []struct {
+		name string
+		fn   WidthEnforcer
+	}{
+		{"default", nil},
+		{"WrapHard", text.WrapHard},
+		{"WrapSoft", text.WrapSoft},
+		{"WrapText", text.WrapText},
+	} {
+		t.Run(enforcer.name, func(t *testing.T) {
+			tw := NewWriter()
+			tw.AppendRow(Row{"ab" + thumbsUp + "cd", "x"})
+			tw.SetColumnConfigs([]ColumnConfig{{Number: 1, WidthMax: 4, WidthMaxEnforcer: enforcer.fn}})
+
+			out := tw.Render()
+			compareOutput(t, out, `
++------+---+
+| ab   | x |
+| `+thumbsUp+` |   |
+| cd   |   |
++------+---+`)
+			for _, line := range strings.Split(out, "\n") {
+				assert.Equal(t, 12, text.StringWidthWithoutEscSequences(line), "line=%q", line)
+			}
+		})
+	}
+}
+
 // TestTable_Render_WidthMax_WideRunes ensures that wrapping wide (CJK) content
 // to a WidthMax that is not a multiple of the rune width never produces rows
 // wider than the table borders.
@@ -74,6 +106,32 @@ func TestTable_Render_WidthMax_WideRunes_Hyperlink(t *testing.T) {
 			for _, line := range strings.Split(out, "\n") {
 				assert.Equal(t, 11, text.StringWidthWithoutEscSequences(line), "line=%q", line)
 			}
+		})
+	}
+}
+
+// TestTable_Render_WidthMax_ControlSequences ensures that content with
+// sequences that move the cursor or erase text is wrapped to WidthMax too.
+func TestTable_Render_WidthMax_ControlSequences(t *testing.T) {
+	for _, enforcer := range []struct {
+		name string
+		fn   WidthEnforcer
+	}{
+		{"default", nil},
+		{"WrapHard", text.WrapHard},
+		{"WrapSoft", text.WrapSoft},
+		{"WrapText", text.WrapText},
+	} {
+		t.Run(enforcer.name, func(t *testing.T) {
+			tw := NewWriter()
+			tw.AppendRow(Row{text.EraseLine.Sprint() + "abcdefgh", "x"})
+			tw.SetColumnConfigs([]ColumnConfig{{Number: 1, WidthMax: 4, WidthMaxEnforcer: enforcer.fn}})
+
+			compareOutput(t, text.StripEscape(tw.Render()), `
++------+---+
+| abcd | x |
+| efgh |   |
++------+---+`)
 		})
 	}
 }

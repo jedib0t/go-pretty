@@ -173,6 +173,32 @@ func TestWrapHyperlinkWideRunes(t *testing.T) {
 	}
 }
 
+func TestWrapHyperlinkGraphemeClusters(t *testing.T) {
+	thumbsUp := "\U0001F44D\U0001F3FD"                     // 4 columns
+	family := "\U0001F468\u200D\U0001F469\u200D\U0001F467" // 6 columns
+	link := func(s string) string { return Hyperlink("https://example.com/x", s) }
+	lines := func(labels ...string) string {
+		for idx, label := range labels {
+			labels[idx] = link(label)
+		}
+		return strings.Join(labels, "\n")
+	}
+	for _, wrap := range []struct {
+		name string
+		fn   func(string, int) string
+	}{{"hard", WrapHard}, {"soft", WrapSoft}, {"text", WrapText}} {
+		t.Run(wrap.name, func(t *testing.T) {
+			// a cluster moves to the next line as a whole
+			assert.Equal(t, lines("ab", thumbsUp, "cd"), wrap.fn(link("ab"+thumbsUp+"cd"), 4))
+			assert.Equal(t, lines("a", family), wrap.fn(link("a"+family), 6))
+			// and so does a link that begins with one
+			assert.Equal(t, "ab\n"+lines(thumbsUp, "c"), wrap.fn("ab"+link(thumbsUp+"c"), 4))
+			// wider than a whole line: split, to keep to the length
+			assert.Equal(t, lines("\U0001F468\u200D", "\U0001F469\u200D", "\U0001F467"), wrap.fn(link(family), 3))
+		})
+	}
+}
+
 func TestWrapHyperlinkUnterminatedSequences(t *testing.T) {
 	link := func(s string) string { return Hyperlink("https://example.com/x", s) }
 	for _, wrap := range []struct {

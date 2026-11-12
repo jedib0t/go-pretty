@@ -73,6 +73,54 @@ func TestWrapHard(t *testing.T) {
 	assert.Equal(t, "世\n世\n世\n世\n世\n世", WrapHard("世世世世世世", 3))
 }
 
+// TestWrap_ControlSequences ensures that the sequences that move the cursor or
+// erase text are seen as escape sequences, like the ones that set colors, and
+// that only the latter are restarted on a new line.
+func TestWrap_ControlSequences(t *testing.T) {
+	eraseLine, cursorUp := EraseLine.Sprint(), CursorUp.Sprint()
+	for _, wrap := range []struct {
+		name string
+		fn   func(string, int) string
+	}{{"hard", WrapHard}, {"soft", WrapSoft}, {"text", WrapText}} {
+		t.Run(wrap.name, func(t *testing.T) {
+			assert.Equal(t, eraseLine+"abcd\nefgh", wrap.fn(eraseLine+"abcdefgh", 4))
+			assert.Equal(t, "\x1b[?25labcd\nef\x1b[2;3Hgh", wrap.fn("\x1b[?25labcdef\x1b[2;3Hgh", 4))
+			assert.Equal(t, "\x1b[31mab"+cursorUp+"cd\x1b[0m\n\x1b[31mefgh\x1b[0m",
+				wrap.fn("\x1b[31mab"+cursorUp+"cdefgh\x1b[0m", 4))
+
+			for _, line := range strings.Split(wrap.fn("ab "+eraseLine+"cdefghij "+cursorUp+"kl mnopqr", 4), "\n") {
+				assert.LessOrEqual(t, StringWidthWithoutEscSequences(line), 4, "line=%q", line)
+			}
+		})
+	}
+}
+
+// TestWrap_GraphemeClusters ensures that a grapheme cluster (like an emoji with
+// a skin tone) is moved to the next line as a whole when it does not fit in
+// what is left of the line, and that it is split only if it is wider than a
+// whole line.
+func TestWrap_GraphemeClusters(t *testing.T) {
+	thumbsUp := "\U0001F44D\U0001F3FD"                     // 4 columns
+	family := "\U0001F468\u200D\U0001F469\u200D\U0001F467" // 6 columns
+	flag := "\U0001F1E9\U0001F1EA"                         // 2 columns
+	for _, wrap := range []struct {
+		name string
+		fn   func(string, int) string
+	}{{"hard", WrapHard}, {"soft", WrapSoft}, {"text", WrapText}} {
+		t.Run(wrap.name, func(t *testing.T) {
+			assert.Equal(t, "ab\n"+thumbsUp+"\ncd", wrap.fn("ab"+thumbsUp+"cd", 4))
+			assert.Equal(t, "a\n"+family, wrap.fn("a"+family, 6))
+			assert.Equal(t, "ab\n"+flag+"c", wrap.fn("ab"+flag+"c", 3))
+			assert.Equal(t, "abc\ne\u0301d", wrap.fn("abce\u0301d", 3))
+			assert.Equal(t, "\x1b[31mab\x1b[0m\n\x1b[31m"+thumbsUp+"\x1b[0m\n\x1b[31mcd\x1b[0m",
+				wrap.fn("\x1b[31mab"+thumbsUp+"cd\x1b[0m", 4))
+			// wider than a whole line: split, to keep to the length
+			assert.Equal(t, "\U0001F468\u200D\n\U0001F469\u200D\n\U0001F467", wrap.fn(family, 3))
+			assert.Equal(t, "a\U0001F44D\n\U0001F3FDb", wrap.fn("a"+thumbsUp+"b", 3))
+		})
+	}
+}
+
 func TestWrap_WideRunesNeverExceedWrapLen(t *testing.T) {
 	wrapFuncs := map[string]func(string, int) string{
 		"WrapHard": WrapHard,

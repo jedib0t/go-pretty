@@ -100,6 +100,32 @@ func TestNewNumberTransformerMinInt64(t *testing.T) {
 	}
 }
 
+func TestNewNumberTransformerSign(t *testing.T) {
+	// a number gets one sign, even when the format asks for one
+	for _, test := range []struct {
+		format   string
+		value    interface{}
+		expected string
+	}{
+		{"%+d", -5, "-5"},
+		{"%+d", 5, "+5"},
+		{"%+d", 0, "+0"},
+		{"% d", -5, "-5"},
+		{"% d", 5, " 5"},
+		{"%+.2f", -5.5, "-5.50"},
+		{"%+.2f", 5.5, "+5.50"},
+		{"%+05d", -5, "-00005"},
+		{"%-+4d|", -5, "-5   |"},
+		{"%+d%%", -5, "-5%"},
+		{"%+d%%", 5, "+5%"},
+		{"%d%% +", -5, "-5% +"},
+	} {
+		t.Run(fmt.Sprintf("%s/%v", test.format, test.value), func(t *testing.T) {
+			assert.Equal(t, test.expected, StripEscape(NewNumberTransformer(test.format)(test.value)))
+		})
+	}
+}
+
 type jsonTest struct {
 	Foo string       `json:"foo"`
 	Bar int32        `json:"bar"`
@@ -216,6 +242,16 @@ func TestNewTimeTransformer(t *testing.T) {
 	// Test with nil location
 	transformer = NewTimeTransformer(time.RFC3339, nil)
 	assert.Equal(t, "2010-11-12T13:14:15-07:00", transformer(inTime))
+
+	// a time before the epoch is a value like any other
+	transformer = NewTimeTransformer(time.RFC3339, time.UTC)
+	assert.Equal(t, "1960-01-01T00:00:00Z", transformer(time.Date(1960, time.January, 1, 0, 0, 0, 0, time.UTC)))
+	assert.Equal(t, "1969-12-31T23:59:59Z", transformer(time.Unix(-1, 0)))
+	assert.Equal(t, "1955-02-24T10:30:00Z", transformer("1955-02-24T10:30:00Z"))
+	assert.Equal(t, "1970-01-01T00:00:00.5Z", NewTimeTransformer(time.RFC3339Nano, time.UTC)(time.Unix(0, 500000000)))
+	// the zero value and the epoch are a time that was never set
+	assert.Equal(t, "", transformer(time.Time{}))
+	assert.Equal(t, "", transformer(time.Unix(0, 0)))
 }
 
 func TestNewUnixTimeTransformer(t *testing.T) {
@@ -255,6 +291,21 @@ func TestNewUnixTimeTransformer(t *testing.T) {
 	assert.Equal(t, expected, transformer(inUnixTime*1000000000), "nanoseconds")
 
 	assert.Equal(t, "0.123456", transformer(float32(0.123456)))
+
+	// timestamps before the epoch, in every unit
+	transformer = NewUnixTimeTransformer(time.RFC3339, time.UTC)
+	inUnixTime = time.Date(1955, time.February, 24, 10, 30, 0, 0, time.UTC).Unix()
+	expected = "1955-02-24T10:30:00Z"
+	assert.Equal(t, expected, transformer(fmt.Sprint(inUnixTime)), "seconds in string")
+	assert.Equal(t, expected, transformer(inUnixTime), "seconds")
+	assert.Equal(t, expected, transformer(inUnixTime*1000), "milliseconds")
+	assert.Equal(t, expected, transformer(inUnixTime*1000000), "microseconds")
+	assert.Equal(t, expected, transformer(inUnixTime*1000000000), "nanoseconds")
+	assert.Equal(t, "1969-12-31T23:59:59Z", transformer(int64(-1)))
+	assert.Equal(t, "1677-09-21T00:12:43Z", transformer(int64(math.MinInt64)))
+	// the epoch is a time that was never set
+	assert.Equal(t, "", transformer(int64(0)))
+	assert.Equal(t, "", transformer("0"))
 }
 
 func TestNewUnixTimeTransformerSubseconds(t *testing.T) {
@@ -267,6 +318,19 @@ func TestNewUnixTimeTransformerSubseconds(t *testing.T) {
 			assert.Equal(t, expected, transformer(timestamp))
 			assert.Equal(t, expected, transformer(fmt.Sprint(timestamp)))
 		})
+	}
+
+	// before the epoch, the fraction counts back from the second after it
+	for _, test := range []struct {
+		timestamp int64
+		expected  string
+	}{
+		{-15000000500, "1969-07-11T09:19:59.5Z"},
+		{-15000000000500, "1969-07-11T09:19:59.9995Z"},
+		{-15000000000000500, "1969-07-11T09:19:59.9999995Z"},
+	} {
+		assert.Equal(t, test.expected, transformer(test.timestamp))
+		assert.Equal(t, test.expected, transformer(fmt.Sprint(test.timestamp)))
 	}
 }
 
