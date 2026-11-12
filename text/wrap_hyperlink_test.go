@@ -137,3 +137,38 @@ func TestWrapHyperlinkParagraphs(t *testing.T) {
 		}
 	}
 }
+
+func TestWrapHyperlinkWideRunes(t *testing.T) {
+	link := func(s string) string { return Hyperlink("https://example.com/x", s) }
+	lines := func(labels ...string) string {
+		for idx, label := range labels {
+			labels[idx] = link(label)
+		}
+		return strings.Join(labels, "\n")
+	}
+	for _, wrap := range []struct {
+		name string
+		fn   func(string, int) string
+	}{{"hard", WrapHard}, {"soft", WrapSoft}, {"text", WrapText}} {
+		t.Run(wrap.name, func(t *testing.T) {
+			// a wide rune that does not fit in what is left of the line moves
+			// to the next line instead of overflowing this one
+			assert.Equal(t, lines("生", "命", "生", "命", "生", "命"), wrap.fn(link("生命生命生命"), 3))
+			assert.Equal(t, lines("生命", "生命", "生命"), wrap.fn(link("生命生命生命"), 4))
+			assert.Equal(t, lines("a生", "命b"), wrap.fn(link("a生命b"), 3))
+			assert.Equal(t, lines("ab", "生", "命c"), wrap.fn(link("ab生命c"), 3))
+			// a rune wider than the line gets a line of its own
+			assert.Equal(t, lines("生", "命"), wrap.fn(link("生命"), 1))
+			// a link that begins with a wide rune that does not fit begins on
+			// the next line
+			assert.Equal(t, "ab\n"+lines("生", "命"), wrap.fn("ab"+link("生命"), 3))
+			assert.Equal(t, "ab"+lines("c", "生"), wrap.fn("ab"+link("c生"), 3))
+			// a zero-width rune stays with the rune it combines with
+			assert.Equal(t, lines("abc\u0301", "d"), wrap.fn(link("abc\u0301d"), 3))
+
+			for _, line := range strings.Split(wrap.fn(link("生命 a生命b 生命生命"), 5), "\n") {
+				assert.LessOrEqual(t, StringWidthWithoutEscSequences(line), 5, "line=%q", line)
+			}
+		})
+	}
+}

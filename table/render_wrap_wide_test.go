@@ -42,3 +42,38 @@ func TestTable_Render_WidthMax_WideRunes(t *testing.T) {
 		})
 	}
 }
+
+// TestTable_Render_WidthMax_WideRunes_Hyperlink ensures the same for wide
+// content that is the label of a hyperlink.
+func TestTable_Render_WidthMax_WideRunes_Hyperlink(t *testing.T) {
+	for _, enforcer := range []struct {
+		name string
+		fn   WidthEnforcer
+	}{
+		{"default", nil},
+		{"WrapHard", text.WrapHard},
+		{"WrapSoft", text.WrapSoft},
+		{"WrapText", text.WrapText},
+	} {
+		t.Run(enforcer.name, func(t *testing.T) {
+			tw := NewWriter()
+			tw.AppendRow(Row{text.Hyperlink("https://example.com/x", "生命生命生命"), "x"})
+			tw.SetColumnConfigs([]ColumnConfig{{Number: 1, WidthMax: 3, WidthMaxEnforcer: enforcer.fn}})
+
+			out := tw.Render()
+			compareOutput(t, text.StripEscape(out), `
++-----+---+
+| 生  | x |
+| 命  |   |
+| 生  |   |
+| 命  |   |
+| 生  |   |
+| 命  |   |
++-----+---+`)
+			assert.Equal(t, 6, strings.Count(out, "https://example.com/x"))
+			for _, line := range strings.Split(out, "\n") {
+				assert.Equal(t, 11, text.StringWidthWithoutEscSequences(line), "line=%q", line)
+			}
+		})
+	}
+}
