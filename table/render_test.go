@@ -213,6 +213,32 @@ func TestTable_Render_AutoIndex(t *testing.T) {
 └────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘`)
 }
 
+func TestTable_Render_AutoIndexEmptyColumns(t *testing.T) {
+	// a column is as wide as the ID it gets for a header (A, B, C, ...) at
+	// the least, even when it has no content at all
+	tw := NewWriter()
+	tw.SetAutoIndex(true)
+	tw.AppendRow(Row{"", "x"})
+	tw.AppendRow(Row{"", "y"})
+	compareOutput(t, tw.Render(), `
++---+---+---+
+|   | A | B |
++---+---+---+
+| 1 |   | x |
+| 2 |   | y |
++---+---+---+`)
+
+	tw = NewWriter()
+	tw.SetAutoIndex(true)
+	tw.AppendFooter(Row{"", "Total"})
+	compareOutput(t, tw.Render(), `
++---+---+-------+
+|   | A |   B   |
++---+---+-------+
+|   |   | TOTAL |
++---+---+-------+`)
+}
+
 func TestTable_Render_AutoIndexWidePadding(t *testing.T) {
 	// The auto-index separator must be as wide as the auto-index data cells,
 	// so the padding has to be charged in display columns like everywhere else.

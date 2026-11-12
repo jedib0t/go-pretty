@@ -207,6 +207,10 @@ func (t *Table) initForRenderColumnLengths() {
 	t.maxColumnLengths = make([]int, t.numColumns)
 	t.maxMergedColumnLengths = make(map[int]map[int]int)
 	t.extractMaxColumnLengths(t.rowsHeader, renderHint{isHeaderRow: true})
+	if t.autoIndex && len(t.rowsHeader) == 0 {
+		// the IDs of the columns (A, B, C, ...) get rendered as the header
+		t.extractMaxColumnLengths([]rowStr{t.getAutoIndexColumnIDs()}, renderHint{isAutoIndexRow: true, isHeaderRow: true})
+	}
 	t.extractMaxColumnLengths(t.rows, renderHint{})
 	t.extractMaxColumnLengths(t.rowsFooter, renderHint{isFooterRow: true})
 
