@@ -53,7 +53,7 @@ func (w *hyperlinkWrapper) paragraph(paragraph string, soft bool) {
 			w.lineLen++
 		}
 		w.word(word)
-		if w.lineLen == w.width && idx < len(words)-1 {
+		if w.lineLen >= w.width && idx < len(words)-1 {
 			w.newline(true)
 		}
 	}
@@ -86,7 +86,7 @@ func (w *hyperlinkWrapper) word(word string) {
 			if strings.HasPrefix(token, escapeStartConcealOSI) {
 				uri, end, complete := hyperlinkTarget(token)
 				if complete {
-					if uri != "" && w.lineLen >= w.width && hyperlinkWordWidth(word) > 0 {
+					if uri != "" && w.overflows(hyperlinkRuneWidth(word)) {
 						w.newline(false)
 					}
 					if uri == "" {
@@ -101,13 +101,21 @@ func (w *hyperlinkWrapper) word(word string) {
 			w.out.WriteString(token)
 			continue
 		}
-		if w.lineLen >= w.width {
+		r, _ := utf8.DecodeRuneInString(token)
+		runeWidth := RuneWidth(r)
+		if w.overflows(runeWidth) {
 			w.newline(false)
 		}
 		w.out.WriteString(token)
-		r, _ := utf8.DecodeRuneInString(token)
-		w.lineLen += RuneWidth(r)
+		w.lineLen += runeWidth
 	}
+}
+
+// overflows returns true if a rune of the given width does not fit in what is
+// left of the line. A rune that is wider than a whole line can never fit, so it
+// is left to overflow a line of its own; and a zero-width rune always fits.
+func (w *hyperlinkWrapper) overflows(runeWidth int) bool {
+	return runeWidth > 0 && w.lineLen > 0 && w.lineLen+runeWidth > w.width
 }
 
 func (w *hyperlinkWrapper) closeFormatting() {
@@ -203,6 +211,20 @@ func hyperlinkWordWidth(word string) int {
 		}
 	}
 	return width
+}
+
+// hyperlinkRuneWidth returns the width of the first visible rune in word, or 0
+// if there is none.
+func hyperlinkRuneWidth(word string) int {
+	for len(word) > 0 {
+		token, rest, escape := hyperlinkToken(word)
+		if !escape {
+			r, _ := utf8.DecodeRuneInString(token)
+			return RuneWidth(r)
+		}
+		word = rest
+	}
+	return 0
 }
 
 func hyperlinkToken(str string) (token, rest string, escape bool) {
