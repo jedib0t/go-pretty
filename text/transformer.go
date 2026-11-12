@@ -193,25 +193,34 @@ func NewURLTransformer(colors ...Color) Transformer {
 }
 
 func formatTime(t time.Time, layout string, location *time.Location) string {
-	rsp := ""
-	if t.Unix() > 0 {
-		if location != nil {
-			t = t.In(location)
-		}
-		rsp = t.Format(layout)
+	// the zero value and the epoch are what a time that was never set looks
+	// like; any other time, before or after the epoch, is a value
+	if t.IsZero() || t.Equal(time.Unix(0, 0)) {
+		return ""
 	}
-	return rsp
+	if location != nil {
+		t = t.In(location)
+	}
+	return t.Format(layout)
 }
 
 func formatTimeUnix(unixTime int64, timeTransformer Transformer) string {
+	// find the unit from the magnitude, so that a timestamp before the epoch
+	// (a negative one) is read the same way as one after it
+	magnitude := uint64(unixTime)
+	if unixTime < 0 {
+		magnitude = -magnitude
+	}
 	unitsPerSecond := int64(1)
-	if unixTime >= unixTimeMinNanoSeconds {
+	if magnitude >= uint64(unixTimeMinNanoSeconds) {
 		unitsPerSecond = nanosPerSecond
-	} else if unixTime >= unixTimeMinMicroseconds {
+	} else if magnitude >= uint64(unixTimeMinMicroseconds) {
 		unitsPerSecond = microsPerSecond
-	} else if unixTime >= unixTimeMinMilliseconds {
+	} else if magnitude >= uint64(unixTimeMinMilliseconds) {
 		unitsPerSecond = millisPerSecond
 	}
+	// the remainder is negative for a negative timestamp, which time.Unix
+	// takes away from the seconds as it should
 	seconds := unixTime / unitsPerSecond
 	nanoseconds := (unixTime % unitsPerSecond) * (nanosPerSecond / unitsPerSecond)
 	return timeTransformer(time.Unix(seconds, nanoseconds))
