@@ -348,58 +348,82 @@ func Trim(str string, maxLen int) string {
 	var out strings.Builder
 	out.Grow(maxLen)
 
-	// every byte of an ASCII string is a grapheme cluster of its own (except
-	// "\r\n", which is zero-width and so can never be split by the width
-	// check below), which makes it possible to skip the slower segmentation
-	outLen, esp, state, ascii := 0, EscSeqParser{}, -1, isASCII(str)
-	for len(str) > 0 {
-		var cluster string
-		if ascii {
-			cluster, str = str[:1], str[1:]
-		} else {
-			cluster, str, _, state = uniseg.StepString(str, state)
-		}
-		for idx, sChr := range cluster {
-			if esp.InSequence() {
-				esp.Consume(sChr)
-				out.WriteRune(sChr)
-				continue
-			}
+	outLen, esp := 0, EscSeqParser{}
+	for idx := 0; idx < len(str); {
+		// Escape sequences are copied as they are. ESC is a control character,
+		// which always forms a grapheme cluster of its own, so no escape
+		// sequence can start inside a cluster.
+		if esp.InSequence() || str[idx] == byte(EscapeStartRune) {
+			sChr, size := utf8.DecodeRuneInString(str[idx:])
 			esp.Consume(sChr)
-			if esp.InSequence() {
-				out.WriteRune(sChr)
-				continue
-			}
-			// sChr starts the visible part of the cluster; ESC is a control
-			// character, which always forms a cluster of its own, so no
-			// escape sequence can start further inside this cluster.
-			//
-			// Count the display width of the whole cluster (wide East Asian
-			// characters occupy two columns) instead of counting runes, so the
-			// result never exceeds maxLen columns and never ends in the middle
-			// of a grapheme cluster (like an emoji built with zero-width
-			// joiners).
-			visible := cluster[idx:]
-			if w := StringWidthWithoutEscSequences(visible); outLen+w <= maxLen {
-				outLen += w
-				out.WriteString(visible)
-				break
-			}
+			out.WriteRune(sChr)
+			idx += size
+			continue
+		}
+
+		// Count the display width of the whole grapheme cluster (wide East
+		// Asian characters occupy two columns) instead of counting runes, so
+		// the result never exceeds maxLen columns and never ends in the middle
+		// of a cluster (like an emoji built with zero-width joiners).
+		size, clusterWidth := 1, 0
+		if idx+1 < len(str) && str[idx] < utf8.RuneSelf && str[idx+1] < utf8.RuneSelf {
+			// hot path: an ASCII character followed by another one is always
+			// a cluster of its own; see isStandaloneRune
+			clusterWidth = RuneWidth(rune(str[idx]))
+		} else {
+			size, clusterWidth = trimCluster(str[idx:])
+		}
+		if outLen+clusterWidth > maxLen {
 			// The cluster no longer fits: stop emitting visible text, but
 			// keep copying any trailing escape sequences.
-			return out.String() + trailingEscSequences(str, &esp)
+			return out.String() + trailingEscSequences(str[idx+size:], &esp)
 		}
+		outLen += clusterWidth
+		out.WriteString(str[idx : idx+size])
+		idx += size
 	}
 	return out.String()
 }
 
-func isASCII(str string) bool {
-	for i := 0; i < len(str); i++ {
-		if str[i] >= utf8.RuneSelf {
-			return false
+// isStandaloneRune returns true for the runes that form a grapheme cluster of
+// their own whenever the rune that follows is a standalone rune too: ASCII,
+// CJK punctuation and ideographs, Kana, and precomposed Hangul syllables.
+//
+// "\r\n" is the one pair that is a single cluster instead; both are
+// zero-width, so a width check can never separate them.
+func isStandaloneRune(r rune) bool {
+	return r < utf8.RuneSelf ||
+		(r >= 0x3001 && r <= 0x3002) || // Ideographic comma and full stop
+		(r >= 0x3041 && r <= 0x3096) || // Hiragana
+		(r >= 0x30A1 && r <= 0x30FA) || // Katakana
+		(r >= 0x4E00 && r <= 0x9FFF) || // CJK Unified Ideographs
+		(r >= 0xAC00 && r <= 0xD7A3) // Hangul Syllables
+}
+
+// trimCluster returns the size in bytes and the display width of the grapheme
+// cluster at the beginning of str, which must not be empty.
+func trimCluster(str string) (int, int) {
+	sChr, size := rune(str[0]), 1
+	if sChr >= utf8.RuneSelf {
+		sChr, size = utf8.DecodeRuneInString(str)
+	}
+	// Segmenting text into grapheme clusters is slow; skip it for the common
+	// case of a standalone rune followed by another standalone rune.
+	if isStandaloneRune(sChr) {
+		if size == len(str) || str[size] < utf8.RuneSelf {
+			return size, RuneWidth(sChr)
+		}
+		if next, _ := utf8.DecodeRuneInString(str[size:]); isStandaloneRune(next) {
+			return size, RuneWidth(sChr)
 		}
 	}
-	return true
+
+	cluster, _, _, _ := uniseg.FirstGraphemeClusterInString(str, -1)
+	clusterWidth := 0
+	for _, c := range cluster {
+		clusterWidth += RuneWidth(c)
+	}
+	return len(cluster), clusterWidth
 }
 
 // trailingEscSequences returns only the escape sequences found in str, in
