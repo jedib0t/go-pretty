@@ -297,6 +297,105 @@ func TestTable_Render_AutoMerge_Wrap(t *testing.T) {
 +------------+----------+`)
 	})
 
+	t.Run("merged column enforcer does not re-flow stacked values", func(t *testing.T) {
+		tw := newMergedTable(10)
+		tw.AppendRow(Row{"Eng", "x"})
+		tw.AppendRow(Row{"Ops", "y"})
+		tw.AppendRow(Row{"Sales", "z"})
+
+		compareOutput(t, tw.Render(), `
++-------+----+
+| C1    | C2 |
++-------+----+
+| Eng   | x  |
+| Ops   | y  |
+| Sales | z  |
++-------+----+`)
+	})
+
+	t.Run("stacked column enforcer does not re-flow stacked values", func(t *testing.T) {
+		tw := NewWriter()
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Name: "C1", AutoMerge: true},
+			{Name: "C2", WidthMax: 10, WidthMaxEnforcer: text.WrapSoft},
+		})
+		tw.AppendHeader(Row{"C1", "C2"})
+		tw.AppendRow(Row{"Eng", "Alice"})
+		tw.AppendRow(Row{"Eng", "Bob"})
+		tw.AppendRow(Row{"Ops", "Carol"})
+
+		compareOutput(t, tw.Render(), `
++-----+-------+
+| C1  | C2    |
++-----+-------+
+| Eng | Alice |
+|     | Bob   |
+| Ops | Carol |
++-----+-------+`)
+	})
+
+	t.Run("group continuing a merge from above keeps its values", func(t *testing.T) {
+		tw := NewWriter()
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Name: "C1", AutoMerge: true},
+			{Name: "C2", WidthMax: 6},
+		})
+		tw.AppendHeader(Row{"C1", "C2"})
+		tw.AppendRow(Row{"Eng", "two words"})
+		tw.AppendRow(Row{"Eng", "b"})
+		tw.AppendRow(Row{"Ops", "c"})
+
+		// the first row wraps and renders alone; "Eng" continues into the next
+		// row, so stacking the last two rows would blank "Ops" as well
+		compareOutput(t, tw.Render(), `
++-----+--------+
+| C1  | C2     |
++-----+--------+
+| Eng | two wo |
+|     | rds    |
+|     | b      |
+| Ops | c      |
++-----+--------+`)
+	})
+
+	t.Run("rows merging cells horizontally are not stacked", func(t *testing.T) {
+		tw := NewWriter()
+		tw.SetColumnConfigs([]ColumnConfig{{Name: "C1", AutoMerge: true}})
+		tw.AppendHeader(Row{"C1", "C2", "C3"})
+		tw.AppendRow(Row{"k", "x", "x"}, RowConfig{AutoMerge: true})
+		tw.AppendRow(Row{"k", "y", "z"}, RowConfig{AutoMerge: true})
+
+		compareOutput(t, tw.Render(), `
++----+----+----+
+| C1 | C2 | C3 |
++----+----+----+
+| k  |    x    |
+|    | y  | z  |
++----+----+----+`)
+	})
+
+	t.Run("stacked column VAlign does not move values off their rows", func(t *testing.T) {
+		tw := NewWriter()
+		tw.SetColumnConfigs([]ColumnConfig{
+			{Name: "C1", AutoMerge: true, WidthMax: 10, WidthMaxEnforcer: text.WrapSoft},
+			{Name: "C2"},
+			{Name: "C3", VAlign: text.VAlignBottom},
+		})
+		tw.AppendHeader(Row{"C1", "C2", "C3"})
+		tw.AppendRow(Row{"very long row value that wraps", "x", "1"})
+		tw.AppendRow(Row{"very long row value that wraps", "y", "2"})
+
+		compareOutput(t, tw.Render(), `
++------------+----+----+
+| C1         | C2 | C3 |
++------------+----+----+
+| very long  | x  |    |
+| row value  |    |    |
+| that wraps |    | 1  |
+|            | y  | 2  |
++------------+----+----+`)
+	})
+
 	t.Run("gated off when rows are separated", func(t *testing.T) {
 		tw := newMergedTable(10)
 		tw.SetStyle(StyleLight)
