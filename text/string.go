@@ -178,7 +178,10 @@ func ProcessCRLF(str string) string {
 	return strings.Join(lines, "\n")
 }
 
-// RepeatAndTrim repeats the given string until it is as long as maxRunes.
+// RepeatAndTrim repeats the given string until it is maxRunes display columns
+// wide. Escape sequences are ignored while measuring, and the ones found before
+// and after the text are used just once, around the repeated text. The result
+// can be narrower than maxRunes if a wide character does not fit in the end.
 // For ex.:
 //
 //	RepeatAndTrim("", 5) == ""
@@ -186,14 +189,55 @@ func ProcessCRLF(str string) string {
 //	RepeatAndTrim("Ghost", 5) == "Ghost"
 //	RepeatAndTrim("Ghost", 7) == "GhostGh"
 //	RepeatAndTrim("Ghost", 10) == "GhostGhost"
+//	RepeatAndTrim("\x1b[33mGhost\x1b[0m", 7) == "\x1b[33mGhostGh\x1b[0m"
+//	RepeatAndTrim("生命", 5) == "生命"
 func RepeatAndTrim(str string, maxRunes int) string {
-	if str == "" || maxRunes == 0 {
+	if str == "" || maxRunes <= 0 {
 		return ""
-	} else if maxRunes == utf8.RuneCountInString(str) {
+	}
+	if !strings.ContainsRune(str, EscapeStartRune) {
+		return repeatAndTrim(str, maxRunes)
+	}
+
+	// split the string into the escape sequences leading up to the text, the
+	// text, and the escape sequences trailing it
+	textBegin, textEnd, esp := -1, 0, EscSeqParser{skipParse: true}
+	for idx := 0; idx < len(str); {
+		c, size := utf8.DecodeRuneInString(str[idx:])
+		idx += size
+		if esp.InSequence() || c == EscapeStartRune {
+			esp.Consume(c)
+			continue
+		}
+		if textBegin < 0 {
+			textBegin = idx - size
+		}
+		textEnd = idx
+	}
+	if textBegin < 0 { // nothing but escape sequences
 		return str
 	}
-	repeatedS := strings.Repeat(str, int(maxRunes/utf8.RuneCountInString(str))+1)
-	return Trim(repeatedS, maxRunes)
+	prefix, text, suffix := str[:textBegin], str[textBegin:textEnd], str[textEnd:]
+	if strings.ContainsRune(text, EscapeStartRune) {
+		// escape sequences within the text change how the text after them is
+		// rendered, so every copy needs the leading escape sequences again
+		prefix, text = "", str[:textEnd]
+	}
+	return prefix + repeatAndTrim(text, maxRunes) + suffix
+}
+
+// repeatAndTrim repeats the given string until it is maxLen display columns
+// wide, with its escape sequences repeated along with it.
+func repeatAndTrim(str string, maxLen int) string {
+	strWidth := StringWidthWithoutEscSequences(str)
+	if strWidth == 0 || strWidth == maxLen {
+		return str
+	}
+	if maxLen%strWidth == 0 {
+		// whole copies add up to the width exactly; there is nothing to trim
+		return strings.Repeat(str, maxLen/strWidth)
+	}
+	return Trim(strings.Repeat(str, maxLen/strWidth+1), maxLen)
 }
 
 // RuneCount is similar to utf8.RuneCountInString, except for the fact that it
@@ -393,19 +437,37 @@ func Trim(str string, maxLen int) string {
 	return out.String()
 }
 
+// standaloneRuneRanges are the ranges of non-ASCII runes that isStandaloneRune
+// returns true for.
+var standaloneRuneRanges = [...][2]rune{
+	{0x4E00, 0x9FFF}, // CJK Unified Ideographs
+	{0x3041, 0x3096}, // Hiragana
+	{0x30A1, 0x30FA}, // Katakana
+	{0x3001, 0x3002}, // Ideographic comma and full stop
+	{0xAC00, 0xD7A3}, // Hangul Syllables
+	{0x2500, 0x259F}, // Box Drawing and Block Elements
+	{0x00AE, 0x02FF}, // Latin-1 Supplement (after the soft hyphen) to Spacing Modifier Letters
+	{0x00A0, 0x00AC}, // Latin-1 Supplement (before the soft hyphen)
+	{0x0370, 0x0482}, // Greek and Cyrillic (before the combining marks)
+	{0x048A, 0x052F}, // Cyrillic (after the combining marks) and its supplement
+}
+
 // isStandaloneRune returns true for the runes that form a grapheme cluster of
-// their own whenever the rune that follows is a standalone rune too: ASCII,
-// CJK punctuation and ideographs, Kana, and precomposed Hangul syllables.
+// their own whenever the rune that follows is a standalone rune too: ASCII and
+// the runes in standaloneRuneRanges.
 //
 // "\r\n" is the one pair that is a single cluster instead; both are
 // zero-width, so a width check can never separate them.
 func isStandaloneRune(r rune) bool {
-	return r < utf8.RuneSelf ||
-		(r >= 0x3001 && r <= 0x3002) || // Ideographic comma and full stop
-		(r >= 0x3041 && r <= 0x3096) || // Hiragana
-		(r >= 0x30A1 && r <= 0x30FA) || // Katakana
-		(r >= 0x4E00 && r <= 0x9FFF) || // CJK Unified Ideographs
-		(r >= 0xAC00 && r <= 0xD7A3) // Hangul Syllables
+	if r < utf8.RuneSelf {
+		return true
+	}
+	for _, runeRange := range standaloneRuneRanges {
+		if r >= runeRange[0] && r <= runeRange[1] {
+			return true
+		}
+	}
+	return false
 }
 
 // trimCluster returns the size in bytes and the display width of the grapheme

@@ -247,6 +247,27 @@ func TestRepeatAndTrim(t *testing.T) {
 	assert.Equal(t, "GhostGh", RepeatAndTrim("Ghost", 7))
 	assert.Equal(t, "GhostGhost", RepeatAndTrim("Ghost", 10))
 	assert.Equal(t, "───", RepeatAndTrim("─", 3))
+	assert.Equal(t, "", RepeatAndTrim("Ghost", -5))
+	// the display width is what counts, not the number of runes
+	assert.Equal(t, "生命生", RepeatAndTrim("生命", 6))
+	assert.Equal(t, "生命", RepeatAndTrim("生命", 5))
+	assert.Equal(t, "", RepeatAndTrim("生", 1))
+	assert.Equal(t, "e\u0301e\u0301e\u0301", RepeatAndTrim("e\u0301", 3))
+	assert.Equal(t, "\u0301", RepeatAndTrim("\u0301", 5))
+	// escape sequences around the text are used once, around the repeated text
+	assert.Equal(t, "\x1b[31mxxxxx\x1b[0m", RepeatAndTrim("\x1b[31mx\x1b[0m", 5))
+	assert.Equal(t, "\x1b[31mxy\x1b[0m", RepeatAndTrim("\x1b[31mxyz\x1b[0m", 2))
+	assert.Equal(t, "\x1b[31mxyz\x1b[0m", RepeatAndTrim("\x1b[31mxyz\x1b[0m", 3))
+	assert.Equal(t, "\x1b[31mxyzxyzx\x1b[0m", RepeatAndTrim("\x1b[31mxyz\x1b[0m", 7))
+	assert.Equal(t, "\x1b[31mababa", RepeatAndTrim("\x1b[31mab", 5))
+	assert.Equal(t, "aba\x1b[0m", RepeatAndTrim("ab\x1b[0m", 3))
+	assert.Equal(t, "\x1b[31m\x1b[0m", RepeatAndTrim("\x1b[31m\x1b[0m", 5))
+	assert.Equal(t, "\x1b]8;;http://example.com\x1b\\GhostGh\x1b]8;;\x1b\\",
+		RepeatAndTrim("\x1b]8;;http://example.com\x1b\\Ghost\x1b]8;;\x1b\\", 7))
+	// escape sequences within the text are repeated along with the text
+	assert.Equal(t, "\x1b[31ma\x1b[34mb\x1b[31ma\x1b[34mb\x1b[31ma\x1b[34m\x1b[0m",
+		RepeatAndTrim("\x1b[31ma\x1b[34mb\x1b[0m", 5))
+	assert.Equal(t, "\x1b[31ma\x1b[34mb\x1b[0m", RepeatAndTrim("\x1b[31ma\x1b[34mb\x1b[0m", 2))
 }
 
 func ExampleRuneCount() {
@@ -495,7 +516,7 @@ func TestTrim_Segmentation(t *testing.T) {
 	}
 
 	pieces := []string{
-		"a", "b", " ", "Ghost", "\t", "\r\n", "e\u0301", "\u0301", "\u200d", "\u0600", "─", "\xff",
+		"a", "b", " ", "Ghost", "\t", "\r\n", "e\u0301", "é", "я", "©", "\u0301", "\u200d", "\u0600", "─", "\xff",
 		"生", "命", "ツ", "、", "あ", "か\u3099", "ー", "ｶﾞ", "한", "가\u11a8", "\u1100\u1161\u11a8", "क्षि",
 		"\U0001F468\u200D\U0001F469\u200D\U0001F467", "\U0001F1E9\U0001F1EA", "\U0001F44D\U0001F3FD", "\u2764\ufe0f",
 		"\x1b[33m", "\x1b[0m", "\x1b[1;38;5;208m", "\x1b[K", "\x1b[3", "\x1b",
@@ -520,8 +541,10 @@ func TestTrim_StandaloneRunes(t *testing.T) {
 	assert.False(t, isStandaloneRune('ー'))
 	assert.False(t, isStandaloneRune('\u0301'))
 	assert.False(t, isStandaloneRune('\U0001F467'))
+	assert.False(t, isStandaloneRune('\u00ad')) // soft hyphen
+	assert.False(t, isStandaloneRune('\u0483')) // combining Cyrillic titlo
 
-	samples := []rune{'a', ' ', '\n', '\r', '\x1b', '\x7f', '、', 'あ', 'ア', '生', '한'}
+	samples := []rune{'a', ' ', '\n', '\r', '\x1b', '\x7f', '、', 'あ', 'ア', '生', '한', '─', '█', '©', 'é', 'ʰ', 'λ', 'я'}
 	for r := rune(0); r <= 0xD7A3; r++ {
 		if !isStandaloneRune(r) {
 			continue
