@@ -56,6 +56,30 @@ func TestStripEscape_Hyperlinks(t *testing.T) {
 	}
 }
 
+func TestStripEscape_CursorSequences(t *testing.T) {
+	// the Cursor type of this package emits sequences that end in a byte other
+	// than "m"; none of them is printable text
+	for _, test := range []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"erase line", EraseLine.Sprint() + "Ghost", "Ghost"},
+		{"cursor up repeated", CursorUp.Sprintn(3) + "Ghost", "Ghost"},
+		{"cursor down", "Ghost" + CursorDown.Sprint(), "Ghost"},
+		{"cursor left repeated", "Ghost" + CursorLeft.Sprintn(2), "Ghost"},
+		{"cursor right", "Ghost" + CursorRight.Sprint(), "Ghost"},
+		{"cursor position", "Ghost\x1b[2;3H", "Ghost"},
+		{"surrounding text", "Ghost " + CursorUp.Sprint() + "Lady", "Ghost Lady"},
+		{"colour in force", FgHiBlue.Sprint("Ghost") + CursorUp.Sprint() + "Lady", "GhostLady"},
+		{"line erased between lines", "Ghost\n" + EraseLine.Sprint() + "Lady", "Ghost\nLady"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			assert.Equal(t, test.want, StripEscape(test.input))
+		})
+	}
+}
+
 func ExampleStripEscape() {
 	fmt.Printf("StripEscape(%#v) == %#v\n", "Ghost", StripEscape("Ghost"))
 	fmt.Printf("StripEscape(%#v) == %#v\n", "\x1b[91mGhost\x1b[0m", StripEscape("\x1b[91mGhost\x1b[0m"))

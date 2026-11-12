@@ -430,3 +430,33 @@ func TestEscSeqParser_ConsumeMalformedSequence(t *testing.T) {
 	}
 	assert.Equal(t, []int{1}, es.Codes())
 }
+
+func TestEscSeqParser_ControlSequences(t *testing.T) {
+	// the Cursor type of this package emits CSI sequences that end in a byte
+	// other than "m"; they must end the sequence without changing the state in
+	// force, and without swallowing the text that follows them
+	for _, test := range []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"erase line", EraseLine.Sprint(), ""},
+		{"cursor up", CursorUp.Sprint(), ""},
+		{"cursor down repeated", CursorDown.Sprintn(3), ""},
+		{"cursor left", CursorLeft.Sprint(), ""},
+		{"cursor right repeated", CursorRight.Sprintn(2), ""},
+		{"cursor position", "\x1b[2;3H", ""},
+		{"hide cursor", "\x1b[?25l", ""},
+		{"plain text after a cursor sequence", CursorUp.Sprint() + "Ghost", ""},
+		{"colour in force after a cursor sequence", "\x1b[31m" + CursorUp.Sprint(), "\x1b[31m"},
+		{"colour set after a cursor sequence", CursorUp.Sprint() + "\x1b[31m", "\x1b[31m"},
+		{"cursor sequence between two colours", "\x1b[31m" + EraseLine.Sprint() + "\x1b[1m", "\x1b[1;31m"},
+		{"reset after a cursor sequence", "\x1b[31m" + CursorUp.Sprint() + "\x1b[0m", ""},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			es := EscSeqParser{}
+			assert.Equal(t, test.want, es.ParseString(test.input))
+			assert.False(t, es.InSequence())
+		})
+	}
+}

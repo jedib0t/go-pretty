@@ -437,3 +437,30 @@ func TestWiden(t *testing.T) {
 	assert.Equal(t, "Ｇｈｏｓｔ　生命", Widen("Ghost 生命"))
 	assert.Equal(t, "\x1b[33mＧｈｏｓｔ　生命\x1b[0m", Widen("\x1b[33mGhost 生命\x1b[0m"))
 }
+
+func TestCursorSequences(t *testing.T) {
+	// the Cursor type of this package emits CSI sequences that end in a byte
+	// other than "m"; the helpers that measure, trim and pad text have to see
+	// them as escape sequences, not as printable text
+	cursorSeq, eraseSeq := CursorUp.Sprintn(3), EraseLine.Sprint()
+
+	assert.Equal(t, 3, StringWidthWithoutEscSequences(cursorSeq+"abc"))
+	assert.Equal(t, 3, StringWidthWithoutEscSequences(eraseSeq+"abc"))
+	assert.Equal(t, 0, StringWidthWithoutEscSequences(cursorSeq))
+	assert.Equal(t, 3, RuneCount(cursorSeq+"abc"))
+	assert.Equal(t, 3, RuneWidthWithoutEscSequences(cursorSeq+"abc"))
+
+	assert.Equal(t, 3, LongestLineLen(eraseSeq+"abc\ndef"))
+	assert.Equal(t, 3, LongestLineLen(eraseSeq+"abc\ndef\n\x1b[31mxy\x1b[0m"))
+	assert.Equal(t, 3, LongestLineLen(eraseSeq+"abc\n"+cursorSeq+"def"))
+
+	assert.Equal(t, eraseSeq+"abc", Pad(eraseSeq+"abc", 3, ' '))
+	assert.Equal(t, eraseSeq+"abc  ", Pad(eraseSeq+"abc", 5, ' '))
+
+	assert.Equal(t, eraseSeq+"abc", Trim(eraseSeq+"abcdef", 3))
+	// the sequences are kept while the visible text is trimmed
+	assert.Equal(t, eraseSeq+"abc"+cursorSeq, Trim(eraseSeq+"abc"+cursorSeq+"def", 3))
+	assert.Equal(t, cursorSeq+"abcd~", Snip(cursorSeq+"abcdef", 5, "~"))
+	assert.Equal(t, cursorSeq+"a-b-c", InsertEveryN(cursorSeq+"abc", '-', 1))
+	assert.Equal(t, cursorSeq+"ａｂｃ", Widen(cursorSeq+"abc"))
+}
