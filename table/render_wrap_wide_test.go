@@ -75,6 +75,47 @@ func TestTable_Render_WidthMax_WideRunes(t *testing.T) {
 	}
 }
 
+// TestTable_Render_WidthMax_MultiLine ensures that a column is wide enough for
+// content with many lines, after the enforcer has had a go at it: WrapHard and
+// WrapSoft join the lines before wrapping, and can end up with longer lines
+// than the content had to begin with.
+func TestTable_Render_WidthMax_MultiLine(t *testing.T) {
+	for _, enforcer := range []struct {
+		name     string
+		fn       WidthEnforcer
+		expected string
+	}{
+		{"default", nil, `
++----------+---+
+| line one | x |
+| line two |   |
++----------+---+`},
+		{"WrapHard", text.WrapHard, `
++------------+---+
+| line one l | x |
+| ine two    |   |
++------------+---+`},
+		{"WrapSoft", text.WrapSoft, `
++------------+---+
+| line one   | x |
+| line two   |   |
++------------+---+`},
+		{"WrapText", text.WrapText, `
++----------+---+
+| line one | x |
+| line two |   |
++----------+---+`},
+	} {
+		t.Run(enforcer.name, func(t *testing.T) {
+			tw := NewWriter()
+			tw.AppendRow(Row{"line one\nline two", "x"})
+			tw.SetColumnConfigs([]ColumnConfig{{Number: 1, WidthMax: 10, WidthMaxEnforcer: enforcer.fn}})
+
+			compareOutput(t, tw.Render(), enforcer.expected)
+		})
+	}
+}
+
 // TestTable_Render_WidthMax_WideRunes_Hyperlink ensures the same for wide
 // content that is the label of a hyperlink.
 func TestTable_Render_WidthMax_WideRunes_Hyperlink(t *testing.T) {

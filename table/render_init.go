@@ -64,8 +64,13 @@ func (t *Table) extractMaxColumnLengths(rows []rowStr, hint renderHint) {
 func (t *Table) extractMaxColumnLengthsFromRow(row rowStr, mci mergedColumnIndices) {
 	for colIdx := 0; colIdx < len(row); colIdx++ {
 		colStr := row[colIdx]
-		longestLineLen := text.LongestLineLen(colStr)
 		maxColWidth := t.getColumnWidthMax(colIdx)
+		if maxColWidth > 0 && strings.Contains(colStr, "\n") {
+			// the enforcer may join the lines of the text while wrapping it,
+			// and leave it with lines longer than the ones it came with
+			colStr = t.columnConfigMap[colIdx].getWidthMaxEnforcer()(colStr, maxColWidth)
+		}
+		longestLineLen := text.LongestLineLen(colStr)
 		if maxColWidth > 0 && maxColWidth < longestLineLen {
 			longestLineLen = maxColWidth
 		}
