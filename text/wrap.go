@@ -130,23 +130,28 @@ func appendChar(char rune, wrapLen int, lineLen *int, inEscSeq bool, lastSeenEsc
 }
 
 func appendWord(word string, lineIdx *int, lastSeenEscSeq string, wrapLen int, out *strings.Builder) {
-	inEscSeq := false
+	esp, escSeq := EscSeqParser{skipParse: true}, ""
 	for _, char := range word {
-		if char == EscapeStartRune {
-			inEscSeq = true
-			lastSeenEscSeq = ""
+		inEscSeq := esp.InSequence() || char == EscapeStartRune
+		if !esp.InSequence() {
+			escSeq = ""
 		}
-		if inEscSeq && len(lastSeenEscSeq) < escSeqMaxLength {
-			lastSeenEscSeq += string(char)
+		esp.Consume(char)
+		if inEscSeq && len(escSeq) < escSeqMaxLength {
+			escSeq += string(char)
 		}
 
 		appendChar(char, wrapLen, lineIdx, inEscSeq, lastSeenEscSeq, out)
 
-		if inEscSeq && char == EscapeStopRune {
-			inEscSeq = false
-		}
-		if lastSeenEscSeq == EscapeReset {
-			lastSeenEscSeq = ""
+		// A sequence that sets colors or attributes remains in force for the
+		// text after it, and has to be restarted on every new line. Any other
+		// sequence (moving the cursor, erasing the line, ...) is done once it
+		// has been written out.
+		if inEscSeq && !esp.InSequence() && strings.HasPrefix(escSeq, EscapeStartCSI) && strings.HasSuffix(escSeq, EscapeStopCSI) {
+			lastSeenEscSeq = escSeq
+			if lastSeenEscSeq == EscapeReset {
+				lastSeenEscSeq = ""
+			}
 		}
 	}
 }

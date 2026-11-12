@@ -73,6 +73,28 @@ func TestWrapHard(t *testing.T) {
 	assert.Equal(t, "世\n世\n世\n世\n世\n世", WrapHard("世世世世世世", 3))
 }
 
+// TestWrap_ControlSequences ensures that the sequences that move the cursor or
+// erase text are seen as escape sequences, like the ones that set colors, and
+// that only the latter are restarted on a new line.
+func TestWrap_ControlSequences(t *testing.T) {
+	eraseLine, cursorUp := EraseLine.Sprint(), CursorUp.Sprint()
+	for _, wrap := range []struct {
+		name string
+		fn   func(string, int) string
+	}{{"hard", WrapHard}, {"soft", WrapSoft}, {"text", WrapText}} {
+		t.Run(wrap.name, func(t *testing.T) {
+			assert.Equal(t, eraseLine+"abcd\nefgh", wrap.fn(eraseLine+"abcdefgh", 4))
+			assert.Equal(t, "\x1b[?25labcd\nef\x1b[2;3Hgh", wrap.fn("\x1b[?25labcdef\x1b[2;3Hgh", 4))
+			assert.Equal(t, "\x1b[31mab"+cursorUp+"cd\x1b[0m\n\x1b[31mefgh\x1b[0m",
+				wrap.fn("\x1b[31mab"+cursorUp+"cdefgh\x1b[0m", 4))
+
+			for _, line := range strings.Split(wrap.fn("ab "+eraseLine+"cdefghij "+cursorUp+"kl mnopqr", 4), "\n") {
+				assert.LessOrEqual(t, StringWidthWithoutEscSequences(line), 4, "line=%q", line)
+			}
+		})
+	}
+}
+
 func TestWrap_WideRunesNeverExceedWrapLen(t *testing.T) {
 	wrapFuncs := map[string]func(string, int) string{
 		"WrapHard": WrapHard,

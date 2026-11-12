@@ -77,3 +77,29 @@ func TestTable_Render_WidthMax_WideRunes_Hyperlink(t *testing.T) {
 		})
 	}
 }
+
+// TestTable_Render_WidthMax_ControlSequences ensures that content with
+// sequences that move the cursor or erase text is wrapped to WidthMax too.
+func TestTable_Render_WidthMax_ControlSequences(t *testing.T) {
+	for _, enforcer := range []struct {
+		name string
+		fn   WidthEnforcer
+	}{
+		{"default", nil},
+		{"WrapHard", text.WrapHard},
+		{"WrapSoft", text.WrapSoft},
+		{"WrapText", text.WrapText},
+	} {
+		t.Run(enforcer.name, func(t *testing.T) {
+			tw := NewWriter()
+			tw.AppendRow(Row{text.EraseLine.Sprint() + "abcdefgh", "x"})
+			tw.SetColumnConfigs([]ColumnConfig{{Number: 1, WidthMax: 4, WidthMaxEnforcer: enforcer.fn}})
+
+			compareOutput(t, text.StripEscape(tw.Render()), `
++------+---+
+| abcd | x |
+| efgh |   |
++------+---+`)
+		})
+	}
+}
