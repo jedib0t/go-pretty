@@ -33,7 +33,7 @@ func InsertEveryN(str string, runeToInsert rune, n int) string {
 
 	var out strings.Builder
 	out.Grow(len(str) + utf8.RuneLen(runeToInsert)*(len(str)/n))
-	lineLen, esp, state := 0, EscSeqParser{}, -1
+	lineLen, esp, state := 0, EscSeqParser{skipParse: true}, -1
 	for len(str) > 0 {
 		var cluster string
 		cluster, str, _, state = uniseg.StepString(str, state)
@@ -74,7 +74,7 @@ func InsertEveryN(str string, runeToInsert rune, n int) string {
 //
 //	LongestLineLen("Ghost!\nCome back here!\nRight now!") == 15
 func LongestLineLen(str string) int {
-	maxLength, currLength, esp := 0, 0, EscSeqParser{}
+	maxLength, currLength, esp := 0, 0, EscSeqParser{skipParse: true}
 	//fmt.Println(str)
 	for _, c := range str {
 		//fmt.Printf("%03d | %03d | %c | %5v | %v | %#v\n", idx, c, c, esp.inEscSeq, esp.Codes(), esp.escapeSeq)
@@ -228,6 +228,14 @@ func RuneCount(str string) int {
 // * https://github.com/jedib0t/go-pretty/issues/220
 // * https://github.com/jedib0t/go-pretty/issues/204
 func RuneWidth(r rune) int {
+	// ASCII is the common case, and needs none of the lookups below: printable
+	// characters are one column wide, control characters are zero.
+	if r < utf8.RuneSelf {
+		if r >= 0x20 && r < 0x7f {
+			return 1
+		}
+		return 0
+	}
 	if isSingleCellRune(r) {
 		return 1
 	}
@@ -315,7 +323,7 @@ func StringWidthWithoutEscSequences(str string) int {
 		return count
 	}
 
-	count, esp := 0, EscSeqParser{}
+	count, esp := 0, EscSeqParser{skipParse: true}
 	for _, c := range str {
 		if esp.InSequence() {
 			esp.Consume(c)
@@ -348,7 +356,7 @@ func Trim(str string, maxLen int) string {
 	var out strings.Builder
 	out.Grow(maxLen)
 
-	outLen, esp := 0, EscSeqParser{}
+	outLen, esp := 0, EscSeqParser{skipParse: true}
 	for idx := 0; idx < len(str); {
 		// Escape sequences are copied as they are. ESC is a control character,
 		// which always forms a grapheme cluster of its own, so no escape
@@ -453,7 +461,7 @@ func Widen(str string) string {
 	sb := strings.Builder{}
 	sb.Grow(len(str))
 
-	esp := EscSeqParser{}
+	esp := EscSeqParser{skipParse: true}
 	for _, c := range str {
 		if esp.InSequence() {
 			sb.WriteRune(c)

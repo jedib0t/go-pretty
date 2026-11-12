@@ -223,7 +223,7 @@ func hyperlinkToken(str string) (token, rest string, escape bool) {
 		}
 		return str, "", true
 	}
-	parser := EscSeqParser{}
+	parser := EscSeqParser{skipParse: true}
 	for idx, r := range str {
 		parser.Consume(r)
 		if !parser.InSequence() {
