@@ -54,7 +54,7 @@ func NewNumberTransformer(format string) Transformer {
 
 	transformInt64 := func(val int64) string {
 		if val < 0 {
-			return colorsNumberNegative.Sprintf(negFormat, -val)
+			return colorsNumberNegative.Sprintf(negFormat, -uint64(val))
 		}
 		if val > 0 {
 			return colorsNumberPositive.Sprintf(format, val)
