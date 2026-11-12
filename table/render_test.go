@@ -213,6 +213,32 @@ func TestTable_Render_AutoIndex(t *testing.T) {
 └────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘`)
 }
 
+func TestTable_Render_AutoIndexEmptyColumns(t *testing.T) {
+	// a column is as wide as the ID it gets for a header (A, B, C, ...) at
+	// the least, even when it has no content at all
+	tw := NewWriter()
+	tw.SetAutoIndex(true)
+	tw.AppendRow(Row{"", "x"})
+	tw.AppendRow(Row{"", "y"})
+	compareOutput(t, tw.Render(), `
++---+---+---+
+|   | A | B |
++---+---+---+
+| 1 |   | x |
+| 2 |   | y |
++---+---+---+`)
+
+	tw = NewWriter()
+	tw.SetAutoIndex(true)
+	tw.AppendFooter(Row{"", "Total"})
+	compareOutput(t, tw.Render(), `
++---+---+-------+
+|   | A |   B   |
++---+---+-------+
+|   |   | TOTAL |
++---+---+-------+`)
+}
+
 func TestTable_Render_AutoIndexWidePadding(t *testing.T) {
 	// The auto-index separator must be as wide as the auto-index data cells,
 	// so the padding has to be charged in display columns like everywhere else.
@@ -1171,8 +1197,56 @@ func TestTable_Render_EmptyWithHeaders(t *testing.T) {
 ╭───┬────────────┬───────────┬────────╮
 │ # │ FIRST NAME │ LAST NAME │ SALARY │
 ├───┼────────────┼───────────┼────────┤
-│   │            │     TOTAL │  10000 │
+│   │            │ TOTAL     │  10000 │
 ╰───┴────────────┴───────────┴────────╯`)
+
+	// Without data rows, a column is numeric (and so aligned to the right)
+	// only if the footers have nothing but numbers in it
+	tw3 := NewWriter()
+	tw3.AppendHeader(Row{"Key", "Value", "#"})
+	tw3.AppendFooter(Row{"Grand Total", 10000, 3})
+	tw3.AppendFooter(Row{"Average", "n/a", 1.5})
+	compareOutput(t, tw3.Render(), `
++-------------+-------+-----+
+| KEY         | VALUE |   # |
++-------------+-------+-----+
+| GRAND TOTAL | 10000 |   3 |
+| AVERAGE     | N/A   | 1.5 |
++-------------+-------+-----+`)
+
+	// and the headers alone say nothing about what a column holds
+	tw4 := NewWriter()
+	tw4.AppendHeader(Row{"Key", "Value"})
+	tw4.SetColumnConfigs([]ColumnConfig{{Number: 1, WidthMin: 8}, {Number: 2, WidthMin: 8}})
+	compareOutput(t, tw4.Render(), `
++----------+----------+
+| KEY      | VALUE    |
++----------+----------+
++----------+----------+`)
+}
+
+func TestTable_Render_EmptyWithFooters(t *testing.T) {
+	// the top border has to be drawn in full without headers or data rows
+	tw := NewWriter()
+	tw.AppendFooter(Row{"Total", 10000})
+	compareOutput(t, tw.Render(), `
++-------+-------+
+| TOTAL | 10000 |
++-------+-------+`)
+
+	tw.SetStyle(StyleRounded)
+	compareOutput(t, tw.Render(), `
+╭───────┬───────╮
+│ TOTAL │ 10000 │
+╰───────┴───────╯`)
+
+	tw.SetTitle("Title")
+	compareOutput(t, tw.Render(), `
+╭───────────────╮
+│ Title         │
+├───────┬───────┤
+│ TOTAL │ 10000 │
+╰───────┴───────╯`)
 }
 
 func TestTable_Render_Filtered(t *testing.T) {
