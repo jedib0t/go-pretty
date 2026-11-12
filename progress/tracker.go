@@ -197,7 +197,7 @@ func (t *Tracker) setProgress(value int64, minETA time.Duration) {
 	t.mutex.Unlock()
 }
 
-// Start starts the tracking for the case when DeferStart=false.
+// Start starts the tracking for the case when DeferStart=true.
 func (t *Tracker) Start() {
 	t.mutex.Lock()
 	if t.timeStart.IsZero() {

@@ -266,9 +266,11 @@ func TestProgress_watchTerminalSize(t *testing.T) {
 	p.renderContext, p.renderContextCancel = context.WithCancel(context.Background())
 
 	// Call watchTerminalSize in a goroutine
+	conn, err := os.Stdout.SyscallConn()
+	require.NoError(t, err)
 	done := make(chan bool)
 	go func() {
-		p.watchTerminalSize(int(os.Stdout.Fd()))
+		p.watchTerminalSize(conn)
 		done <- true
 	}()
 
@@ -293,18 +295,24 @@ func TestProgress_watchTerminalSize(t *testing.T) {
 	}
 }
 
-func Test_terminalFd(t *testing.T) {
+func Test_terminalConn(t *testing.T) {
 	f, err := os.Create(filepath.Join(t.TempDir(), "out"))
 	require.NoError(t, err)
 	defer func() { _ = f.Close() }()
 
+	closed, err := os.Create(filepath.Join(t.TempDir(), "closed"))
+	require.NoError(t, err)
+	require.NoError(t, closed.Close())
+
 	for name, w := range map[string]io.Writer{
 		"buffer":       &bytes.Buffer{},
 		"regular file": f,
+		"closed file":  closed,
+		"nil file":     (*os.File)(nil),
 		"wrapped file": struct{ io.Writer }{os.Stderr},
 	} {
 		t.Run(name, func(t *testing.T) {
-			_, ok := terminalFd(w)
+			_, ok := terminalConn(w)
 			assert.False(t, ok)
 		})
 	}

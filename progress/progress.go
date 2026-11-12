@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -365,45 +366,54 @@ func (p *Progress) initForRender() {
 	// get the current terminal size for preventing roll-overs, and do this in a
 	// background loop until end of render. This only works if the output writer
 	// is a terminal (like STDOUT or STDERR) that exposes its file descriptor.
-	if fd, ok := terminalFd(outputWriter); ok {
-		go p.watchTerminalSize(fd) // needs p.updateFrequency
+	if conn, ok := terminalConn(outputWriter); ok {
+		go p.watchTerminalSize(conn) // needs p.updateFrequency
 	}
 }
 
-// fileDescriptor is implemented by writers backed by a file, like *os.File.
-type fileDescriptor interface {
-	Fd() uintptr
-}
-
-// terminalFd returns the file descriptor of w if w is a terminal. As a side
-// effect, calling Fd puts the file into blocking mode, which should not be an
-// issue in practice.
-func terminalFd(w io.Writer) (int, bool) {
-	f, ok := w.(fileDescriptor)
+// terminalConn returns the raw connection to the file behind w, if w is a
+// terminal. The file descriptor is only ever used through this connection, as
+// asking the file for it directly (File.Fd) puts the file into blocking mode
+// for good, and the file belongs to the caller.
+func terminalConn(w io.Writer) (syscall.RawConn, bool) {
+	f, ok := w.(syscall.Conn)
 	if !ok {
-		return 0, false
+		return nil, false
 	}
-	fd := int(f.Fd())
-	return fd, term.IsTerminal(fd)
+	conn, err := f.SyscallConn()
+	if err != nil {
+		return nil, false
+	}
+	isTerminal := false
+	_ = conn.Control(func(fd uintptr) {
+		isTerminal = term.IsTerminal(int(fd))
+	})
+	return conn, isTerminal
 }
 
-func (p *Progress) updateTerminalSize(fd int) {
+func (p *Progress) updateTerminalSize(conn syscall.RawConn) {
+	// the width remains 0 (unknown) if the file has been closed
+	width := 0
+	_ = conn.Control(func(fd uintptr) {
+		width, _, _ = term.GetSize(int(fd))
+	})
+
 	p.terminalWidthMutex.Lock()
 	defer p.terminalWidthMutex.Unlock()
 
-	p.terminalWidth, _, _ = term.GetSize(fd)
+	p.terminalWidth = width
 }
 
-func (p *Progress) watchTerminalSize(fd int) {
+func (p *Progress) watchTerminalSize(conn syscall.RawConn) {
 	// once
-	p.updateTerminalSize(fd)
+	p.updateTerminalSize(conn)
 	// until end of time
 	ticker := time.NewTicker(time.Second / 10)
 	defer ticker.Stop()
 	for {
 		select {
 		case <-ticker.C:
-			p.updateTerminalSize(fd)
+			p.updateTerminalSize(conn)
 		case <-p.renderContext.Done():
 			return
 		}

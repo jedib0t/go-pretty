@@ -12,22 +12,25 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func Test_terminalFd_pseudoTerminal(t *testing.T) {
+func Test_terminalConn_pseudoTerminal(t *testing.T) {
 	tty := openPseudoTerminal(t)
 
-	fd, ok := terminalFd(tty)
+	conn, ok := terminalConn(tty)
 	assert.True(t, ok)
-	assert.Equal(t, int(tty.Fd()), fd)
+	assert.NotNil(t, conn)
 
-	_, ok = terminalFd(struct{ io.Writer }{tty})
+	_, ok = terminalConn(struct{ io.Writer }{tty})
 	assert.False(t, ok)
 }
 
 func TestProgress_initForRender_terminal(t *testing.T) {
 	tty := openPseudoTerminal(t)
 	const cols = 60
-	winsize := &unix.Winsize{Row: 24, Col: cols}
-	require.NoError(t, unix.IoctlSetWinsize(int(tty.Fd()), unix.TIOCSWINSZ, winsize))
+	withFd(t, tty, func(fd int) {
+		winsize := &unix.Winsize{Row: 24, Col: cols}
+		require.NoError(t, unix.IoctlSetWinsize(fd, unix.TIOCSWINSZ, winsize))
+	})
+	wasNonBlocking := isNonBlocking(t, tty)
 
 	p := &Progress{}
 	p.SetOutputWriter(tty)
@@ -36,9 +39,54 @@ func TestProgress_initForRender_terminal(t *testing.T) {
 
 	assert.Eventually(t, func() bool { return p.getTerminalWidth() == cols }, time.Second, 10*time.Millisecond)
 
+	// The file belongs to the caller; measuring it must not change its mode.
+	assert.Equal(t, wasNonBlocking, isNonBlocking(t, tty))
+
 	// An explicit width still wins over the width measured from the terminal.
 	p.SetTerminalWidth(42)
 	assert.Equal(t, 42, p.getTerminalWidth())
+}
+
+func TestProgress_updateTerminalSize_closedTerminal(t *testing.T) {
+	tty := openPseudoTerminal(t)
+	withFd(t, tty, func(fd int) {
+		winsize := &unix.Winsize{Row: 24, Col: 60}
+		require.NoError(t, unix.IoctlSetWinsize(fd, unix.TIOCSWINSZ, winsize))
+	})
+	conn, ok := terminalConn(tty)
+	require.True(t, ok)
+
+	p := &Progress{}
+	p.updateTerminalSize(conn)
+	assert.Equal(t, 60, p.getTerminalWidth())
+
+	// the width is unknown once the terminal is gone
+	require.NoError(t, tty.Close())
+	p.updateTerminalSize(conn)
+	assert.Equal(t, 0, p.getTerminalWidth())
+}
+
+// isNonBlocking returns true if the file is in non-blocking mode.
+func isNonBlocking(t *testing.T, f *os.File) bool {
+	t.Helper()
+
+	nonBlocking := false
+	withFd(t, f, func(fd int) {
+		flags, err := unix.FcntlInt(uintptr(fd), unix.F_GETFL, 0)
+		require.NoError(t, err)
+		nonBlocking = flags&unix.O_NONBLOCK != 0
+	})
+	return nonBlocking
+}
+
+// withFd calls fn with the file descriptor of f, without the side effect that
+// File.Fd has of putting the file into blocking mode.
+func withFd(t *testing.T, f *os.File, fn func(fd int)) {
+	t.Helper()
+
+	conn, err := f.SyscallConn()
+	require.NoError(t, err)
+	require.NoError(t, conn.Control(func(fd uintptr) { fn(int(fd)) }))
 }
 
 // openPseudoTerminal returns the terminal side of a new pseudo-terminal. Both
