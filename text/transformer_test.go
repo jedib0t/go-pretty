@@ -100,6 +100,32 @@ func TestNewNumberTransformerMinInt64(t *testing.T) {
 	}
 }
 
+func TestNewNumberTransformerSign(t *testing.T) {
+	// a number gets one sign, even when the format asks for one
+	for _, test := range []struct {
+		format   string
+		value    interface{}
+		expected string
+	}{
+		{"%+d", -5, "-5"},
+		{"%+d", 5, "+5"},
+		{"%+d", 0, "+0"},
+		{"% d", -5, "-5"},
+		{"% d", 5, " 5"},
+		{"%+.2f", -5.5, "-5.50"},
+		{"%+.2f", 5.5, "+5.50"},
+		{"%+05d", -5, "-00005"},
+		{"%-+4d|", -5, "-5   |"},
+		{"%+d%%", -5, "-5%"},
+		{"%+d%%", 5, "+5%"},
+		{"%d%% +", -5, "-5% +"},
+	} {
+		t.Run(fmt.Sprintf("%s/%v", test.format, test.value), func(t *testing.T) {
+			assert.Equal(t, test.expected, StripEscape(NewNumberTransformer(test.format)(test.value)))
+		})
+	}
+}
+
 type jsonTest struct {
 	Foo string       `json:"foo"`
 	Bar int32        `json:"bar"`

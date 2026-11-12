@@ -49,8 +49,9 @@ type Transformer func(val interface{}) string
 //
 //gocyclo:ignore
 func NewNumberTransformer(format string) Transformer {
-	// Pre-compute negative format string to avoid repeated allocations
-	negFormat := "-" + format
+	// Pre-compute negative format string to avoid repeated allocations; the
+	// "-" takes the place of any sign that the format asks for
+	negFormat := "-" + formatWithoutSignFlags(format)
 
 	transformInt64 := func(val int64) string {
 		if val < 0 {
@@ -190,6 +191,36 @@ func NewURLTransformer(colors ...Color) Transformer {
 	return func(val interface{}) string {
 		return colorsToUse.Sprint(val)
 	}
+}
+
+// formatWithoutSignFlags returns the format with the flags that ask for a sign
+// ("+" and " ") removed from all its verbs.
+func formatWithoutSignFlags(format string) string {
+	if !strings.ContainsAny(format, "+ ") {
+		return format
+	}
+
+	var out strings.Builder
+	for idx := 0; idx < len(format); idx++ {
+		out.WriteByte(format[idx])
+		if format[idx] != '%' {
+			continue
+		}
+		// "%%" is a percent sign, and not the beginning of a verb
+		if idx+1 < len(format) && format[idx+1] == '%' {
+			idx++
+			out.WriteByte(format[idx])
+			continue
+		}
+		// the flags come right after the "%"
+		for idx+1 < len(format) && strings.IndexByte("+-# 0", format[idx+1]) >= 0 {
+			idx++
+			if format[idx] != '+' && format[idx] != ' ' {
+				out.WriteByte(format[idx])
+			}
+		}
+	}
+	return out.String()
 }
 
 func formatTime(t time.Time, layout string, location *time.Location) string {
