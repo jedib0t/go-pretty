@@ -213,6 +213,36 @@ func TestTable_Render_AutoIndex(t *testing.T) {
 └────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘`)
 }
 
+func TestTable_Render_AutoIndexWidePadding(t *testing.T) {
+	// The auto-index separator must be as wide as the auto-index data cells,
+	// so the padding has to be charged in display columns like everywhere else.
+	for _, tt := range []struct {
+		name    string
+		padding string
+	}{
+		{"wide rune", "\u3000"},
+		{"escape sequences", "\x1b[90m \x1b[0m"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			tw := NewWriter()
+			tw.SetAutoIndex(true)
+			tw.SetStyle(StyleLight)
+			tw.Style().Box.PaddingLeft = tt.padding
+			tw.Style().Box.PaddingRight = tt.padding
+			tw.AppendHeader(Row{"NAME"})
+			tw.AppendRow(Row{"Alice"})
+
+			lines := strings.Split(tw.Render(), "\n")
+			want := text.StringWidthWithoutEscSequences(lines[0])
+			for _, line := range lines {
+				if got := text.StringWidthWithoutEscSequences(line); got != want {
+					t.Errorf("line %q is %d columns, want %d", line, got, want)
+				}
+			}
+		})
+	}
+}
+
 func TestTable_Render_AutoWidth(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(testHeader)
