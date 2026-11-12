@@ -172,3 +172,21 @@ func TestWrapHyperlinkWideRunes(t *testing.T) {
 		})
 	}
 }
+
+func TestWrapHyperlinkUnterminatedSequences(t *testing.T) {
+	link := func(s string) string { return Hyperlink("https://example.com/x", s) }
+	for _, wrap := range []struct {
+		name string
+		fn   func(string, int) string
+	}{{"hard", WrapHard}, {"soft", WrapSoft}, {"text", WrapText}} {
+		t.Run(wrap.name, func(t *testing.T) {
+			// a link that is never terminated is not a link: the text before it
+			// is wrapped, and the sequence is left as it is
+			unterminated := "\x1b]8;;https://example.com/x"
+			assert.Equal(t, "abcd\nefgh"+unterminated, wrap.fn("abcdefgh"+unterminated, 4))
+			assert.Equal(t, link("abcd")+"\n"+link("efgh")+unterminated, wrap.fn(link("abcdefgh")+unterminated, 4))
+			// the same goes for any other escape sequence that is never terminated
+			assert.Equal(t, link("abcd")+"\n"+link("efgh")+"\x1b[3", wrap.fn(link("abcdefgh")+"\x1b[3", 4))
+		})
+	}
+}
