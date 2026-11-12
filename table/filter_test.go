@@ -1,6 +1,7 @@
 package table
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -656,4 +657,66 @@ func TestTable_calculateNumColumnsFromRaw(t *testing.T) {
 		table.calculateNumColumnsFromRaw()
 		assert.Equal(t, 4, table.numColumns)
 	})
+}
+
+func TestTable_FilterLargeIntegers(t *testing.T) {
+	for _, values := range []struct {
+		name      string
+		low, high interface{}
+	}{
+		{"int64", int64(9007199254740992), int64(9007199254740993)},
+		{"negative", int64(-9007199254740993), int64(-9007199254740992)},
+		{"max-int64", int64(math.MaxInt64 - 1), int64(math.MaxInt64)},
+		{"max-uint64", uint64(math.MaxUint64 - 1), uint64(math.MaxUint64)},
+		{"string", "9007199254740992", "9007199254740993"},
+	} {
+		t.Run(values.name, func(t *testing.T) {
+			for _, test := range []struct {
+				name      string
+				operator  FilterOperator
+				threshold interface{}
+				want      []Row
+			}{
+				{"greater", GreaterThan, values.low, []Row{{values.high}}},
+				{"greater-or-equal", GreaterThanOrEqual, values.high, []Row{{values.high}}},
+				{"less", LessThan, values.high, []Row{{values.low}}},
+				{"less-or-equal", LessThanOrEqual, values.low, []Row{{values.low}}},
+			} {
+				t.Run(test.name, func(t *testing.T) {
+					table := Table{}
+					table.AppendHeader(Row{"ID"})
+					table.AppendRows([]Row{{values.low}, {values.high}})
+					table.FilterBy([]FilterBy{{Number: 1, Operator: test.operator, Value: test.threshold}})
+					table.initForRenderRows()
+					assert.Equal(t, test.want, table.rowsRawFiltered)
+				})
+			}
+		})
+	}
+}
+
+func TestTable_FilterNumericCompatibility(t *testing.T) {
+	for _, test := range []struct {
+		name  string
+		cell  interface{}
+		value interface{}
+		want  bool
+	}{
+		{"decimal", 1.5, float32(1.25), true},
+		{"exponent", "1e3", "999", true},
+		{"positive-infinity", math.Inf(1), int64(math.MaxInt64), true},
+		{"infinite-threshold", int64(math.MaxInt64), math.Inf(1), false},
+		{"nan-cell", math.NaN(), 0, false},
+		{"nan-threshold", 1, math.NaN(), false},
+		{"invalid-cell", "invalid", 0, false},
+		{"invalid-threshold", 1, "invalid", false},
+		{"overflow-cell", "1e999", 0, false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			table := Table{}
+			assert.Equal(t, test.want, table.matchesFilterRaw(Row{test.cell}, FilterBy{
+				Number: 1, Operator: GreaterThan, Value: test.value,
+			}))
+		})
+	}
 }
