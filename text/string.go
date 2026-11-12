@@ -228,10 +228,17 @@ func RuneCount(str string) int {
 // * https://github.com/jedib0t/go-pretty/issues/220
 // * https://github.com/jedib0t/go-pretty/issues/204
 func RuneWidth(r rune) int {
-	if (r >= 0x2500 && r <= 0x257F) || (r >= 0x2580 && r <= 0x259F) {
+	if isSingleCellRune(r) {
 		return 1
 	}
 	return rwCondition.RuneWidth(r)
+}
+
+// isSingleCellRune returns true for box drawing (U+2500-U+257F) and block
+// element (U+2580-U+259F) characters, which are always treated as width 1
+// regardless of locale.
+func isSingleCellRune(r rune) bool {
+	return (r >= 0x2500 && r <= 0x257F) || (r >= 0x2580 && r <= 0x259F)
 }
 
 // RuneWidthWithoutEscSequences is similar to RuneWidth, except for the fact
@@ -272,8 +279,21 @@ func Snip(str string, length int, snipIndicator string) string {
 //
 //	StringWidth("Ghost 生命"): 10
 //	StringWidth("\x1b[33mGhost 生命\x1b[0m"): 19
-func StringWidth(str string) int {
-	return rwCondition.StringWidth(str)
+//	StringWidth("┌──┐"): 4
+func StringWidth(str string) (width int) {
+	// Counted the way runewidth counts, one grapheme cluster at a time taking
+	// the first rune with a width, but through RuneWidth so that the box
+	// drawing and block element override applies here too.
+	g := uniseg.NewGraphemes(str)
+	for g.Next() {
+		for _, r := range g.Runes() {
+			if w := RuneWidth(r); w > 0 {
+				width += w
+				break
+			}
+		}
+	}
+	return width
 }
 
 // StringWidthWithoutEscSequences is similar to RuneWidth, except for the fact
