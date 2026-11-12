@@ -56,3 +56,23 @@ func BenchmarkStringWidthWithoutEscSequences(b *testing.B) {
 		})
 	}
 }
+
+func BenchmarkTrim(b *testing.B) {
+	for _, bc := range []struct {
+		name string
+		str  string
+	}{
+		{"ASCII", "The quick brown fox jumped over the lazy dog. The quick brown fox jumps"},
+		{"Plain", benchStrPlain},
+		{"Escaped", benchStrEscaped},
+		{"CJK", "生命、宇宙、そして万物についての疑問の答え、生命、宇宙、そして万物についての疑問"},
+		{"Emoji", "\U0001F468\u200D\U0001F469\u200D\U0001F467 \U0001F1E9\U0001F1EA \U0001F44D\U0001F3FD e\u0301 \U0001F468\u200D\U0001F469\u200D\U0001F467 \U0001F1E9\U0001F1EA"},
+	} {
+		b.Run(bc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				benchResultStr = Trim(bc.str, 30)
+			}
+		})
+	}
+}

@@ -2,8 +2,11 @@ package text
 
 import (
 	"fmt"
+	"math/rand"
+	"strings"
 	"testing"
 
+	"github.com/rivo/uniseg"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -436,6 +439,88 @@ func TestTrim(t *testing.T) {
 	assert.Equal(t, "e\u0301", Trim("e\u0301x", 1))
 	assert.Equal(t, "\x1b[33m\x1b[0m", Trim("\x1b[33m"+family+"\x1b[0m", 2))
 	assert.Equal(t, "\x1b[33m"+family+"\x1b[0m", Trim("\x1b[33m"+family+"\x1b[0m", 6))
+	// text is cut between clusters whatever the mix of scripts around the cut
+	assert.Equal(t, "aあ", Trim("aあ生", 3))
+	assert.Equal(t, "生a", Trim("生aツ", 3))
+	assert.Equal(t, "한글", Trim("한글한글", 5))
+	assert.Equal(t, "か\u3099", Trim("か\u3099き", 3))
+	assert.Equal(t, "生", Trim("生"+family, 7))
+	assert.Equal(t, "a\r\nb", Trim("a\r\nbc", 2))
+	// invalid UTF-8 is measured as the replacement character and kept as it is
+	assert.Equal(t, "a\xff", Trim("a\xffb", 2))
+}
+
+// TestTrim_Segmentation ensures that Trim, which only segments the text into
+// grapheme clusters where it has to, returns what it would return if it had
+// segmented all of the text.
+func TestTrim_Segmentation(t *testing.T) {
+	trimSegmented := func(str string, maxLen int) string {
+		var out strings.Builder
+		outLen, esp, state := 0, EscSeqParser{}, -1
+		for len(str) > 0 {
+			var cluster string
+			cluster, str, _, state = uniseg.FirstGraphemeClusterInString(str, state)
+			for idx, sChr := range cluster {
+				if esp.InSequence() || sChr == EscapeStartRune {
+					esp.Consume(sChr)
+					out.WriteRune(sChr)
+					continue
+				}
+				visible := cluster[idx:]
+				if outLen += StringWidthWithoutEscSequences(visible); outLen > maxLen {
+					return out.String() + trailingEscSequences(str, &esp)
+				}
+				out.WriteString(visible)
+				break
+			}
+		}
+		return out.String()
+	}
+
+	pieces := []string{
+		"a", "b", " ", "Ghost", "\t", "\r\n", "e\u0301", "\u0301", "\u200d", "\u0600", "─", "\xff",
+		"生", "命", "ツ", "、", "あ", "か\u3099", "ー", "ｶﾞ", "한", "가\u11a8", "\u1100\u1161\u11a8", "क्षि",
+		"\U0001F468\u200D\U0001F469\u200D\U0001F467", "\U0001F1E9\U0001F1EA", "\U0001F44D\U0001F3FD", "\u2764\ufe0f",
+		"\x1b[33m", "\x1b[0m", "\x1b[1;38;5;208m", "\x1b[K", "\x1b[3", "\x1b",
+		"\x1b]8;;http://example.com/é\x1b\\", "\x1b]8;;\x1b\\", "\x1b]8;;http://example.com\x07",
+	}
+	rng := rand.New(rand.NewSource(1))
+	for i := 0; i < 20000; i++ {
+		var sb strings.Builder
+		for numPieces := rng.Intn(12); numPieces > 0; numPieces-- {
+			sb.WriteString(pieces[rng.Intn(len(pieces))])
+		}
+		str, maxLen := sb.String(), 1+rng.Intn(16)
+		if expected, actual := trimSegmented(str, maxLen), Trim(str, maxLen); expected != actual {
+			t.Fatalf("Trim(%+q, %d): expected %+q, got %+q", str, maxLen, expected, actual)
+		}
+	}
+}
+
+// TestTrim_StandaloneRunes ensures that every rune Trim regards as standalone
+// is a grapheme cluster of its own next to every kind of standalone rune.
+func TestTrim_StandaloneRunes(t *testing.T) {
+	assert.False(t, isStandaloneRune('ー'))
+	assert.False(t, isStandaloneRune('\u0301'))
+	assert.False(t, isStandaloneRune('\U0001F467'))
+
+	samples := []rune{'a', ' ', '\n', '\r', '\x1b', '\x7f', '、', 'あ', 'ア', '生', '한'}
+	for r := rune(0); r <= 0xD7A3; r++ {
+		if !isStandaloneRune(r) {
+			continue
+		}
+		for _, sample := range samples {
+			for _, pair := range []string{string(r) + string(sample), string(sample) + string(r)} {
+				if pair == "\r\n" {
+					continue // the one exception; see isStandaloneRune
+				}
+				cluster, rest, _, _ := uniseg.FirstGraphemeClusterInString(pair, -1)
+				if cluster+rest != pair || rest == "" {
+					t.Fatalf("%+q is a single grapheme cluster", pair)
+				}
+			}
+		}
+	}
 }
 
 func ExampleWiden() {
