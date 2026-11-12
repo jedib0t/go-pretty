@@ -40,6 +40,40 @@ func BenchmarkEscSeqParser_Consume(b *testing.B) {
 	}
 }
 
+func BenchmarkLongestLineLen(b *testing.B) {
+	for _, bc := range []struct {
+		name string
+		str  string
+	}{
+		{"Plain", benchStrPlain},
+		{"Escaped", benchStrEscaped},
+	} {
+		b.Run(bc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				benchResultInt = LongestLineLen(bc.str)
+			}
+		})
+	}
+}
+
+func BenchmarkStripEscape(b *testing.B) {
+	for _, bc := range []struct {
+		name string
+		str  string
+	}{
+		{"Plain", benchStrPlain},
+		{"Escaped", benchStrEscaped},
+	} {
+		b.Run(bc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				benchResultStr = StripEscape(bc.str)
+			}
+		})
+	}
+}
+
 func BenchmarkStringWidthWithoutEscSequences(b *testing.B) {
 	for _, bc := range []struct {
 		name string

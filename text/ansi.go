@@ -45,7 +45,7 @@ func StripEscape(str string) string {
 	var out strings.Builder
 	out.Grow(len(str))
 
-	esp := EscSeqParser{}
+	esp := EscSeqParser{skipParse: true}
 	for _, sChr := range str {
 		if esp.InSequence() {
 			esp.Consume(sChr)

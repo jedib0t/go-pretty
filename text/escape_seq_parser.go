@@ -134,6 +134,11 @@ type EscSeqParser struct {
 	// escapeSeq accumulates the current escape sequence being parsed; it is
 	// bounded by escSeqMaxLength and reused across sequences.
 	escapeSeq []byte
+
+	// skipParse makes Consume track only where escape sequences begin and
+	// end, without parsing the codes in them; meant for the callers that
+	// measure or cut text and never ask for Codes, IsOpen or Sequence.
+	skipParse bool
 }
 
 func (s *EscSeqParser) Codes() []int {
@@ -176,13 +181,13 @@ func (s *EscSeqParser) Consume(char rune) {
 			bytes.HasPrefix(s.escapeSeq, escapeStartConcealOSIBytes) &&
 			char == escRuneBEL { // BEL
 
-			s.ParseSeq(string(s.escapeSeq), s.escSeqKind)
+			s.parseEscapeSeq()
 			s.Reset()
 			return
 		}
 
 		if s.isEscapeStopRune(char) {
-			s.ParseSeq(string(s.escapeSeq), s.escSeqKind)
+			s.parseEscapeSeq()
 			s.Reset()
 		}
 	}
@@ -362,6 +367,14 @@ func (s *EscSeqParser) parse256ColorSequence(codes []string, i int) (colorIndex 
 	}
 
 	return colorIndex, expectedBase, true
+}
+
+// parseEscapeSeq parses the escape sequence that was just consumed, unless the
+// parser has been asked to skip that.
+func (s *EscSeqParser) parseEscapeSeq() {
+	if !s.skipParse {
+		s.ParseSeq(string(s.escapeSeq), s.escSeqKind)
+	}
 }
 
 // process256ColorSequences processes 256-color sequences (38;5;n or 48;5;n) and returns

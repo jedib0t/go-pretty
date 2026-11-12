@@ -1,6 +1,7 @@
 package text
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -458,5 +459,33 @@ func TestEscSeqParser_ControlSequences(t *testing.T) {
 			assert.Equal(t, test.want, es.ParseString(test.input))
 			assert.False(t, es.InSequence())
 		})
+	}
+}
+
+func TestEscSeqParser_SkipParse(t *testing.T) {
+	// a parser that skips parsing must agree with one that does not on where
+	// every escape sequence begins and ends
+	for _, input := range []string{
+		"",
+		"plain text",
+		"\x1b[33mGhost\x1b[0m",
+		"\x1b[38;5;208mOrange\x1b[0m and \x1b[48;5;21mBlue\x1b[0m",
+		"\x1b[KGhost\x1b[3A\x1b[?25l",
+		"\x1b]8;;http://example.com\x07label\x1b]8;;\x07",
+		"\x1b]8;;http://example.com\x1b\\label\x1b]8;;\x1b\\",
+		"\x1b[33mUnterminated\x1b[0",
+		"\x1b[" + strings.Repeat("1;", escSeqMaxLength) + "m overflow",
+		"\x1b\x1b[1m\u751f\u547d\x1b[22m",
+		"\x1b(B\x1b[1mGhost",
+	} {
+		full, skip := EscSeqParser{}, EscSeqParser{skipParse: true}
+		for idx, char := range input {
+			full.Consume(char)
+			skip.Consume(char)
+			assert.Equal(t, full.InSequence(), skip.InSequence(), "input %q, byte %d", input, idx)
+		}
+		// nothing gets parsed, so nothing is ever seen as being open
+		assert.False(t, skip.IsOpen(), "input %q", input)
+		assert.Empty(t, skip.Codes(), "input %q", input)
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/rivo/uniseg"
 	"github.com/stretchr/testify/assert"
@@ -291,6 +292,22 @@ func TestRuneWidth(t *testing.T) {
 	assert.Equal(t, 1, RuneWidth('⊙'))
 	assert.Equal(t, 2, RuneWidth('︿'))
 	assert.Equal(t, 0, RuneWidth(rune(27))) // ANSI escape sequence
+}
+
+func TestRuneWidth_ASCII(t *testing.T) {
+	originalValue := rwCondition.EastAsianWidth
+	defer func() {
+		rwCondition.EastAsianWidth = originalValue
+	}()
+
+	// the shortcut for ASCII must agree with runewidth, whatever the locale
+	for _, eastAsianWidth := range []bool{false, true} {
+		OverrideRuneWidthEastAsianWidth(eastAsianWidth)
+		for r := rune(-1); r < utf8.RuneSelf; r++ {
+			assert.Equal(t, rwCondition.RuneWidth(r), RuneWidth(r),
+				"rune %#x with EastAsianWidth=%v", r, eastAsianWidth)
+		}
+	}
 }
 
 func ExampleRuneWidthWithoutEscSequences() {
