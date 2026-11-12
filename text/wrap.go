@@ -13,6 +13,9 @@ func WrapHard(str string, wrapLen int) string {
 	if wrapLen <= 0 {
 		return ""
 	}
+	if strings.Contains(str, escapeStartConcealOSI) {
+		return wrapHyperlinks(str, wrapLen, false, false)
+	}
 	str = strings.ReplaceAll(str, "\t", "    ")
 	sLen := StringWidthWithoutEscSequences(str)
 	if sLen <= wrapLen {
@@ -41,6 +44,9 @@ func WrapSoft(str string, wrapLen int) string {
 	if wrapLen <= 0 {
 		return ""
 	}
+	if strings.Contains(str, escapeStartConcealOSI) {
+		return wrapHyperlinks(str, wrapLen, true, false)
+	}
 	str = strings.ReplaceAll(str, "\t", "    ")
 	sLen := StringWidthWithoutEscSequences(str)
 	if sLen <= wrapLen {
@@ -67,6 +73,9 @@ func WrapSoft(str string, wrapLen int) string {
 func WrapText(str string, wrapLen int) string {
 	if wrapLen <= 0 {
 		return ""
+	}
+	if strings.Contains(str, escapeStartConcealOSI) {
+		return wrapHyperlinks(str, wrapLen, false, true)
 	}
 	str = strings.ReplaceAll(str, "\t", "    ")
 	sLen := StringWidthWithoutEscSequences(str)
