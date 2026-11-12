@@ -462,6 +462,10 @@ func (t *Table) initForRenderRowSeparatorStrings() {
 		// When there are headers but no data rows, we still need separatorTypeRowBottom
 		// for the bottom border.
 		addSeparatorType(separatorTypeRowBottom)
+	} else {
+		// When there are neither headers nor data rows, the top border is
+		// still the one that goes above the data rows.
+		addSeparatorType(separatorTypeRowTop)
 	}
 	if len(t.rowsFooter) > 0 || t.autoIndex {
 		addSeparatorType(separatorTypeFooterTop)

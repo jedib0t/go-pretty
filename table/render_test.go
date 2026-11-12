@@ -1175,6 +1175,30 @@ func TestTable_Render_EmptyWithHeaders(t *testing.T) {
 ╰───┴────────────┴───────────┴────────╯`)
 }
 
+func TestTable_Render_EmptyWithFooters(t *testing.T) {
+	// the top border has to be drawn in full without headers or data rows
+	tw := NewWriter()
+	tw.AppendFooter(Row{"Total", 10000})
+	compareOutput(t, tw.Render(), `
++-------+-------+
+| TOTAL | 10000 |
++-------+-------+`)
+
+	tw.SetStyle(StyleRounded)
+	compareOutput(t, tw.Render(), `
+╭───────┬───────╮
+│ TOTAL │ 10000 │
+╰───────┴───────╯`)
+
+	tw.SetTitle("Title")
+	compareOutput(t, tw.Render(), `
+╭───────────────╮
+│ Title         │
+├───────┬───────┤
+│ TOTAL │ 10000 │
+╰───────┴───────╯`)
+}
+
 func TestTable_Render_Filtered(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(testHeader)
