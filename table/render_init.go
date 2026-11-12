@@ -302,6 +302,11 @@ func (t *Table) initForRenderRows() {
 	t.rowsFooter = t.initForRenderRowsStringify(t.rowsFooterRaw, renderHint{isFooterRow: true})
 	t.rowsHeader = t.initForRenderRowsStringify(t.rowsHeaderRaw, renderHint{isHeaderRow: true})
 
+	// without any (data) rows, no column has been found to be non-numeric
+	if len(t.rows) == 0 {
+		t.initForRenderRowsNonNumericColumns()
+	}
+
 	// sort the rows as requested
 	t.initForRenderSortRows()
 
@@ -366,6 +371,25 @@ func (t *Table) initForRenderFilterRows() {
 			}
 		}
 		t.separators = newSeparators
+	}
+}
+
+// initForRenderRowsNonNumericColumns figures out which columns are numeric when
+// there are no (data) rows to go by: a column is numeric if the footers have
+// numbers, and nothing but numbers, in it. The headers are names of the
+// columns, and say nothing about what the columns hold.
+func (t *Table) initForRenderRowsNonNumericColumns() {
+	for colIdx := range t.columnIsNonNumeric {
+		isNumeric := false
+		for _, row := range t.rowsFooterRaw {
+			if colIdx < len(row) {
+				isNumeric = isNumber(row[colIdx])
+				if !isNumeric {
+					break
+				}
+			}
+		}
+		t.columnIsNonNumeric[colIdx] = !isNumeric
 	}
 }
 

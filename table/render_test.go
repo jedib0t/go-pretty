@@ -1171,8 +1171,32 @@ func TestTable_Render_EmptyWithHeaders(t *testing.T) {
 ╭───┬────────────┬───────────┬────────╮
 │ # │ FIRST NAME │ LAST NAME │ SALARY │
 ├───┼────────────┼───────────┼────────┤
-│   │            │     TOTAL │  10000 │
+│   │            │ TOTAL     │  10000 │
 ╰───┴────────────┴───────────┴────────╯`)
+
+	// Without data rows, a column is numeric (and so aligned to the right)
+	// only if the footers have nothing but numbers in it
+	tw3 := NewWriter()
+	tw3.AppendHeader(Row{"Key", "Value", "#"})
+	tw3.AppendFooter(Row{"Grand Total", 10000, 3})
+	tw3.AppendFooter(Row{"Average", "n/a", 1.5})
+	compareOutput(t, tw3.Render(), `
++-------------+-------+-----+
+| KEY         | VALUE |   # |
++-------------+-------+-----+
+| GRAND TOTAL | 10000 |   3 |
+| AVERAGE     | N/A   | 1.5 |
++-------------+-------+-----+`)
+
+	// and the headers alone say nothing about what a column holds
+	tw4 := NewWriter()
+	tw4.AppendHeader(Row{"Key", "Value"})
+	tw4.SetColumnConfigs([]ColumnConfig{{Number: 1, WidthMin: 8}, {Number: 2, WidthMin: 8}})
+	compareOutput(t, tw4.Render(), `
++----------+----------+
+| KEY      | VALUE    |
++----------+----------+
++----------+----------+`)
 }
 
 func TestTable_Render_EmptyWithFooters(t *testing.T) {
