@@ -201,6 +201,21 @@ func TestNewTimeTransformer(t *testing.T) {
 	assert.Equal(t, "2010-11-12T13:14:15-07:00", transformer(inTime))
 }
 
+func TestNewTimeTransformerBeforeEpoch(t *testing.T) {
+	transformer := NewTimeTransformer(time.RFC3339, nil)
+
+	// A time before the epoch is an ordinary value.
+	before := time.Date(1960, time.January, 1, 0, 0, 0, 0, time.UTC)
+	assert.Equal(t, "1960-01-01T00:00:00Z", transformer(before))
+
+	// The epoch itself is a value too.
+	epoch := time.Date(1970, time.January, 1, 0, 0, 0, 0, time.UTC)
+	assert.Equal(t, "1970-01-01T00:00:00Z", transformer(epoch))
+
+	// The zero time is not a value.
+	assert.Equal(t, "", transformer(time.Time{}))
+}
+
 func TestNewUnixTimeTransformer(t *testing.T) {
 	inStr := "2010-11-12T13:14:15-07:00"
 	inTime, err := time.Parse(time.RFC3339, inStr)

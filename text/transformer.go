@@ -194,7 +194,7 @@ func NewURLTransformer(colors ...Color) Transformer {
 
 func formatTime(t time.Time, layout string, location *time.Location) string {
 	rsp := ""
-	if t.Unix() > 0 {
+	if !t.IsZero() {
 		if location != nil {
 			t = t.In(location)
 		}
