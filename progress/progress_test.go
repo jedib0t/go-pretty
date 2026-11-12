@@ -1,13 +1,17 @@
 package progress
 
 import (
+	"bytes"
 	"context"
+	"io"
 	"math"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestProgress_AppendTracker(t *testing.T) {
@@ -264,7 +268,7 @@ func TestProgress_watchTerminalSize(t *testing.T) {
 	// Call watchTerminalSize in a goroutine
 	done := make(chan bool)
 	go func() {
-		p.watchTerminalSize()
+		p.watchTerminalSize(int(os.Stdout.Fd()))
 		done <- true
 	}()
 
@@ -286,5 +290,22 @@ func TestProgress_watchTerminalSize(t *testing.T) {
 		// Context is cancelled, which is expected
 	default:
 		t.Fatal("Expected context to be cancelled")
+	}
+}
+
+func Test_terminalFd(t *testing.T) {
+	f, err := os.Create(filepath.Join(t.TempDir(), "out"))
+	require.NoError(t, err)
+	defer func() { _ = f.Close() }()
+
+	for name, w := range map[string]io.Writer{
+		"buffer":       &bytes.Buffer{},
+		"regular file": f,
+		"wrapped file": struct{ io.Writer }{os.Stderr},
+	} {
+		t.Run(name, func(t *testing.T) {
+			_, ok := terminalFd(w)
+			assert.False(t, ok)
+		})
 	}
 }
