@@ -74,6 +74,24 @@ func BenchmarkStripEscape(b *testing.B) {
 	}
 }
 
+func BenchmarkRepeatAndTrim(b *testing.B) {
+	for _, bc := range []struct {
+		name string
+		str  string
+	}{
+		{"ASCII", "-"},
+		{"BoxDrawing", "\u2500"},
+		{"Escaped", "\x1b[33m-\x1b[0m"},
+	} {
+		b.Run(bc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				benchResultStr = RepeatAndTrim(bc.str, 20)
+			}
+		})
+	}
+}
+
 func BenchmarkStringWidthWithoutEscSequences(b *testing.B) {
 	for _, bc := range []struct {
 		name string
