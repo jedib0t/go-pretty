@@ -1,6 +1,7 @@
 package table
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -274,4 +275,46 @@ func TestTable_Render_SkipEmptyRowsWhenClipped_PagerWithMerge(t *testing.T) {
 +----+ ~`, pg.GoTo(2))
 	assert.Equal(t, pg.Render(), pg.Next())
 	assert.Equal(t, 2, pg.Location())
+}
+
+func TestTable_Render_SkipEmptyRowsWhenClipped_PagerWithMultiLineMerge(t *testing.T) {
+	// nothing is clipped here, so the option must not change the output; the
+	// merged multi-line value has to be split into lines on every page
+	tw := NewWriter()
+	tw.AppendHeader(Row{"ID", "Notes"})
+	tw.AppendRows([]Row{{"x\ny", "a"}, {"x\ny", "b"}, {"x\ny", "c"}})
+	tw.SetColumnConfigs([]ColumnConfig{{Number: 1, AutoMerge: true}})
+	tw.Style().Size.WidthMax = 80
+	tw.SetPageSize(2)
+	original := tw.Render()
+	tw.Style().Options.SkipEmptyRowsWhenClipped = true
+	assert.Equal(t, original, tw.Render())
+}
+
+func TestTable_Render_SkipEmptyRowsWhenClipped_PagerWithMultiLineMergeClipped(t *testing.T) {
+	// every retained line starts a new page, where a merged value is visible
+	// again; only the lines left with nothing but clipped content are dropped
+	tw := newClippedRowsTable([]Row{
+		{"x\ny", "alpha beta gamma"}, {"x\ny", "alpha beta gamma"}, {"x\ny", "alpha beta gamma"},
+	})
+	tw.SetColumnConfigs([]ColumnConfig{
+		{Number: 1, AutoMerge: true},
+		{Number: 2, WidthMax: 5, WidthMaxEnforcer: text.WrapSoft},
+	})
+	tw.SetPageSize(1)
+	pageBlank := `+----+ ~
+| ID | ~
++----+ ~
+|    | ~
++----+ ~`
+	pageX := strings.Replace(pageBlank, "|    |", "| x  |", 1)
+	pageY := strings.Replace(pageBlank, "|    |", "| y  |", 1)
+	compareOutput(t, tw.Render(), strings.Join([]string{
+		pageX, pageY, pageBlank, pageX, pageY, pageBlank, pageX, pageY, pageBlank,
+	}, "\n\n"))
+
+	tw.Style().Options.SkipEmptyRowsWhenClipped = true
+	compareOutput(t, tw.Render(), strings.Join([]string{
+		pageX, pageY, pageX, pageY, pageX, pageY,
+	}, "\n\n"))
 }

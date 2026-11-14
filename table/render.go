@@ -190,18 +190,27 @@ func (t *Table) renderLine(out *strings.Builder, row rowStr, hint renderHint) {
 		}
 		outLine = out
 	}
+
+	// if a page break is pending, this line will be the first one on the new
+	// page if it is retained; render it (and decide on skipping it) that way,
+	// as a page boundary makes vertically merged cells visible again
+	startsPage := t.pendingPageBreak && hint.isRegularRow() && !hint.isBorderTop && !hint.isBorderBottom
+	if startsPage {
+		t.firstRowOfPage = true
+	}
 	t.renderLineContents(outLine, row, hint)
 
 	// merge the strings.Builder objects if a new one was created earlier
 	if outLine != out {
-		if t.shouldSkipClippedLine(outLine, hint) {
-			return
+		skip := t.shouldSkipClippedLine(outLine, hint)
+		if startsPage {
+			t.firstRowOfPage = false
+			if !skip {
+				t.renderPageBreak(out)
+			}
 		}
-		if t.pendingPageBreak && hint.isRegularRow() && !hint.isBorderTop && !hint.isBorderBottom {
-			t.renderPageBreak(out)
-			// A page boundary can make vertically merged cells visible again.
-			outLine.Reset()
-			t.renderLineContents(outLine, row, hint)
+		if skip {
+			return
 		}
 		if out.Len() > 0 {
 			out.WriteRune('\n')
@@ -289,6 +298,13 @@ func (t *Table) renderPageBreak(out *strings.Builder) {
 
 func (t *Table) renderRow(out *strings.Builder, row rowStr, hint renderHint) {
 	if len(row) > 0 {
+		// the first line of a row is never skipped, so a pending page break is
+		// certain to happen here; start the new page before wrapping the row
+		// so that vertical merges are worked out for the new page
+		if t.pendingPageBreak && hint.isRegularRow() {
+			t.renderPageBreak(out)
+		}
+
 		// fit every column into the allowedColumnLength/maxColumnLength limit
 		// and in the process find the max. number of lines in any column in
 		// this row
