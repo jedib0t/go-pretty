@@ -443,6 +443,12 @@ func TestTable_RenderHTML_ConvertColorsToSpans(t *testing.T) {
 		assert.NotContains(t, result, "\x1b[31m")
 	})
 
+	t.Run("switches colors after a combined reset", func(t *testing.T) {
+		tw := NewWriter()
+		tw.AppendRow(Row{"\x1b[31mred\x1b[0;32mgreen\x1b[0m"})
+		assert.Contains(t, tw.RenderHTML(), `<span class="fg-red">red</span><span class="fg-green">green</span>`)
+	})
+
 	t.Run("disabled", func(t *testing.T) {
 		tw := NewWriter()
 		tw.Style().HTML.ConvertColorsToSpans = false
