@@ -76,8 +76,15 @@ func (c *escSeqToSpanConverter) closeSpan() {
 
 // colorsChanged checks if the color set has changed.
 func (c *escSeqToSpanConverter) colorsChanged(newColors map[int]bool) bool {
-	// we never set the map values to false, so a simple size compare is enough
-	return len(c.currentColors) != len(newColors)
+	if len(c.currentColors) != len(newColors) {
+		return true
+	}
+	for code := range newColors {
+		if !c.currentColors[code] {
+			return true
+		}
+	}
+	return false
 }
 
 // cssClasses converts color codes to CSS class names.
