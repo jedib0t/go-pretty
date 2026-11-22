@@ -83,17 +83,38 @@ func TestEscSeqParser(t *testing.T) {
 		for _, char := range "\x1b]8;;url\x07" {
 			es.Consume(char)
 		}
-		// After consuming BEL, the parser should have reset
-		// Note: code 8 (conceal) will be parsed before reset
+		// After consuming BEL, the parser should have reset; the hyperlink
+		// carries no attributes: its 8 is not the code to conceal text
 		assert.False(t, es.InSequence())
-		assert.True(t, es.IsOpen())
-		assert.Contains(t, es.Codes(), 8)
+		assert.False(t, es.IsOpen())
+		assert.Empty(t, es.Codes())
 
 		// Test with a full hyperlink sequence
 		es = EscSeqParser{} // fresh parser
 		result := es.ParseString("\x1b]8;;https://example.com\x07Click here\x1b]8;;\x07")
-		// Code 8 (conceal) will be parsed
-		assert.Equal(t, "\x1b[8m", result)
+		assert.Equal(t, "", result)
+	})
+
+	t.Run("osi hyperlink has no codes", func(t *testing.T) {
+		for _, terminator := range []string{"\x07", "\x1b\\"} {
+			// neither the 8, nor the numbers in the params and in the URI
+			// are codes; and the 0 in the URI is not a reset
+			link := "\x1b]8;id=1;https://example.com/0;31;4" + terminator + "label\x1b]8;;" + terminator
+
+			es := EscSeqParser{}
+			assert.Equal(t, "", es.ParseString(link))
+			assert.False(t, es.InSequence())
+
+			// the colors around the hyperlink are left alone
+			es = EscSeqParser{}
+			assert.Equal(t, "\x1b[1;32m", es.ParseString("\x1b[1;32m"+link))
+			assert.Equal(t, "\x1b[1;32;44m", es.ParseString(link+"\x1b[44m"))
+		}
+
+		// "OSC 8" without the rest of a hyperlink is still the conceal code
+		es := EscSeqParser{}
+		es.ParseSeq("\x1b]8\\", escSeqKindOSI)
+		assert.Equal(t, []int{escCodeConceal}, es.Codes())
 	})
 
 	t.Run("consume directly", func(t *testing.T) {
@@ -460,6 +481,104 @@ func TestEscSeqParser_ControlSequences(t *testing.T) {
 			assert.False(t, es.InSequence())
 		})
 	}
+}
+
+func TestEscSeqParser_CodeOrder(t *testing.T) {
+	// the codes of a sequence apply in the order they appear in, and a
+	// terminal has only one foreground and one background color at a time
+	for _, test := range []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"fg replaces fg", "\x1b[31m\x1b[32m", "\x1b[32m"},
+		{"fg replaces fg in one sequence", "\x1b[31;32m", "\x1b[32m"},
+		{"bright fg replaces fg", "\x1b[31m\x1b[92m", "\x1b[92m"},
+		{"fg replaces bright fg", "\x1b[92m\x1b[31m", "\x1b[31m"},
+		{"bg replaces bg", "\x1b[41m\x1b[42m", "\x1b[42m"},
+		{"bright bg replaces bg", "\x1b[41m\x1b[102m", "\x1b[102m"},
+		{"fg leaves bg and attributes alone", "\x1b[1;31;44m\x1b[32m", "\x1b[1;32;44m"},
+		{"bg leaves fg and attributes alone", "\x1b[1;31;44m\x1b[42m", "\x1b[1;31;42m"},
+		{"fg replaces 256-color fg", "\x1b[38;5;10m\x1b[31m", "\x1b[31m"},
+		{"bg replaces 256-color bg", "\x1b[48;5;10m\x1b[41m", "\x1b[41m"},
+		{"256-color fg replaces fg in one sequence", "\x1b[31;38;5;10m", "\x1b[38;5;10m"},
+		{"fg replaces 256-color fg in one sequence", "\x1b[38;5;10;31m", "\x1b[31m"},
+		{"reset before a color", "\x1b[1;31m\x1b[0;32m", "\x1b[32m"},
+		{"reset before a 256-color", "\x1b[1;31m\x1b[0;38;5;10m", "\x1b[38;5;10m"},
+		{"reset after a 256-color", "\x1b[38;5;10;0m", ""},
+		{"reset without a parameter", "\x1b[1;31m\x1b[m", ""},
+		{"reset without a parameter before a color", "\x1b[1;31m\x1b[;32m", "\x1b[32m"},
+		{"256-color with a bad index is skipped whole", "\x1b[31m\x1b[38;5;999m", "\x1b[31m"},
+		{"256-color without an index is skipped whole", "\x1b[31m\x1b[38;5m", "\x1b[31m"},
+		{"38 with nothing after it is not a color", "\x1b[31m\x1b[38m", "\x1b[31;38m"},
+		{"48 with an unknown color type is not a color", "\x1b[41m\x1b[48;4m", "\x1b[4;41;48m"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			es := EscSeqParser{}
+			assert.Equal(t, test.want, es.ParseString(test.input))
+		})
+	}
+}
+
+func TestEscSeqParser_RGBColors(t *testing.T) {
+	// the numbers in "38;2;r;g;b" and "48;2;r;g;b" are color components, and
+	// not codes: a 0 in there is no reset, and a 1 does not turn bold on
+	for _, test := range []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"fg", "\x1b[38;2;255;0;0m", "\x1b[38;2;255;0;0m"},
+		{"bg", "\x1b[48;2;0;255;0m", "\x1b[48;2;0;255;0m"},
+		{"fg and bg", "\x1b[38;2;1;2;3m\x1b[48;2;4;5;6m", "\x1b[38;2;1;2;3;48;2;4;5;6m"},
+		{"fg and bg in one sequence", "\x1b[38;2;1;2;3;48;2;4;5;6m", "\x1b[38;2;1;2;3;48;2;4;5;6m"},
+		{"with attributes", "\x1b[1;38;2;1;2;3;4m", "\x1b[1;4;38;2;1;2;3m"},
+		{"with spaces", "\x1b[ 38 ; 2 ; 1 ; 2 ; 3 m", "\x1b[38;2;1;2;3m"},
+		{"fg replaces fg", "\x1b[38;2;1;2;3m\x1b[38;2;4;5;6m", "\x1b[38;2;4;5;6m"},
+		{"fg replaces standard fg", "\x1b[31m\x1b[38;2;1;2;3m", "\x1b[38;2;1;2;3m"},
+		{"fg replaces 256-color fg", "\x1b[38;5;10m\x1b[38;2;1;2;3m", "\x1b[38;2;1;2;3m"},
+		{"standard fg replaces fg", "\x1b[38;2;1;2;3m\x1b[31m", "\x1b[31m"},
+		{"256-color fg replaces fg", "\x1b[38;2;1;2;3m\x1b[38;5;10m", "\x1b[38;5;10m"},
+		{"bg replaces standard bg", "\x1b[41m\x1b[48;2;1;2;3m", "\x1b[48;2;1;2;3m"},
+		{"standard bg replaces bg", "\x1b[48;2;1;2;3m\x1b[41m", "\x1b[41m"},
+		{"fg leaves bg alone", "\x1b[48;2;4;5;6m\x1b[31m", "\x1b[31;48;2;4;5;6m"},
+		{"reset", "\x1b[38;2;1;2;3;48;2;4;5;6m\x1b[0m", ""},
+		{"reset fg", "\x1b[38;2;1;2;3;48;2;4;5;6m\x1b[39m", "\x1b[48;2;4;5;6m"},
+		{"reset bg", "\x1b[38;2;1;2;3;48;2;4;5;6m\x1b[49m", "\x1b[38;2;1;2;3m"},
+		{"reset before a color", "\x1b[1m\x1b[0;38;2;1;2;3m", "\x1b[38;2;1;2;3m"},
+		{"OSI format", "\x1b]38;2;1;2;3\\", "\x1b[38;2;1;2;3m"},
+		{"component out of range is skipped whole", "\x1b[1m\x1b[38;2;256;0;0m", "\x1b[1m"},
+		{"missing components are skipped whole", "\x1b[1m\x1b[38;2;0;0m", "\x1b[1m"},
+		{"codes after a bad color still apply", "\x1b[38;2;256;0;0;4m", "\x1b[4m"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			es := EscSeqParser{}
+			assert.Equal(t, test.want, es.ParseString(test.input))
+			assert.Equal(t, test.want != "", es.IsOpen())
+		})
+	}
+
+	// 24-bit colors have no Color to stand for them, and are not in Codes()
+	es := EscSeqParser{}
+	_, _, _, ok := es.FgRGB()
+	assert.False(t, ok)
+	_, _, _, ok = es.BgRGB()
+	assert.False(t, ok)
+
+	es.ParseString("\x1b[1;38;2;1;2;3;48;2;4;5;6m")
+	assert.Equal(t, []int{1}, es.Codes())
+	r, g, b, ok := es.FgRGB()
+	assert.Equal(t, []int{1, 2, 3}, []int{r, g, b})
+	assert.True(t, ok)
+	r, g, b, ok = es.BgRGB()
+	assert.Equal(t, []int{4, 5, 6}, []int{r, g, b})
+	assert.True(t, ok)
+
+	es.ParseString("\x1b[39m")
+	_, _, _, ok = es.FgRGB()
+	assert.False(t, ok)
+	_, _, _, ok = es.BgRGB()
+	assert.True(t, ok)
 }
 
 func TestEscSeqParser_SkipParse(t *testing.T) {
