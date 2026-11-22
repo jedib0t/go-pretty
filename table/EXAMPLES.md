@@ -263,16 +263,21 @@ to get:
 
 You can limit the number of lines rendered in a single "Page". This logic
 can handle rows with multiple lines too. The recommended way is to use the
-`Pager()` interface:
+`Pager()` interface. Add `fmt` to the imports and replace the final
+`t.Render()` call with:
 
 ```golang
-    pager := t.Pager(PageSize(1))
-    pager.Render()  // Render first page
-    pager.Next()    // Move to next page and render
-    pager.Prev()    // Move to previous page and render
-    pager.GoTo(3)   // Jump to page 3
-    pager.Location() // Get current page number
+    pager := t.Pager(table.PageSize(1))
+    pager.SetOutputMirror(nil) // Print the returned page text explicitly below.
+    fmt.Println(pager.Render())   // Print the first page
+    fmt.Println(pager.Next())     // Move forward one page and print it
+    fmt.Println(pager.Prev())     // Move back one page and print it
+    fmt.Println(pager.GoTo(3))    // Jump to page 3 and print it
+    fmt.Println(pager.Location()) // Print the current page number (3)
 ```
+
+The navigation methods return the selected page as a string without writing
+to the output mirror. `Render()` also writes to the mirror when one is set.
 
 Or use the deprecated `SetPageSize()` method for simple cases:
 ```golang
