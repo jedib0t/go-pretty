@@ -95,6 +95,34 @@ func TestWrap_ControlSequences(t *testing.T) {
 	}
 }
 
+// TestWrap_ColorChanges ensures that a new line restarts the colors that a
+// terminal would have in force at that point, and nothing else.
+func TestWrap_ColorChanges(t *testing.T) {
+	for _, wrap := range []struct {
+		name string
+		fn   func(string, int) string
+	}{{"hard", WrapHard}, {"soft", WrapSoft}, {"text", WrapText}} {
+		t.Run(wrap.name, func(t *testing.T) {
+			// the last line of the output shows what got restarted
+			lastLine := func(str string) string {
+				lines := strings.Split(wrap.fn(str, 4), "\n")
+				return lines[len(lines)-1]
+			}
+
+			// 24-bit colors: the components are not codes of their own
+			assert.Equal(t, "\x1b[38;2;1;2;3mghi\x1b[0m", lastLine("\x1b[38;2;1;2;3mabc def ghi\x1b[0m"))
+			assert.Equal(t, "\x1b[38;2;255;0;0mghi\x1b[0m", lastLine("\x1b[38;2;255;0;0mabc def ghi\x1b[0m"))
+			assert.Equal(t, "\x1b[48;2;0;0;9mghi\x1b[0m", lastLine("\x1b[48;2;0;0;9mabc def ghi\x1b[0m"))
+			// a color replaces the color before it
+			assert.Equal(t, "\x1b[32mjkl\x1b[0m", lastLine("\x1b[31mabc \x1b[32mdef ghi jkl\x1b[0m"))
+			// a reset in the same sequence as a color comes before the color
+			assert.Equal(t, "\x1b[38;5;10mjkl\x1b[0m", lastLine("\x1b[1;31mabc \x1b[0;38;5;10mdef ghi jkl\x1b[0m"))
+			// a reset without a parameter is a reset
+			assert.Equal(t, "jkl", lastLine("\x1b[31mabc\x1b[m def ghi jkl"))
+		})
+	}
+}
+
 // TestWrap_GraphemeClusters ensures that a grapheme cluster (like an emoji with
 // a skin tone) is moved to the next line as a whole when it does not fit in
 // what is left of the line, and that it is split only if it is wider than a
