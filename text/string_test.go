@@ -438,6 +438,16 @@ func TestStringWidthWithoutEscSequences(t *testing.T) {
 	assert.Equal(t, 10, StringWidthWithoutEscSequences("\x1b[33mGhost 生命\x1b[0m"))
 }
 
+func TestStringWidthWithoutEscSequences_LoneEscapeSequences(t *testing.T) {
+	// ESC sequences that are neither CSI nor OSI ("ESC 7" saves the cursor,
+	// "ESC c" resets the terminal, "ESC ( B" picks a charset) must not make
+	// the text that follows them invisible to measurement and cutting
+	assert.Equal(t, 5, StringWidthWithoutEscSequences("\x1b7Ghost"))
+	assert.Equal(t, 3, StringWidthWithoutEscSequences("a\x1bQbc"))
+	assert.Equal(t, 5, StringWidthWithoutEscSequences("\x1b(Bworld"))
+	assert.Equal(t, "\x1bcHel", Trim("\x1bcHello", 3))
+}
+
 func ExampleTrim() {
 	fmt.Printf("Trim(\"Ghost\", 0): %#v\n", Trim("Ghost", 0))
 	fmt.Printf("Trim(\"Ghost\", 3): %#v\n", Trim("Ghost", 3))

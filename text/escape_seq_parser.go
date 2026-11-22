@@ -42,6 +42,7 @@ const (
 	escSeqKindUnknown escSeqKind = iota
 	escSeqKindCSI
 	escSeqKindOSI
+	escSeqKindString
 )
 
 // private constants
@@ -174,18 +175,28 @@ func (s *EscSeqParser) Codes() []int {
 	return codes
 }
 
+// escSeqKindFor returns the kind of sequence introduced by char after ESC.
+func escSeqKindFor(char rune) escSeqKind {
+	switch char {
+	case EscapeStartRuneCSI:
+		return escSeqKindCSI
+	case EscapeStartRuneOSI:
+		return escSeqKindOSI
+	case 'P', 'X', '^', '_':
+		// DCS, SOS, PM and APC carry a payload; the sequence runs until
+		// ST ("ESC \") instead of ending at a final byte (ECMA-48)
+		return escSeqKindString
+	}
+	return escSeqKindUnknown
+}
+
 func (s *EscSeqParser) Consume(char rune) {
 	if !s.inEscSeq && char == EscapeStartRune {
 		s.inEscSeq = true
 		s.escSeqKind = escSeqKindUnknown
 		s.escapeSeq = s.escapeSeq[:0]
 	} else if s.inEscSeq && s.escSeqKind == escSeqKindUnknown {
-		switch char {
-		case EscapeStartRuneCSI:
-			s.escSeqKind = escSeqKindCSI
-		case EscapeStartRuneOSI:
-			s.escSeqKind = escSeqKindOSI
-		}
+		s.escSeqKind = escSeqKindFor(char)
 	}
 
 	if s.inEscSeq {
@@ -230,6 +241,12 @@ func (s *EscSeqParser) IsOpen() bool {
 }
 
 func (s *EscSeqParser) ParseSeq(seq string, seqKind escSeqKind) {
+	// only CSI and OSI sequences carry character attributes. A bare escape
+	// ("ESC 7"), a DCS/SOS/PM/APC string or any other kind must not be parsed
+	// as SGR: their parameter bytes are payload, not attribute codes.
+	if seqKind != escSeqKindCSI && seqKind != escSeqKindOSI {
+		return
+	}
 	if s.codes == nil {
 		s.codes = make(map[int]bool)
 	}
@@ -339,6 +356,19 @@ func (s *EscSeqParser) isEscapeStopRune(char rune) bool {
 	} else if (s.escSeqKind == escSeqKindCSI && len(s.escapeSeq) > len(EscapeStartCSI) && isCSIFinalRune(char)) ||
 		(s.escSeqKind == escSeqKindOSI && char == EscapeStopRuneOSI) {
 		return true
+	} else if s.escSeqKind == escSeqKindString && char == EscapeStopRuneOSI {
+		// ST is "ESC \\", but this stops at the backslash itself, just like
+		// the OSI branch above; a backslash inside a DCS/SOS/PM/APC payload
+		// therefore also ends the sequence early. Tightening both is a
+		// separate change.
+		return true
+	} else if s.escSeqKind == escSeqKindUnknown && isEscapeFinalRune(char) {
+		// an ESC that starts neither a CSI, an OSI, nor a string sequence
+		// forms an escape sequence of its own: "ESC 7" (save cursor), "ESC c"
+		// (reset terminal), or "ESC ( B" (select charset); such a sequence
+		// ends at its final byte (ECMA-48), and everything after it is
+		// visible text again
+		return true
 	}
 	return false
 }
@@ -358,6 +388,13 @@ func isForegroundColorCode(code int) bool {
 	return (code >= escCodeFgStdStart && code <= escCodeFgStdEnd) ||
 		(code >= escCodeFgBrightStart && code <= escCodeFgBrightEnd) ||
 		(code >= escCode256FgBase && code <= escCode256FgBase+escCode256Max)
+}
+
+// isEscapeFinalRune returns true if the given rune can end an escape sequence
+// that is not a CSI or an OSI sequence: "ESC", followed by intermediate bytes
+// (0x20-0x2F) and a final byte in the range 0x30-0x7E (ECMA-48, section 8.3.143).
+func isEscapeFinalRune(char rune) bool {
+	return char >= 0x30 && char <= 0x7E
 }
 
 // isRegularCode checks if a code is a regular code (not a 256-color encoded value).
