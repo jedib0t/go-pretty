@@ -535,6 +535,9 @@ func TestEscSeqParser_LoneEscapeSequences(t *testing.T) {
 		{"text after an unknown sequence", "a\x1bQbc"},
 		{"DCS payload until ST", "\x1bP61;1|1;2\x1b\\"},
 		{"DCS parameters are not SGR codes", "\x1bP1;2;3\x1b\\"},
+		{"string starter after an intermediate byte", "\x1b(X"},
+		{"CSI starter after an intermediate byte", "\x1b#["},
+		{"OSI starter after an intermediate byte", "\x1b ]"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			es := EscSeqParser{}

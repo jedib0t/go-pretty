@@ -39,10 +39,11 @@ const (
 type escSeqKind int
 
 const (
-	escSeqKindUnknown escSeqKind = iota
-	escSeqKindCSI
-	escSeqKindOSI
-	escSeqKindString
+	escSeqKindUnknown escSeqKind = iota // nothing but the ESC has been seen
+	escSeqKindCSI                       // "ESC [": Control Sequence Introducer
+	escSeqKindOSI                       // "ESC ]": Operating System Command
+	escSeqKindString                    // "ESC P", "ESC X", "ESC ^", "ESC _": DCS, SOS, PM, APC
+	escSeqKindPlain                     // any other, like "ESC 7" or "ESC ( B"
 )
 
 // private constants
@@ -144,7 +145,8 @@ type EscSeqParser struct {
 
 	// inEscSeq indicates whether the parser is currently inside an escape sequence.
 	inEscSeq bool
-	// escSeqKind identifies the type of escape sequence being parsed (CSI or OSI).
+	// escSeqKind identifies the type of escape sequence being parsed; it is
+	// decided by the rune that follows the ESC.
 	escSeqKind escSeqKind
 	// escapeSeq accumulates the current escape sequence being parsed; it is
 	// bounded by escSeqMaxLength and reused across sequences.
@@ -183,7 +185,9 @@ func (s *EscSeqParser) Codes() []int {
 	return codes
 }
 
-// escSeqKindFor returns the kind of sequence introduced by char after ESC.
+// escSeqKindFor returns the kind of sequence introduced by the char that comes
+// right after ESC. Only that char decides the kind: in "ESC ( X" the "X" is the
+// final byte of a plain escape sequence, and does not start a string.
 func escSeqKindFor(char rune) escSeqKind {
 	switch char {
 	case EscapeStartRuneCSI:
@@ -195,7 +199,7 @@ func escSeqKindFor(char rune) escSeqKind {
 		// ST ("ESC \") instead of ending at a final byte (ECMA-48)
 		return escSeqKindString
 	}
-	return escSeqKindUnknown
+	return escSeqKindPlain
 }
 
 func (s *EscSeqParser) Consume(char rune) {
@@ -370,7 +374,7 @@ func (s *EscSeqParser) isEscapeStopRune(char rune) bool {
 		// therefore also ends the sequence early. Tightening both is a
 		// separate change.
 		return true
-	} else if s.escSeqKind == escSeqKindUnknown && isEscapeFinalRune(char) {
+	} else if s.escSeqKind == escSeqKindPlain && isEscapeFinalRune(char) {
 		// an ESC that starts neither a CSI, an OSI, nor a string sequence
 		// forms an escape sequence of its own: "ESC 7" (save cursor), "ESC c"
 		// (reset terminal), or "ESC ( B" (select charset); such a sequence

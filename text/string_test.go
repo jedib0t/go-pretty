@@ -446,6 +446,13 @@ func TestStringWidthWithoutEscSequences_LoneEscapeSequences(t *testing.T) {
 	assert.Equal(t, 3, StringWidthWithoutEscSequences("a\x1bQbc"))
 	assert.Equal(t, 5, StringWidthWithoutEscSequences("\x1b(Bworld"))
 	assert.Equal(t, "\x1bcHel", Trim("\x1bcHello", 3))
+
+	// only the rune right after the ESC decides the kind of sequence: after an
+	// intermediate byte, the runes that would start a string or a CSI sequence
+	// are final bytes like any other
+	assert.Equal(t, 5, StringWidthWithoutEscSequences("\x1b(XGhost"))
+	assert.Equal(t, 5, StringWidthWithoutEscSequences("\x1b#PGhost"))
+	assert.Equal(t, 8, StringWidthWithoutEscSequences("\x1b([31mGhost"))
 }
 
 func ExampleTrim() {
