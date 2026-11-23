@@ -520,6 +520,32 @@ func TestEscSeqParser_CodeOrder(t *testing.T) {
 	}
 }
 
+func TestEscSeqParser_LoneEscapeSequences(t *testing.T) {
+	// an ESC that is not followed by "[" or "]" starts a two-byte escape
+	// sequence like "ESC 7" (save cursor) or "ESC c" (reset terminal); it must
+	// end at its final byte (ECMA-48) without swallowing the text after it
+	for _, test := range []struct {
+		name  string
+		input string
+	}{
+		{"save cursor", "\x1b7"},
+		{"reset terminal", "\x1bc"},
+		{"charset selection", "\x1b(B"},
+		{"text after save cursor", "\x1b7Ghost"},
+		{"text after an unknown sequence", "a\x1bQbc"},
+		{"DCS payload until ST", "\x1bP61;1|1;2\x1b\\"},
+		{"DCS parameters are not SGR codes", "\x1bP1;2;3\x1b\\"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			es := EscSeqParser{}
+			assert.Equal(t, "", es.ParseString(test.input))
+			assert.False(t, es.InSequence())
+			assert.Empty(t, es.Codes())
+			assert.False(t, es.IsOpen())
+		})
+	}
+}
+
 func TestEscSeqParser_RGBColors(t *testing.T) {
 	// the numbers in "38;2;r;g;b" and "48;2;r;g;b" are color components, and
 	// not codes: a 0 in there is no reset, and a 1 does not turn bold on
