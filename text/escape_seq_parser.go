@@ -185,6 +185,15 @@ func (s *EscSeqParser) Codes() []int {
 	return codes
 }
 
+// cutsStringShort returns true if the char shows that a sequence that carries
+// a payload is over without an ST: the char before it was an ESC, and the char
+// is not the backslash that makes an ST of the two.
+func (s *EscSeqParser) cutsStringShort(char rune) bool {
+	return s.inEscSeq && char != EscapeStopRuneOSI &&
+		(s.escSeqKind == escSeqKindOSI || s.escSeqKind == escSeqKindString) &&
+		s.escapeSeq[len(s.escapeSeq)-1] == byte(EscapeStartRune)
+}
+
 // escSeqKindFor returns the kind of sequence introduced by the char that comes
 // right after ESC. Only that char decides the kind: in "ESC ( X" the "X" is the
 // final byte of a plain escape sequence, and does not start a string.
@@ -203,6 +212,14 @@ func escSeqKindFor(char rune) escSeqKind {
 }
 
 func (s *EscSeqParser) Consume(char rune) {
+	if s.cutsStringShort(char) {
+		// the ESC before the char was not the first half of an ST: like on a
+		// terminal, it cut the string short and started a new escape
+		// sequence, which the char is a part of
+		s.Reset()
+		s.Consume(EscapeStartRune)
+	}
+
 	if s.startsSequence(char) {
 		s.inEscSeq = true
 		s.escSeqKind = escSeqKindUnknown
@@ -360,29 +377,45 @@ func isBackgroundColorCode(code int) bool {
 		(code >= escCode256BgBase && code <= escCode256BgBase+escCode256Max)
 }
 
+// isEscapeStopRune returns true if the char, which is the last one in the
+// escape sequence so far, ends the sequence.
 func (s *EscSeqParser) isEscapeStopRune(char rune) bool {
-	if bytes.HasPrefix(s.escapeSeq, escapeStartConcealOSIBytes) {
-		if bytes.HasSuffix(s.escapeSeq, escapeStopConcealOSIBytes) {
-			return true
-		}
-	} else if (s.escSeqKind == escSeqKindCSI && len(s.escapeSeq) > len(EscapeStartCSI) && isCSIFinalRune(char)) ||
-		(s.escSeqKind == escSeqKindOSI && char == EscapeStopRuneOSI) {
-		return true
-	} else if s.escSeqKind == escSeqKindString && char == EscapeStopRuneOSI {
-		// ST is "ESC \", but this stops at the backslash itself, just like
-		// the OSI branch above; a backslash inside a DCS/SOS/PM/APC payload
-		// therefore also ends the sequence early. Tightening both is a
-		// separate change.
-		return true
-	} else if s.escSeqKind == escSeqKindPlain && isEscapeFinalRune(char) {
+	switch s.escSeqKind {
+	case escSeqKindCSI:
+		return len(s.escapeSeq) > len(EscapeStartCSI) && isCSIFinalRune(char)
+	case escSeqKindPlain:
 		// an ESC that starts neither a CSI, an OSI, nor a string sequence
 		// forms an escape sequence of its own: "ESC 7" (save cursor), "ESC c"
 		// (reset terminal), or "ESC ( B" (select charset); such a sequence
-		// ends at its final byte (ECMA-48), and everything after it is
-		// visible text again
-		return true
+		// ends at its final byte, and everything after it is visible text
+		return isEscapeFinalRune(char)
+	case escSeqKindOSI, escSeqKindString:
+		return char == EscapeStopRuneOSI && (s.endsInST() || s.isLegacyOSI())
 	}
 	return false
+}
+
+// endsInST returns true if the escape sequence so far ends in an ST ("ESC \"),
+// which is what ends a sequence that carries a payload.
+func (s *EscSeqParser) endsInST() bool {
+	return bytes.HasSuffix(s.escapeSeq, escapeStopConcealOSIBytes)
+}
+
+// isLegacyOSI returns true if the escape sequence so far is "ESC ]", a list of
+// codes, and a backslash. This package has always read that as the OSI form of
+// a "CSI ... m" sequence, which ends at the backslash without an ESC before it
+// (EscapeStopOSI). Any other OSI sequence is an Operating System Command, where
+// a backslash is a part of the payload like any other character.
+func (s *EscSeqParser) isLegacyOSI() bool {
+	if s.escSeqKind != escSeqKindOSI || bytes.HasPrefix(s.escapeSeq, escapeStartConcealOSIBytes) {
+		return false
+	}
+	for _, b := range s.escapeSeq[len(EscapeStartOSI) : len(s.escapeSeq)-len(EscapeStopOSI)] {
+		if (b < '0' || b > '9') && b != ';' && b != ' ' {
+			return false
+		}
+	}
+	return true
 }
 
 // isCSIFinalRune returns true if the given rune ends a CSI sequence. A CSI

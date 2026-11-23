@@ -549,6 +549,58 @@ func TestEscSeqParser_LoneEscapeSequences(t *testing.T) {
 	}
 }
 
+func TestEscSeqParser_StringSequences(t *testing.T) {
+	// a sequence that carries a payload (OSC, DCS, SOS, PM, APC) ends at the
+	// ST ("ESC \"), and a backslash on its own is a part of the payload
+	for _, test := range []struct {
+		name  string
+		input string
+		want  string // the sequence in force after the input
+	}{
+		{"DCS with a backslash", "\x1bPa\\b\x1b\\", ""},
+		{"APC with a backslash", "\x1b_a\\b\x1b\\", ""},
+		{"OSC with a backslash", "\x1b]0;C:\\dir\x1b\\", ""},
+		{"hyperlink with a backslash", "\x1b]8;;http://example.com/a\\b\x1b\\", ""},
+		{"empty DCS", "\x1bP\x1b\\", ""},
+		// an ESC that is not followed by a backslash cuts the string short
+		// and starts a new sequence
+		{"OSC cut short by a CSI sequence", "\x1b]0;title\x1b[31m", "\x1b[31m"},
+		{"DCS cut short by a plain sequence", "\x1bPabc\x1b7", ""},
+		{"SOS cut short by two ESCs", "\x1bXabc\x1b\x1b[31m", "\x1b[31m"},
+		{"PM cut short by another string", "\x1b^abc\x1b]0;title\x1b\\", ""},
+		{"hyperlink cut short by a CSI sequence", "\x1b]8;;http://example.com\x1b[31m", "\x1b[31m"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			es := EscSeqParser{}
+			assert.Equal(t, test.want, es.ParseString(test.input))
+			assert.False(t, es.InSequence())
+			assert.Equal(t, 5, StringWidthWithoutEscSequences(test.input+"Ghost"))
+			assert.Equal(t, "Ghost", StripEscape(test.input+"Ghost"))
+		})
+	}
+
+	// without the ST, the sequence is not over
+	for _, input := range []string{"\x1bPa\\b", "\x1b]0;C:\\dir", "\x1b]8;;\\", "\x1bXabc\x1b"} {
+		es := EscSeqParser{}
+		es.ParseString(input)
+		assert.True(t, es.InSequence(), "input=%q", input)
+	}
+
+	// the OSI form of a "CSI ... m" sequence is a list of codes that ends at
+	// a backslash without an ESC before it
+	for _, test := range []struct{ input, want string }{
+		{"\x1b]31\\", "\x1b[31m"},
+		{"\x1b]1;31\\", "\x1b[1;31m"},
+		{"\x1b] 1 ; 31 \\", "\x1b[1;31m"},
+		{"\x1b]31\\\x1b]0\\", ""},
+		{"\x1b]\\", ""},
+	} {
+		es := EscSeqParser{}
+		assert.Equal(t, test.want, es.ParseString(test.input), "input=%q", test.input)
+		assert.False(t, es.InSequence(), "input=%q", test.input)
+	}
+}
+
 func TestEscSeqParser_Restart(t *testing.T) {
 	// an ESC inside an escape sequence cuts that sequence short, and starts a
 	// new one: nothing of the first one is left to garble the second
