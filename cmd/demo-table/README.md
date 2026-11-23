@@ -290,7 +290,7 @@ Table with Borders Everywhere!
 [CSV] Unite!
 [CSV] #,First Name,Last Name,Salary,
 [CSV] 1,Arya,Stark,3000,
-[CSV] 20,Jon,Snow,2000,"You know nothing\, Jon Snow!"
+[CSV] 20,Jon,Snow,2000,"You know nothing, Jon Snow!"
 [CSV] 300,Tyrion,Lannister,5000,
 [CSV] ,,Total,10000,
 [CSV] (c) No one!

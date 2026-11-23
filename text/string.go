@@ -239,7 +239,7 @@ func repeatAndTrim(str string, maxLen int) string {
 //	RuneCount("\x1b[33mGhost\x1b[0m") == 5
 //	RuneCount("\x1b[33mGhost\x1b[0") == 5
 //
-// Deprecated: in favor of RuneWidthWithoutEscSequences
+// Deprecated: in favor of StringWidthWithoutEscSequences
 func RuneCount(str string) int {
 	return StringWidthWithoutEscSequences(str)
 }
