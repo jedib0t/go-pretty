@@ -126,6 +126,7 @@ func Test_convertEscSequencesToSpans(t *testing.T) {
 			{"window title that ends in a BEL", "\x1b[31mred \x1b]0;my title\aafter\x1b[0m", "<span class=\"fg-red\">red after</span>"},
 			{"window title is not a reset", "\x1b[31mred \x1b]0;my title\x1b\\after\x1b[0m", "<span class=\"fg-red\">red after</span>"},
 			{"working directory is not reverse video", "\x1b]7;file://host/home\x1b\\text", "text"},
+			{"malformed sequence leaves the text alone", "\x1b[31mred\x1b\nmore\x1b[3世界\x1b[0m", "<span class=\"fg-red\">red\nmore世界</span>"},
 			{"hyperlink within a color", "\x1b[31mred \x1b]8;;http://example.com/0\x07link\x1b]8;;\x07 after\x1b[0m", "<span class=\"fg-red\">red link after</span>"},
 			{"open span at end", text.FgRed.EscapeSeq() + "Red Text", "<span class=\"fg-red\">Red Text</span>"},
 		}

@@ -601,6 +601,80 @@ func TestEscSeqParser_StringSequences(t *testing.T) {
 	}
 }
 
+func TestEscSeqParser_MalformedSequences(t *testing.T) {
+	// a CSI or a plain escape sequence cannot have a control character or a
+	// non-ASCII rune in it: the sequence is dropped, and that rune and all
+	// that follows it are text
+	for _, test := range []struct {
+		name  string
+		input string
+		want  string // the text
+	}{
+		{"new-line after ESC", "\x1b\nGhost", "\nGhost"},
+		{"tab after ESC", "\x1b\tGhost", "\tGhost"},
+		{"non-ASCII rune after ESC", "\x1bé7Ghost", "é7Ghost"},
+		{"wide rune after ESC", "\x1b世Ghost", "世Ghost"},
+		{"DEL after ESC", "\x1b\x7fGhost", "\x7fGhost"},
+		{"new-line inside a CSI sequence", "\x1b[31\nmGhost", "\nmGhost"},
+		{"non-ASCII rune inside a CSI sequence", "\x1b[3éGhost", "éGhost"},
+		{"new-line after an intermediate byte", "\x1b(\nGhost", "\nGhost"},
+		{"new-line after a string cut short", "\x1bPabc\x1b\nGhost", "\nGhost"},
+		{"ESC at the end of every line", "Jon\x1b\nSnow\x1b\n", "Jon\nSnow\n"},
+		// a sequence that carries a payload takes any rune
+		{"new-line inside a string sequence", "\x1bPa\nb\x1b\\Ghost", "Ghost"},
+		{"non-ASCII rune inside a hyperlink", "\x1b]8;;http://example.com/世\x1b\\Ghost", "Ghost"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			es := EscSeqParser{}
+			assert.Equal(t, "", es.ParseString(test.input))
+			assert.False(t, es.InSequence())
+			assert.Equal(t, test.want, StripEscape(test.input))
+			assert.Equal(t, StringWidthWithoutEscSequences(test.want), StringWidthWithoutEscSequences(test.input))
+			assert.Equal(t, LongestLineLen(test.want), LongestLineLen(test.input))
+		})
+	}
+
+	// the sequence that got dropped sets nothing
+	es := EscSeqParser{}
+	assert.Equal(t, "\x1b[32m", es.ParseString("\x1b[32m\x1b[1;31\nm"))
+}
+
+func TestEscSeqParser_ParseRune(t *testing.T) {
+	// ParseRune tells the runes of the escape sequences from the text; "s"
+	// marks the former and "." the latter
+	for _, test := range []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"text", "Ghost", "....."},
+		{"CSI sequence", "a\x1b[31mb\x1b[0mc", ".sssss.ssss."},
+		{"plain sequence", "a\x1b7b\x1b(Bc", ".ss.sss."},
+		{"hyperlink", "a\x1b]8;;x\x1b\\b\x1b]8;;\ac", ".ssssssss.ssssss."},
+		{"string sequence", "a\x1bPq\x1b\\b", ".sssss."},
+		{"ESC that starts over", "a\x1b[3\x1b[1mb", ".sssssss."},
+		{"string cut short", "a\x1bXq\x1b[1mb", ".sssssss."},
+		{"sequence that never ends", "a\x1b[31", ".ssss"},
+		{"rune that breaks a plain sequence", "a\x1b\nb", ".s.."},
+		{"rune that breaks a CSI sequence", "a\x1b[3世b", ".sss.."},
+		{"rune that breaks a string cut short", "a\x1bXq\x1b\nb", ".ssss.."},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			for _, es := range []EscSeqParser{{}, {skipParse: true}} {
+				got := strings.Builder{}
+				for _, char := range test.input {
+					if es.ParseRune(char) {
+						got.WriteByte('s')
+					} else {
+						got.WriteByte('.')
+					}
+				}
+				assert.Equal(t, test.want, got.String())
+			}
+		})
+	}
+}
+
 func TestEscSeqParser_OperatingSystemCommands(t *testing.T) {
 	// the number that an Operating System Command begins with says which
 	// command it is; neither that, nor the numbers in the rest of it are codes

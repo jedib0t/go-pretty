@@ -123,6 +123,31 @@ func TestWrap_ColorChanges(t *testing.T) {
 	}
 }
 
+// TestWrap_MalformedSequences ensures that the text after an escape sequence
+// that is cut short by a rune it cannot have is wrapped like any other text.
+func TestWrap_MalformedSequences(t *testing.T) {
+	for _, wrap := range []struct {
+		name string
+		fn   func(string, int) string
+	}{{"hard", WrapHard}, {"soft", WrapSoft}, {"text", WrapText}} {
+		t.Run(wrap.name, func(t *testing.T) {
+			assert.Equal(t, "\x1b世界\nab", wrap.fn("\x1b世界ab", 4))
+			assert.Equal(t, "\x1b[3世界\nab", wrap.fn("\x1b[3世界ab", 4))
+			assert.Equal(t, "ab\x1bé \ncd", wrap.fn("ab\x1bé cd", 4))
+
+			// the ESC that is left behind changes nothing about the wrapping
+			for _, str := range []string{
+				"ab\x1bé cd",
+				"\x1b[31mab\x1bé cd efgh\x1b[0m",
+				"\x1b]8;;http://a.test/\x1b\\ab\x1bé cd\x1b]8;;\x1b\\",
+			} {
+				without := strings.Replace(str, "\x1bé", "é", 1)
+				assert.Equal(t, wrap.fn(without, 4), strings.Replace(wrap.fn(str, 4), "\x1bé", "é", 1), "str=%q", str)
+			}
+		})
+	}
+}
+
 // TestWrap_GraphemeClusters ensures that a grapheme cluster (like an emoji with
 // a skin tone) is moved to the next line as a whole when it does not fit in
 // what is left of the line, and that it is split only if it is wider than a

@@ -208,38 +208,11 @@ func escSeqKindFor(char rune) escSeqKind {
 	return escSeqKindPlain
 }
 
+// Consume parses the given rune as the next one in the text. Use ParseRune
+// instead to know if the rune is a part of an escape sequence: InSequence()
+// does not tell that for a rune that ends a sequence.
 func (s *EscSeqParser) Consume(char rune) {
-	if s.cutsStringShort(char) {
-		// the ESC before the char was not the first half of an ST: like on a
-		// terminal, it cut the string short and started a new escape
-		// sequence, which the char is a part of
-		s.Reset()
-		s.Consume(EscapeStartRune)
-	}
-
-	if s.startsSequence(char) {
-		s.inEscSeq = true
-		s.escSeqKind = escSeqKindUnknown
-		s.escapeSeq = s.escapeSeq[:0]
-	} else if s.inEscSeq && s.escSeqKind == escSeqKindUnknown {
-		s.escSeqKind = escSeqKindFor(char)
-	}
-
-	if s.inEscSeq {
-		s.escapeSeq = utf8.AppendRune(s.escapeSeq, char)
-
-		// abort on absurdly long (most likely malformed/unterminated)
-		// sequences instead of accumulating them without limit
-		if len(s.escapeSeq) > escSeqMaxLength {
-			s.Reset()
-			return
-		}
-
-		if s.isEscapeStopRune(char) {
-			s.parseEscapeSeq()
-			s.Reset()
-		}
-	}
+	s.ParseRune(char)
 }
 
 // FgRGB returns the active 24-bit foreground color, as set by a sequence like
@@ -254,6 +227,49 @@ func (s *EscSeqParser) InSequence() bool {
 
 func (s *EscSeqParser) IsOpen() bool {
 	return len(s.codes) > 0 || s.fgRGB.set || s.bgRGB.set
+}
+
+// ParseRune parses the given rune as the next one in the text, and returns
+// true if the rune is a part of an escape sequence; false means that the rune
+// is text.
+//
+// A rune that an escape sequence cannot have (see breaksSequence) is text: the
+// sequence it shows up in is malformed, and is dropped without any effect.
+func (s *EscSeqParser) ParseRune(char rune) bool {
+	if s.cutsStringShort(char) {
+		// the ESC before the char was not the first half of an ST: like on a
+		// terminal, it cut the string short and started a new escape
+		// sequence, which the char is a part of
+		s.Reset()
+		s.ParseRune(EscapeStartRune)
+	}
+
+	if s.startsSequence(char) {
+		s.inEscSeq = true
+		s.escSeqKind = escSeqKindUnknown
+		s.escapeSeq = s.escapeSeq[:0]
+	} else if s.inEscSeq && s.escSeqKind == escSeqKindUnknown {
+		s.escSeqKind = escSeqKindFor(char)
+	}
+
+	if !s.inEscSeq {
+		return false
+	}
+	if s.breaksSequence(char) {
+		s.Reset()
+		return false
+	}
+
+	s.escapeSeq = utf8.AppendRune(s.escapeSeq, char)
+	if len(s.escapeSeq) > escSeqMaxLength {
+		// abort on absurdly long (most likely malformed/unterminated)
+		// sequences instead of accumulating them without limit
+		s.Reset()
+	} else if s.isEscapeStopRune(char) {
+		s.parseEscapeSeq()
+		s.Reset()
+	}
+	return true
 }
 
 func (s *EscSeqParser) ParseSeq(seq string, seqKind escSeqKind) {
@@ -297,7 +313,7 @@ func (s *EscSeqParser) ParseSeq(seq string, seqKind escSeqKind) {
 func (s *EscSeqParser) ParseString(str string) string {
 	s.escapeSeq, s.inEscSeq, s.escSeqKind = s.escapeSeq[:0], false, escSeqKindUnknown
 	for _, char := range str {
-		s.Consume(char)
+		s.ParseRune(char)
 	}
 	return s.Sequence()
 }
@@ -333,6 +349,16 @@ func (s *EscSeqParser) Sequence() string {
 		parts = append(parts, fmt.Sprintf("%d;%d;%d;%d;%d", escCode256BgStart, escCodeRGBColor, c.r, c.g, c.b))
 	}
 	return EscapeStart + strings.Join(parts, ";") + EscapeStop
+}
+
+// breaksSequence returns true if the char cannot be a part of the escape
+// sequence being parsed. A CSI or a plain escape sequence is made of the bytes
+// 0x20-0x7E alone: a control character (like a new-line) or a non-ASCII rune
+// in one means that the sequence is malformed, and that the text has resumed.
+// The sequences that carry a payload are not as strict about what it has.
+func (s *EscSeqParser) breaksSequence(char rune) bool {
+	return (s.escSeqKind == escSeqKindCSI || s.escSeqKind == escSeqKindPlain) &&
+		(char < 0x20 || char > 0x7E)
 }
 
 // clearAllBackgroundColors clears the active background color, whichever
