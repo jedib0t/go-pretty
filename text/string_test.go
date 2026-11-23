@@ -447,6 +447,10 @@ func TestStringWidthWithoutEscSequences_LoneEscapeSequences(t *testing.T) {
 	assert.Equal(t, 5, StringWidthWithoutEscSequences("\x1b(Bworld"))
 	assert.Equal(t, "\x1bcHel", Trim("\x1bcHello", 3))
 
+	// the title of the window, as set by a shell prompt, takes no space
+	assert.Equal(t, 5, StringWidthWithoutEscSequences("\x1b]0;user@host: ~\aGhost"))
+	assert.Equal(t, "\x1b]0;user@host: ~\aGho", Trim("\x1b]0;user@host: ~\aGhost", 3))
+
 	// only the rune right after the ESC decides the kind of sequence: after an
 	// intermediate byte, the runes that would start a string or a CSI sequence
 	// are final bytes like any other

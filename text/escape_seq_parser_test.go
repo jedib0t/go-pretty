@@ -628,8 +628,28 @@ func TestEscSeqParser_OperatingSystemCommands(t *testing.T) {
 		})
 	}
 
-	// ParseSeq reads nothing but the OSI form of a "CSI ... m" sequence
+	// an Operating System Command ends at a BEL as well
+	for _, input := range []string{
+		"\x1b]0;my title\a",
+		"\x1b]2;1;4;31\a",
+		"\x1b]104\a",
+		"\x1b]52;c;aGVsbG8=\a",
+		"\x1b]8;;http://example.com\a",
+		"\x1b]0;C:\\dir\a",
+	} {
+		es := EscSeqParser{}
+		assert.Equal(t, "\x1b[1;31m", es.ParseString("\x1b[1;31m"+input), "input=%q", input)
+		assert.False(t, es.InSequence(), "input=%q", input)
+		assert.Equal(t, 5, StringWidthWithoutEscSequences(input+"Ghost"), "input=%q", input)
+		assert.Equal(t, "Ghost", StripEscape(input+"Ghost"), "input=%q", input)
+	}
+	// the other sequences that carry a payload do not
 	es := EscSeqParser{}
+	es.ParseString("\x1bPq#0;2;0;0;0\a")
+	assert.True(t, es.InSequence())
+
+	// ParseSeq reads nothing but the OSI form of a "CSI ... m" sequence
+	es = EscSeqParser{}
 	es.ParseSeq("\x1b]7;file://host/home\x1b\\", escSeqKindOSI)
 	es.ParseSeq("\x1b]104\x1b\\", escSeqKindOSI)
 	es.ParseSeq("\x1b]104\a", escSeqKindOSI)

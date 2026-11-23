@@ -83,12 +83,9 @@ const (
 	escSeqMaxLength = 2048
 )
 
-// []byte forms of the OSC 8 hyperlink markers for prefix/suffix checks on the
-// escape sequence buffer without allocating per call
-var (
-	escapeStartConcealOSIBytes = []byte(escapeStartConcealOSI)
-	escapeStopConcealOSIBytes  = []byte(escapeStopConcealOSI)
-)
+// []byte form of the ST ("ESC \") for suffix checks on the escape sequence
+// buffer without allocating per call
+var escapeStopConcealOSIBytes = []byte(escapeStopConcealOSI)
 
 // 256-color and 24-bit ("true") color codes: "38;5;n" and "38;2;r;g;b" set
 // the foreground, and "48;5;n" and "48;2;r;g;b" set the background
@@ -238,16 +235,6 @@ func (s *EscSeqParser) Consume(char rune) {
 			return
 		}
 
-		// --- FIX for OSC 8 hyperlinks (e.g. \x1b]8;;url\x07label\x1b]8;;\x07)
-		if s.escSeqKind == escSeqKindOSI &&
-			bytes.HasPrefix(s.escapeSeq, escapeStartConcealOSIBytes) &&
-			char == escRuneBEL { // BEL
-
-			s.parseEscapeSeq()
-			s.Reset()
-			return
-		}
-
 		if s.isEscapeStopRune(char) {
 			s.parseEscapeSeq()
 			s.Reset()
@@ -390,9 +377,14 @@ func (s *EscSeqParser) isEscapeStopRune(char rune) bool {
 		// (reset terminal), or "ESC ( B" (select charset); such a sequence
 		// ends at its final byte, and everything after it is visible text
 		return isEscapeFinalRune(char)
-	case escSeqKindOSI, escSeqKindString:
-		return char == EscapeStopRuneOSI && (s.endsInST() ||
-			(s.escSeqKind == escSeqKindOSI && isLegacyOSI(string(s.escapeSeq))))
+	case escSeqKindOSI:
+		// an Operating System Command ends at an ST, or at a BEL: the latter
+		// is what xterm began with, and what most programs still emit, as in
+		// "\x1b]0;title\x07" or "\x1b]8;;url\x07label\x1b]8;;\x07"
+		return char == escRuneBEL ||
+			(char == EscapeStopRuneOSI && (s.endsInST() || isLegacyOSI(string(s.escapeSeq))))
+	case escSeqKindString:
+		return char == EscapeStopRuneOSI && s.endsInST()
 	}
 	return false
 }
