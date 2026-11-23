@@ -34,21 +34,13 @@ func (c *escSeqToSpanConverter) Convert(str string) string {
 
 	// Process the string character by character
 	for _, char := range str {
-		wasInSequence := c.esp.InSequence()
-		c.esp.Consume(char)
-
-		if c.esp.InSequence() {
-			// We're inside an escape sequence, skip it (don't write to result)
-			continue
-		}
-
-		if wasInSequence {
-			// We just finished an escape sequence, update the span
-			c.updateSpan(c.spanAttributes())
-		} else {
+		if !c.esp.ParseRune(char) {
 			// Regular character, escape it for HTML safety and write it
 			// (will be inside current span if colors are active)
 			c.writeEscapedRune(char)
+		} else if !c.esp.InSequence() {
+			// We just finished an escape sequence, update the span
+			c.updateSpan(c.spanAttributes())
 		}
 	}
 

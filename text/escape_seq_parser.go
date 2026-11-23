@@ -39,10 +39,11 @@ const (
 type escSeqKind int
 
 const (
-	escSeqKindUnknown escSeqKind = iota
-	escSeqKindCSI
-	escSeqKindOSI
-	escSeqKindString
+	escSeqKindUnknown escSeqKind = iota // nothing but the ESC has been seen
+	escSeqKindCSI                       // "ESC [": Control Sequence Introducer
+	escSeqKindOSI                       // "ESC ]": Operating System Command
+	escSeqKindString                    // "ESC P", "ESC X", "ESC ^", "ESC _": DCS, SOS, PM, APC
+	escSeqKindPlain                     // any other, like "ESC 7" or "ESC ( B"
 )
 
 // private constants
@@ -68,18 +69,23 @@ const (
 	escapeStartConcealOSI = "\x1b]8;"
 	escapeStopConcealOSI  = "\x1b\\"
 
+	// the runes that follow ESC to start a sequence that carries a payload
+	// until ST: Device Control String, Start Of String, Privacy Message and
+	// Application Program Command
+	escapeStartRuneDCS = 'P'
+	escapeStartRuneSOS = 'X'
+	escapeStartRunePM  = '^'
+	escapeStartRuneAPC = '_'
+
 	// escSeqMaxLength bounds the accumulated escape sequence; real terminals
 	// cap sequences in the low KBs, and anything longer here is most likely
 	// malformed input that would otherwise grow the buffer without limit
 	escSeqMaxLength = 2048
 )
 
-// []byte forms of the OSC 8 hyperlink markers for prefix/suffix checks on the
-// escape sequence buffer without allocating per call
-var (
-	escapeStartConcealOSIBytes = []byte(escapeStartConcealOSI)
-	escapeStopConcealOSIBytes  = []byte(escapeStopConcealOSI)
-)
+// []byte form of the ST ("ESC \") for suffix checks on the escape sequence
+// buffer without allocating per call
+var escapeStopConcealOSIBytes = []byte(escapeStopConcealOSI)
 
 // 256-color and 24-bit ("true") color codes: "38;5;n" and "38;2;r;g;b" set
 // the foreground, and "48;5;n" and "48;2;r;g;b" set the background
@@ -136,7 +142,8 @@ type EscSeqParser struct {
 
 	// inEscSeq indicates whether the parser is currently inside an escape sequence.
 	inEscSeq bool
-	// escSeqKind identifies the type of escape sequence being parsed (CSI or OSI).
+	// escSeqKind identifies the type of escape sequence being parsed; it is
+	// decided by the rune that follows the ESC.
 	escSeqKind escSeqKind
 	// escapeSeq accumulates the current escape sequence being parsed; it is
 	// bounded by escSeqMaxLength and reused across sequences.
@@ -175,55 +182,37 @@ func (s *EscSeqParser) Codes() []int {
 	return codes
 }
 
-// escSeqKindFor returns the kind of sequence introduced by char after ESC.
+// cutsStringShort returns true if the char shows that a sequence that carries
+// a payload is over without an ST: the char before it was an ESC, and the char
+// is not the backslash that makes an ST of the two.
+func (s *EscSeqParser) cutsStringShort(char rune) bool {
+	return s.inEscSeq && char != EscapeStopRuneOSI &&
+		(s.escSeqKind == escSeqKindOSI || s.escSeqKind == escSeqKindString) &&
+		s.escapeSeq[len(s.escapeSeq)-1] == byte(EscapeStartRune)
+}
+
+// escSeqKindFor returns the kind of sequence introduced by the char that comes
+// right after ESC. Only that char decides the kind: in "ESC ( X" the "X" is the
+// final byte of a plain escape sequence, and does not start a string.
 func escSeqKindFor(char rune) escSeqKind {
 	switch char {
 	case EscapeStartRuneCSI:
 		return escSeqKindCSI
 	case EscapeStartRuneOSI:
 		return escSeqKindOSI
-	case 'P', 'X', '^', '_':
+	case escapeStartRuneDCS, escapeStartRuneSOS, escapeStartRunePM, escapeStartRuneAPC:
 		// DCS, SOS, PM and APC carry a payload; the sequence runs until
 		// ST ("ESC \") instead of ending at a final byte (ECMA-48)
 		return escSeqKindString
 	}
-	return escSeqKindUnknown
+	return escSeqKindPlain
 }
 
+// Consume parses the given rune as the next one in the text. Use ParseRune
+// instead to know if the rune is a part of an escape sequence: InSequence()
+// does not tell that for a rune that ends a sequence.
 func (s *EscSeqParser) Consume(char rune) {
-	if !s.inEscSeq && char == EscapeStartRune {
-		s.inEscSeq = true
-		s.escSeqKind = escSeqKindUnknown
-		s.escapeSeq = s.escapeSeq[:0]
-	} else if s.inEscSeq && s.escSeqKind == escSeqKindUnknown {
-		s.escSeqKind = escSeqKindFor(char)
-	}
-
-	if s.inEscSeq {
-		s.escapeSeq = utf8.AppendRune(s.escapeSeq, char)
-
-		// abort on absurdly long (most likely malformed/unterminated)
-		// sequences instead of accumulating them without limit
-		if len(s.escapeSeq) > escSeqMaxLength {
-			s.Reset()
-			return
-		}
-
-		// --- FIX for OSC 8 hyperlinks (e.g. \x1b]8;;url\x07label\x1b]8;;\x07)
-		if s.escSeqKind == escSeqKindOSI &&
-			bytes.HasPrefix(s.escapeSeq, escapeStartConcealOSIBytes) &&
-			char == escRuneBEL { // BEL
-
-			s.parseEscapeSeq()
-			s.Reset()
-			return
-		}
-
-		if s.isEscapeStopRune(char) {
-			s.parseEscapeSeq()
-			s.Reset()
-		}
-	}
+	s.ParseRune(char)
 }
 
 // FgRGB returns the active 24-bit foreground color, as set by a sequence like
@@ -238,6 +227,49 @@ func (s *EscSeqParser) InSequence() bool {
 
 func (s *EscSeqParser) IsOpen() bool {
 	return len(s.codes) > 0 || s.fgRGB.set || s.bgRGB.set
+}
+
+// ParseRune parses the given rune as the next one in the text, and returns
+// true if the rune is a part of an escape sequence; false means that the rune
+// is text.
+//
+// A rune that an escape sequence cannot have (see breaksSequence) is text: the
+// sequence it shows up in is malformed, and is dropped without any effect.
+func (s *EscSeqParser) ParseRune(char rune) bool {
+	if s.cutsStringShort(char) {
+		// the ESC before the char was not the first half of an ST: like on a
+		// terminal, it cut the string short and started a new escape
+		// sequence, which the char is a part of
+		s.Reset()
+		s.ParseRune(EscapeStartRune)
+	}
+
+	if s.startsSequence(char) {
+		s.inEscSeq = true
+		s.escSeqKind = escSeqKindUnknown
+		s.escapeSeq = s.escapeSeq[:0]
+	} else if s.inEscSeq && s.escSeqKind == escSeqKindUnknown {
+		s.escSeqKind = escSeqKindFor(char)
+	}
+
+	if !s.inEscSeq {
+		return false
+	}
+	if s.breaksSequence(char) {
+		s.Reset()
+		return false
+	}
+
+	s.escapeSeq = utf8.AppendRune(s.escapeSeq, char)
+	if len(s.escapeSeq) > escSeqMaxLength {
+		// abort on absurdly long (most likely malformed/unterminated)
+		// sequences instead of accumulating them without limit
+		s.Reset()
+	} else if s.isEscapeStopRune(char) {
+		s.parseEscapeSeq()
+		s.Reset()
+	}
+	return true
 }
 
 func (s *EscSeqParser) ParseSeq(seq string, seqKind escSeqKind) {
@@ -257,10 +289,11 @@ func (s *EscSeqParser) ParseSeq(seq string, seqKind escSeqKind) {
 	if seqKind == escSeqKindCSI && !strings.HasSuffix(seq, EscapeStopCSI) {
 		return
 	}
-	// an OSC 8 hyperlink ("OSC 8 ; params ; URI ST") carries a link and no
-	// attributes: its 8 is not the code to conceal text, and the numbers in
-	// its params and URI are not codes either
-	if seqKind == escSeqKindOSI && strings.HasPrefix(seq, escapeStartConcealOSI) {
+	// an Operating System Command (a hyperlink, the title of the window, the
+	// working directory, ...) carries no attributes: the number it begins
+	// with says which command it is, and is not a code; nor are the numbers
+	// in the rest of it. Only the OSI form of a "CSI ... m" sequence has codes.
+	if seqKind == escSeqKindOSI && !isLegacyOSI(seq) {
 		return
 	}
 
@@ -280,7 +313,7 @@ func (s *EscSeqParser) ParseSeq(seq string, seqKind escSeqKind) {
 func (s *EscSeqParser) ParseString(str string) string {
 	s.escapeSeq, s.inEscSeq, s.escSeqKind = s.escapeSeq[:0], false, escSeqKindUnknown
 	for _, char := range str {
-		s.Consume(char)
+		s.ParseRune(char)
 	}
 	return s.Sequence()
 }
@@ -318,6 +351,16 @@ func (s *EscSeqParser) Sequence() string {
 	return EscapeStart + strings.Join(parts, ";") + EscapeStop
 }
 
+// breaksSequence returns true if the char cannot be a part of the escape
+// sequence being parsed. A CSI or a plain escape sequence is made of the bytes
+// 0x20-0x7E alone: a control character (like a new-line) or a non-ASCII rune
+// in one means that the sequence is malformed, and that the text has resumed.
+// The sequences that carry a payload are not as strict about what it has.
+func (s *EscSeqParser) breaksSequence(char rune) bool {
+	return (s.escSeqKind == escSeqKindCSI || s.escSeqKind == escSeqKindPlain) &&
+		(char < 0x20 || char > 0x7E)
+}
+
 // clearAllBackgroundColors clears the active background color, whichever
 // form (standard, bright, 256-color or 24-bit) it was set in.
 func (s *EscSeqParser) clearAllBackgroundColors() {
@@ -348,29 +391,53 @@ func isBackgroundColorCode(code int) bool {
 		(code >= escCode256BgBase && code <= escCode256BgBase+escCode256Max)
 }
 
+// isEscapeStopRune returns true if the char, which is the last one in the
+// escape sequence so far, ends the sequence.
 func (s *EscSeqParser) isEscapeStopRune(char rune) bool {
-	if bytes.HasPrefix(s.escapeSeq, escapeStartConcealOSIBytes) {
-		if bytes.HasSuffix(s.escapeSeq, escapeStopConcealOSIBytes) {
-			return true
-		}
-	} else if (s.escSeqKind == escSeqKindCSI && len(s.escapeSeq) > len(EscapeStartCSI) && isCSIFinalRune(char)) ||
-		(s.escSeqKind == escSeqKindOSI && char == EscapeStopRuneOSI) {
-		return true
-	} else if s.escSeqKind == escSeqKindString && char == EscapeStopRuneOSI {
-		// ST is "ESC \\", but this stops at the backslash itself, just like
-		// the OSI branch above; a backslash inside a DCS/SOS/PM/APC payload
-		// therefore also ends the sequence early. Tightening both is a
-		// separate change.
-		return true
-	} else if s.escSeqKind == escSeqKindUnknown && isEscapeFinalRune(char) {
+	switch s.escSeqKind {
+	case escSeqKindCSI:
+		return len(s.escapeSeq) > len(EscapeStartCSI) && isCSIFinalRune(char)
+	case escSeqKindPlain:
 		// an ESC that starts neither a CSI, an OSI, nor a string sequence
 		// forms an escape sequence of its own: "ESC 7" (save cursor), "ESC c"
 		// (reset terminal), or "ESC ( B" (select charset); such a sequence
-		// ends at its final byte (ECMA-48), and everything after it is
-		// visible text again
-		return true
+		// ends at its final byte, and everything after it is visible text
+		return isEscapeFinalRune(char)
+	case escSeqKindOSI:
+		// an Operating System Command ends at an ST, or at a BEL: the latter
+		// is what xterm began with, and what most programs still emit, as in
+		// "\x1b]0;title\x07" or "\x1b]8;;url\x07label\x1b]8;;\x07"
+		return char == escRuneBEL ||
+			(char == EscapeStopRuneOSI && (s.endsInST() || isLegacyOSI(string(s.escapeSeq))))
+	case escSeqKindString:
+		return char == EscapeStopRuneOSI && s.endsInST()
 	}
 	return false
+}
+
+// endsInST returns true if the escape sequence so far ends in an ST ("ESC \"),
+// which is what ends a sequence that carries a payload.
+func (s *EscSeqParser) endsInST() bool {
+	return bytes.HasSuffix(s.escapeSeq, escapeStopConcealOSIBytes)
+}
+
+// isLegacyOSI returns true if the sequence is "ESC ]", a list of codes, and a
+// backslash (which is optional here, for a sequence that is not over yet).
+// This package has always read that as the OSI form of a "CSI ... m" sequence,
+// which ends at the backslash without an ESC before it (EscapeStopOSI). Any
+// other OSI sequence is an Operating System Command, like a hyperlink, where
+// a backslash is a part of the payload like any other character.
+func isLegacyOSI(seq string) bool {
+	if !strings.HasPrefix(seq, EscapeStartOSI) || strings.HasPrefix(seq, escapeStartConcealOSI) {
+		return false
+	}
+	codes := strings.TrimSuffix(seq[len(EscapeStartOSI):], EscapeStopOSI)
+	for idx := 0; idx < len(codes); idx++ {
+		if b := codes[idx]; (b < '0' || b > '9') && b != ';' && b != ' ' {
+			return false
+		}
+	}
+	return true
 }
 
 // isCSIFinalRune returns true if the given rune ends a CSI sequence. A CSI
@@ -392,7 +459,9 @@ func isForegroundColorCode(code int) bool {
 
 // isEscapeFinalRune returns true if the given rune can end an escape sequence
 // that is not a CSI or an OSI sequence: "ESC", followed by intermediate bytes
-// (0x20-0x2F) and a final byte in the range 0x30-0x7E (ECMA-48, section 8.3.143).
+// (0x20-0x2F) and a final byte in the range 0x30-0x7E. ECMA-35 names these
+// sequences after their final byte: Fp (0x30-0x3F), Fe (0x40-0x5F) and Fs
+// (0x60-0x7E), or nF when there are intermediate bytes.
 func isEscapeFinalRune(char rune) bool {
 	return char >= 0x30 && char <= 0x7E
 }
@@ -546,6 +615,15 @@ func (s *EscSeqParser) splitAndTrimCodes(seq string) []string {
 		codes[i] = strings.TrimSpace(codes[i])
 	}
 	return codes
+}
+
+// startsSequence returns true if the char starts a new escape sequence. An ESC
+// does, even inside another escape sequence: like on a terminal, it cuts that
+// one short and starts over. The exception is a sequence that carries a
+// payload, where the ESC may be the first half of the ST ("ESC \") that ends it.
+func (s *EscSeqParser) startsSequence(char rune) bool {
+	return char == EscapeStartRune &&
+		(!s.inEscSeq || (s.escSeqKind != escSeqKindOSI && s.escSeqKind != escSeqKindString))
 }
 
 // stripEscapeSequence removes escape sequence markers from the input string.

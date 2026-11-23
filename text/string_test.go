@@ -446,6 +446,26 @@ func TestStringWidthWithoutEscSequences_LoneEscapeSequences(t *testing.T) {
 	assert.Equal(t, 3, StringWidthWithoutEscSequences("a\x1bQbc"))
 	assert.Equal(t, 5, StringWidthWithoutEscSequences("\x1b(Bworld"))
 	assert.Equal(t, "\x1bcHel", Trim("\x1bcHello", 3))
+
+	// the title of the window, as set by a shell prompt, takes no space
+	assert.Equal(t, 5, StringWidthWithoutEscSequences("\x1b]0;user@host: ~\aGhost"))
+	assert.Equal(t, "\x1b]0;user@host: ~\aGho", Trim("\x1b]0;user@host: ~\aGhost", 3))
+
+	// a rune that an escape sequence cannot have is text, and so is what
+	// follows it
+	assert.Equal(t, 7, StringWidthWithoutEscSequences("\x1b世界Jon"))
+	assert.Equal(t, "\x1b世", Trim("\x1b世界Jon", 3))
+	assert.Equal(t, "\x1b[3世界J", Trim("\x1b[3世界Jon", 5))
+	assert.Equal(t, "\x1b世界..", Pad("\x1b世界", 6, '.'))
+	assert.Equal(t, "\x1bé-J-o-n", InsertEveryN("\x1béJon", '-', 1))
+	assert.Equal(t, "\x1b世Ｊｏｎ", Widen("\x1b世Jon"))
+
+	// only the rune right after the ESC decides the kind of sequence: after an
+	// intermediate byte, the runes that would start a string or a CSI sequence
+	// are final bytes like any other
+	assert.Equal(t, 5, StringWidthWithoutEscSequences("\x1b(XGhost"))
+	assert.Equal(t, 5, StringWidthWithoutEscSequences("\x1b#PGhost"))
+	assert.Equal(t, 8, StringWidthWithoutEscSequences("\x1b([31mGhost"))
 }
 
 func ExampleTrim() {
@@ -509,8 +529,7 @@ func TestTrim_Segmentation(t *testing.T) {
 			var cluster string
 			cluster, str, _, state = uniseg.FirstGraphemeClusterInString(str, state)
 			for idx, sChr := range cluster {
-				if esp.InSequence() || sChr == EscapeStartRune {
-					esp.Consume(sChr)
+				if esp.ParseRune(sChr) {
 					out.WriteRune(sChr)
 					continue
 				}

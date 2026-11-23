@@ -535,6 +535,9 @@ func TestEscSeqParser_LoneEscapeSequences(t *testing.T) {
 		{"text after an unknown sequence", "a\x1bQbc"},
 		{"DCS payload until ST", "\x1bP61;1|1;2\x1b\\"},
 		{"DCS parameters are not SGR codes", "\x1bP1;2;3\x1b\\"},
+		{"string starter after an intermediate byte", "\x1b(X"},
+		{"CSI starter after an intermediate byte", "\x1b#["},
+		{"OSI starter after an intermediate byte", "\x1b ]"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			es := EscSeqParser{}
@@ -544,6 +547,222 @@ func TestEscSeqParser_LoneEscapeSequences(t *testing.T) {
 			assert.False(t, es.IsOpen())
 		})
 	}
+}
+
+func TestEscSeqParser_StringSequences(t *testing.T) {
+	// a sequence that carries a payload (OSC, DCS, SOS, PM, APC) ends at the
+	// ST ("ESC \"), and a backslash on its own is a part of the payload
+	for _, test := range []struct {
+		name  string
+		input string
+		want  string // the sequence in force after the input
+	}{
+		{"DCS with a backslash", "\x1bPa\\b\x1b\\", ""},
+		{"APC with a backslash", "\x1b_a\\b\x1b\\", ""},
+		{"OSC with a backslash", "\x1b]0;C:\\dir\x1b\\", ""},
+		{"hyperlink with a backslash", "\x1b]8;;http://example.com/a\\b\x1b\\", ""},
+		{"empty DCS", "\x1bP\x1b\\", ""},
+		// an ESC that is not followed by a backslash cuts the string short
+		// and starts a new sequence
+		{"OSC cut short by a CSI sequence", "\x1b]0;title\x1b[31m", "\x1b[31m"},
+		{"DCS cut short by a plain sequence", "\x1bPabc\x1b7", ""},
+		{"SOS cut short by two ESCs", "\x1bXabc\x1b\x1b[31m", "\x1b[31m"},
+		{"PM cut short by another string", "\x1b^abc\x1b]0;title\x1b\\", ""},
+		{"hyperlink cut short by a CSI sequence", "\x1b]8;;http://example.com\x1b[31m", "\x1b[31m"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			es := EscSeqParser{}
+			assert.Equal(t, test.want, es.ParseString(test.input))
+			assert.False(t, es.InSequence())
+			assert.Equal(t, 5, StringWidthWithoutEscSequences(test.input+"Ghost"))
+			assert.Equal(t, "Ghost", StripEscape(test.input+"Ghost"))
+		})
+	}
+
+	// without the ST, the sequence is not over
+	for _, input := range []string{"\x1bPa\\b", "\x1b]0;C:\\dir", "\x1b]8;;\\", "\x1bXabc\x1b"} {
+		es := EscSeqParser{}
+		es.ParseString(input)
+		assert.True(t, es.InSequence(), "input=%q", input)
+	}
+
+	// the OSI form of a "CSI ... m" sequence is a list of codes that ends at
+	// a backslash without an ESC before it
+	for _, test := range []struct{ input, want string }{
+		{"\x1b]31\\", "\x1b[31m"},
+		{"\x1b]1;31\\", "\x1b[1;31m"},
+		{"\x1b] 1 ; 31 \\", "\x1b[1;31m"},
+		{"\x1b]31\\\x1b]0\\", ""},
+		{"\x1b]\\", ""},
+	} {
+		es := EscSeqParser{}
+		assert.Equal(t, test.want, es.ParseString(test.input), "input=%q", test.input)
+		assert.False(t, es.InSequence(), "input=%q", test.input)
+	}
+}
+
+func TestEscSeqParser_MalformedSequences(t *testing.T) {
+	// a CSI or a plain escape sequence cannot have a control character or a
+	// non-ASCII rune in it: the sequence is dropped, and that rune and all
+	// that follows it are text
+	for _, test := range []struct {
+		name  string
+		input string
+		want  string // the text
+	}{
+		{"new-line after ESC", "\x1b\nGhost", "\nGhost"},
+		{"tab after ESC", "\x1b\tGhost", "\tGhost"},
+		{"non-ASCII rune after ESC", "\x1bé7Ghost", "é7Ghost"},
+		{"wide rune after ESC", "\x1b世Ghost", "世Ghost"},
+		{"DEL after ESC", "\x1b\x7fGhost", "\x7fGhost"},
+		{"new-line inside a CSI sequence", "\x1b[31\nmGhost", "\nmGhost"},
+		{"non-ASCII rune inside a CSI sequence", "\x1b[3éGhost", "éGhost"},
+		{"new-line after an intermediate byte", "\x1b(\nGhost", "\nGhost"},
+		{"new-line after a string cut short", "\x1bPabc\x1b\nGhost", "\nGhost"},
+		{"ESC at the end of every line", "Jon\x1b\nSnow\x1b\n", "Jon\nSnow\n"},
+		// a sequence that carries a payload takes any rune
+		{"new-line inside a string sequence", "\x1bPa\nb\x1b\\Ghost", "Ghost"},
+		{"non-ASCII rune inside a hyperlink", "\x1b]8;;http://example.com/世\x1b\\Ghost", "Ghost"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			es := EscSeqParser{}
+			assert.Equal(t, "", es.ParseString(test.input))
+			assert.False(t, es.InSequence())
+			assert.Equal(t, test.want, StripEscape(test.input))
+			assert.Equal(t, StringWidthWithoutEscSequences(test.want), StringWidthWithoutEscSequences(test.input))
+			assert.Equal(t, LongestLineLen(test.want), LongestLineLen(test.input))
+		})
+	}
+
+	// the sequence that got dropped sets nothing
+	es := EscSeqParser{}
+	assert.Equal(t, "\x1b[32m", es.ParseString("\x1b[32m\x1b[1;31\nm"))
+}
+
+func TestEscSeqParser_ParseRune(t *testing.T) {
+	// ParseRune tells the runes of the escape sequences from the text; "s"
+	// marks the former and "." the latter
+	for _, test := range []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"text", "Ghost", "....."},
+		{"CSI sequence", "a\x1b[31mb\x1b[0mc", ".sssss.ssss."},
+		{"plain sequence", "a\x1b7b\x1b(Bc", ".ss.sss."},
+		{"hyperlink", "a\x1b]8;;x\x1b\\b\x1b]8;;\ac", ".ssssssss.ssssss."},
+		{"string sequence", "a\x1bPq\x1b\\b", ".sssss."},
+		{"ESC that starts over", "a\x1b[3\x1b[1mb", ".sssssss."},
+		{"string cut short", "a\x1bXq\x1b[1mb", ".sssssss."},
+		{"sequence that never ends", "a\x1b[31", ".ssss"},
+		{"rune that breaks a plain sequence", "a\x1b\nb", ".s.."},
+		{"rune that breaks a CSI sequence", "a\x1b[3世b", ".sss.."},
+		{"rune that breaks a string cut short", "a\x1bXq\x1b\nb", ".ssss.."},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			for _, es := range []EscSeqParser{{}, {skipParse: true}} {
+				got := strings.Builder{}
+				for _, char := range test.input {
+					if es.ParseRune(char) {
+						got.WriteByte('s')
+					} else {
+						got.WriteByte('.')
+					}
+				}
+				assert.Equal(t, test.want, got.String())
+			}
+		})
+	}
+}
+
+func TestEscSeqParser_OperatingSystemCommands(t *testing.T) {
+	// the number that an Operating System Command begins with says which
+	// command it is; neither that, nor the numbers in the rest of it are codes
+	for _, test := range []struct {
+		name  string
+		input string
+	}{
+		{"window title", "\x1b]0;my title\x1b\\"},
+		{"window title with numbers", "\x1b]2;1;4;31\x1b\\"},
+		{"working directory", "\x1b]7;file://host/home\x1b\\"},
+		{"palette color", "\x1b]4;1;rgb:ff/00/00\x1b\\"},
+		{"palette reset", "\x1b]104\x1b\\"},
+		{"shell integration", "\x1b]133;A\x1b\\"},
+		{"hyperlink", "\x1b]8;;http://example.com\x1b\\"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			es := EscSeqParser{}
+			assert.Equal(t, "", es.ParseString(test.input))
+			assert.False(t, es.InSequence())
+
+			// the colors in force are left alone
+			assert.Equal(t, "\x1b[1;31m", es.ParseString("\x1b[1;31m"+test.input))
+			assert.Equal(t, "\x1b[1;31;44m", es.ParseString(test.input+"\x1b[44m"))
+			assert.Equal(t, 5, StringWidthWithoutEscSequences(test.input+"Ghost"))
+		})
+	}
+
+	// an Operating System Command ends at a BEL as well
+	for _, input := range []string{
+		"\x1b]0;my title\a",
+		"\x1b]2;1;4;31\a",
+		"\x1b]104\a",
+		"\x1b]52;c;aGVsbG8=\a",
+		"\x1b]8;;http://example.com\a",
+		"\x1b]0;C:\\dir\a",
+	} {
+		es := EscSeqParser{}
+		assert.Equal(t, "\x1b[1;31m", es.ParseString("\x1b[1;31m"+input), "input=%q", input)
+		assert.False(t, es.InSequence(), "input=%q", input)
+		assert.Equal(t, 5, StringWidthWithoutEscSequences(input+"Ghost"), "input=%q", input)
+		assert.Equal(t, "Ghost", StripEscape(input+"Ghost"), "input=%q", input)
+	}
+	// the other sequences that carry a payload do not
+	es := EscSeqParser{}
+	es.ParseString("\x1bPq#0;2;0;0;0\a")
+	assert.True(t, es.InSequence())
+
+	// ParseSeq reads nothing but the OSI form of a "CSI ... m" sequence
+	es = EscSeqParser{}
+	es.ParseSeq("\x1b]7;file://host/home\x1b\\", escSeqKindOSI)
+	es.ParseSeq("\x1b]104\x1b\\", escSeqKindOSI)
+	es.ParseSeq("\x1b]104\a", escSeqKindOSI)
+	es.ParseSeq("1;31\\", escSeqKindOSI)
+	assert.Empty(t, es.Codes())
+	es.ParseSeq("\x1b]1;31\\", escSeqKindOSI)
+	es.ParseSeq("\x1b]4", escSeqKindOSI)
+	assert.Equal(t, []int{1, 4, 31}, es.Codes())
+}
+
+func TestEscSeqParser_Restart(t *testing.T) {
+	// an ESC inside an escape sequence cuts that sequence short, and starts a
+	// new one: nothing of the first one is left to garble the second
+	for _, test := range []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"ESC after ESC", "\x1b\x1b[31m", "\x1b[31m"},
+		{"ESC inside a CSI sequence", "\x1b[1;3\x1b[31m", "\x1b[31m"},
+		{"ESC inside a plain sequence", "\x1b(\x1b[31m", "\x1b[31m"},
+		{"many ESCs", "\x1b\x1b\x1b\x1b[31m", "\x1b[31m"},
+		{"the sequence cut short is dropped", "\x1b[32m\x1b[1\x1b7", "\x1b[32m"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			es := EscSeqParser{}
+			assert.Equal(t, test.want, es.ParseString(test.input))
+			assert.False(t, es.InSequence())
+			assert.Equal(t, 5, StringWidthWithoutEscSequences(test.input+"Ghost"))
+			assert.Equal(t, "Ghost", StripEscape(test.input+"Ghost"))
+		})
+	}
+
+	// an ESC inside a sequence with a payload is the first half of its ST
+	es := EscSeqParser{}
+	assert.Equal(t, "", es.ParseString("\x1b]8;;http://example.com\x1b\\"))
+	assert.False(t, es.InSequence())
+	assert.Equal(t, "", es.ParseString("\x1bP1$r0m\x1b\\"))
+	assert.False(t, es.InSequence())
 }
 
 func TestEscSeqParser_RGBColors(t *testing.T) {
