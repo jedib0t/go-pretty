@@ -365,7 +365,7 @@ func (s *EscSeqParser) isEscapeStopRune(char rune) bool {
 		(s.escSeqKind == escSeqKindOSI && char == EscapeStopRuneOSI) {
 		return true
 	} else if s.escSeqKind == escSeqKindString && char == EscapeStopRuneOSI {
-		// ST is "ESC \\", but this stops at the backslash itself, just like
+		// ST is "ESC \", but this stops at the backslash itself, just like
 		// the OSI branch above; a backslash inside a DCS/SOS/PM/APC payload
 		// therefore also ends the sequence early. Tightening both is a
 		// separate change.
@@ -400,7 +400,9 @@ func isForegroundColorCode(code int) bool {
 
 // isEscapeFinalRune returns true if the given rune can end an escape sequence
 // that is not a CSI or an OSI sequence: "ESC", followed by intermediate bytes
-// (0x20-0x2F) and a final byte in the range 0x30-0x7E (ECMA-48, section 8.3.143).
+// (0x20-0x2F) and a final byte in the range 0x30-0x7E. ECMA-35 names these
+// sequences after their final byte: Fp (0x30-0x3F), Fe (0x40-0x5F) and Fs
+// (0x60-0x7E), or nF when there are intermediate bytes.
 func isEscapeFinalRune(char rune) bool {
 	return char >= 0x30 && char <= 0x7E
 }
