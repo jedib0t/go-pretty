@@ -123,6 +123,27 @@ func TestWrap_ColorChanges(t *testing.T) {
 	}
 }
 
+// TestWrap_SequencesCutShort ensures that a new line restarts the colors set by
+// a sequence that follows one that an ESC cut short, and nothing of the latter.
+func TestWrap_SequencesCutShort(t *testing.T) {
+	for _, wrap := range []struct {
+		name string
+		fn   func(string, int) string
+	}{{"hard", WrapHard}, {"soft", WrapSoft}, {"text", WrapText}} {
+		t.Run(wrap.name, func(t *testing.T) {
+			assert.Equal(t, "\x1b[3\x1b[31mabcd\x1b[0m\n\x1b[31mefgh\x1b[0m",
+				wrap.fn("\x1b[3\x1b[31mabcdefgh", 4))
+			assert.Equal(t, "\x1b(\x1b[31mabcd\x1b[0m\n\x1b[31mefgh\x1b[0m",
+				wrap.fn("\x1b(\x1b[31mabcdefgh", 4))
+			assert.Equal(t, "\x1b]0;title\x1b[31mabcd\x1b[0m\n\x1b[31mefgh\x1b[0m",
+				wrap.fn("\x1b]0;title\x1b[31mabcdefgh", 4))
+			// the ESC of an ST does not hide the colors set before the string
+			assert.Equal(t, "\x1b[31m\x1b]0;title\x1b\\abcd\x1b[0m\n\x1b[31mefgh\x1b[0m",
+				wrap.fn("\x1b[31m\x1b]0;title\x1b\\abcdefgh", 4))
+		})
+	}
+}
+
 // TestWrap_MalformedSequences ensures that the text after an escape sequence
 // that is cut short by a rune it cannot have is wrapped like any other text.
 func TestWrap_MalformedSequences(t *testing.T) {

@@ -129,7 +129,9 @@ func appendWord(word string, lineIdx *int, lastSeenEscSeq string, wrapLen int, o
 		// escape sequences are written out as they are, a rune at a time
 		if esp.InSequence() || word[idx] == byte(EscapeStartRune) {
 			char, size := utf8.DecodeRuneInString(word[idx:])
-			if !esp.InSequence() {
+			if !esp.InSequence() || char == EscapeStartRune {
+				// an ESC starts a sequence, and starts over inside one; one
+				// that is half of an ST is not in a sequence that sets colors
 				escSeq = ""
 			}
 			if esp.ParseRune(char) {
