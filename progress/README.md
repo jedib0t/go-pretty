@@ -42,7 +42,7 @@ A demonstration of all the capabilities can be found here:
 
   - Choose to have the Writer auto-stop the Render when no more Trackers are
     in queue, or manually stop using `Stop()`
-  - Redirect output to an io.Writer object (like os.StdOut)
+  - Redirect output to an io.Writer object (like `os.Stdout`)
   - Pinned messages that stay visible above all trackers
   - Log messages during rendering that appear temporarily
   - Automatic terminal width detection to prevent line wrapping

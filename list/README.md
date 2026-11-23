@@ -6,15 +6,15 @@ Pretty-print lists with multiple levels/indents into ASCII/Unicode strings.
 ## Sample List Output
 
 ```
- ■ Game Of Thrones
-   ■ Winter
-   ■ Is
-   ■ Coming
-     ■ This
-     ■ Is
-     ■ Known
- ■ The Dark Tower
-   ■ The Gunslinger
+■ Game Of Thrones
+  ■ Winter
+  ■ Is
+  ■ Coming
+    ■ This
+    ■ Is
+    ■ Known
+■ The Dark Tower
+  ■ The Gunslinger
 ```
 
 A demonstration of all the capabilities can be found here:
@@ -69,6 +69,6 @@ A demonstration of all the capabilities can be found here:
 
 ### Output Control
 
-  - Mirror output to an io.Writer object (like os.StdOut) while rendering
+  - Mirror output to an io.Writer object (like `os.Stdout`) while rendering
   - Get rendered output as string for further processing
   - Length() method to get the number of items in the list
