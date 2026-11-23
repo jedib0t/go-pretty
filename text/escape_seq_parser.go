@@ -203,7 +203,7 @@ func escSeqKindFor(char rune) escSeqKind {
 }
 
 func (s *EscSeqParser) Consume(char rune) {
-	if !s.inEscSeq && char == EscapeStartRune {
+	if s.startsSequence(char) {
 		s.inEscSeq = true
 		s.escSeqKind = escSeqKindUnknown
 		s.escapeSeq = s.escapeSeq[:0]
@@ -560,6 +560,15 @@ func (s *EscSeqParser) splitAndTrimCodes(seq string) []string {
 		codes[i] = strings.TrimSpace(codes[i])
 	}
 	return codes
+}
+
+// startsSequence returns true if the char starts a new escape sequence. An ESC
+// does, even inside another escape sequence: like on a terminal, it cuts that
+// one short and starts over. The exception is a sequence that carries a
+// payload, where the ESC may be the first half of the ST ("ESC \") that ends it.
+func (s *EscSeqParser) startsSequence(char rune) bool {
+	return char == EscapeStartRune &&
+		(!s.inEscSeq || (s.escSeqKind != escSeqKindOSI && s.escSeqKind != escSeqKindString))
 }
 
 // stripEscapeSequence removes escape sequence markers from the input string.

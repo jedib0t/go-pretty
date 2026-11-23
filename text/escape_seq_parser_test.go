@@ -549,6 +549,37 @@ func TestEscSeqParser_LoneEscapeSequences(t *testing.T) {
 	}
 }
 
+func TestEscSeqParser_Restart(t *testing.T) {
+	// an ESC inside an escape sequence cuts that sequence short, and starts a
+	// new one: nothing of the first one is left to garble the second
+	for _, test := range []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"ESC after ESC", "\x1b\x1b[31m", "\x1b[31m"},
+		{"ESC inside a CSI sequence", "\x1b[1;3\x1b[31m", "\x1b[31m"},
+		{"ESC inside a plain sequence", "\x1b(\x1b[31m", "\x1b[31m"},
+		{"many ESCs", "\x1b\x1b\x1b\x1b[31m", "\x1b[31m"},
+		{"the sequence cut short is dropped", "\x1b[32m\x1b[1\x1b7", "\x1b[32m"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			es := EscSeqParser{}
+			assert.Equal(t, test.want, es.ParseString(test.input))
+			assert.False(t, es.InSequence())
+			assert.Equal(t, 5, StringWidthWithoutEscSequences(test.input+"Ghost"))
+			assert.Equal(t, "Ghost", StripEscape(test.input+"Ghost"))
+		})
+	}
+
+	// an ESC inside a sequence with a payload is the first half of its ST
+	es := EscSeqParser{}
+	assert.Equal(t, "", es.ParseString("\x1b]8;;http://example.com\x1b\\"))
+	assert.False(t, es.InSequence())
+	assert.Equal(t, "", es.ParseString("\x1bP1$r0m\x1b\\"))
+	assert.False(t, es.InSequence())
+}
+
 func TestEscSeqParser_RGBColors(t *testing.T) {
 	// the numbers in "38;2;r;g;b" and "48;2;r;g;b" are color components, and
 	// not codes: a 0 in there is no reset, and a 1 does not turn bold on
