@@ -286,10 +286,11 @@ func (s *EscSeqParser) ParseSeq(seq string, seqKind escSeqKind) {
 	if seqKind == escSeqKindCSI && !strings.HasSuffix(seq, EscapeStopCSI) {
 		return
 	}
-	// an OSC 8 hyperlink ("OSC 8 ; params ; URI ST") carries a link and no
-	// attributes: its 8 is not the code to conceal text, and the numbers in
-	// its params and URI are not codes either
-	if seqKind == escSeqKindOSI && strings.HasPrefix(seq, escapeStartConcealOSI) {
+	// an Operating System Command (a hyperlink, the title of the window, the
+	// working directory, ...) carries no attributes: the number it begins
+	// with says which command it is, and is not a code; nor are the numbers
+	// in the rest of it. Only the OSI form of a "CSI ... m" sequence has codes.
+	if seqKind == escSeqKindOSI && !isLegacyOSI(seq) {
 		return
 	}
 
@@ -390,7 +391,8 @@ func (s *EscSeqParser) isEscapeStopRune(char rune) bool {
 		// ends at its final byte, and everything after it is visible text
 		return isEscapeFinalRune(char)
 	case escSeqKindOSI, escSeqKindString:
-		return char == EscapeStopRuneOSI && (s.endsInST() || s.isLegacyOSI())
+		return char == EscapeStopRuneOSI && (s.endsInST() ||
+			(s.escSeqKind == escSeqKindOSI && isLegacyOSI(string(s.escapeSeq))))
 	}
 	return false
 }
@@ -401,17 +403,19 @@ func (s *EscSeqParser) endsInST() bool {
 	return bytes.HasSuffix(s.escapeSeq, escapeStopConcealOSIBytes)
 }
 
-// isLegacyOSI returns true if the escape sequence so far is "ESC ]", a list of
-// codes, and a backslash. This package has always read that as the OSI form of
-// a "CSI ... m" sequence, which ends at the backslash without an ESC before it
-// (EscapeStopOSI). Any other OSI sequence is an Operating System Command, where
+// isLegacyOSI returns true if the sequence is "ESC ]", a list of codes, and a
+// backslash (which is optional here, for a sequence that is not over yet).
+// This package has always read that as the OSI form of a "CSI ... m" sequence,
+// which ends at the backslash without an ESC before it (EscapeStopOSI). Any
+// other OSI sequence is an Operating System Command, like a hyperlink, where
 // a backslash is a part of the payload like any other character.
-func (s *EscSeqParser) isLegacyOSI() bool {
-	if s.escSeqKind != escSeqKindOSI || bytes.HasPrefix(s.escapeSeq, escapeStartConcealOSIBytes) {
+func isLegacyOSI(seq string) bool {
+	if !strings.HasPrefix(seq, EscapeStartOSI) || strings.HasPrefix(seq, escapeStartConcealOSI) {
 		return false
 	}
-	for _, b := range s.escapeSeq[len(EscapeStartOSI) : len(s.escapeSeq)-len(EscapeStopOSI)] {
-		if (b < '0' || b > '9') && b != ';' && b != ' ' {
+	codes := strings.TrimSuffix(seq[len(EscapeStartOSI):], EscapeStopOSI)
+	for idx := 0; idx < len(codes); idx++ {
+		if b := codes[idx]; (b < '0' || b > '9') && b != ';' && b != ' ' {
 			return false
 		}
 	}

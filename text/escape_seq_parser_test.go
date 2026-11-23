@@ -601,6 +601,45 @@ func TestEscSeqParser_StringSequences(t *testing.T) {
 	}
 }
 
+func TestEscSeqParser_OperatingSystemCommands(t *testing.T) {
+	// the number that an Operating System Command begins with says which
+	// command it is; neither that, nor the numbers in the rest of it are codes
+	for _, test := range []struct {
+		name  string
+		input string
+	}{
+		{"window title", "\x1b]0;my title\x1b\\"},
+		{"window title with numbers", "\x1b]2;1;4;31\x1b\\"},
+		{"working directory", "\x1b]7;file://host/home\x1b\\"},
+		{"palette color", "\x1b]4;1;rgb:ff/00/00\x1b\\"},
+		{"palette reset", "\x1b]104\x1b\\"},
+		{"shell integration", "\x1b]133;A\x1b\\"},
+		{"hyperlink", "\x1b]8;;http://example.com\x1b\\"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			es := EscSeqParser{}
+			assert.Equal(t, "", es.ParseString(test.input))
+			assert.False(t, es.InSequence())
+
+			// the colors in force are left alone
+			assert.Equal(t, "\x1b[1;31m", es.ParseString("\x1b[1;31m"+test.input))
+			assert.Equal(t, "\x1b[1;31;44m", es.ParseString(test.input+"\x1b[44m"))
+			assert.Equal(t, 5, StringWidthWithoutEscSequences(test.input+"Ghost"))
+		})
+	}
+
+	// ParseSeq reads nothing but the OSI form of a "CSI ... m" sequence
+	es := EscSeqParser{}
+	es.ParseSeq("\x1b]7;file://host/home\x1b\\", escSeqKindOSI)
+	es.ParseSeq("\x1b]104\x1b\\", escSeqKindOSI)
+	es.ParseSeq("\x1b]104\a", escSeqKindOSI)
+	es.ParseSeq("1;31\\", escSeqKindOSI)
+	assert.Empty(t, es.Codes())
+	es.ParseSeq("\x1b]1;31\\", escSeqKindOSI)
+	es.ParseSeq("\x1b]4", escSeqKindOSI)
+	assert.Equal(t, []int{1, 4, 31}, es.Codes())
+}
+
 func TestEscSeqParser_Restart(t *testing.T) {
 	// an ESC inside an escape sequence cuts that sequence short, and starts a
 	// new one: nothing of the first one is left to garble the second

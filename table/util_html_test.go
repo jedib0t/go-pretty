@@ -123,6 +123,8 @@ func Test_convertEscSequencesToSpans(t *testing.T) {
 			{"same colors set twice", text.FgRed.EscapeSeq() + "Red1" + text.FgRed.EscapeSeq() + "Red2" + text.Reset.EscapeSeq(), "<span class=\"fg-red\">Red1Red2</span>"},
 			{"same classes from different codes", "\x1b[31;21ma\x1b[0;31;53mb\x1b[0m", "<span class=\"fg-red\">ab</span>"},
 			{"hyperlink is not concealed text", "\x1b]8;;http://example.com\x1b\\link\x1b]8;;\x1b\\ after", "link after"},
+			{"window title is not a reset", "\x1b[31mred \x1b]0;my title\x1b\\after\x1b[0m", "<span class=\"fg-red\">red after</span>"},
+			{"working directory is not reverse video", "\x1b]7;file://host/home\x1b\\text", "text"},
 			{"hyperlink within a color", "\x1b[31mred \x1b]8;;http://example.com/0\x07link\x1b]8;;\x07 after\x1b[0m", "<span class=\"fg-red\">red link after</span>"},
 			{"open span at end", text.FgRed.EscapeSeq() + "Red Text", "<span class=\"fg-red\">Red Text</span>"},
 		}
