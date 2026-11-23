@@ -68,6 +68,14 @@ const (
 	escapeStartConcealOSI = "\x1b]8;"
 	escapeStopConcealOSI  = "\x1b\\"
 
+	// the runes that follow ESC to start a sequence that carries a payload
+	// until ST: Device Control String, Start Of String, Privacy Message and
+	// Application Program Command
+	escapeStartRuneDCS = 'P'
+	escapeStartRuneSOS = 'X'
+	escapeStartRunePM  = '^'
+	escapeStartRuneAPC = '_'
+
 	// escSeqMaxLength bounds the accumulated escape sequence; real terminals
 	// cap sequences in the low KBs, and anything longer here is most likely
 	// malformed input that would otherwise grow the buffer without limit
@@ -182,7 +190,7 @@ func escSeqKindFor(char rune) escSeqKind {
 		return escSeqKindCSI
 	case EscapeStartRuneOSI:
 		return escSeqKindOSI
-	case 'P', 'X', '^', '_':
+	case escapeStartRuneDCS, escapeStartRuneSOS, escapeStartRunePM, escapeStartRuneAPC:
 		// DCS, SOS, PM and APC carry a payload; the sequence runs until
 		// ST ("ESC \") instead of ending at a final byte (ECMA-48)
 		return escSeqKindString
