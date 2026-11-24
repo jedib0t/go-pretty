@@ -42,6 +42,12 @@ func (t *Table) csvEscapeDoubleQuotes(str string) string {
 	return strings.ReplaceAll(str, "\"", "\"\"")
 }
 
+func (t *Table) csvNeedsQuotes(str string) bool {
+	// Quote lone empty fields so CSV readers do not skip their rows as blank lines.
+	return strings.ContainsAny(str, "\",\n") ||
+		(str == "" && t.numColumns == 1 && !t.autoIndex)
+}
+
 // csvProtectField neutralizes fields that spreadsheet applications would
 // interpret as formulas (=, +, -, @, tab or CR prefix) by prefixing them with
 // a single-quote.
@@ -74,7 +80,7 @@ func (t *Table) csvRenderRow(out *strings.Builder, row rowStr, hint renderHint) 
 		if t.style.CSV.FieldProtection && colStr != "" {
 			colStr = t.csvProtectField(colStr)
 		}
-		if strings.ContainsAny(colStr, "\",\n") {
+		if t.csvNeedsQuotes(colStr) {
 			out.WriteRune('"')
 			out.WriteString(t.csvEscapeDoubleQuotes(colStr))
 			out.WriteRune('"')

@@ -72,6 +72,72 @@ func TestTable_RenderCSV_Empty(t *testing.T) {
 	assert.Empty(t, tw.RenderCSV())
 }
 
+func TestTable_RenderCSV_EmptyFields(t *testing.T) {
+	for _, tc := range []struct {
+		name         string
+		header       Row
+		rows         []Row
+		footer       Row
+		hiddenColumn int
+		autoIndex    bool
+		want         [][]string
+	}{
+		{
+			name: "single empty field",
+			rows: []Row{{""}},
+			want: [][]string{{""}},
+		},
+		{
+			name: "leading, consecutive, middle and trailing empty rows",
+			rows: []Row{{""}, {""}, {"first"}, {""}, {"last"}, {""}},
+			want: [][]string{{""}, {""}, {"first"}, {""}, {"last"}, {""}},
+		},
+		{
+			name:   "empty header and footer",
+			header: Row{""},
+			rows:   []Row{{"value"}},
+			footer: Row{""},
+			want:   [][]string{{""}, {"value"}, {""}},
+		},
+		{
+			name:         "one visible column",
+			rows:         []Row{{"", "hidden"}, {"value", "hidden"}, {"", "hidden"}},
+			hiddenColumn: 2,
+			want:         [][]string{{""}, {"value"}, {""}},
+		},
+		{
+			name: "multiple columns",
+			rows: []Row{{"", ""}, {"value", ""}},
+			want: [][]string{{"", ""}, {"value", ""}},
+		},
+		{
+			name:      "auto index",
+			rows:      []Row{{""}, {"value"}},
+			autoIndex: true,
+			want:      [][]string{{"", "A"}, {"1", ""}, {"2", "value"}},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tw := NewWriter()
+			if tc.header != nil {
+				tw.AppendHeader(tc.header)
+			}
+			tw.AppendRows(tc.rows)
+			if tc.footer != nil {
+				tw.AppendFooter(tc.footer)
+			}
+			if tc.hiddenColumn != 0 {
+				tw.SetColumnConfigs([]ColumnConfig{{Number: tc.hiddenColumn, Hidden: true}})
+			}
+			tw.SetAutoIndex(tc.autoIndex)
+
+			records, err := csv.NewReader(strings.NewReader(tw.RenderCSV())).ReadAll()
+			assert.NoError(t, err)
+			assert.Equal(t, tc.want, records)
+		})
+	}
+}
+
 func TestTable_RenderCSV_HiddenColumns(t *testing.T) {
 	tw := NewWriter()
 	tw.AppendHeader(testHeader)
