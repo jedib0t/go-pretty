@@ -34,32 +34,36 @@ func (t *Table) RenderTSV() string {
 }
 
 func (t *Table) tsvRenderRow(out *strings.Builder, row rowStr, hint renderHint) {
-	if out.Len() > 0 {
+	// when working on line number 2 or more, insert a newline first; the
+	// lines are counted as a lone empty field renders as an empty line
+	if out.Len() > 0 || t.numLinesRendered > 0 {
 		out.WriteRune('\n')
 	}
+	t.numLinesRendered++
 
-	for idx, col := range row {
-		if idx == 0 && t.autoIndex {
-			if hint.isRegularRow() {
-				fmt.Fprint(out, hint.rowNumber)
-			}
+	// auto-index column
+	if t.autoIndex {
+		if hint.isRegularRow() {
+			fmt.Fprint(out, hint.rowNumber)
+		}
+		out.WriteRune('\t')
+	}
+
+	// rows with fewer columns than the table are padded with empty fields
+	for colIdx := 0; colIdx < t.numColumns; colIdx++ {
+		if colIdx > 0 {
 			out.WriteRune('\t')
 		}
-
-		if idx > 0 {
-			out.WriteRune('\t')
+		var col string
+		if colIdx < len(row) {
+			col = row[colIdx]
 		}
-
 		if strings.ContainsAny(col, "\t\n\"") || strings.Contains(col, "    ") {
 			col = strings.ReplaceAll(col, "\"", "\"\"") // fix double-quotes
 			fmt.Fprintf(out, "\"%s\"", col)
 		} else {
 			out.WriteString(col)
 		}
-	}
-
-	for colIdx := len(row); colIdx < t.numColumns; colIdx++ {
-		out.WriteRune('\t')
 	}
 }
 
