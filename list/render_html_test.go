@@ -21,21 +21,24 @@ func TestList_RenderHTML(t *testing.T) {
 	lw.SetHTMLCSSClass(testCSSClass)
 
 	expectedOut := `<ul class="test-css-class">
-  <li>Game Of Thrones</li>
-  <ul class="test-css-class-1">
-    <li>Winter</li>
-    <li>Is</li>
-    <li>Coming</li>
-    <ul class="test-css-class-2">
-      <li>This</li>
+  <li>Game Of Thrones
+    <ul class="test-css-class-1">
+      <li>Winter</li>
       <li>Is</li>
-      <li>Known</li>
+      <li>Coming
+        <ul class="test-css-class-2">
+          <li>This</li>
+          <li>Is</li>
+          <li>Known</li>
+        </ul>
+      </li>
     </ul>
-  </ul>
-  <li>The Dark Tower</li>
-  <ul class="test-css-class-1">
-    <li>The Gunslinger</li>
-  </ul>
+  </li>
+  <li>The Dark Tower
+    <ul class="test-css-class-1">
+      <li>The Gunslinger</li>
+    </ul>
+  </li>
 </ul>`
 
 	assert.Equal(t, expectedOut, lw.RenderHTML())
@@ -67,40 +70,47 @@ func TestList_RenderHTML_Complex(t *testing.T) {
 	lw.AppendItems([]interface{}{"Cersei Lannister", "Jaime Lannister", "Tyrion Lannister"})
 
 	expectedOut := `<ul class="go-pretty-table">
-  <li>The Houses of Westeros</li>
-  <ul class="go-pretty-table-1">
-    <li>The Starks of Winterfell</li>
-    <ul class="go-pretty-table-2">
-      <li>Eddard Stark</li>
-      <ul class="go-pretty-table-3">
-        <li>Robb Stark</li>
-        <li>Sansa Stark</li>
-        <li>Arya Stark</li>
-        <li>Bran Stark</li>
-        <li>Rickon Stark</li>
-      </ul>
-      <li>Lyanna Stark</li>
-      <li>Benjen Stark</li>
+  <li>The Houses of Westeros
+    <ul class="go-pretty-table-1">
+      <li>The Starks of Winterfell
+        <ul class="go-pretty-table-2">
+          <li>Eddard Stark
+            <ul class="go-pretty-table-3">
+              <li>Robb Stark</li>
+              <li>Sansa Stark</li>
+              <li>Arya Stark</li>
+              <li>Bran Stark</li>
+              <li>Rickon Stark</li>
+            </ul>
+          </li>
+          <li>Lyanna Stark</li>
+          <li>Benjen Stark</li>
+        </ul>
+      </li>
+      <li>The Targaryens of Dragonstone
+        <ul class="go-pretty-table-2">
+          <li>Aerys Targaryen
+            <ul class="go-pretty-table-3">
+              <li>Rhaegar Targaryen</li>
+              <li>Viserys Targaryen</li>
+              <li>Daenerys Targaryen</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>The Lannisters of Lannisport
+        <ul class="go-pretty-table-2">
+          <li>Tywin Lannister
+            <ul class="go-pretty-table-3">
+              <li>Cersei Lannister</li>
+              <li>Jaime Lannister</li>
+              <li>Tyrion Lannister</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
     </ul>
-    <li>The Targaryens of Dragonstone</li>
-    <ul class="go-pretty-table-2">
-      <li>Aerys Targaryen</li>
-      <ul class="go-pretty-table-3">
-        <li>Rhaegar Targaryen</li>
-        <li>Viserys Targaryen</li>
-        <li>Daenerys Targaryen</li>
-      </ul>
-    </ul>
-    <li>The Lannisters of Lannisport</li>
-    <ul class="go-pretty-table-2">
-      <li>Tywin Lannister</li>
-      <ul class="go-pretty-table-3">
-        <li>Cersei Lannister</li>
-        <li>Jaime Lannister</li>
-        <li>Tyrion Lannister</li>
-      </ul>
-    </ul>
-  </ul>
+  </li>
 </ul>`
 
 	assert.Equal(t, expectedOut, lw.RenderHTML())
