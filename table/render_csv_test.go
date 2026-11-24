@@ -72,51 +72,88 @@ func TestTable_RenderCSV_Empty(t *testing.T) {
 	assert.Empty(t, tw.RenderCSV())
 }
 
-func TestTable_RenderCSV_EmptyFields(t *testing.T) {
-	for _, tc := range []struct {
-		name         string
-		header       Row
-		rows         []Row
-		footer       Row
-		hiddenColumn int
-		autoIndex    bool
-		want         [][]string
-	}{
-		{
-			name: "single empty field",
-			rows: []Row{{""}},
-			want: [][]string{{""}},
-		},
-		{
-			name: "leading, consecutive, middle and trailing empty rows",
-			rows: []Row{{""}, {""}, {"first"}, {""}, {"last"}, {""}},
-			want: [][]string{{""}, {""}, {"first"}, {""}, {"last"}, {""}},
-		},
-		{
-			name:   "empty header and footer",
-			header: Row{""},
-			rows:   []Row{{"value"}},
-			footer: Row{""},
-			want:   [][]string{{""}, {"value"}, {""}},
-		},
-		{
-			name:         "one visible column",
-			rows:         []Row{{"", "hidden"}, {"value", "hidden"}, {"", "hidden"}},
-			hiddenColumn: 2,
-			want:         [][]string{{""}, {"value"}, {""}},
-		},
-		{
-			name: "multiple columns",
-			rows: []Row{{"", ""}, {"value", ""}},
-			want: [][]string{{"", ""}, {"value", ""}},
-		},
-		{
-			name:      "auto index",
-			rows:      []Row{{""}, {"value"}},
-			autoIndex: true,
-			want:      [][]string{{"", "A"}, {"1", ""}, {"2", "value"}},
-		},
-	} {
+// testEmptyFieldsCases are tables with empty fields and rows that should
+// survive a round-trip through a CSV/TSV reader.
+var testEmptyFieldsCases = []struct {
+	name         string
+	header       Row
+	rows         []Row
+	footer       Row
+	hiddenColumn int
+	autoIndex    bool
+	want         [][]string
+}{
+	{
+		name: "single empty field",
+		rows: []Row{{""}},
+		want: [][]string{{""}},
+	},
+	{
+		name: "leading, consecutive, middle and trailing empty rows",
+		rows: []Row{{""}, {""}, {"first"}, {""}, {"last"}, {""}},
+		want: [][]string{{""}, {""}, {"first"}, {""}, {"last"}, {""}},
+	},
+	{
+		name:   "empty header and footer",
+		header: Row{""},
+		rows:   []Row{{"value"}},
+		footer: Row{""},
+		want:   [][]string{{""}, {"value"}, {""}},
+	},
+	{
+		name:         "one visible column",
+		rows:         []Row{{"", "hidden"}, {"value", "hidden"}, {"", "hidden"}},
+		hiddenColumn: 2,
+		want:         [][]string{{""}, {"value"}, {""}},
+	},
+	{
+		name: "multiple columns",
+		rows: []Row{{"", ""}, {"value", ""}},
+		want: [][]string{{"", ""}, {"value", ""}},
+	},
+	{
+		name:      "auto index",
+		rows:      []Row{{""}, {"value"}},
+		autoIndex: true,
+		want:      [][]string{{"", "A"}, {"1", ""}, {"2", "value"}},
+	},
+	{
+		name: "rows without fields",
+		rows: []Row{{}, {"first"}, {}, {"last"}, {}},
+		want: [][]string{{""}, {"first"}, {""}, {"last"}, {""}},
+	},
+	{
+		name: "rows without fields in multiple columns",
+		rows: []Row{{}, {"a", "b", "c"}, {"a"}, {}},
+		want: [][]string{{"", "", ""}, {"a", "b", "c"}, {"a", "", ""}, {"", "", ""}},
+	},
+	{
+		name:   "header and footer without fields",
+		header: Row{},
+		rows:   []Row{{"a", "b"}},
+		footer: Row{},
+		want:   [][]string{{"", ""}, {"a", "b"}, {"", ""}},
+	},
+	{
+		name:         "row left without fields by a hidden column",
+		rows:         []Row{{"hidden", "value"}, {"hidden"}},
+		hiddenColumn: 1,
+		want:         [][]string{{"value"}, {""}},
+	},
+	{
+		name:      "rows without fields with auto index",
+		header:    Row{},
+		rows:      []Row{{"a", "b"}, {}, {"c"}},
+		footer:    Row{},
+		autoIndex: true,
+		want:      [][]string{{"", "", ""}, {"1", "a", "b"}, {"2", "", ""}, {"3", "c", ""}, {"", "", ""}},
+	},
+}
+
+// testEmptyFields renders all the testEmptyFieldsCases with the given render
+// function, and verifies that the output parses back as the expected records.
+func testEmptyFields(t *testing.T, render func(tw Writer) string, parse func(out string) ([][]string, error)) {
+	for _, tc := range testEmptyFieldsCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tw := NewWriter()
 			if tc.header != nil {
@@ -131,11 +168,27 @@ func TestTable_RenderCSV_EmptyFields(t *testing.T) {
 			}
 			tw.SetAutoIndex(tc.autoIndex)
 
-			records, err := csv.NewReader(strings.NewReader(tw.RenderCSV())).ReadAll()
+			records, err := parse(render(tw))
 			assert.NoError(t, err)
 			assert.Equal(t, tc.want, records)
 		})
 	}
+}
+
+func TestTable_RenderCSV_EmptyFields(t *testing.T) {
+	testEmptyFields(t,
+		func(tw Writer) string { return tw.RenderCSV() },
+		func(out string) ([][]string, error) {
+			return csv.NewReader(strings.NewReader(out)).ReadAll()
+		},
+	)
+
+	tw := NewWriter()
+	tw.AppendRows([]Row{{""}, {"value"}, {}})
+	assert.Equal(t, "\"\"\nvalue\n\"\"", tw.RenderCSV())
+
+	tw.SetAutoIndex(true)
+	assert.Equal(t, ",A\n1,\n2,value\n3,", tw.RenderCSV())
 }
 
 func TestTable_RenderCSV_HiddenColumns(t *testing.T) {

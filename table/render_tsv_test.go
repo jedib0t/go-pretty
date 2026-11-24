@@ -2,7 +2,10 @@ package table
 
 import (
 	"fmt"
+	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTable_RenderTSV(t *testing.T) {
@@ -184,4 +187,30 @@ First Name	Last Name	Salary
 			compareOutput(t, output, tt.output)
 		})
 	}
+}
+
+func TestTable_RenderTSV_EmptyFields(t *testing.T) {
+	// TSV has no quoting, so a lone empty field is an empty line; parse the
+	// output the way a plain TSV reader would
+	testEmptyFields(t,
+		func(tw Writer) string { return tw.RenderTSV() },
+		func(out string) ([][]string, error) {
+			var records [][]string
+			for _, line := range strings.Split(out, "\n") {
+				records = append(records, strings.Split(line, "\t"))
+			}
+			return records, nil
+		},
+	)
+
+	tw := NewWriter()
+	tw.AppendRows([]Row{{""}, {"value"}, {}})
+	assert.Equal(t, "\nvalue\n", tw.RenderTSV())
+
+	tw.SetTitle("title")
+	tw.SetCaption("caption")
+	assert.Equal(t, "title\n\nvalue\n\ncaption", tw.RenderTSV())
+
+	tw.SetAutoIndex(true)
+	assert.Equal(t, "title\n\tA\n1\t\n2\tvalue\n3\t\ncaption", tw.RenderTSV())
 }

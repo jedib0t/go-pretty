@@ -3,7 +3,6 @@ package table
 import (
 	"fmt"
 	"strings"
-	"unicode/utf8"
 )
 
 // RenderCSV renders the Table in CSV format. Example:
@@ -42,8 +41,10 @@ func (t *Table) csvEscapeDoubleQuotes(str string) string {
 	return strings.ReplaceAll(str, "\"", "\"\"")
 }
 
+// csvNeedsQuotes returns true if the field has to be enclosed in double-quotes
+// to be read back as-is. A lone empty field is quoted as CSV readers would
+// otherwise skip its record as a blank line.
 func (t *Table) csvNeedsQuotes(str string) bool {
-	// Quote lone empty fields so CSV readers do not skip their rows as blank lines.
 	return strings.ContainsAny(str, "\",\n") ||
 		(str == "" && t.numColumns == 1 && !t.autoIndex)
 }
@@ -65,17 +66,23 @@ func (t *Table) csvRenderRow(out *strings.Builder, row rowStr, hint renderHint) 
 		out.WriteRune('\n')
 	}
 
-	// generate the columns to render in CSV format and append to "out"
-	for colIdx, colStr := range row {
-		// auto-index column
-		if colIdx == 0 && t.autoIndex {
-			if hint.isRegularRow() {
-				fmt.Fprint(out, hint.rowNumber)
-			}
-			out.WriteRune(',')
+	// auto-index column
+	if t.autoIndex {
+		if hint.isRegularRow() {
+			fmt.Fprint(out, hint.rowNumber)
 		}
+		out.WriteRune(',')
+	}
+
+	// generate the columns to render in CSV format and append to "out"; rows
+	// with fewer columns than the table are padded with empty fields
+	for colIdx := 0; colIdx < t.numColumns; colIdx++ {
 		if colIdx > 0 {
 			out.WriteRune(',')
+		}
+		var colStr string
+		if colIdx < len(row) {
+			colStr = row[colIdx]
 		}
 		if t.style.CSV.FieldProtection && colStr != "" {
 			colStr = t.csvProtectField(colStr)
@@ -84,12 +91,9 @@ func (t *Table) csvRenderRow(out *strings.Builder, row rowStr, hint renderHint) 
 			out.WriteRune('"')
 			out.WriteString(t.csvEscapeDoubleQuotes(colStr))
 			out.WriteRune('"')
-		} else if utf8.RuneCountInString(colStr) > 0 {
+		} else {
 			out.WriteString(colStr)
 		}
-	}
-	for colIdx := len(row); colIdx < t.numColumns; colIdx++ {
-		out.WriteRune(',')
 	}
 }
 
