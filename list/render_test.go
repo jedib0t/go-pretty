@@ -213,21 +213,24 @@ func TestList_Render_MultiLine(t *testing.T) {
 	assert.Equal(t, expectedOutRounded, lw.Render())
 
 	expectedOutHTML := `<ul class="go-pretty-table">
-  <li>Game Of Thrones<br/>    // George. R. R. Martin</li>
-  <ul class="go-pretty-table-1">
-    <li>Winter<br/>Is<br/>Coming</li>
-    <li>Is</li>
-    <li>Coming</li>
-    <ul class="go-pretty-table-2">
-      <li>This<br/>Is<br/>Known</li>
+  <li>Game Of Thrones<br/>    // George. R. R. Martin
+    <ul class="go-pretty-table-1">
+      <li>Winter<br/>Is<br/>Coming</li>
       <li>Is</li>
-      <li>Known</li>
+      <li>Coming
+        <ul class="go-pretty-table-2">
+          <li>This<br/>Is<br/>Known</li>
+          <li>Is</li>
+          <li>Known</li>
+        </ul>
+      </li>
     </ul>
-  </ul>
-  <li>The Dark Tower<br/>    // Stephen King</li>
-  <ul class="go-pretty-table-1">
-    <li>The Gunslinger</li>
-  </ul>
+  </li>
+  <li>The Dark Tower<br/>    // Stephen King
+    <ul class="go-pretty-table-1">
+      <li>The Gunslinger</li>
+    </ul>
+  </li>
 </ul>`
 	assert.Equal(t, expectedOutHTML, lw.RenderHTML())
 

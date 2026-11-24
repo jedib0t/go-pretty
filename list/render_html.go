@@ -9,21 +9,24 @@ import (
 // RenderHTML renders the List in the HTML format. Example:
 //
 //	<ul class="go-pretty-table">
-//	  <li>Game Of Thrones</li>
-//	  <ul class="go-pretty-table-1">
-//	    <li>Winter</li>
-//	    <li>Is</li>
-//	    <li>Coming</li>
-//	    <ul class="go-pretty-table-2">
-//	      <li>This</li>
+//	  <li>Game Of Thrones
+//	    <ul class="go-pretty-table-1">
+//	      <li>Winter</li>
 //	      <li>Is</li>
-//	      <li>Known</li>
+//	      <li>Coming
+//	        <ul class="go-pretty-table-2">
+//	          <li>This</li>
+//	          <li>Is</li>
+//	          <li>Known</li>
+//	        </ul>
+//	      </li>
 //	    </ul>
-//	  </ul>
-//	  <li>The Dark Tower</li>
-//	  <ul class="go-pretty-table-1">
-//	    <li>The Gunslinger</li>
-//	  </ul>
+//	  </li>
+//	  <li>The Dark Tower
+//	    <ul class="go-pretty-table-1">
+//	      <li>The Gunslinger</li>
+//	    </ul>
+//	  </li>
 //	</ul>
 func (l *List) RenderHTML() string {
 	l.initForRender()
@@ -31,42 +34,40 @@ func (l *List) RenderHTML() string {
 	var out strings.Builder
 	if len(l.items) > 0 {
 		out.Grow(l.approxSize)
-		l.htmlRenderRecursively(&out, 0, l.items[0])
+		l.htmlRenderRecursively(&out, 0)
 	}
 	return l.render(&out)
 }
 
-func (l *List) htmlRenderRecursively(out *strings.Builder, idx int, item *listItem) int {
-	linePrefix := strings.Repeat("  ", item.Level)
+// htmlRenderRecursively renders one list and returns the index after its last item.
+func (l *List) htmlRenderRecursively(out *strings.Builder, idx int) int {
+	level := l.items[idx].Level
+	linePrefix := strings.Repeat("    ", level)
 
 	out.WriteString(linePrefix)
 	out.WriteString("<ul class=\"")
 	out.WriteString(html.EscapeString(l.htmlCSSClass))
-	if item.Level > 0 {
+	if level > 0 {
 		out.WriteRune('-')
-		out.WriteString(strconv.Itoa(item.Level))
+		out.WriteString(strconv.Itoa(level))
 	}
 	out.WriteString("\">\n")
-	var numItemsRendered int
-	for itemIdx := idx; itemIdx < len(l.items); itemIdx++ {
-		if l.items[itemIdx].Level == item.Level {
+
+	for idx < len(l.items) && l.items[idx].Level == level {
+		out.WriteString(linePrefix)
+		out.WriteString("  <li>")
+		out.WriteString(strings.ReplaceAll(html.EscapeString(l.items[idx].Text), "\n", "<br/>"))
+		idx++
+		if idx < len(l.items) && l.items[idx].Level > level {
+			out.WriteRune('\n')
+			idx = l.htmlRenderRecursively(out, idx)
+			out.WriteRune('\n')
 			out.WriteString(linePrefix)
-			out.WriteString("  <li>")
-			out.WriteString(strings.ReplaceAll(html.EscapeString(l.items[itemIdx].Text), "\n", "<br/>"))
-			out.WriteString("</li>\n")
-			numItemsRendered++
-		} else if l.items[itemIdx].Level > item.Level { // indent
-			numItemsRenderedRecursively := l.htmlRenderRecursively(out, itemIdx, l.items[itemIdx])
-			numItemsRendered += numItemsRenderedRecursively
-			itemIdx += numItemsRenderedRecursively - 1
-			if numItemsRendered > 0 {
-				out.WriteRune('\n')
-			}
-		} else { // un-indent
-			break
+			out.WriteString("  ")
 		}
+		out.WriteString("</li>\n")
 	}
 	out.WriteString(linePrefix)
 	out.WriteString("</ul>")
-	return numItemsRendered
+	return idx
 }
