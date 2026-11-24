@@ -57,21 +57,24 @@ b THE DARK TOWER
 A List in HTML format:
 ----------------------
 [HTML] <ul class="go-pretty-table">
-[HTML]   <li>Game Of Thrones</li>
-[HTML]   <ul class="go-pretty-table-1">
-[HTML]     <li>Winter</li>
-[HTML]     <li>Is</li>
-[HTML]     <li>Coming</li>
-[HTML]     <ul class="go-pretty-table-2">
-[HTML]       <li>This</li>
+[HTML]   <li>Game Of Thrones
+[HTML]     <ul class="go-pretty-table-1">
+[HTML]       <li>Winter</li>
 [HTML]       <li>Is</li>
-[HTML]       <li>Known</li>
+[HTML]       <li>Coming
+[HTML]         <ul class="go-pretty-table-2">
+[HTML]           <li>This</li>
+[HTML]           <li>Is</li>
+[HTML]           <li>Known</li>
+[HTML]         </ul>
+[HTML]       </li>
 [HTML]     </ul>
-[HTML]   </ul>
-[HTML]   <li>The Dark Tower</li>
-[HTML]   <ul class="go-pretty-table-1">
-[HTML]     <li>The Gunslinger</li>
-[HTML]   </ul>
+[HTML]   </li>
+[HTML]   <li>The Dark Tower
+[HTML]     <ul class="go-pretty-table-1">
+[HTML]       <li>The Gunslinger</li>
+[HTML]     </ul>
+[HTML]   </li>
 [HTML] </ul>
 
 A List in Markdown format:
