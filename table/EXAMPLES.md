@@ -392,7 +392,8 @@ rows be sorted first by "First Name" and then by "Last Name" (in case of similar
 
 The `Mode` field in `SortBy` supports various sorting modes:
 - `Asc` / `Dsc` - Alphabetical ascending/descending
-- `AscNumeric` / `DscNumeric` - Numerical ascending/descending
+- `AscNumeric` / `DscNumeric` - Numerical ascending/descending; non-numeric
+  values (empty, text, `NaN`) come last and are ordered by the next column
 - `AscAlphaNumeric` / `DscAlphaNumeric` - Alphabetical first, then numerical
 - `AscNumericAlpha` / `DscNumericAlpha` - Numerical first, then alphabetical
 

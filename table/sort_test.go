@@ -1,6 +1,7 @@
 package table
 
 import (
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -70,6 +71,37 @@ func TestTable_sortRows_MixedMode(t *testing.T) {
 	// sort column #5 in Descending order numerically and then alphabetically
 	table.SortBy([]SortBy{{Number: 5, Mode: DscNumericAlpha}, {Number: 1, Mode: AscNumeric}})
 	assert.Equal(t, []int{0, 3, 5, 2, 4, 1}, table.getSortedRowIndices())
+}
+
+func TestTable_sortRows_NumericWithNonNumericCells(t *testing.T) {
+	table := Table{}
+	table.AppendRows([]Row{
+		/* 0 */ {3, "c"},
+		/* 1 */ {"", "z"},
+		/* 2 */ {1, "a"},
+		/* 3 */ {"N/A", "m"},
+		/* 4 */ {2, "b"},
+		/* 5 */ {math.NaN(), "k"},
+	})
+	table.initForRenderRows()
+
+	// numbers are sorted, non-numeric cells (incl. NaN) come last in both
+	// directions and are ordered by the next column
+	table.SortBy([]SortBy{{Number: 1, Mode: AscNumeric}, {Number: 2, Mode: Asc}})
+	assert.Equal(t, []int{2, 4, 0, 5, 3, 1}, table.getSortedRowIndices())
+
+	table.SortBy([]SortBy{{Number: 1, Mode: DscNumeric}, {Number: 2, Mode: Asc}})
+	assert.Equal(t, []int{0, 4, 2, 5, 3, 1}, table.getSortedRowIndices())
+
+	table.SortBy([]SortBy{{Number: 1, Mode: AscNumeric}, {Number: 2, Mode: Dsc}})
+	assert.Equal(t, []int{2, 4, 0, 1, 3, 5}, table.getSortedRowIndices())
+
+	// NaN is not a number in the mixed modes either
+	table.SortBy([]SortBy{{Number: 1, Mode: AscNumericAlpha}})
+	assert.Equal(t, []int{2, 4, 0, 1, 3, 5}, table.getSortedRowIndices())
+
+	table.SortBy([]SortBy{{Number: 1, Mode: DscAlphaNumeric}})
+	assert.Equal(t, []int{5, 3, 1, 0, 4, 2}, table.getSortedRowIndices())
 }
 
 func TestTable_sortRows_WithName(t *testing.T) {

@@ -1,6 +1,7 @@
 package table
 
 import (
+	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -179,12 +180,12 @@ func lessAlphabetic(iVal string, jVal string, sb SortBy) (bool, bool) {
 }
 
 func lessMixedMode(iVal string, jVal string, sb SortBy) (bool, bool) {
-	iNumVal, iErr := strconv.ParseFloat(iVal, 64)
-	jNumVal, jErr := strconv.ParseFloat(jVal, 64)
-	if iErr != nil && jErr != nil { // both are alphanumeric
+	iNumVal, iOk := parseNumber(iVal)
+	jNumVal, jOk := parseNumber(jVal)
+	if !iOk && !jOk { // both are alphanumeric
 		return lessAlphabetic(iVal, jVal, sb)
 	}
-	if iErr != nil { // iVal == "abc"; jVal == 5
+	if !iOk { // iVal == "abc"; jVal == 5
 		switch sb.Mode {
 		case AscAlphaNumeric, DscAlphaNumeric:
 			return false, true
@@ -192,7 +193,7 @@ func lessMixedMode(iVal string, jVal string, sb SortBy) (bool, bool) {
 			return false, false
 		}
 	}
-	if jErr != nil { // iVal == 5; jVal	== "abc"
+	if !jOk { // iVal == 5; jVal	== "abc"
 		switch sb.Mode {
 		case AscAlphaNumeric, DscAlphaNumeric:
 			return false, false
@@ -205,13 +206,22 @@ func lessMixedMode(iVal string, jVal string, sb SortBy) (bool, bool) {
 }
 
 func lessNumeric(iVal string, jVal string, sb SortBy) (bool, bool) {
-	iNumVal, iErr := strconv.ParseFloat(iVal, 64)
-	jNumVal, jErr := strconv.ParseFloat(jVal, 64)
-	if iErr != nil || jErr != nil {
-		return false, false
+	iNumVal, iOk := parseNumber(iVal)
+	jNumVal, jOk := parseNumber(jVal)
+	if !iOk || !jOk {
+		// non-numeric values come after all numbers (in either direction)
+		// and are equal to each other, leaving the order to the next column
+		return !iOk && !jOk, iOk && !jOk
 	}
 
 	return lessNumericVal(iNumVal, jNumVal, sb)
+}
+
+// parseNumber parses a cell value for numeric sorting; NaN is not treated as
+// a number as it cannot be ordered against other numbers.
+func parseNumber(val string) (float64, bool) {
+	num, err := strconv.ParseFloat(val, 64)
+	return num, err == nil && !math.IsNaN(num)
 }
 
 func lessNumericVal(iVal float64, jVal float64, sb SortBy) (bool, bool) {
