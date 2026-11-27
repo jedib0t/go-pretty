@@ -75,5 +75,5 @@ A demonstration of all the capabilities can be found here:
     - `UnitsDefault` - Regular numbers (K, M, B, T, Q notation)
     - `UnitsBytes` - Storage units (B, KB, MB, GB, TB, PB)
     - `UnitsCurrencyDollar` - Dollar amounts ($x.yzK, etc.)
-    - `UnitsCurrencyEuro` - Euro amounts (₠x.yzK, etc.)
+    - `UnitsCurrencyEuro` - Euro amounts (€x.yzK, etc.)
     - `UnitsCurrencyPound` - Pound amounts (£x.yzK, etc.)
