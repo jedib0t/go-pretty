@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -72,6 +73,11 @@ func NewNumberTransformer(format string) Transformer {
 
 	transformFloat64 := func(val float64) string {
 		if val < 0 {
+			// fmt writes +Inf with its sign even when the format does not ask
+			// for one, so -Inf is formatted as is to avoid a "-+Inf"
+			if math.IsInf(val, -1) {
+				return colorsNumberNegative.Sprintf(format, val)
+			}
 			return colorsNumberNegative.Sprintf(negFormat, -val)
 		}
 		if val > 0 {

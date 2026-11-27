@@ -100,6 +100,25 @@ func TestNewNumberTransformerMinInt64(t *testing.T) {
 	}
 }
 
+func TestNewNumberTransformerInfinity(t *testing.T) {
+	for _, tc := range []struct {
+		format string
+		value  interface{}
+		want   string
+		colors Colors
+	}{
+		{"%.2f", math.Inf(-1), "-Inf", colorsNumberNegative},
+		{"%+.2f", math.Inf(-1), "-Inf", colorsNumberNegative},
+		{"%v", math.Inf(-1), "-Inf", colorsNumberNegative},
+		{"%.2f", float32(math.Inf(-1)), "-Inf", colorsNumberNegative},
+		{"%.2f", math.Inf(1), "+Inf", colorsNumberPositive},
+	} {
+		t.Run(fmt.Sprintf("%s/%T/%v", tc.format, tc.value, tc.value), func(t *testing.T) {
+			assert.Equal(t, tc.colors.Sprint(tc.want), NewNumberTransformer(tc.format)(tc.value))
+		})
+	}
+}
+
 func TestNewNumberTransformerSign(t *testing.T) {
 	// a number gets one sign, even when the format asks for one
 	for _, test := range []struct {
