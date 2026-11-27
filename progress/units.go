@@ -68,10 +68,10 @@ var (
 	}
 
 	// UnitsCurrencyEuro defines the value as a Euro amount. Values will be
-	// converted and printed in one of these forms: ₠x.yz, ₠x.yzK, ₠x.yzM,
-	// ₠x.yzB, ₠x.yzT
+	// converted and printed in one of these forms: €x.yz, €x.yzK, €x.yzM,
+	// €x.yzB, €x.yzT
 	UnitsCurrencyEuro = Units{
-		Notation:         "₠",
+		Notation:         "€",
 		NotationPosition: UnitsNotationPositionBefore,
 		Formatter:        FormatNumber,
 	}

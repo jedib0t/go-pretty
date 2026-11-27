@@ -43,7 +43,7 @@ func TestUnits_Sprint(t *testing.T) {
 	assert.Equal(t, "1.50K", UnitsDefault.Sprint(1500))
 	assert.Equal(t, "1.50KB", UnitsBytes.Sprint(1500))
 	assert.Equal(t, "$1.50K", UnitsCurrencyDollar.Sprint(1500))
-	assert.Equal(t, "₠1.50K", UnitsCurrencyEuro.Sprint(1500))
+	assert.Equal(t, "€1.50K", UnitsCurrencyEuro.Sprint(1500))
 	assert.Equal(t, "£1.50K", UnitsCurrencyPound.Sprint(1500))
 
 	customUnits := Units{Notation: "#"}
